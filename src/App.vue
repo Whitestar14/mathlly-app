@@ -1,103 +1,169 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-white dark:bg-gray-900">
-    <CalculatorHeader />
-    <div class="flex-grow flex items-center justify-center p-4">
-      <div class="w-80 bg-gray-100 dark:bg-gray-800 rounded-3xl overflow-hidden shadow-2xl">
-        <CalculatorDisplay :display="display" />
-        <CalculatorButtons @button-click="handleButtonClick" />
+  <div class="min-h-screen flex flex-col bg-background dark:bg-gray-900 transition-colors duration-300">
+    <calculator-header v-model:mode="mode" @close-dropdown="closeDropdown" />
+    <main class="flex-grow flex items-center justify-center p-4" @click="closeDropdown">
+      <div class="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-300">
+        <div class="p-6">
+          <calculator-display :input="input" :preview="preview" :error="error" />
+          <calculator-buttons :mode="mode" @button-click="handleButtonClick" @clear="handleClear" />
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, provide } from 'vue'
+import CalculatorHeader from './components/CalculatorHeader.vue'
 import CalculatorDisplay from './components/CalculatorDisplay.vue'
 import CalculatorButtons from './components/CalculatorButtons.vue'
-import CalculatorHeader from './components/CalculatorHeader.vue'
 
-const currentValue = ref("");
-const previousValue = ref("");
-const operation = ref("");
-const shouldResetScreen = ref(false);
+const input = ref('0')
+const preview = ref('')
+const mode = ref('Standard')
+const error = ref('')
 
-const display = computed(() => currentValue.value || "0");
+const closeDropdown = () => {
+  console.log('Closing dropdown')
+}
+provide('closeDropdown', closeDropdown)
 
-function handleButtonClick(value) {
-  if (isNaN(parseInt(value)) && value !== ".") {
-    handleSymbol(value);
+const updatePreview = () => {
+  try {
+    if (input.value.trim() === '' || input.value === 'Error') {
+      preview.value = ''
+      error.value = ''
+      return
+    }
+    const result = evaluateExpression(input.value)
+    preview.value = result.toString()
+    error.value = ''
+  } catch (err) {
+    preview.value = ''
+    if (err instanceof SyntaxError) {
+      error.value = `SyntaxError: ${err.message}`
+    } else if (err instanceof TypeError) {
+      error.value = `TypeError: ${err.message}`
+    } else if (err instanceof ReferenceError) {
+      error.value = `ReferenceError: ${err.message}`
+    } else {
+      error.value = `Error: ${err.message}`
+    }
+  }
+}
+
+const handleButtonClick = (btn) => {
+  switch (btn) {
+    case '=':
+      handleEquals()
+      break
+    case '±':
+      toggleSign()
+      break
+    case '%':
+      handlePercentage()
+      break
+    case '÷':
+    case '×':
+    case '-':
+    case '+':
+      handleOperator(btn)
+      break
+    case '.':
+      handleDecimal()
+      break
+    case 'OR':
+    case 'AND':
+    case 'NOT':
+    case 'XOR':
+      alert(`${btn} is not implemented yet`)
+      handleClear()
+      break
+    default:
+      handleNumber(btn)
+  }
+  if (btn !== '=') {
+    updatePreview()
+  }
+}
+
+const handleNumber = (num) => {
+  if (input.value === '0' || input.value === 'Error') {
+    input.value = num
   } else {
-    handleNumber(value);
+    input.value += num
   }
 }
 
-function handleNumber(num) {
-  if (shouldResetScreen.value) {
-    currentValue.value = "";
-    shouldResetScreen.value = false;
-  }
-  currentValue.value += num;
-}
-
-function handleSymbol(symbol) {
-  switch (symbol) {
-    case "AC":
-      currentValue.value = "";
-      previousValue.value = "";
-      operation.value = "";
-      break;
-    case "=":
-      if (previousValue.value && currentValue.value) {
-        currentValue.value = calculate();
-        previousValue.value = "";
-        operation.value = "";
-        shouldResetScreen.value = true;
-      }
-      break;
-    case "+":
-    case "-":
-    case "×":
-    case "÷":
-      handleOperation(symbol);
-      break;
+const handleOperator = (op) => {
+  if (input.value !== 'Error') {
+    input.value += ` ${op} `
   }
 }
 
-function handleOperation(op) {
-  if (currentValue.value === "") return;
-  if (previousValue.value !== "") {
-    currentValue.value = calculate();
+const handleDecimal = () => {
+  const parts = input.value.split(/[-+×÷]/)
+  const lastPart = parts[parts.length - 1]
+  if (!lastPart.includes('.')) {
+    input.value += '.'
   }
-  operation.value = op;
-  previousValue.value = currentValue.value;
-  shouldResetScreen.value = true;
 }
 
-function calculate() {
-  const prev = parseFloat(previousValue.value);
-  const current = parseFloat(currentValue.value);
-  if (isNaN(prev) || isNaN(current)) return "";
-  let result = 0;
-  switch (operation.value) {
-    case "+":
-      result = prev + current;
-      break;
-    case "-":
-      result = prev - current;
-      break;
-    case "×":
-      result = prev * current;
-      break;
-    case "÷":
-      result = prev / current;
-      break;
+const handleEquals = () => {
+  try {
+    const result = evaluateExpression(input.value)
+    input.value = result.toString()
+    preview.value = ''
+    error.value = ''
+  } catch (err) {
+    input.value = 'Error'
+    preview.value = ''
+    if (err instanceof SyntaxError) {
+      error.value = `SyntaxError: ${err.message}`
+    } else if (err instanceof TypeError) {
+      error.value = `TypeError: ${err.message}`
+    } else if (err instanceof ReferenceError) {
+      error.value = `ReferenceError: ${err.message}`
+    } else {
+      error.value = `Error: ${err.message}`
+    }
   }
-  return result.toString();
+}
+
+const handleClear = () => {
+  input.value = '0'
+  preview.value = ''
+  error.value = ''
+}
+
+const toggleSign = () => {
+  if (input.value !== '0' && input.value !== 'Error') {
+    input.value = input.value.startsWith('-') ? input.value.slice(1) : '-' + input.value
+  }
+}
+
+const handlePercentage = () => {
+  try {
+    const result = evaluateExpression(input.value) / 100
+    input.value = result.toString()
+    error.value = ''
+  } catch (err) {
+    input.value = 'Error'
+    preview.value = ''
+    if (err instanceof SyntaxError) {
+      error.value = `SyntaxError: ${err.message}`
+    } else if (err instanceof TypeError) {
+      error.value = `TypeError: ${err.message}`
+    } else if (err instanceof ReferenceError) {
+      error.value = `ReferenceError: ${err.message}`
+    } else {
+      error.value = `Error: ${err.message}`
+    }
+  }
+}
+
+const evaluateExpression = (expr) => {
+  const sanitizedExpr = expr.replace(/×/g, '*').replace(/÷/g, '/')
+  return Function(`'use strict'; return (${sanitizedExpr})`)()
 }
 </script>
-
-<style>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-</style>
