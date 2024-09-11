@@ -30,21 +30,21 @@
 </template>
 
 <script setup>
-import { ref, provide, watch } from "vue";
+import { ref, provide } from "vue";
 import { evaluate, format } from "mathjs";
 import CalculatorHeader from "./components/CalculatorHeader.vue";
 import CalculatorDisplay from "./components/CalculatorDisplay.vue";
 import CalculatorButtons from "./components/CalculatorButtons.vue";
 
 const input = ref("0");
-const preview = ref("");
 const mode = ref("Standard");
 const error = ref("");
 const isAnimating = ref(false);
-const animatedPreview = ref("");
+const animatedResult = ref("");
 const lastOperator = ref("");
 const lastNumber = ref("");
-const shouldClearPreview = ref(false);
+const MAX_INPUT_LENGTH = 50; // Maximum allowed input length
+
 const isOperator = (char) => ["+", "-", "×", "÷"].includes(char);
 const isLastCharOperator = () => isOperator(input.value.trim().slice(-1));
 
@@ -53,57 +53,54 @@ const closeDropdown = () => {
 };
 provide("closeDropdown", closeDropdown);
 
-// Updated evaluateExpression function (unchanged)
+// Function to sanitize and validate input
+const sanitizeInput = (expr) => {
+  // Remove any characters that are not numbers, operators, or decimal points
+  const sanitized = expr.replace(/[^0-9+\-×÷.]/g, "");
+  
+  // Ensure the expression doesn't start with an operator (except minus)
+  return sanitized.replace(/^[+×÷]/, "");
+};
+
+// Function to evaluate the mathematical expression with improved error handling
 const evaluateExpression = (expr) => {
   try {
-    const sanitizedExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
+    const sanitizedExpr = sanitizeInput(expr)
+      .replace(/×/g, "*")
+      .replace(/÷/g, "/");
+
+    // Check for division by zero
+    if (sanitizedExpr.includes("/0")) {
+      throw new Error("Division by zero is not allowed");
+    }
+
+    // Use a regular expression to check for potentially harmful expressions
+    if (sanitizedExpr.match(/[a-zA-Z_$]/)) {
+      throw new Error("Invalid characters in expression");
+    }
+
     const result = evaluate(sanitizedExpr);
+
+    // Check if the result is a valid number
+    if (typeof result !== "number" || !isFinite(result)) {
+      throw new Error("Invalid result");
+    }
+
     return format(result, { precision: 14 });
   } catch (err) {
-    throw new Error("Invalid expression");
+    throw new Error("Invalid expression: " + err.message);
   }
 };
 
-// Updated updatePreview function
-const updatePreview = () => {
-  try {
-    if (shouldClearPreview.value) {
-      preview.value = "";
-      error.value = "";
-      shouldClearPreview.value = false;
-      return;
-    }
-
-    if (!input.value || input.value === "Error") {
-      preview.value = "";
-      error.value = "";
-      return;
-    }
-
-    if (isLastCharOperator() || input.value.trim().endsWith(".")) {
-      preview.value = "";
-      return;
-    }
-
-    preview.value = evaluateExpression(input.value).toString();
-    error.value = "";
-  } catch (err) {
-    preview.value = "";
-    error.value = err.message;
-  }
-};
-
-// Watch the input field and update the preview
-watch(input, () => updatePreview());
-
-// Updated handleButtonClick function
+// Button click handlers
 const handleButtonClick = (btn) => {
   if (input.value === "Error") {
     handleClear();
   }
 
-  if (lastOperator.value === "=" && !isOperator(btn)) {
-    shouldClearPreview.value = true;
+  if (input.value.length >= MAX_INPUT_LENGTH && btn !== "=" && btn !== "AC") {
+    error.value = "Maximum input length reached";
+    return;
   }
 
   switch (btn) {
@@ -117,7 +114,14 @@ const handleButtonClick = (btn) => {
       handlePlusMinus();
       break;
     case "AC":
+    case "C":
       handleClear();
+      break;
+    case "CE":
+      handleClearEntry();
+      break;
+    case "backspace":
+      handleBackspace();
       break;
     case "+":
     case "-":
@@ -134,19 +138,18 @@ const handleButtonClick = (btn) => {
   }
 };
 
-// Updated handleOperator function
 const handleOperator = (op) => {
+  error.value = ""; // Clear any previous errors
   if (!isLastCharOperator()) {
     input.value += ` ${op} `;
   } else {
     input.value = input.value.slice(0, -3) + ` ${op} `;
   }
   lastOperator.value = op;
-  shouldClearPreview.value = false;
 };
 
-// Updated handleNumber function
 const handleNumber = (num) => {
+  error.value = ""; // Clear any previous errors
   if (input.value === "Error" || input.value === lastOperator.value) {
     input.value = num;
   } else if (input.value === "0" && num === "0") {
@@ -161,59 +164,84 @@ const handleNumber = (num) => {
     }
   }
   lastNumber.value = num;
-  shouldClearPreview.value = false;
 };
 
-// Updated handlePercentage function
 const handlePercentage = () => {
+  error.value = ""; // Clear any previous errors
   if (input.value !== "Error" && !isLastCharOperator()) {
-    input.value = (parseFloat(input.value) / 100).toString();
-    updatePreview();
+    try {
+      const result = parseFloat(input.value) / 100;
+      if (!isFinite(result)) {
+        throw new Error("Invalid percentage calculation");
+      }
+      input.value = result.toString();
+    } catch (err) {
+      error.value = err.message;
+    }
   }
 };
 
-// Updated handlePlusMinus function
 const handlePlusMinus = () => {
+  error.value = ""; // Clear any previous errors
   if (input.value !== "Error" && !isLastCharOperator()) {
-    input.value = (parseFloat(input.value) * -1).toString();
-    updatePreview();
+    try {
+      const result = parseFloat(input.value) * -1;
+      if (!isFinite(result)) {
+        throw new Error("Invalid negation");
+      }
+      input.value = result.toString();
+    } catch (err) {
+      error.value = err.message;
+    }
   }
 };
 
-// Updated handleEquals function
 const handleEquals = () => {
+  error.value = ""; // Clear any previous errors
   try {
     const result = evaluateExpression(input.value);
     
-    animatedPreview.value = result.toString();
+    animatedResult.value = result.toString();
     isAnimating.value = true;
     
     setTimeout(() => {
       input.value = result.toString();
-      shouldClearPreview.value = true;
-      updatePreview();
-      error.value = "";
       lastOperator.value = "";
       lastNumber.value = result.toString();
       isAnimating.value = false;
     }, 500);
   } catch (err) {
     input.value = "Error";
-    shouldClearPreview.value = true;
-    updatePreview();
     error.value = err.message;
   }
 };
 
-// Updated handleClear function
 const handleClear = () => {
   input.value = "0";
-  shouldClearPreview.value = true;
-  updatePreview();
   error.value = "";
   isAnimating.value = false;
   lastOperator.value = "";
   lastNumber.value = "";
-  animatedPreview.value = "";
+  animatedResult.value = "";
+};
+
+const handleClearEntry = () => {
+  if (input.value !== "0" && input.value !== "Error") {
+    const parts = input.value.split(" ");
+    parts.pop();
+    input.value = parts.join(" ") || "0";
+  } else {
+    handleClear();
+  }
+};
+
+const handleBackspace = () => {
+  if (input.value !== "0" && input.value !== "Error") {
+    if (input.value.length === 1) {
+      input.value = "0";
+    } else {
+      input.value = input.value.slice(0, -1);
+    }
+  }
 };
 </script>

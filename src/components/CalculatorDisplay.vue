@@ -17,16 +17,6 @@
           {{ input }}
         </div>
 
-        <!-- Display the preview if there is no error and not animating -->
-        <div
-          v-if="!error && !isAnimating && preview"
-          class="text-right text-xl text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {{ preview }}
-        </div>
-
         <!-- Display the error message if an error exists -->
         <div
           v-if="error"
@@ -38,7 +28,7 @@
         </div>
       </div>
 
-      <!-- Animated preview section (becomes the main display when animating) -->
+      <!-- Animated result section (becomes the main display when animating) -->
       <div
         class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
         :class="{ 'translate-y-0 opacity-100': isAnimating, 'translate-y-full opacity-0': !isAnimating }"
@@ -48,7 +38,7 @@
           aria-live="polite"
           aria-atomic="true"
         >
-          {{ animatedPreview }}
+          {{ animatedResult }}
         </div>
       </div>
     </div>
@@ -61,23 +51,22 @@ import { defineProps } from 'vue';
 // Define the props passed to this component
 defineProps({
   input: String,             // The current input value
-  preview: String,           // The preview of the evaluated result
   error: String,             // Error message (if any)
   isAnimating: Boolean,      // Boolean flag for animation state
-  animatedPreview: String    // The animated result that appears after pressing '='
+  animatedResult: String     // The animated result that appears after pressing '='
 });
 </script>
 
 <style scoped>
 /* Transitions for sliding the content vertically */
 .translate-y-full {
-  transform: translate3d(0, 100%, 0); /* Push down for hide */
+  transform: translate3d(0, 100%, 0);
 }
 .-translate-y-full {
-  transform: translate3d(0, -100%, 0); /* Push up for hide */
+  transform: translate3d(0, -100%, 0);
 }
 .translate-y-0 {
-  transform: translate3d(0, 0, 0); /* Stay in place for show */
+  transform: translate3d(0, 0, 0);
 }
 
 /* Custom easing function for smoother transitions */

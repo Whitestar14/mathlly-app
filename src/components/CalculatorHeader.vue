@@ -38,7 +38,7 @@
                 :style="dropdownStyle"
               >
                 <div
-                  v-for="option in ['Standard', 'Programmer']"
+                  v-for="option in ['Basic', 'Standard', 'Programmer']"
                   :key="option"
                   @click="selectMode(option)"
                   class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-default transition-colors w-full"

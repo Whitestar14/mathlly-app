@@ -1,99 +1,146 @@
 <template>
   <div class="grid grid-cols-4 gap-2">
-    <!-- Special Functions (Top Row) -->
-    <button @click="$emit('clear')" class="special-btn-ac">AC</button>
-    <button @click="$emit('button-click', '±')" class="special-btn">±</button>
-    <button @click="$emit('button-click', '%')" class="special-btn">%</button>
-    <button @click="$emit('button-click', '÷')" class="operator-btn">÷</button>
-
-    <!-- Numbers and Decimal -->
-    <button
-      v-for="num in ['7', '8', '9']"
-      :key="num"
-      @click="$emit('button-click', num)"
-      class="number-btn"
-    >
-      {{ num }}
-    </button>
-    <button @click="$emit('button-click', '×')" class="operator-btn">×</button>
-
-    <button
-      v-for="num in ['4', '5', '6']"
-      :key="num"
-      @click="$emit('button-click', num)"
-      class="number-btn"
-    >
-      {{ num }}
-    </button>
-    <button @click="$emit('button-click', '-')" class="operator-btn">−</button>
-
-    <button
-      v-for="num in ['1', '2', '3']"
-      :key="num"
-      @click="$emit('button-click', num)"
-      class="number-btn"
-    >
-      {{ num }}
-    </button>
-    <button @click="$emit('button-click', '+')" class="operator-btn">+</button>
-
-    <!-- Zero and Decimal -->
-    <button @click="$emit('button-click', '0')" class="col-span-2 number-btn">
-      0
-    </button>
-    <button @click="$emit('button-click', '.')" class="number-btn">.</button>
-    <button @click="$emit('button-click', '=')" class="operator-btn">=</button>
-
-    <!-- Programmer Mode Buttons (conditionally rendered) -->
-    <template v-if="mode === 'Programmer'">
-      <button
-        v-for="op in ['AND', 'OR', 'NOT', 'XOR']"
-        :key="op"
-        @click="$emit('button-click', op)"
-        class="col-span-2 programmer-btn"
-      >
-        {{ op }}
+    <!-- Basic Mode -->
+    <template v-if="mode === 'Basic'">
+      <button @click="handleClick('CE')" class="special-btn">CE</button>
+      <button @click="handleClick('C')" class="special-btn">C</button>
+      <button @click="handleClick('backspace')" class="special-btn flex justify-center items-center">
+        <Delete class="h-5 w-5" />
       </button>
+      <button @click="handleClick('÷')" class="operator-btn">÷</button>
+
+      <button v-for="num in ['7', '8', '9']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('×')" class="operator-btn">×</button>
+
+      <button v-for="num in ['4', '5', '6']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('-')" class="operator-btn">−</button>
+
+      <button v-for="num in ['1', '2', '3']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('+')" class="operator-btn">+</button>
+
+      <button @click="handleClick('±')" class="number-btn">±</button>
+      <button @click="handleClick('0')" class="number-btn">0</button>
+      <button @click="handleClick('.')" class="number-btn">.</button>
+      <button @click="handleClick('=')" class="operator-btn equals-btn">=</button>
+    </template>
+
+    <!-- Standard Mode -->
+    <template v-if="mode === 'Standard'">
+      <button @click="handleClick('AC')" class="special-btn-ac">AC</button>
+      <button @click="handleClick('±')" class="special-btn">±</button>
+      <button @click="handleClick('%')" class="special-btn">%</button>
+      <button @click="handleClick('÷')" class="operator-btn">÷</button>
+
+      <button v-for="num in ['7', '8', '9']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('×')" class="operator-btn">×</button>
+
+      <button v-for="num in ['4', '5', '6']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('-')" class="operator-btn">−</button>
+
+      <button v-for="num in ['1', '2', '3']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('+')" class="operator-btn">+</button>
+
+      <button @click="handleClick('0')" class="number-btn col-span-2">0</button>
+      <button @click="handleClick('.')" class="number-btn">.</button>
+      <button @click="handleClick('=')" class="operator-btn">=</button>
+    </template>
+
+    <!-- Programmer Mode -->
+    <template v-if="mode === 'Programmer'">
+      <button @click="handleClick('AC')" class="special-btn-ac">AC</button>
+      <button @click="handleClick('±')" class="special-btn">±</button>
+      <button @click="handleClick('%')" class="special-btn">%</button>
+      <button @click="handleClick('÷')" class="operator-btn">÷</button>
+
+      <button v-for="num in ['7', '8', '9']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('×')" class="operator-btn">×</button>
+
+      <button v-for="num in ['4', '5', '6']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('-')" class="operator-btn">−</button>
+
+      <button v-for="num in ['1', '2', '3']" :key="num" @click="handleClick(num)" class="number-btn">
+        {{ num }}
+      </button>
+      <button @click="handleClick('+')" class="operator-btn">+</button>
+
+      <button @click="handleClick('0')" class="number-btn col-span-2">0</button>
+      <button @click="handleClick('.')" class="number-btn">.</button>
+      <button @click="handleClick('=')" class="operator-btn">=</button>
+
+      <div class="col-span-4 grid grid-cols-4 gap-2 mt-2">
+        <button v-for="op in ['AND', 'OR', 'NOT', 'XOR']" :key="op" @click="handleClick(op)" class="programmer-btn">
+          {{ op }}
+        </button>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import defineProps from "vue";
-import defineEmits from "vue";
+import { Delete } from 'lucide-vue-next';
+import { defineEmits, defineProps } from "vue";
+
 defineProps(["mode"]);
-defineEmits(["button-click", "clear"]);
+const emit = defineEmits(["button-click", "clear"]);
+
+const handleClick = (value) => {
+  if (value === 'C' || value === 'AC') {
+    emit('clear');
+  } else {
+    emit('button-click', value);
+  }
+};
 </script>
 
 <style scoped>
-/* Number Button Styling */
+.number-btn,
+.operator-btn,
+.special-btn,
+.special-btn-ac,
+.programmer-btn,
+.equals-btn {
+  @apply text-xl font-semibold rounded-lg transition-all duration-100 ease-in-out p-3
+         active:scale-95 active:opacity-80;
+}
+
 .number-btn {
-  @apply text-xl font-semibold rounded-lg transition-all duration-300 ease-in-out p-3
-         bg-gray-200 text-gray-800 hover:bg-gray-300 
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300 
          dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600;
 }
 
-/* Operator Button Styling */
 .operator-btn {
-  @apply text-xl font-semibold rounded-lg transition-all duration-300 ease-in-out p-3
-         bg-indigo-500 text-white hover:bg-indigo-600;
+  @apply bg-indigo-500 text-white hover:bg-indigo-600;
 }
 
-/* Special Button Styling */
 .special-btn {
-  @apply text-xl font-semibold rounded-lg transition-all duration-300 ease-in-out p-3
-         bg-gray-300 text-gray-900 hover:bg-gray-400;
+  @apply bg-gray-300 text-gray-900 hover:bg-gray-400;
 }
 
-/* AC Button Styling (Orangish-red) */
 .special-btn-ac {
-  @apply text-xl font-semibold rounded-lg transition-all duration-300 ease-in-out p-3
-         bg-red-500 text-white hover:bg-red-600;
+  @apply bg-red-500 text-white hover:bg-red-600;
 }
 
-/* Programmer Mode Button Styling */
 .programmer-btn {
-  @apply text-xl font-semibold rounded-lg transition-all duration-300 ease-in-out p-3
-         bg-purple-500 text-white hover:bg-purple-600;
+  @apply text-sm bg-purple-500 text-white hover:bg-purple-600;
+}
+
+.equals-btn {
+  @apply bg-gray-500 text-white hover:bg-gray-900;
 }
 </style>
