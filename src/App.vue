@@ -1,11 +1,28 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-background dark:bg-gray-900 transition-colors duration-300">
+  <div
+    class="min-h-screen flex flex-col bg-background dark:bg-gray-900 transition-colors duration-300"
+  >
     <calculator-header v-model:mode="mode" @close-dropdown="closeDropdown" />
-    <main class="flex-grow flex items-center justify-center p-4" @click="closeDropdown">
-      <div class="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-300">
+    <main
+      class="flex-grow flex items-center justify-center p-4"
+      @click="closeDropdown"
+    >
+      <div
+        class="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-300"
+      >
         <div class="p-6">
-          <calculator-display :input="input" :preview="preview" :error="error" />
-          <calculator-buttons :mode="mode" @button-click="handleButtonClick" @clear="handleClear" />
+          <calculator-display
+            :input="input"
+            :preview="preview"
+            :error="error"
+            :isAnimating="isAnimating"
+            :animatedPreview="animatedPreview"
+          />
+          <calculator-buttons
+            :mode="mode"
+            @button-click="handleButtonClick"
+            @clear="handleClear"
+          />
         </div>
       </div>
     </main>
@@ -13,157 +30,190 @@
 </template>
 
 <script setup>
-import { ref, provide } from 'vue'
-import CalculatorHeader from './components/CalculatorHeader.vue'
-import CalculatorDisplay from './components/CalculatorDisplay.vue'
-import CalculatorButtons from './components/CalculatorButtons.vue'
+import { ref, provide, watch } from "vue";
+import { evaluate, format } from "mathjs";
+import CalculatorHeader from "./components/CalculatorHeader.vue";
+import CalculatorDisplay from "./components/CalculatorDisplay.vue";
+import CalculatorButtons from "./components/CalculatorButtons.vue";
 
-const input = ref('0')
-const preview = ref('')
-const mode = ref('Standard')
-const error = ref('')
+const input = ref("0");
+const preview = ref("");
+const mode = ref("Standard");
+const error = ref("");
+const isAnimating = ref(false);
+const animatedPreview = ref("");
+const lastOperator = ref("");
+const lastNumber = ref("");
+const shouldClearPreview = ref(false);
+const isOperator = (char) => ["+", "-", "×", "÷"].includes(char);
+const isLastCharOperator = () => isOperator(input.value.trim().slice(-1));
 
 const closeDropdown = () => {
-  console.log('Closing dropdown')
-}
-provide('closeDropdown', closeDropdown)
+  console.log("Closing dropdown");
+};
+provide("closeDropdown", closeDropdown);
 
+// Updated evaluateExpression function (unchanged)
+const evaluateExpression = (expr) => {
+  try {
+    const sanitizedExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
+    const result = evaluate(sanitizedExpr);
+    return format(result, { precision: 14 });
+  } catch (err) {
+    throw new Error("Invalid expression");
+  }
+};
+
+// Updated updatePreview function
 const updatePreview = () => {
   try {
-    if (input.value.trim() === '' || input.value === 'Error') {
-      preview.value = ''
-      error.value = ''
-      return
+    if (shouldClearPreview.value) {
+      preview.value = "";
+      error.value = "";
+      shouldClearPreview.value = false;
+      return;
     }
-    const result = evaluateExpression(input.value)
-    preview.value = result.toString()
-    error.value = ''
+
+    if (!input.value || input.value === "Error") {
+      preview.value = "";
+      error.value = "";
+      return;
+    }
+
+    if (isLastCharOperator() || input.value.trim().endsWith(".")) {
+      preview.value = "";
+      return;
+    }
+
+    preview.value = evaluateExpression(input.value).toString();
+    error.value = "";
   } catch (err) {
-    preview.value = ''
-    if (err instanceof SyntaxError) {
-      error.value = `SyntaxError: ${err.message}`
-    } else if (err instanceof TypeError) {
-      error.value = `TypeError: ${err.message}`
-    } else if (err instanceof ReferenceError) {
-      error.value = `ReferenceError: ${err.message}`
+    preview.value = "";
+    error.value = err.message;
+  }
+};
+
+// Watch the input field and update the preview
+watch(input, () => updatePreview());
+
+// Updated handleButtonClick function
+const handleButtonClick = (btn) => {
+  if (input.value === "Error") {
+    handleClear();
+  }
+
+  if (lastOperator.value === "=" && !isOperator(btn)) {
+    shouldClearPreview.value = true;
+  }
+
+  switch (btn) {
+    case "=":
+      handleEquals();
+      break;
+    case "%":
+      handlePercentage();
+      break;
+    case "±":
+      handlePlusMinus();
+      break;
+    case "AC":
+      handleClear();
+      break;
+    case "+":
+    case "-":
+    case "×":
+    case "÷":
+      handleOperator(btn);
+      break;
+    default:
+      handleNumber(btn);
+  }
+
+  if (btn === "=") {
+    lastOperator.value = "=";
+  }
+};
+
+// Updated handleOperator function
+const handleOperator = (op) => {
+  if (!isLastCharOperator()) {
+    input.value += ` ${op} `;
+  } else {
+    input.value = input.value.slice(0, -3) + ` ${op} `;
+  }
+  lastOperator.value = op;
+  shouldClearPreview.value = false;
+};
+
+// Updated handleNumber function
+const handleNumber = (num) => {
+  if (input.value === "Error" || input.value === lastOperator.value) {
+    input.value = num;
+  } else if (input.value === "0" && num === "0") {
+    return;
+  } else if (input.value === "0" && num !== ".") {
+    input.value = num;
+  } else {
+    if (input.value === "0" && num === ".") {
+      input.value = "0.";
     } else {
-      error.value = `Error: ${err.message}`
+      input.value += num;
     }
   }
-}
+  lastNumber.value = num;
+  shouldClearPreview.value = false;
+};
 
-const handleButtonClick = (btn) => {
-  switch (btn) {
-    case '=':
-      handleEquals()
-      break
-    case '±':
-      toggleSign()
-      break
-    case '%':
-      handlePercentage()
-      break
-    case '÷':
-    case '×':
-    case '-':
-    case '+':
-      handleOperator(btn)
-      break
-    case '.':
-      handleDecimal()
-      break
-    case 'OR':
-    case 'AND':
-    case 'NOT':
-    case 'XOR':
-      alert(`${btn} is not implemented yet`)
-      handleClear()
-      break
-    default:
-      handleNumber(btn)
+// Updated handlePercentage function
+const handlePercentage = () => {
+  if (input.value !== "Error" && !isLastCharOperator()) {
+    input.value = (parseFloat(input.value) / 100).toString();
+    updatePreview();
   }
-  if (btn !== '=') {
-    updatePreview()
-  }
-}
+};
 
-const handleNumber = (num) => {
-  if (input.value === '0' || input.value === 'Error') {
-    input.value = num
-  } else {
-    input.value += num
+// Updated handlePlusMinus function
+const handlePlusMinus = () => {
+  if (input.value !== "Error" && !isLastCharOperator()) {
+    input.value = (parseFloat(input.value) * -1).toString();
+    updatePreview();
   }
-}
+};
 
-const handleOperator = (op) => {
-  if (input.value !== 'Error') {
-    input.value += ` ${op} `
-  }
-}
-
-const handleDecimal = () => {
-  const parts = input.value.split(/[-+×÷]/)
-  const lastPart = parts[parts.length - 1]
-  if (!lastPart.includes('.')) {
-    input.value += '.'
-  }
-}
-
+// Updated handleEquals function
 const handleEquals = () => {
   try {
-    const result = evaluateExpression(input.value)
-    input.value = result.toString()
-    preview.value = ''
-    error.value = ''
+    const result = evaluateExpression(input.value);
+    
+    animatedPreview.value = result.toString();
+    isAnimating.value = true;
+    
+    setTimeout(() => {
+      input.value = result.toString();
+      shouldClearPreview.value = true;
+      updatePreview();
+      error.value = "";
+      lastOperator.value = "";
+      lastNumber.value = result.toString();
+      isAnimating.value = false;
+    }, 500);
   } catch (err) {
-    input.value = 'Error'
-    preview.value = ''
-    if (err instanceof SyntaxError) {
-      error.value = `SyntaxError: ${err.message}`
-    } else if (err instanceof TypeError) {
-      error.value = `TypeError: ${err.message}`
-    } else if (err instanceof ReferenceError) {
-      error.value = `ReferenceError: ${err.message}`
-    } else {
-      error.value = `Error: ${err.message}`
-    }
+    input.value = "Error";
+    shouldClearPreview.value = true;
+    updatePreview();
+    error.value = err.message;
   }
-}
+};
 
+// Updated handleClear function
 const handleClear = () => {
-  input.value = '0'
-  preview.value = ''
-  error.value = ''
-}
-
-const toggleSign = () => {
-  if (input.value !== '0' && input.value !== 'Error') {
-    input.value = input.value.startsWith('-') ? input.value.slice(1) : '-' + input.value
-  }
-}
-
-const handlePercentage = () => {
-  try {
-    const result = evaluateExpression(input.value) / 100
-    input.value = result.toString()
-    error.value = ''
-  } catch (err) {
-    input.value = 'Error'
-    preview.value = ''
-    if (err instanceof SyntaxError) {
-      error.value = `SyntaxError: ${err.message}`
-    } else if (err instanceof TypeError) {
-      error.value = `TypeError: ${err.message}`
-    } else if (err instanceof ReferenceError) {
-      error.value = `ReferenceError: ${err.message}`
-    } else {
-      error.value = `Error: ${err.message}`
-    }
-  }
-}
-
-const evaluateExpression = (expr) => {
-  const sanitizedExpr = expr.replace(/×/g, '*').replace(/÷/g, '/')
-  return Function(`'use strict'; return (${sanitizedExpr})`)()
-}
+  input.value = "0";
+  shouldClearPreview.value = true;
+  updatePreview();
+  error.value = "";
+  isAnimating.value = false;
+  lastOperator.value = "";
+  lastNumber.value = "";
+  animatedPreview.value = "";
+};
 </script>

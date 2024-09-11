@@ -1,5 +1,7 @@
 <template>
-  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+  <header
+    class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4"
+  >
     <div class="container mx-auto flex justify-between items-center">
       <!-- Logo Section -->
       <div class="flex items-center space-x-2">
@@ -13,10 +15,12 @@
       </div>
       <!-- Mode Toggle and Theme Switch -->
       <div class="flex-grow flex justify-center sm:justify-end items-center">
-        <div class="w-full sm:w-auto flex justify-between sm:justify-end items-center space-x-4">
+        <div
+          class="w-full sm:w-auto flex justify-between sm:justify-end items-center space-x-4"
+        >
           <!-- Spacer for left alignment on mobile -->
           <div class="w-8 sm:hidden"></div>
-          
+
           <!-- Mode Toggler -->
           <div class="relative w-[70%] sm:w-32">
             <button
@@ -44,7 +48,7 @@
               </div>
             </transition>
           </div>
-          
+
           <!-- Theme Toggle Button -->
           <button
             @click="toggleTheme"
@@ -93,20 +97,22 @@ const toggleTheme = () => {
 
 const dropdownStyle = computed(() => {
   if (!modeToggleButton.value) return {};
-  
+
   const buttonRect = modeToggleButton.value.getBoundingClientRect();
   const isSmallScreen = window.innerWidth < 640; // sm breakpoint
-  
+
   return {
-    width: isSmallScreen ? `${buttonRect.width}px` : '128px', // 32 * 4 = 128px
-    left: isSmallScreen ? '50%' : '0',
-    transform: isSmallScreen ? 'translateX(-50%)' : 'none',
+    width: isSmallScreen ? `${buttonRect.width}px` : "136px", // 32 * 4 = 128px
+    transform: isSmallScreen ? "translateX(0)" : "translateX(-5%)",
   };
 });
 
 // Click outside event handler
 const handleClickOutside = (event) => {
-  if (modeToggleButton.value && !modeToggleButton.value.contains(event.target)) {
+  if (
+    modeToggleButton.value &&
+    !modeToggleButton.value.contains(event.target)
+  ) {
     showModeDropdown.value = false;
     closeDropdown();
   }
@@ -127,11 +133,12 @@ onUnmounted(() => {
 /* Transition for Dropdown */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, filter 0.5s ease;
 }
 .fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
-  transform: translateY(-10px) scale(0.95);
+  transform: translateY(-15px) scale(0.95);
+  filter: blur(2px);
 }
 </style>

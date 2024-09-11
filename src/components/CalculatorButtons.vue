@@ -7,29 +7,51 @@
     <button @click="$emit('button-click', '÷')" class="operator-btn">÷</button>
 
     <!-- Numbers and Decimal -->
-    <button v-for="num in ['7', '8', '9']" :key="num" @click="$emit('button-click', num)" class="number-btn">
+    <button
+      v-for="num in ['7', '8', '9']"
+      :key="num"
+      @click="$emit('button-click', num)"
+      class="number-btn"
+    >
       {{ num }}
     </button>
     <button @click="$emit('button-click', '×')" class="operator-btn">×</button>
 
-    <button v-for="num in ['4', '5', '6']" :key="num" @click="$emit('button-click', num)" class="number-btn">
+    <button
+      v-for="num in ['4', '5', '6']"
+      :key="num"
+      @click="$emit('button-click', num)"
+      class="number-btn"
+    >
       {{ num }}
     </button>
     <button @click="$emit('button-click', '-')" class="operator-btn">−</button>
 
-    <button v-for="num in ['1', '2', '3']" :key="num" @click="$emit('button-click', num)" class="number-btn">
+    <button
+      v-for="num in ['1', '2', '3']"
+      :key="num"
+      @click="$emit('button-click', num)"
+      class="number-btn"
+    >
       {{ num }}
     </button>
     <button @click="$emit('button-click', '+')" class="operator-btn">+</button>
 
     <!-- Zero and Decimal -->
-    <button @click="$emit('button-click', '0')" class="col-span-2 number-btn">0</button>
+    <button @click="$emit('button-click', '0')" class="col-span-2 number-btn">
+      0
+    </button>
     <button @click="$emit('button-click', '.')" class="number-btn">.</button>
     <button @click="$emit('button-click', '=')" class="operator-btn">=</button>
 
     <!-- Programmer Mode Buttons (conditionally rendered) -->
     <template v-if="mode === 'Programmer'">
-      <button v-for="op in ['AND', 'OR', 'NOT', 'XOR']" :key="op" @click="$emit('button-click', op)" class="col-span-2 programmer-btn">
+      <button
+        v-for="op in ['AND', 'OR', 'NOT', 'XOR']"
+        :key="op"
+        @click="$emit('button-click', op)"
+        class="col-span-2 programmer-btn"
+      >
         {{ op }}
       </button>
     </template>
@@ -37,10 +59,10 @@
 </template>
 
 <script setup>
-import defineProps from 'vue';
-import defineEmits from 'vue'
-defineProps(['mode'])
-defineEmits(['button-click', 'clear'])
+import defineProps from "vue";
+import defineEmits from "vue";
+defineProps(["mode"]);
+defineEmits(["button-click", "clear"]);
 </script>
 
 <style scoped>
