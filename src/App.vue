@@ -1,13 +1,24 @@
 <!-- src/App.vue -->
 <template>
-  <div class="min-h-screen flex flex-col bg-background dark:bg-gray-900 transition-colors duration-300">
-    <calculator-header v-model:mode="mode" @close-dropdown="closeDropdown" />
-    <main class="flex-grow flex items-center justify-center p-4" @click="closeDropdown">
-      <div class="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-300">
+  <div
+    class="min-h-screen flex flex-col bg-background dark:bg-gray-900 transition-colors duration-300"
+  >
+    <calculator-header v-model:mode="mode" />
+    <main
+      class="flex-grow flex items-center justify-center p-4"
+    >
+      <div
+        class="w-full bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-300"
+      >
         <div class="p-6">
           <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Calculator</h1>
-            <button @click="openSettings" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+              Calculator
+            </h1>
+            <button
+              @click="openSettings"
+              class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            >
               <SettingsIcon class="h-6 w-6" />
             </button>
           </div>
@@ -36,21 +47,21 @@
 </template>
 
 <script setup>
-import { ref, computed, provide } from 'vue';
-import { evaluate, format, fraction } from 'mathjs';
-import { SettingsIcon } from 'lucide-vue-next';
-import CalculatorHeader from './components/CalculatorHeader.vue';
-import CalculatorDisplay from './components/CalculatorDisplay.vue';
-import CalculatorButtons from './components/CalculatorButtons.vue';
-import SettingsModal from './components/SettingsModal.vue';
+import { SettingsIcon } from "lucide-vue-next";
+import { evaluate, format, fraction } from "mathjs";
+import { computed, onMounted, onUnmounted, provide, ref } from "vue";
+import CalculatorButtons from "./components/CalculatorButtons.vue";
+import CalculatorDisplay from "./components/CalculatorDisplay.vue";
+import CalculatorHeader from "./components/CalculatorHeader.vue";
+import SettingsModal from "./components/SettingsModal.vue";
 
-const input = ref('0');
-const mode = ref('Standard');
-const error = ref('');
+const input = ref("0");
+const mode = ref("Standard");
+const error = ref("");
 const isAnimating = ref(false);
-const animatedResult = ref('');
-const lastOperator = ref('');
-const lastNumber = ref('');
+const animatedResult = ref("");
+const lastOperator = ref("");
+const lastNumber = ref("");
 const MAX_INPUT_LENGTH = 50;
 
 const settings = ref({
@@ -73,51 +84,46 @@ const updateSettings = (newSettings) => {
   settings.value = newSettings;
 };
 
-const isOperator = (char) => ['+', '-', '×', '÷'].includes(char);
+const isOperator = (char) => ["+", "-", "×", "÷"].includes(char);
 const isLastCharOperator = () => isOperator(input.value.trim().slice(-1));
-
-const closeDropdown = () => {
-  console.log('Closing dropdown');
-};
-provide("closeDropdown", closeDropdown);
 
 const preview = computed(() => {
   try {
     const result = evaluateExpression(input.value);
     return formatResult(result);
   } catch (err) {
-    return '';
+    return "";
   }
 });
 
 const sanitizeInput = (expr) => {
-  const sanitized = expr.replace(/[^0-9+\-×÷.]/g, '');
-  return sanitized.replace(/^[+×÷]/, '');
+  const sanitized = expr.replace(/[^0-9+\-×÷.]/g, "");
+  return sanitized.replace(/^[+×÷]/, "");
 };
 
 const evaluateExpression = (expr) => {
   try {
     const sanitizedExpr = sanitizeInput(expr)
-      .replace(/×/g, '*')
-      .replace(/÷/g, '/');
+      .replace(/×/g, "*")
+      .replace(/÷/g, "/");
 
-    if (sanitizedExpr.includes('/0')) {
-      throw new Error('Division by zero is not allowed');
+    if (sanitizedExpr.includes("/0")) {
+      throw new Error("Division by zero is not allowed");
     }
 
     if (sanitizedExpr.match(/[a-zA-Z_$]/)) {
-      throw new Error('Invalid characters in expression');
+      throw new Error("Invalid characters in expression");
     }
 
     const result = evaluate(sanitizedExpr);
 
-    if (typeof result !== 'number' || !isFinite(result)) {
-      throw new Error('Invalid result');
+    if (typeof result !== "number" || !isFinite(result)) {
+      throw new Error("Invalid result");
     }
 
     return result;
   } catch (err) {
-    throw new Error('Invalid expression: ' + err.message);
+    throw new Error("Invalid expression: " + err.message);
   }
 };
 
@@ -128,59 +134,62 @@ const formatResult = (result) => {
   } else {
     let formattedResult = format(result, { precision: settings.value.precision });
     if (settings.value.useThousandsSeparator) {
-      formattedResult = formattedResult.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      // Only apply thousands separator to the integer part
+      const [integerPart, decimalPart] = formattedResult.split('.');
+      const formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      formattedResult = decimalPart ? `${formattedIntegerPart}.${decimalPart}` : formattedIntegerPart;
     }
     return formattedResult;
   }
 };
 
 const handleButtonClick = (btn) => {
-  if (input.value === 'Error') {
+  if (input.value === "Error") {
     handleClear();
   }
 
-  if (input.value.length >= MAX_INPUT_LENGTH && btn !== '=' && btn !== 'AC') {
-    error.value = 'Maximum input length reached';
+  if (input.value.length >= MAX_INPUT_LENGTH && btn !== "=" && btn !== "AC") {
+    error.value = "Maximum input length reached";
     return;
   }
 
   switch (btn) {
-    case '=':
+    case "=":
       handleEquals();
       break;
-    case '%':
+    case "%":
       handlePercentage();
       break;
-    case '±':
+    case "±":
       handlePlusMinus();
       break;
-    case 'AC':
-    case 'C':
+    case "AC":
+    case "C":
       handleClear();
       break;
-    case 'CE':
+    case "CE":
       handleClearEntry();
       break;
-    case 'backspace':
+    case "backspace":
       handleBackspace();
       break;
-    case '+':
-    case '-':
-    case '×':
-    case '÷':
+    case "+":
+    case "-":
+    case "×":
+    case "÷":
       handleOperator(btn);
       break;
     default:
       handleNumber(btn);
   }
 
-  if (btn === '=') {
-    lastOperator.value = '=';
+  if (btn === "=") {
+    lastOperator.value = "=";
   }
 };
 
 const handleOperator = (op) => {
-  error.value = '';
+  error.value = "";
   if (!isLastCharOperator()) {
     input.value += ` ${op} `;
   } else {
@@ -190,16 +199,16 @@ const handleOperator = (op) => {
 };
 
 const handleNumber = (num) => {
-  error.value = '';
-  if (input.value === 'Error' || input.value === lastOperator.value) {
+  error.value = "";
+  if (input.value === "Error" || input.value === lastOperator.value) {
     input.value = num;
-  } else if (input.value === '0' && num === '0') {
+  } else if (input.value === "0" && num === "0") {
     return;
-  } else if (input.value === '0' && num !== '.') {
+  } else if (input.value === "0" && num !== ".") {
     input.value = num;
   } else {
-    if (input.value === '0' && num === '.') {
-      input.value = '0.';
+    if (input.value === "0" && num === ".") {
+      input.value = "0.";
     } else {
       input.value += num;
     }
@@ -208,12 +217,12 @@ const handleNumber = (num) => {
 };
 
 const handlePercentage = () => {
-  error.value = '';
-  if (input.value !== 'Error' && !isLastCharOperator()) {
+  error.value = "";
+  if (input.value !== "Error" && !isLastCharOperator()) {
     try {
       const result = parseFloat(input.value) / 100;
       if (!isFinite(result)) {
-        throw new Error('Invalid percentage calculation');
+        throw new Error("Invalid percentage calculation");
       }
       input.value = formatResult(result);
     } catch (err) {
@@ -223,12 +232,12 @@ const handlePercentage = () => {
 };
 
 const handlePlusMinus = () => {
-  error.value = '';
-  if (input.value !== 'Error' && !isLastCharOperator()) {
+  error.value = "";
+  if (input.value !== "Error" && !isLastCharOperator()) {
     try {
       const result = parseFloat(input.value) * -1;
       if (!isFinite(result)) {
-        throw new Error('Invalid negation');
+        throw new Error("Invalid negation");
       }
       input.value = formatResult(result);
     } catch (err) {
@@ -238,51 +247,111 @@ const handlePlusMinus = () => {
 };
 
 const handleEquals = () => {
-  error.value = '';
+  error.value = "";
   try {
     const result = evaluateExpression(input.value);
-    
+
     animatedResult.value = formatResult(result);
     isAnimating.value = true;
-    
+
     setTimeout(() => {
       input.value = formatResult(result);
-      lastOperator.value = '';
+      lastOperator.value = "";
       lastNumber.value = formatResult(result);
       isAnimating.value = false;
     }, 500);
   } catch (err) {
-    input.value = 'Error';
+    input.value = "Error";
     error.value = err.message;
   }
 };
 
 const handleClear = () => {
-  input.value = '0';
-  error.value = '';
+  input.value = "0";
+  error.value = "";
   isAnimating.value = false;
-  lastOperator.value = '';
-  lastNumber.value = '';
-  animatedResult.value = '';
+  lastOperator.value = "";
+  lastNumber.value = "";
+  animatedResult.value = "";
 };
 
 const handleClearEntry = () => {
-  if (input.value !== '0' && input.value !== 'Error') {
-    const parts = input.value.split(' ');
+  if (input.value !== "0" && input.value !== "Error") {
+    const parts = input.value.split(" ");
     parts.pop();
-    input.value = parts.join(' ') || '0';
+    input.value = parts.join(" ") || "0";
   } else {
     handleClear();
   }
 };
 
 const handleBackspace = () => {
-  if (input.value !== '0' && input.value !== 'Error') {
+  if (input.value !== "0" && input.value !== "Error") {
     if (input.value.length === 1) {
-      input.value = '0';
+      input.value = "0";
     } else {
       input.value = input.value.slice(0, -1);
     }
   }
 };
+
+const handleKeyDown = (event) => {
+  const key = event.key;
+
+  // Prevent default behavior for some keys
+  if (["+", "-", "*", "/", "=", "Enter", "Escape", "Backspace"].includes(key)) {
+    event.preventDefault();
+  }
+
+  // Map keyboard inputs to calculator buttons
+  switch (key) {
+    case "0":
+    case "1":
+    case "2":
+    case "3":
+    case "4":
+    case "5":
+    case "6":
+    case "7":
+    case "8":
+    case "9":
+    case ".":
+      handleButtonClick(key);
+      break;
+    case "+":
+      handleButtonClick("+");
+      break;
+    case "-":
+      handleButtonClick("-");
+      break;
+    case "*":
+      handleButtonClick("×");
+      break;
+    case "/":
+      handleButtonClick("÷");
+      break;
+    case "=":
+    case "Enter":
+      handleButtonClick("=");
+      break;
+    case "Escape":
+      handleButtonClick("AC");
+      break;
+    case "Backspace":
+      handleButtonClick("backspace");
+      break;
+    case "%":
+      handleButtonClick("%");
+      break;
+  }
+};
+
+// Add these lifecycle hooks
+onMounted(() => {
+  window.addEventListener("keydown", handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyDown);
+});
 </script>
