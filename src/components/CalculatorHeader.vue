@@ -22,7 +22,7 @@
           <div class="w-8 sm:hidden"></div>
 
           <!-- Mode Toggler -->
-          <div class="relative w-[70%] sm:w-32">
+          <div class="relative w-[70%] sm:w-36">
             <button
               @click="toggleModeDropdown"
               ref="modeToggleButton"

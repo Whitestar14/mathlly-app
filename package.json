@@ -13,6 +13,7 @@
     "decimal.js": "^10.4.3",
     "lucide-vue-next": "^0.439.0",
     "mathjs": "^13.1.1",
+    "radix-vue": "^1.9.5",
     "vue": "^3.2.13"
   },
   "devDependencies": {
