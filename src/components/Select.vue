@@ -1,6 +1,6 @@
 <template>
   <SelectRoot v-model="selectedValue" :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
-    <SelectTrigger class="inline-flex items-center justify-between w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 text-white border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    <SelectTrigger class="inline-flex items-center text-gray-700 dark:text-gray-300 justify-between w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
       <SelectValue :placeholder="placeholder" />
       <SelectIcon class="w-5 h-5 ml-2 -mr-1 text-gray-400" aria-hidden="true">
         <ChevronDownIcon />

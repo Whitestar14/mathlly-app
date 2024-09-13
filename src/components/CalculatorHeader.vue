@@ -22,9 +22,9 @@
               </SelectIcon>
             </SelectTrigger>
             <SelectPortal>
-              <SelectContent class="bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700">
-                <SelectViewport class="py-1">
-                  <SelectItem v-for="option in ['Basic', 'Standard', 'Programmer']" :key="option" :value="option" class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer outline-none">
+              <SelectContent class="overflow-hidden bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700 relative top-12">
+                <SelectViewport class="p-1">
+                  <SelectItem v-for="option in ['Basic', 'Standard', 'Programmer']" :key="option" :value="option" class="px-3 py-2 text-sm text-gray-700 rounded-sm dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer outline-none">
                     <SelectItemText>{{ option }}</SelectItemText>
                   </SelectItem>
                 </SelectViewport>
