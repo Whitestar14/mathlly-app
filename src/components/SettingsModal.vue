@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { defineProps, defineEmits, ref, watch } from 'vue';
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogClose } from 'radix-vue';
 import { XIcon } from 'lucide-vue-next';
 import Select from './Select.vue';

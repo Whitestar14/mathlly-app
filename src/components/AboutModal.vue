@@ -46,6 +46,7 @@
 <script setup>
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogClose } from 'radix-vue';
 import { XIcon } from 'lucide-vue-next';
+import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
   isOpen: Boolean,

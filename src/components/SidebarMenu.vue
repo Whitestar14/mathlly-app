@@ -1,5 +1,5 @@
 <template>
-  <DialogRoot :open="isOpen" @update:open="updateOpen">
+  <DialogRoot v-if="isOpen" :open="isOpen" @update:open="updateOpen">
     <DialogPortal>
       <DialogOverlay
         class="fixed inset-0 bg-black/50 animate-fade-in transition-opacity duration-300 ease-in-out"
@@ -54,6 +54,7 @@
 </template>
 
 <script setup>
+import { defineProps, defineEmits } from 'vue';
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogClose } from 'radix-vue';
 import { XIcon, InfoIcon, SettingsIcon } from 'lucide-vue-next';
 

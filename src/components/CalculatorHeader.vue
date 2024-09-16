@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { defineProps, defineEmits, ref, watch } from 'vue';
 import { useDark, useToggle } from '@vueuse/core';
 import { Sun, Moon, ChevronDown } from 'lucide-vue-next';
 import {

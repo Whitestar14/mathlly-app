@@ -2,33 +2,42 @@
   <div class="min-h-screen flex flex-col bg-background dark:bg-gray-900 transition-colors duration-300">
     <calculator-header v-model:mode="mode" />
     <main class="flex-grow flex">
-      <div class="w-full bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-300 flex justify-center">
-        <div class="p-6 max-w-md w-full">
-          <div class="flex justify-between items-center mb-4">
-            <div class="flex items-center space-x-2">
-              <button @click="toggleSidebar" class="text-gray-600 dark:text-gray-400">
-                <MenuIcon class="h-6 w-6" />
-              </button>
+      <div class="w-full flex">
+        <div class="flex-grow bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-colors duration-300">
+          <div class="p-6 max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center space-x-2">
+                <button @click="toggleSidebar" class="text-gray-600 dark:text-gray-400">
+                  <MenuIcon class="h-6 w-6" />
+                </button>
+              </div>
+              <div class="flex items-center space-x-4 md:hidden">
+                <button @click="toggleHistory" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                  <HistoryIcon class="h-6 w-6" />
+                </button>
+              </div>
             </div>
-            <div class="flex items-center space-x-4">
-              <button @click="toggleHistory" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                <HistoryIcon class="h-6 w-6" />
-              </button>
-            </div>
+            <calculator-display
+              :input="input"
+              :preview="preview"
+              :error="error"
+              :isAnimating="isAnimating"
+              :animatedPreview="animatedResult"
+            />
+            <calculator-buttons
+              :mode="mode"
+              @button-click="handleButtonClick"
+              @clear="handleClear"
+            />
           </div>
-          <calculator-display
-            :input="input"
-            :preview="preview"
-            :error="error"
-            :isAnimating="isAnimating"
-            :animatedPreview="animatedResult"
-          />
-          <calculator-buttons
-            :mode="mode"
-            @button-click="handleButtonClick"
-            @clear="handleClear"
-          />
         </div>
+        <history-panel
+          v-if="!isMobile"
+          :history="history"
+          :clearHistory="clearHistory"
+          :onSelectHistoryItem="selectHistoryItem"
+          class="w-1/4 min-w-[250px] max-w-[400px]"
+        />
       </div>
     </main>
     <sidebar-menu
@@ -45,10 +54,12 @@
       v-model:isOpen="isAboutOpen"
     />
     <history-panel
+      v-if="isMobile"
       :isOpen="isHistoryOpen"
       :isMobile="isMobile"
       :history="history"
       :clearHistory="clearHistory"
+      :deleteHistoryItem="deleteHistoryItem"
       :onSelectHistoryItem="selectHistoryItem"
       @close="closeHistory"
     />
@@ -119,10 +130,17 @@ const clearHistory = () => {
 
 const selectHistoryItem = (item) => {
   input.value = item.expression;
+  if (isMobile.value) {
+    closeHistory();
+  }
+};
+
+const deleteHistoryItem = (index) => {
+  history.value.splice(index, 1);
 };
 
 const addToHistory = (expression, result) => {
-  history.value.unshift({ expression, result });
+  history.value.unshift({ id: Date.now(), expression, result });
 };
 
 const isOperator = (char) => ['+', '-', '×', '÷'].includes(char);
@@ -390,13 +408,6 @@ const handleKeyDown = (event) => {
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth < 768;
-  });
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown);
-  window.removeEventListener('resize', () => {
     isMobile.value = window.innerWidth < 768;
   });
 });

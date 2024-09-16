@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { defineProps, defineEmits, ref, watch } from 'vue';
 import { SelectRoot, SelectTrigger, SelectValue, SelectIcon, SelectPortal, SelectContent, SelectScrollUpButton, SelectViewport, SelectGroup, SelectLabel, SelectItem, SelectItemText, SelectItemIndicator, SelectScrollDownButton } from 'radix-vue';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from 'lucide-vue-next';
 
