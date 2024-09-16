@@ -14,7 +14,7 @@
       ]"
       :style="isMobile ? panelStyle : {}"
     >
-      <div class="p-4 h-full flex flex-col">
+      <div class="p-4 h-full flex flex-col max-h-[90vh]">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">History</h2>
           <button
@@ -25,29 +25,31 @@
             <XIcon class="h-6 w-6" />
           </button>
         </div>
-        <div class="space-y-2 overflow-y-auto flex-grow">
+        <div class="overflow-y-auto flex-grow custom-scrollbar">
           <div
             v-if="history.length === 0"
-            class="text-center text-gray-500 dark:text-gray-400 py-4"
+            class="text-center text-sm text-gray-500 dark:text-gray-400 py-4"
           >
             There's no history yet
           </div>
-          <div
-            v-for="(item, index) in history"
-            :key="index"
-            class="p-2 bg-gray-100 dark:bg-gray-700 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative group"
-          >
-            <div @click="onSelectHistoryItem(item)">
-              <div class="text-sm text-gray-600 dark:text-gray-400">{{ item.expression }}</div>
-              <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.result }}</div>
-            </div>
-            <button
-              @click="deleteHistoryItem(index)"
-              class="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+          <TransitionGroup name="list" tag="div" class="space-y-2">
+            <div
+              v-for="(item, index) in history"
+              :key="item.id"
+              class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative group"
             >
-              <TrashIcon class="h-4 w-4" />
-            </button>
-          </div>
+              <div @click="onSelectHistoryItem(item)">
+                <div class="text-sm text-gray-600 dark:text-gray-400">{{ item.expression }}</div>
+                <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.result }}</div>
+              </div>
+              <button
+                @click="handleDeleteHistoryItem(index)"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 p-2 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+              >
+                <TrashIcon class="h-4 w-4" />
+              </button>
+            </div>
+          </TransitionGroup>
         </div>
         <button
           v-if="history.length > 0"
@@ -63,7 +65,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 import { TrashIcon, XIcon } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -81,10 +83,18 @@ const props = defineProps({
   deleteHistoryItem: Function,
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'deleteHistoryItem']);
 
 const closePanel = () => {
   emit('close');
+};
+
+const handleDeleteHistoryItem = (index) => {
+  if (props.deleteHistoryItem) {
+    props.deleteHistoryItem(index);
+  } else {
+    emit('deleteHistoryItem', index);
+  }
 };
 
 const panelStyle = computed(() => ({
@@ -95,5 +105,40 @@ const panelStyle = computed(() => ({
 <style scoped>
 .group:hover .opacity-0 {
   opacity: 1;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+
+}
+.list-move {
+  transition: transform 0.4s ease;
 }
 </style>

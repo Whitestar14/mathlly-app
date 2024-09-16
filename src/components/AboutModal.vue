@@ -1,8 +1,8 @@
 <template>
   <DialogRoot :open="isOpen" @update:open="updateOpen">
     <DialogPortal>
-      <DialogOverlay class="fixed inset-0 bg-black/50 animate-fade-in" />
-      <DialogContent class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full w-[80%] max-w-lg max-h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl flex flex-col animate-scale-in">
+      <DialogOverlay class="fixed inset-0 bg-black/50 animate-fade-in z-20" />
+      <DialogContent class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full w-[80%] max-w-lg max-h-[90vh] z-20 bg-white dark:bg-gray-800 rounded-lg shadow-xl flex flex-col animate-scale-in">
         <DialogTitle class="text-2xl font-bold text-gray-900 dark:text-white p-6 flex items-center border-b border-gray-200 dark:border-gray-700">
           About Mathlly
         </DialogTitle>
