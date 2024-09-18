@@ -13,9 +13,10 @@
         </div>
         <button
           @click="closeSidebar"
-          class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+          class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 custom-transition"
+          :class="[isSidebarOpen ? 'opacity-0 pointer-none' : '']"
         >
-          <PanelRightIcon class="h-6 w-6" />
+          <PanelLeftIcon class="h-6 w-6" />
         </button>
       </div>
       
@@ -53,11 +54,12 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
-import { PanelRightIcon, InfoIcon, SettingsIcon } from 'lucide-vue-next';
+import { PanelLeftIcon, InfoIcon, SettingsIcon } from 'lucide-vue-next';
 
 const props = defineProps({
   isOpen: Boolean,
   isMobile: Boolean,
+  isSidebarOpen: Boolean,
 });
 
 const emit = defineEmits(['update:isOpen', 'openAbout', 'openSettings']);
@@ -89,5 +91,9 @@ const openSettings = () => {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+.custom-transition {
+  transition: opacity 0.3s ease;
 }
 </style>

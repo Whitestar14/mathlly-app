@@ -5,9 +5,10 @@
       <div class="flex items-center justify-between pb-1">
         <button
           @click="$emit('toggle-sidebar')"
-          class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+          class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 custom-transition"
+          :class="[isSidebarOpen ? 'opacity-0 pointer-none' : '']"
         >
-          <PanelLeftIcon class="h-6 w-6" />
+          <PanelRightIcon class="h-6 w-6"/>
         </button>
       </div>
       <!-- Mode Toggle and Theme Switch -->
@@ -25,7 +26,7 @@
             </SelectIcon>
           </SelectTrigger>
           <SelectPortal>
-            <SelectContent class="overflow-hidden bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700">
+            <SelectContent class="bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 overflow-hidden border border-gray-200 dark:border-gray-700">
               <SelectViewport class="p-1">
                 <SelectItem v-for="option in ['Basic', 'Standard', 'Programmer']" :key="option" :value="option" class="px-3 py-2 text-sm text-gray-700 rounded-sm dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer outline-none">
                   <SelectItemText>{{ option }}</SelectItemText>
@@ -52,7 +53,7 @@
 <script setup>
 import { defineProps, defineEmits, ref, watch } from 'vue';
 import { useDark, useToggle } from '@vueuse/core';
-import { Sun, Moon, ChevronDown, PanelLeftIcon } from 'lucide-vue-next';
+import { Sun, Moon, ChevronDown, PanelRightIcon } from 'lucide-vue-next';
 import {
   SelectRoot,
   SelectTrigger,
@@ -65,7 +66,7 @@ import {
   SelectItemText,
 } from 'radix-vue';
 
-const props = defineProps(['mode']);
+const props = defineProps(['mode', 'isSidebarOpen', 'isMobile']);
 const emit = defineEmits(['update:mode', 'toggle-sidebar']);
 
 const isDark = useDark();
@@ -95,5 +96,13 @@ const toggleTheme = () => {
   .select-content {
     width: var(--select-content-width);
   }
+}
+
+.pointer-none {
+  pointer-events: none;
+}
+
+.custom-transition {
+  transition: opacity 0.3s ease;
 }
 </style>

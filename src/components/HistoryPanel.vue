@@ -131,14 +131,18 @@ const panelStyle = computed(() => ({
 }
 .list-enter-from {
   opacity: 0;
-  transform: translateY(-30px);
+  transform: translateY(30px);
 }
 .list-leave-to {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(-30px);
 
 }
 .list-move {
   transition: transform 0.4s ease;
 }
+
+
+
+
 </style>

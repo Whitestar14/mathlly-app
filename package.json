@@ -14,7 +14,8 @@
     "lucide-vue-next": "^0.439.0",
     "mathjs": "^13.1.1",
     "radix-vue": "^1.9.5",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
