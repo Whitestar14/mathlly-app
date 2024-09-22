@@ -1,99 +1,191 @@
 <template>
-  <div
-    :class="[
-      'fixed inset-y-0 left-0 z-10 bg-white border-r border-gray-200 dark:border-gray-700 dark:bg-gray-900 transition-transform duration-300 ease-in-out',
-      isMobile ? 'w-full' : 'w-64',
-      isOpen ? 'translate-x-0' : '-translate-x-full'
-    ]"
-  >
-    <div class="flex flex-col h-full">
-      <div class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700">
-        <div class="w-8 h-8">
-          <img src="@/assets/mathlly-logo.svg" alt="Mathlly Logo" class="w-full h-full" />
-        </div>
-        <button
-          @click="closeSidebar"
-          class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 custom-transition"
-          :class="[isSidebarOpen ? 'opacity-0 pointer-none' : '']"
+  <Transition name="slide">
+    <div v-show="isOpen" class="sidebar-container" :class="sidebarClasses">
+      <div class="flex flex-col h-full">
+        <div
+          class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700"
         >
-          <PanelLeftIcon class="h-6 w-6" />
-        </button>
-      </div>
-      
-      <nav class="flex-grow p-4">
-        <ul class="space-y-2">
-          <li>
-            <button
-              @click="openAbout"
-              class="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          <div class="w-8 h-8">
+            <img
+              src="@/assets/Mathlly Mobile (1).png"
+              alt="Mathlly Logo"
+              class="w-full h-full"
+            />
+          </div>
+          <button
+            @click="closeSidebar"
+            class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-opacity duration-300"
+            :class="{ 'opacity-0': !isOpen }"
+          >
+            <PanelLeftIcon class="h-6 w-6" />
+          </button>
+        </div>
+
+        <NavigationMenuRoot
+          orientation="vertical"
+          class="flex-grow p-4 relative"
+        >
+          <div
+            v-if="showIndicator"
+            class="absolute z-50 left-4 w-1 rounded-lg bg-indigo-500 transition-all duration-300 ease-in-out"
+            :style="{ top: `${indicatorPosition}px`, height: '20px' }"
+          ></div>
+          <NavigationMenuList class="space-y-1">
+            <NavigationMenuItem
+              v-for="(item, index) in menuItems"
+              :key="item.path"
             >
-              <InfoIcon class="h-5 w-5" />
-              <span>About</span>
-            </button>
-          </li>
-          <li>
-            <button
-              @click="openSettings"
-              class="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-            >
-              <SettingsIcon class="h-5 w-5" />
-              <span>Settings</span>
-            </button>
-          </li>
-        </ul>
-      </nav>
-      
-      <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Mathlly v1.0.0
-        </p>
+              <NavigationMenuLink
+                :active="currentRoute === item.path"
+                as-child
+              >
+                <button
+                  @click="navigateTo(item.path, index)"
+                  :class="[
+                    'w-full flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md transition-all duration-300',
+                    currentRoute === item.path
+                      ? 'bg-gray-200 dark:bg-gray-800 font-semibold'
+                      : 'font-normal',
+                  ]"
+                >
+                  <component :is="item.icon" class="h-5 w-5" />
+                  <span>{{ item.name }}</span>
+                </button>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenuRoot>
+
+        <div
+          class="mt-auto p-4 pb-0.5 border-t border-gray-200 dark:border-gray-700"
+        >
+          <NavigationMenuRoot orientation="vertical">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  :active="currentRoute === '/settings'"
+                  as-child
+                >
+                  <button
+                    @click="navigateTo('/settings', menuItems.length)"
+                    :class="[
+                      'w-full flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md transition-all duration-300 mb-4',
+                      currentRoute === '/settings'
+                        ? 'bg-gray-200 dark:bg-gray-800 font-semibold'
+                        : 'font-normal',
+                    ]"
+                  >
+                    <SettingsIcon class="h-5 w-5" />
+                    <span>Settings</span>
+                  </button>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenuRoot>
+          <h4 class="text-sm m-0 p-0 text-gray-500 dark:text-gray-400">
+            Mathlly - The Mathlly Team
+          </h4>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-import { PanelLeftIcon, InfoIcon, SettingsIcon } from 'lucide-vue-next';
+import {
+  CalculatorIcon,
+  InfoIcon,
+  PanelLeftIcon,
+  SettingsIcon,
+} from "lucide-vue-next";
+import {
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuRoot,
+} from "radix-vue";
+import { defineEmits, defineProps, computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps({
-  isOpen: Boolean,
-  isMobile: Boolean,
-  isSidebarOpen: Boolean,
+  isOpen: {
+    type: Boolean,
+    default: true,
+  },
+  isMobile: {
+    type: Boolean,
+    default: false,
+  },
 });
+const emit = defineEmits(["update:isOpen"]);
 
-const emit = defineEmits(['update:isOpen', 'openAbout', 'openSettings']);
+const router = useRouter();
+const route = useRoute();
+const currentRoute = ref(route.path);
+const indicatorPosition = ref(0);
+const showIndicator = ref(true);
 
-const closeSidebar = () => {
-  emit('update:isOpen', false);
-};
+const menuItems = [
+  { name: "Calculator", path: "/", icon: CalculatorIcon, indicatorOffset: 28 },
+  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 76 },
+];
 
-const openAbout = () => {
-  emit('openAbout');
+const closeSidebar = () => emit("update:isOpen", false);
+
+const navigateTo = (path, index) => {
+  router.push(path);
+  updateIndicatorPos(index);
   if (props.isMobile) {
     closeSidebar();
   }
 };
 
-const openSettings = () => {
-  emit('openSettings');
-  if (props.isMobile) {
-    closeSidebar();
+const updateIndicatorPos = (index) => {
+  if (index < menuItems.length) {
+    indicatorPosition.value = menuItems[index].indicatorOffset;
+    showIndicator.value = true;
+  } else {
+    showIndicator.value = false;
   }
 };
+
+const sidebarClasses = computed(() => [
+  "fixed inset-y-0 left-0 z-10 bg-gray-100 border-r border-gray-200 dark:border-gray-700 dark:bg-gray-900 transition-all",
+  props.isMobile ? "w-full" : "w-64",
+]);
+
+watch(
+  () => route.path,
+  (newPath) => {
+    currentRoute.value = newPath;
+    const index = menuItems.findIndex((item) => item.path === newPath);
+    updateIndicatorPos(index !== -1 ? index : menuItems.length);
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
 }
 
-.custom-transition {
-  transition: opacity 0.3s ease;
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-enter-to,
+.slide-leave-from {
+  transform: translateX(0%);
 }
 </style>

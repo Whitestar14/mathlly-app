@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300"
+    class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300"
   >
     <header
       class="bg-white dark:bg-gray-800 p-4 flex items-center border-b border-gray-200 dark:border-gray-700"
@@ -11,14 +11,14 @@
       >
         <ArrowLeftIcon class="h-6 w-6" />
       </button>
-      <h1 class="text-2xl font-bold">Settings</h1>
+      <h1 class="text-2xl font-semibold">Settings</h1>
     </header>
 
     <main class="flex-grow p-6">
       <div class="max-w-2xl mx-auto">
         <div class="space-y-6">
           <section
-            class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700"
+            class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700 rounded-md"
           >
             <h2 class="text-xl font-semibold mb-4">Display Settings</h2>
             <div class="space-y-4">
@@ -53,19 +53,11 @@
           </section>
 
           <section
-            class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700"
+            class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700 rounded-md"
           >
             <h2 class="text-xl font-semibold mb-4">Theme</h2>
             <div class="flex items-center justify-between">
-              <label
-                for="darkMode"
-                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >Dark Mode</label
-              >
-              <Switch
-                v-model="isDarkMode"
-                @update:modelValue="toggleDarkMode"
-              />
+              <!-- Add theme toggle here if needed -->
             </div>
           </section>
         </div>
@@ -91,28 +83,36 @@
 
 <script setup>
 import { ArrowLeftIcon } from "lucide-vue-next";
-import { ref, watch, defineProps, defineEmits } from "vue";
+import { defineEmits, defineProps, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import Select from "./Select.vue";
 import Switch from "./Switch.vue";
+
 const router = useRouter();
 
 const props = defineProps({
   settings: Object,
 });
 
-const emit = defineEmits(["settingsChange"]);
-watch(
-  () => props.settings,
-  (newSettings) => {
-    localSettings.value = { ...newSettings };
-  }
-);
+const emit = defineEmits(["settings-change"]);
+
 const localSettings = ref({
   precision: props.settings.precision,
   useFractions: props.settings.useFractions,
-  useThousandsSeparator: props.settings.useThousandsSeparator,
+  useThousandsSeparator: props.settings.useThousandsSeparator
 });
+
+watch(
+  () => props.settings,
+  (newSettings) => {
+    localSettings.value = {
+      precision: newSettings.precision,
+      useFractions: newSettings.useFractions,
+      useThousandsSeparator: newSettings.useThousandsSeparator
+    };
+  },
+  { deep: true }
+);
 
 const precisionOptions = [
   { value: 0, label: "0" },
@@ -133,7 +133,12 @@ const goBack = () => {
 };
 
 const saveSettings = () => {
-  emit('settings-change', localSettings.value);
+  const settingsToSave = {
+    precision: localSettings.value.precision,
+    useFractions: localSettings.value.useFractions,
+    useThousandsSeparator: localSettings.value.useThousandsSeparator
+  };
+  emit("settings-change", settingsToSave);
   goBack();
 };
 </script>

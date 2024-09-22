@@ -5,66 +5,70 @@
       :isMobile="isMobile"
       @update:isOpen="updateSidebarOpen"
       @openAbout="navigateToAbout"
-      @openSettings="openSettings"
+      @openSettings="navigateToSettings"
     />
+
     <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
          :class="[!isMobile && isSidebarOpen ? 'ml-64' : '']">
-      <calculator-header 
-        v-model:mode="mode" 
-        @toggle-sidebar="toggleSidebar" 
+      <calculator-header
+        v-model:mode="mode"
+        @toggle-sidebar="toggleSidebar"
         :isSidebarOpen="isSidebarOpen"
         :isMobile="isMobile"
       />
+
       <router-view v-slot="{ Component }">
-        <component :is="Component" 
+        <component
+          :is="Component"
           :mode="mode"
           :settings="settings"
-          @settings-change="updateSettings"
-          :history="history"
           :isMobile="isMobile"
           :isHistoryOpen="isHistoryOpen"
+          @settings-change="updateSettings"
           @update:mode="updateMode"
           @add-to-history="addToHistory"
           @clear-history="clearHistory"
           @select-history-item="selectHistoryItem"
           @delete-history-item="deleteHistoryItem"
           @toggle-history="toggleHistory"
+          @update-history="updateHistory"
         />
       </router-view>
     </div>
+
     <history-panel
       v-if="isMobile"
       :isOpen="isHistoryOpen"
       :isMobile="isMobile"
-      :history="history"
-      :clearHistory="clearHistory"
-      :onSelectHistoryItem="selectHistoryItem"
-      :deleteHistoryItem="deleteHistoryItem"
+      @selectHistoryItem="selectHistoryItem"
+      @deleteHistoryItem="deleteHistoryItem"
+      @clearHistory="clearHistory"
       @close="closeHistory"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref, provide } from 'vue';
 import { useRouter } from 'vue-router';
 import CalculatorHeader from './components/CalculatorHeader.vue';
-import SidebarMenu from './components/SidebarMenu.vue';
 import HistoryPanel from './components/HistoryPanel.vue';
+import SidebarMenu from './components/SidebarMenu.vue';
+import db from './db';
 
 const router = useRouter();
-
 const mode = ref('Standard');
 const settings = ref({
   precision: 4,
   useFractions: false,
-  useThousandsSeparator: true,
+  useThousandsSeparator: true
 });
-
 const isSidebarOpen = ref(false);
 const isHistoryOpen = ref(false);
-const history = ref([]);
 const isMobile = ref(window.innerWidth < 768);
+const currentInput = ref('');
+
+provide('currentInput', currentInput);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -74,16 +78,12 @@ const updateSidebarOpen = (value) => {
   isSidebarOpen.value = value;
 };
 
-const openSettings = () => {
-    router.push('/settings');
-};
+const navigateToSettings = () => router.push('/settings');
+const navigateToAbout = () => router.push('/about');
 
-const navigateToAbout = () => {
-  router.push('/about');
-};
-
-const updateSettings = (newSettings) => {
+const updateSettings = async (newSettings) => {
   settings.value = { ...newSettings };
+  await saveSettings(newSettings);
 };
 
 const updateMode = (newMode) => {
@@ -98,59 +98,78 @@ const closeHistory = () => {
   isHistoryOpen.value = false;
 };
 
-const clearHistory = () => {
-  history.value = [];
+const clearHistory = async () => {
+  await db.history.clear();
 };
 
 const selectHistoryItem = (item) => {
-  if (isMobile.value) {
-    closeHistory();
+  currentInput.value = item.expression;
+  if (isMobile.value) closeHistory();
+};
+
+const deleteHistoryItem = async (id) => {
+  await db.history.delete(id);
+};
+
+const addToHistory = async (expression, result) => {
+  const timestamp = new Date().getTime();
+  await db.history.add({ expression, result, timestamp });
+};
+
+const updateHistory = () => {
+  // This function can be used to trigger any necessary updates
+};
+
+const handleResize = () => {
+  isMobile.value = window.innerWidth < 768;
+  isSidebarOpen.value = !isMobile.value;
+};
+
+const handleKeyDown = (e) => {
+  if (e.ctrlKey) {
+    switch (e.key) {
+      case 'l':
+        toggleSidebar();
+        e.preventDefault();
+        break;
+      case 'h':
+        toggleHistory();
+        e.preventDefault();
+        break;
+      case 's':
+        navigateToSettings();
+        e.preventDefault();
+        break;
+    }
   }
 };
 
-const deleteHistoryItem = (index) => {
-  history.value.splice(index, 1);
+const loadSettings = async () => {
+  const savedSettings = await db.settings.toArray();
+  if (savedSettings.length > 0) {
+    settings.value = savedSettings[0];
+  }
 };
 
-const addToHistory = (expression, result) => {
-  history.value.unshift({ id: Date.now(), expression, result });
+const saveSettings = async (newSettings) => {
+  const settingsToSave = {
+    precision: newSettings.precision,
+    useFractions: newSettings.useFractions,
+    useThousandsSeparator: newSettings.useThousandsSeparator
+  };
+  await db.settings.clear();
+  await db.settings.add(settingsToSave);
 };
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('resize', handleResize);
+  window.addEventListener('keydown', handleKeyDown);
   handleResize();
+  await loadSettings();
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
+  window.removeEventListener('keydown', handleKeyDown);
 });
-
-const handleResize = () => {
-  isMobile.value = window.innerWidth < 768;
-  if (!isMobile.value) {
-    isSidebarOpen.value = true;
-  } else {
-    isSidebarOpen.value = false;
-  }
-};
 </script>
-
-<style scoped>
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.2s ease-out;
-}
-</style>

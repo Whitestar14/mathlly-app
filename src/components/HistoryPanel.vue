@@ -34,16 +34,16 @@
           </div>
           <TransitionGroup name="list" tag="div" class="space-y-2">
             <div
-              v-for="(item, index) in history"
+              v-for="item in history"
               :key="item.id"
               class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative group"
             >
-              <div @click="onSelectHistoryItem(item)">
+              <div @click.stop="handleSelectHistoryItem(item)">
                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ item.expression }}</div>
                 <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.result }}</div>
               </div>
               <button
-                @click="handleDeleteHistoryItem(index)"
+                @click.stop="handleDeleteHistoryItem(item.id)"
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 p-2 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
               >
                 <TrashIcon class="h-4 w-4" />
@@ -53,7 +53,7 @@
         </div>
         <button
           v-if="history.length > 0"
-          @click="clearHistory"
+          @click="handleClearHistory"
           class="mt-4 flex items-center justify-center w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
         >
           <TrashIcon class="w-4 h-4 mr-2" />
@@ -65,8 +65,9 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed } from 'vue';
+import { defineProps, defineEmits, defineExpose, computed, onMounted, ref, watch } from 'vue';
 import { TrashIcon, XIcon } from 'lucide-vue-next';
+import db from '../db';
 
 const props = defineProps({
   isOpen: {
@@ -77,29 +78,60 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  history: Array,
-  clearHistory: Function,
-  onSelectHistoryItem: Function,
-  deleteHistoryItem: Function,
 });
 
-const emit = defineEmits(['close', 'deleteHistoryItem']);
+const emit = defineEmits(['close', 'selectHistoryItem', 'deleteHistoryItem', 'clearHistory']);
+
+const history = ref([]);
 
 const closePanel = () => {
   emit('close');
 };
 
-const handleDeleteHistoryItem = (index) => {
-  if (props.deleteHistoryItem) {
-    props.deleteHistoryItem(index);
-  } else {
-    emit('deleteHistoryItem', index);
+const handleDeleteHistoryItem = async (id) => {
+  await db.history.delete(id);
+  emit('deleteHistoryItem', id);
+  await loadHistory();
+};
+
+const handleSelectHistoryItem = (item) => {
+  emit('selectHistoryItem', item);
+  if (props.isMobile) {
+    closePanel();
   }
+};
+
+const handleClearHistory = async () => {
+  await db.history.clear();
+  emit('clearHistory');
+  history.value = [];
+};
+
+const loadHistory = async () => {
+  history.value = await db.history.orderBy('timestamp').reverse().toArray();
 };
 
 const panelStyle = computed(() => ({
   transform: props.isOpen ? 'translateY(0)' : 'translateY(100%)',
 }));
+
+onMounted(() => {
+  loadHistory();
+});
+
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    loadHistory();
+  }
+});
+
+// Add this method to update history from outside
+const updateHistory = async () => {
+  await loadHistory();
+};
+
+// Expose the updateHistory method
+defineExpose({ updateHistory });
 </script>
 
 <style scoped>
@@ -131,18 +163,13 @@ const panelStyle = computed(() => ({
 }
 .list-enter-from {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(-30px);
 }
 .list-leave-to {
   opacity: 0;
-  transform: translateY(-30px);
-
+  transform: translateY(30px);
 }
 .list-move {
-  transition: transform 0.4s ease;
+  transition: transform 0.5s ease;
 }
-
-
-
-
 </style>
