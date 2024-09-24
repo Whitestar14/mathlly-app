@@ -7,6 +7,7 @@
       <div class="flex items-center justify-between pb-1">
         <button
           @click="$emit('toggle-sidebar')"
+          v-tippy="{content:'Open Sidebar', placement:'bottom'}"
           class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 custom-transition"
           :class="[isSidebarOpen ? 'opacity-0 pointer-none' : '']"
         >
@@ -52,6 +53,7 @@
           <!-- Theme Toggle Button -->
           <button
             @click="toggleTheme"
+            v-tippy="{content:'Toggle theme', placement:'bottom'}"
             class="p-2 text-gray-500 rounded-full hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-gray-400 dark:hover:text-gray-300"
           >
             <Sun v-if="isDark" class="h-5 w-5" />

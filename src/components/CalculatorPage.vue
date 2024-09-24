@@ -1,9 +1,10 @@
+<!-- CalculatorPage.vue -->
 <template>
   <main class="flex-grow flex">
     <div
-      class="flex-grow bg-gray-50 dark:bg-gray-800 shadow-xl overflow-hidden transition-colors duration-300"
+      class="flex-grow bg-white dark:bg-gray-800 shadow-xl overflow-hidden transition-colors duration-300"
     >
-      <div class="p-6 max-w-md mx-auto">
+      <div class="px-6 mx-auto" :class="isMobile ? 'py-6' : ''">
         <div class="flex justify-between items-center mb-4">
           <div class="flex items-center space-x-2">
             <div class="flex items-center space-x-4 md:hidden">
@@ -23,12 +24,15 @@
           :error="error"
           :isAnimating="isAnimating"
           :animatedPreview="animatedResult"
+          :activeBase="activeBase"
         />
 
         <calculator-buttons
           :mode="mode"
           @button-click="handleButtonClick"
           @clear="handleClear"
+          @base-change="handleBaseChange"
+          :display-value="displayValue"
         />
       </div>
     </div>
@@ -43,42 +47,45 @@
       @clearHistory="clearHistory"
       class="w-1/4 min-w-[250px] max-w-[400px]"
     />
+
+    <div v-if="!isMobile" class="fixed bottom-16 right-4 z-[100]">
+      <button
+        @click="openShortcutModal" v-tippy="{content:'Keyboard Shortcuts'}"
+        class="text-gray-600 bg-gray-200 hover:bg-gray-300 hover:text-indigo-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded-full p-3 shadow-lg transition-colors duration-300"
+      >
+        <KeyboardIcon class="h-6 w-6" />
+      </button>
+    </div>
+
+    <shortcut-guide v-model:open="isShortcutModalOpen"/>
   </main>
 </template>
 
 <script setup>
-import { HistoryIcon } from "lucide-vue-next";
-import { evaluate, format, fraction } from "mathjs";
+import { HistoryIcon, KeyboardIcon } from "lucide-vue-next";
+import { bignumber, evaluate, format, fraction } from "mathjs";
 import {
   computed,
   defineEmits,
   defineProps,
+  inject,
+  nextTick,
   onMounted,
   onUnmounted,
   ref,
   watch,
-  inject,
-  nextTick
 } from "vue";
+import db from "../data/db";
 import CalculatorButtons from "./CalculatorButtons.vue";
 import CalculatorDisplay from "./CalculatorDisplay.vue";
 import HistoryPanel from "./HistoryPanel.vue";
-import db from "../db";
+import ShortcutGuide from "./ShortcutGuide.vue";
 
-const props = defineProps([
-  "mode",
-  "settings",
-  "isMobile",
-  "isHistoryOpen",
-]);
+const props = defineProps(["mode", "settings", "isMobile", "isHistoryOpen"]);
 
-const emit = defineEmits([
-  "update:mode",
-  "toggle-history",
-  "update-history",
-]);
+const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
-const currentInput = inject('currentInput');
+const currentInput = inject("currentInput");
 const input = ref(currentInput.value || "0");
 const error = ref("");
 const isAnimating = ref(false);
@@ -87,6 +94,14 @@ const lastOperator = ref("");
 const lastNumber = ref("");
 const MAX_INPUT_LENGTH = 50;
 const historyPanelRef = ref(null);
+const isOperator = (char) => ["+", "-", "×", "÷"].includes(char);
+const isLastCharOperator = () => isOperator(input.value.trim().slice(-1));
+const isShortcutModalOpen = ref(false);
+
+// Methods to open/close the modal
+const openShortcutModal = () => {
+  isShortcutModalOpen.value = true;
+};
 
 // Watch for changes in currentInput
 watch(currentInput, (newValue) => {
@@ -114,6 +129,18 @@ watch(
   { deep: true }
 );
 
+// Watch for changes in input and update displayValue
+watch(input, (newValue) => {
+  if (newValue !== "Error") {
+    try {
+      const result = evaluateExpression(newValue);
+      updateDisplayValue(result);
+    } catch (err) {
+      console.error("Error updating display value:", err);
+    }
+  }
+});
+
 const preview = computed(() => {
   try {
     const result = evaluateExpression(input.value);
@@ -126,14 +153,14 @@ const preview = computed(() => {
 const addToHistory = async (expression, result) => {
   const timestamp = new Date().getTime();
   const id = await db.history.add({ expression, result, timestamp });
-  emit('update-history');
-  
+  emit("update-history");
+
   // Update the history panel
   if (historyPanelRef.value) {
     await nextTick();
     historyPanelRef.value.updateHistory();
   }
-  
+
   return id;
 };
 
@@ -143,38 +170,113 @@ const selectHistoryItem = (item) => {
 
 const deleteHistoryItem = async (id) => {
   await db.history.delete(id);
-  emit('update-history');
+  emit("update-history");
 };
 
 const clearHistory = async () => {
   await db.history.clear();
-  emit('update-history');
+  emit("update-history");
 };
 
-const isOperator = (char) => ["+", "-", "×", "÷"].includes(char);
-const isLastCharOperator = () => isOperator(input.value.trim().slice(-1));
+const activeBase = ref("DEC");
+const displayValue = ref({
+  hex: "0",
+  dec: "0",
+  oct: "0",
+  bin: "0",
+});
+
+const formatBinary = (binString) => {
+  // Remove any existing spaces and leading zeros
+  binString = binString.replace(/\s/g, '').replace(/^0+/, '');
+  
+  // If the string is empty after removing leading zeros, return '0'
+  if (binString === '') return '0';
+
+  // Pad the string to make its length a multiple of 4
+  const padding = 4 - (binString.length % 4);
+  if (padding < 4) {
+    binString = '0'.repeat(padding) + binString;
+  }
+
+  // Insert a space every 4 digits
+  return binString.match(/.{1,4}/g).join(' ');
+};
+
+const updateDisplayValue = (value) => {
+  try {
+    const decValue = bignumber(value);
+    displayValue.value = {
+      hex: format(decValue, { notation: 'hex' }).toUpperCase().replace(/^0X/, ''),
+      dec: format(decValue, { notation: 'fixed' }),
+      oct: format(decValue, { notation: 'oct' }).replace(/^0O/, ''),
+      bin: formatBinary(format(decValue, { notation: 'bin' }).replace(/^0B/, ''))
+    };
+  } catch (err) {
+    console.error("Error updating display value:", err);
+    displayValue.value = { hex: '0', dec: '0', oct: '0', bin: '0' };
+  }
+};
+
+const handleBaseChange = (newBase) => {
+  activeBase.value = newBase;
+  try {
+    const decValue = bignumber(input.value);
+    switch (newBase) {
+      case "HEX":
+        input.value = format(decValue, { notation: "hex" }).toUpperCase().replace(/^0X/, '');
+        break;
+      case "DEC":
+        input.value = format(decValue, { notation: "fixed" });
+        break;
+      case "OCT":
+        input.value = format(decValue, { notation: "oct" }).replace(/^0O/, '');
+        break;
+      case "BIN":
+        input.value = formatBinary(format(decValue, { notation: "bin" }).replace(/^0B/, ''));
+        break;
+    }
+    updateDisplayValue(decValue);
+  } catch (err) {
+    console.error("Error changing base:", err);
+    error.value = "Invalid input for base conversion";
+  }
+};
 
 const sanitizeInput = (expr) => {
-  const sanitized = expr.replace(/[^0-9+\-×÷.]/g, "");
+  // Allow hexadecimal characters when in HEX mode
+  const allowedChars =
+    activeBase.value === "HEX" ? /[^0-9A-Fa-f+\-×÷.]/g : /[^0-9+\-×÷.]/g;
+  const sanitized = expr.replace(allowedChars, "");
   return sanitized.replace(/^[+×÷]/, "");
 };
 
 const evaluateExpression = (expr) => {
   try {
-    const sanitizedExpr = sanitizeInput(expr)
+    let sanitizedExpr = sanitizeInput(expr)
       .replace(/×/g, "*")
       .replace(/÷/g, "/");
+
+    // Convert the expression to decimal if not already in decimal
+    if (activeBase.value !== "DEC") {
+      const parts = sanitizedExpr.split(/([+\-*/])/);
+      sanitizedExpr = parts
+        .map((part) => {
+          if (!["+", "-", "*", "/"].includes(part)) {
+            return bignumber(part).toString(); // This converts to decimal
+          }
+          return part;
+        })
+        .join("");
+    }
+
     if (sanitizedExpr.includes("/0")) {
       throw new Error("Division by zero is not allowed");
     }
 
-    if (sanitizedExpr.match(/[a-zA-Z_$]/)) {
-      throw new Error("Invalid characters in expression");
-    }
-
     const result = evaluate(sanitizedExpr);
 
-    if (typeof result !== "number" || !isFinite(result)) {
+    if (typeof result !== "number" && !result.isBigNumber) {
       throw new Error("Invalid result");
     }
 
@@ -260,6 +362,15 @@ const handleButtonClick = (btn) => {
 
   if (btn === "=") {
     lastOperator.value = "=";
+  }
+
+  if (input.value !== "Error") {
+    try {
+      const result = evaluateExpression(input.value);
+      updateDisplayValue(result);
+    } catch (err) {
+      console.error("Error updating display value:", err);
+    }
   }
 };
 
@@ -378,51 +489,45 @@ const handleBackspace = () => {
 
 const handleKeyDown = (event) => {
   const key = event.key;
-  if (["+", "-", "*", "/", "=", "Enter", "Escape", "Backspace"].includes(key)) {
+  const allowedKeys = {
+    HEX: /^[0-9A-Fa-f]$/,
+    DEC: /^[0-9]$/,
+    OCT: /^[0-7]$/,
+    BIN: /^[01]$/
+  };
+
+  if (allowedKeys[activeBase.value].test(key)) {
+    handleButtonClick(key.toUpperCase());
+  } else if (['+', '-', '*', '/', '=', 'Enter', 'Escape', 'Backspace'].includes(key)) {
+    event.preventDefault();
+    switch (key) {
+      case '+':
+        handleButtonClick('+');
+        break;
+      case '-':
+        handleButtonClick('-');
+        break;
+      case '*':
+        handleButtonClick('×');
+        break;
+      case '/':
+        handleButtonClick('÷');
+        break;
+      case '=':
+      case 'Enter':
+        handleButtonClick('=');
+        break;
+      case 'Escape':
+        handleButtonClick('C');
+        break;
+      case 'Backspace':
+        handleButtonClick('backspace');
+        break;
+    }
+  } else {
     event.preventDefault();
   }
-  switch (key) {
-    case "0":
-    case "1":
-    case "2":
-    case "3":
-    case "4":
-    case "5":
-    case "6":
-    case "7":
-    case "8":
-    case "9":
-    case ".":
-      handleButtonClick(key);
-      break;
-    case "+":
-      handleButtonClick("+");
-      break;
-    case "-":
-      handleButtonClick("-");
-      break;
-    case "*":
-      handleButtonClick("×");
-      break;
-    case "/":
-      handleButtonClick("÷");
-      break;
-    case "=":
-    case "Enter":
-      handleButtonClick("=");
-      break;
-    case "Escape":
-      handleButtonClick("AC");
-      break;
-    case "Backspace":
-      handleButtonClick("backspace");
-      break;
-    case "%":
-      handleButtonClick("%");
-      break;
-  }
 };
-
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDown);
 });
@@ -431,7 +536,6 @@ onUnmounted(() => {
   window.removeEventListener("keydown", handleKeyDown);
 });
 </script>
-
 
 <style scoped>
 @keyframes fadeIn {

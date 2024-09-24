@@ -3,17 +3,18 @@
     <div v-show="isOpen" class="sidebar-container" :class="sidebarClasses">
       <div class="flex flex-col h-full">
         <div
-          class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700"
+          class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
         >
-          <div class="w-8 h-8">
+          <div class="w-full h-full relative">
             <img
-              src="@/assets/Mathlly Mobile (1).png"
+              src="@/assets/m-logo.svg"
               alt="Mathlly Logo"
-              class="w-full h-full"
+              class="max-h-8 aspect-[20/7] absolute left-3 top-0.5"
             />
           </div>
           <button
             @click="closeSidebar"
+            v-tippy="{content:'Close Sidebar', placement:'bottom'}"
             class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-opacity duration-300"
             :class="{ 'opacity-0': !isOpen }"
           >
@@ -27,7 +28,7 @@
         >
           <div
             v-if="showIndicator"
-            class="absolute z-50 left-4 w-1 rounded-lg bg-indigo-500 transition-all duration-300 ease-in-out"
+            class="absolute z-50 left-4 w-1 rounded-lg bg-indigo-500 dark:bg-indigo-700 transition-all duration-300 ease-in-out"
             :style="{ top: `${indicatorPosition}px`, height: '20px' }"
           ></div>
           <NavigationMenuList class="space-y-1">
@@ -150,7 +151,7 @@ const updateIndicatorPos = (index) => {
 };
 
 const sidebarClasses = computed(() => [
-  "fixed inset-y-0 left-0 z-10 bg-gray-100 border-r border-gray-200 dark:border-gray-700 dark:bg-gray-900 transition-all",
+  "fixed inset-y-0 left-0 z-5 bg-gray-100 border-r border-gray-200 dark:border-gray-700 dark:bg-gray-900 transition-all",
   props.isMobile ? "w-full" : "w-64",
 ]);
 
@@ -171,7 +172,7 @@ watch(
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 10;
+  z-index: 5;
 }
 
 .slide-enter-active,

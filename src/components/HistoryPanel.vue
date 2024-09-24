@@ -10,13 +10,15 @@
         'bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ease-in-out',
         isMobile
           ? 'fixed bottom-0 left-0 right-0 z-50 rounded-t-lg h-1/2'
-          : 'h-full'
+          : 'h-full',
       ]"
       :style="isMobile ? panelStyle : {}"
     >
       <div class="p-4 h-full flex flex-col max-h-[90vh]">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">History</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+            History
+          </h2>
           <button
             v-if="isMobile"
             @click="closePanel"
@@ -39,11 +41,18 @@
               class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative group"
             >
               <div @click.stop="handleSelectHistoryItem(item)">
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ item.expression }}</div>
-                <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.result }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ item.expression }}
+                </div>
+                <div
+                  class="text-lg font-semibold text-gray-900 dark:text-white"
+                >
+                  {{ item.result }}
+                </div>
               </div>
               <button
                 @click.stop="handleDeleteHistoryItem(item.id)"
+                v-tippy="{ content: 'Delete item', placement: 'top' }"
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 p-2 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
               >
                 <TrashIcon class="h-4 w-4" />
@@ -65,37 +74,50 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, defineExpose, computed, onMounted, ref, watch } from 'vue';
-import { TrashIcon, XIcon } from 'lucide-vue-next';
-import db from '../db';
+import { TrashIcon, XIcon } from "lucide-vue-next";
+import {
+  computed,
+  defineEmits,
+  defineExpose,
+  defineProps,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
+import db from "../data/db";
 
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    default: true
+    default: true,
   },
   isMobile: {
     type: Boolean,
-    default: false
+    default: false,
   },
 });
 
-const emit = defineEmits(['close', 'selectHistoryItem', 'deleteHistoryItem', 'clearHistory']);
+const emit = defineEmits([
+  "close",
+  "selectHistoryItem",
+  "deleteHistoryItem",
+  "clearHistory",
+]);
 
 const history = ref([]);
 
 const closePanel = () => {
-  emit('close');
+  emit("close");
 };
 
 const handleDeleteHistoryItem = async (id) => {
   await db.history.delete(id);
-  emit('deleteHistoryItem', id);
+  emit("deleteHistoryItem", id);
   await loadHistory();
 };
 
 const handleSelectHistoryItem = (item) => {
-  emit('selectHistoryItem', item);
+  emit("selectHistoryItem", item);
   if (props.isMobile) {
     closePanel();
   }
@@ -103,27 +125,30 @@ const handleSelectHistoryItem = (item) => {
 
 const handleClearHistory = async () => {
   await db.history.clear();
-  emit('clearHistory');
+  emit("clearHistory");
   history.value = [];
 };
 
 const loadHistory = async () => {
-  history.value = await db.history.orderBy('timestamp').reverse().toArray();
+  history.value = await db.history.orderBy("timestamp").reverse().toArray();
 };
 
 const panelStyle = computed(() => ({
-  transform: props.isOpen ? 'translateY(0)' : 'translateY(100%)',
+  transform: props.isOpen ? "translateY(0)" : "translateY(100%)",
 }));
 
 onMounted(() => {
   loadHistory();
 });
 
-watch(() => props.isOpen, (newValue) => {
-  if (newValue) {
-    loadHistory();
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      loadHistory();
+    }
   }
-});
+);
 
 // Add this method to update history from outside
 const updateHistory = async () => {

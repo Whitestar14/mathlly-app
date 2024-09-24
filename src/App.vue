@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen flex bg-background dark:bg-gray-900 transition-colors duration-300">
+  <div
+    class="min-h-screen flex bg-background dark:bg-gray-900 transition-colors duration-300"
+  >
     <sidebar-menu
       :isOpen="isSidebarOpen"
       :isMobile="isMobile"
@@ -8,8 +10,10 @@
       @openSettings="navigateToSettings"
     />
 
-    <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-         :class="[!isMobile && isSidebarOpen ? 'ml-64' : '']">
+    <div
+      class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
+      :class="[!isMobile && isSidebarOpen ? 'ml-64' : '']"
+    >
       <calculator-header
         v-model:mode="mode"
         @toggle-sidebar="toggleSidebar"
@@ -46,29 +50,33 @@
       @close="closeHistory"
     />
   </div>
+
+  <shortcut-guide v-model:open="isShortcutGuideOpen" />
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, provide } from 'vue';
-import { useRouter } from 'vue-router';
-import CalculatorHeader from './components/CalculatorHeader.vue';
-import HistoryPanel from './components/HistoryPanel.vue';
-import SidebarMenu from './components/SidebarMenu.vue';
-import db from './db';
+import { onMounted, onUnmounted, provide, ref } from "vue";
+import { useRouter } from "vue-router";
+import CalculatorHeader from "./components/CalculatorHeader.vue";
+import HistoryPanel from "./components/HistoryPanel.vue";
+import SidebarMenu from "./components/SidebarMenu.vue";
+import ShortcutGuide from './components/ShortcutGuide.vue';
+import db from "./data/db";
 
 const router = useRouter();
-const mode = ref('Standard');
+const mode = ref("Programmer");
 const settings = ref({
   precision: 4,
   useFractions: false,
-  useThousandsSeparator: true
+  useThousandsSeparator: true,
 });
 const isSidebarOpen = ref(false);
 const isHistoryOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
-const currentInput = ref('');
+const currentInput = ref("");
+const isShortcutGuideOpen = ref(false);
 
-provide('currentInput', currentInput);
+provide("currentInput", currentInput);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -78,8 +86,8 @@ const updateSidebarOpen = (value) => {
   isSidebarOpen.value = value;
 };
 
-const navigateToSettings = () => router.push('/settings');
-const navigateToAbout = () => router.push('/about');
+const navigateToSettings = () => router.push("/settings");
+const navigateToAbout = () => router.push("/about");
 
 const updateSettings = async (newSettings) => {
   settings.value = { ...newSettings };
@@ -125,8 +133,15 @@ const handleResize = () => {
   isSidebarOpen.value = !isMobile.value;
 };
 
+const openShortcutGuide = () => {
+  isShortcutGuideOpen.value = true;
+};
+
 const handleKeyDown = (e) => {
-  if (e.ctrlKey) {
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
+    toggleFullScreen();
+    e.preventDefault();
+  } else if (e.ctrlKey) {
     switch (e.key) {
       case 'l':
         toggleSidebar();
@@ -140,10 +155,24 @@ const handleKeyDown = (e) => {
         navigateToSettings();
         e.preventDefault();
         break;
+      case 'k':
+        openShortcutGuide();
+        e.preventDefault();
+        break;
     }
   }
 };
 
+const toggleFullScreen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
+ 
 const loadSettings = async () => {
   const savedSettings = await db.settings.toArray();
   if (savedSettings.length > 0) {
@@ -155,21 +184,21 @@ const saveSettings = async (newSettings) => {
   const settingsToSave = {
     precision: newSettings.precision,
     useFractions: newSettings.useFractions,
-    useThousandsSeparator: newSettings.useThousandsSeparator
+    useThousandsSeparator: newSettings.useThousandsSeparator,
   };
   await db.settings.clear();
   await db.settings.add(settingsToSave);
 };
 
 onMounted(async () => {
-  window.addEventListener('resize', handleResize);
-  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener("resize", handleResize);
+  window.addEventListener("keydown", handleKeyDown);
   handleResize();
   await loadSettings();
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize);
-  window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener("resize", handleResize);
+  window.removeEventListener("keydown", handleKeyDown);
 });
 </script>

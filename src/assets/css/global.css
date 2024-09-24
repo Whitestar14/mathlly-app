@@ -1,0 +1,8 @@
+/* global.css */
+body {
+  font-family: 'DM Sans', 'Reddit mono', sans-serif;
+}
+
+kbd, .main-display, .btn {
+  font-family: 'Space Mono', monospace;
+}

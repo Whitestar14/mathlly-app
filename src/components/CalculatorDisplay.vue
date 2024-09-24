@@ -7,9 +7,12 @@
       v-if="showLeftChevron"
       @click="scrollToPrevious"
       class="absolute left-2 top-8 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
-      :class="{ 'opacity-0': !showLeftChevron, 'opacity-100': showLeftChevron }"
+      :class="{
+        'opacity-0': !showLeftChevron,
+        'opacity-100': showLeftChevron,
+      }"
     >
-      <ChevronLeft size="24" class="animate-pulse" />
+      <ChevronLeft size="24" class="animate-pulse w-full" />
     </div>
 
     <!-- Right Chevron indicator -->
@@ -46,7 +49,7 @@
         <!-- Display the current input value -->
         <div
           ref="inputDisplay"
-          class="text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide"
+          class="main-display text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide"
           aria-live="polite"
           aria-atomic="true"
           @scroll="checkScroll"
@@ -85,7 +88,13 @@
 
     <!-- Toast Notification -->
     <Transition name="toast">
-      <div v-if="showToast" :class="['toast', toastType === 'success' ? 'bg-green-500' : 'bg-red-500']">
+      <div
+        v-if="showToast"
+        :class="[
+          'font-semibold text-white rounded-md px-3 py-2 fixed top-5 left-1/2 -translate-x-1/2 z-50',
+          toastType === 'success' ? 'bg-green-500' : 'bg-red-500',
+        ]"
+      >
         <div class="flex items-center">
           <CheckCircle v-if="toastType === 'success'" class="mr-2" size="20" />
           <XCircle v-else class="mr-2" size="20" />
@@ -97,8 +106,14 @@
 </template>
 
 <script setup>
-import { defineProps, computed, nextTick, ref, watch } from "vue";
-import { ChevronLeft, ChevronRight, Copy, CheckCircle, XCircle } from "lucide-vue-next";
+import {
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  XCircle,
+} from "lucide-vue-next";
+import { computed, defineProps, nextTick, ref, watch } from "vue";
 
 // Define the props passed to this component
 const props = defineProps({
@@ -106,21 +121,43 @@ const props = defineProps({
   error: String,
   isAnimating: Boolean,
   animatedResult: String,
+  activeBase: String, // Add this prop
 });
 
 const inputDisplay = ref(null);
 const showLeftChevron = ref(false);
 const showRightChevron = ref(false);
 const showToast = ref(false);
-const toastMessage = ref('');
-const toastType = ref('success');
+const toastMessage = ref("");
+const toastType = ref("success");
 
 const formattedInput = computed(() => {
-  if (!props.input) return '';
-  const parts = props.input.split('.');
+  if (!props.input) return "";
+  
+  if (props.activeBase === 'BIN') {
+    return formatBinary(props.input);
+  }
+  
+  const parts = props.input.split(".");
+  if (props.activeBase === 'HEX' || props.activeBase === 'OCT') {
+    return parts.join(".");
+  }
+  
+  // For decimal, add thousand separators
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.join('.');
+  return parts.join(".");
 });
+
+// Add the formatBinary function here
+const formatBinary = (binString) => {
+  binString = binString.replace(/[^01]/g, '').replace(/^0+/, '');
+  if (binString === '') return '0';
+  const padding = 4 - (binString.length % 4);
+  if (padding < 4) {
+    binString = '0'.repeat(padding) + binString;
+  }
+  return binString.match(/.{1,4}/g).join(' ');
+};
 
 const copyContent = computed(() => {
   if (props.animatedResult) {
@@ -181,11 +218,11 @@ function copyToClipboard() {
   navigator.clipboard
     .writeText(copyContent.value)
     .then(() => {
-      showToastNotification('Saved to Clipboard!', 'success');
+      showToastNotification("Saved to Clipboard!", "success");
     })
     .catch((err) => {
       console.error("Failed to copy: ", err);
-      showToastNotification('Error Saving to Clipboard', 'error');
+      showToastNotification("Error Saving to Clipboard", "error");
     });
 }
 
@@ -231,7 +268,8 @@ function showToastNotification(message, type) {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -241,19 +279,6 @@ function showToastNotification(message, type) {
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* New styles for toast notification */
-.toast {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px 20px;
-  border-radius: 4px;
-  color: white;
-  font-weight: bold;
-  z-index: 1000;
 }
 
 .toast-enter-active,
