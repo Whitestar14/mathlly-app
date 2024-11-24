@@ -32,6 +32,7 @@
           @clear="handleClear"
           @base-change="handleBaseChange"
           :display-value="displayValue"
+          :active-base="activeBase"
         />
       </div>
     </div>
@@ -146,11 +147,20 @@ watch(() => props.mode, () => {
 });
 
 const preview = computed(() => {
-  try {
-    const result = calculator.value.evaluateExpression(calculatorState.value.input);
-    return calculator.value.formatResult(result);
-  } catch (err) {
-    return "";
+  if (props.mode === 'Programmer') {
+    try {
+      const result = calculator.value.evaluateExpression(calculatorState.value.input);
+      return calculator.value.formatResult(result);
+    } catch (err) {
+      return "";
+    }
+  } else {
+    try {
+      const result = calculator.value.evaluateExpression(calculatorState.value.input);
+      return calculator.value.formatResult(result);
+    } catch (err) {
+      return "";
+    }
   }
 });
 
@@ -212,7 +222,8 @@ const handleClear = () => {
 const handleBaseChange = (newBase) => {
   if (props.mode === 'Programmer') {
     activeBase.value = newBase;
-    calculatorState.value = calculator.value.handleBaseChange(newBase);
+    const result = calculator.value.handleBaseChange(newBase);
+    calculatorState.value = result;
     updateDisplayValue(calculatorState.value.input);
   }
 };

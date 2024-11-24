@@ -1,39 +1,47 @@
-import { bignumber, format, evaluate } from "mathjs";
+import { evaluate } from "mathjs";
+import {
+  HexCalculator,
+  DecCalculator,
+  OctCalculator,
+  BinCalculator,
+} from "./BaseCalculators";
+import { BaseConverter } from "./BaseConverter";
 
 export class ProgrammerCalculator {
   constructor(settings) {
-    this.MAX_INPUT_LENGTH = 29;
     this.activeBase = "DEC";
     this.input = "0";
     this.error = "";
     this.settings = settings;
+    this.calculators = {
+      HEX: new HexCalculator(),
+      DEC: new DecCalculator(),
+      OCT: new OctCalculator(),
+      BIN: new BinCalculator(),
+    };
   }
 
-  sanitizeInput(expr) {
-    const allowedChars = {
-      HEX: /[^0-9A-Fa-f+\-×÷]/g,
-      DEC: /[^0-9+\-×÷]/g,
-      OCT: /[^0-7+\-×÷]/g,
-      BIN: /[^01+\-×÷]/g,
-    };
-
-    const sanitized = expr.replace(allowedChars[this.activeBase], "");
-    return sanitized.replace(/^[+×÷]/, "").slice(0, this.MAX_INPUT_LENGTH);
+  get activeCalculator() {
+    return this.calculators[this.activeBase];
   }
 
   evaluateExpression(expr) {
     try {
-      let sanitizedExpr = this.sanitizeInput(expr)
+      let sanitizedExpr = this.activeCalculator
+        .sanitizeInput(expr)
         .replace(/×/g, "*")
         .replace(/÷/g, "/");
 
-      // Convert the expression to decimal if not already in decimal
       if (this.activeBase !== "DEC") {
         const parts = sanitizedExpr.split(/([+\-*/])/);
         sanitizedExpr = parts
           .map((part) => {
-            if (!["+", "-", "*", "/"].includes(part)) {
-              return bignumber(part, this.activeBase.toLowerCase()).toString();
+            if (!["+", "-", "*", "/"].includes(part) && part !== "") {
+              return BaseConverter.convertBase(
+                part,
+                this.activeBase.toLowerCase(),
+                10
+              );
             }
             return part;
           })
@@ -50,32 +58,15 @@ export class ProgrammerCalculator {
         throw new Error("Invalid result");
       }
 
-      // Ensure the result is an integer for Programmer mode
-      return Math.floor(result);
+      return Math.floor(Number(result));
     } catch (err) {
+      console.error("Error in evaluateExpression:", err);
       throw new Error("Invalid expression: " + err.message);
     }
   }
 
   formatResult(result) {
-    if (result === undefined) return "";
-    // Format the result based on the active base
-    switch (this.activeBase) {
-      case "HEX":
-        return format(result, { notation: "hex" })
-          .toUpperCase()
-          .replace(/^0X/, "");
-      case "DEC":
-        return format(result, { notation: "fixed", precision: 0 });
-      case "OCT":
-        return format(result, { notation: "oct" }).replace(/^0O/, "");
-      case "BIN":
-        return this.formatBinary(
-          format(result, { notation: "bin" }).replace(/^0B/, "")
-        );
-      default:
-        return format(result, { notation: "fixed", precision: 0 });
-    }
+    return this.activeCalculator.formatResult(result);
   }
 
   handleBaseChange(newBase) {
@@ -91,28 +82,14 @@ export class ProgrammerCalculator {
     }
   }
 
-  formatBinary(binString) {
-    binString = binString.replace(/\s/g, "").replace(/^0+/, "");
-    if (binString === "") return "0";
-    const padding = 4 - (binString.length % 4);
-    if (padding < 4) {
-      binString = "0".repeat(padding) + binString;
-    }
-    return binString.match(/.{1,4}/g).join(" ");
-  }
-
   updateDisplayValue(value) {
     try {
       const decValue = this.evaluateExpression(value);
       return {
-        hex: format(decValue, { notation: "hex" })
-          .toUpperCase()
-          .replace(/^0X/, ""),
-        dec: format(decValue, { notation: "fixed", precision: 0 }),
-        oct: format(decValue, { notation: "oct" }).replace(/^0O/, ""),
-        bin: this.formatBinary(
-          format(decValue, { notation: "bin" }).replace(/^0B/, "")
-        ),
+        hex: this.calculators.HEX.formatResult(decValue),
+        dec: this.calculators.DEC.formatResult(decValue),
+        oct: this.calculators.OCT.formatResult(decValue),
+        bin: this.calculators.BIN.formatResult(decValue),
       };
     } catch (err) {
       console.error("Error updating display value:", err);
@@ -126,7 +103,7 @@ export class ProgrammerCalculator {
     }
 
     if (
-      this.input.length >= this.MAX_INPUT_LENGTH &&
+      this.input.length >= this.activeCalculator.maxInputLength &&
       btn !== "=" &&
       btn !== "AC" &&
       btn !== "backspace"
@@ -222,8 +199,4 @@ export class ProgrammerCalculator {
   isLastCharOperator() {
     return ["+", "-", "×", "÷"].includes(this.input.trim().slice(-1));
   }
-}
-
-export default function Component() {
-  return <div>ProgrammerCalculator.js</div>;
 }

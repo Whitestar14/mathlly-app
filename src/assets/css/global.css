@@ -9,6 +9,11 @@
   src: url(./fonts/GeistMonoVF.woff2);
 }
 
+@font-face {
+  font-family: 'san-fancisco';
+  src: url(./fonts/san_francisco-webfont.woff);
+}
+
 * {
   @apply transition-colors
 }
