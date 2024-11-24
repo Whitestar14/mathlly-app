@@ -6,11 +6,14 @@
           class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
         >
           <div class="w-full h-full relative">
-            <img
-              src="@/assets/m-logo.svg"
+            <div class="absolute max-h-8">
+              <!-- <img
+              src="../assets/mathlly-logo-ft.svg"
               alt="Mathlly Logo"
-              class="max-h-8 aspect-[20/7] absolute left-3 top-0.5"
-            />
+              class=" left-3 top-0.5 "
+            /> -->
+            <kbd aria-label="logo" class="text-gray-600 font-semibold px-3 py-1 my-0 text-2xl dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg pointer-events-none" style="font-family: 'Reddit mono'">{math<span class="text-indigo-400 italic font-black dark:text-indigo-600 inline-block mx-0.5">//</span>y}</kbd>
+            </div>
           </div>
           <button
             @click="closeSidebar"
@@ -28,8 +31,8 @@
         >
           <div
             v-if="showIndicator"
-            class="absolute z-50 left-4 w-1 rounded-lg bg-indigo-500 dark:bg-indigo-700 transition-all duration-300 ease-in-out"
-            :style="{ top: `${indicatorPosition}px`, height: '20px' }"
+            class="absolute z-50 left-4 w-1 rounded-lg bg-indigo-400 dark:bg-indigo-600 transition-all duration-300 ease-in-out"
+            :style="{ top: `${indicatorPosition}em`, height: '20px' }"
           ></div>
           <NavigationMenuList class="space-y-1">
             <NavigationMenuItem
@@ -45,7 +48,7 @@
                   :class="[
                     'w-full flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md transition-all duration-300',
                     currentRoute === item.path
-                      ? 'bg-gray-200 dark:bg-gray-800 font-semibold'
+                      ? 'bg-gray-200 dark:bg-gray-800 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700'
                       : 'font-normal',
                   ]"
                 >
@@ -127,8 +130,8 @@ const indicatorPosition = ref(0);
 const showIndicator = ref(true);
 
 const menuItems = [
-  { name: "Calculator", path: "/", icon: CalculatorIcon, indicatorOffset: 28 },
-  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 76 },
+  { name: "Calculator", path: "/", icon: CalculatorIcon, indicatorOffset: 1.85 },
+  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 5 },
 ];
 
 const closeSidebar = () => emit("update:isOpen", false);

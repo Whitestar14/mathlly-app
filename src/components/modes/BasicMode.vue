@@ -1,6 +1,6 @@
 <template>
   <div class="grid grid-cols-4 gap-2">
-      <button @click="handleClick('C')" class="btn special-btn-ac">AC</button>
+    <button @click="handleClick('C')" class="btn special-btn-ac">AC</button>
     <button @click="handleClick('CE')" class="btn function-btn">CE</button>
     <button @click="handleClick('backspace')" class="btn function-btn flex justify-center items-center">
       <Delete class="h-5 w-5" />

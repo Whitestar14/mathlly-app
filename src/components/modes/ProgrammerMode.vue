@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { defineProps, defineEmits, ref, computed } from 'vue';
 import { Delete } from "lucide-vue-next";
 
 const emit = defineEmits(["button-click", "clear", "base-change"]);

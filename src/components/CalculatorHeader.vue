@@ -1,6 +1,6 @@
 <template>
   <header
-    class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4"
+    class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 h-[64.75px]"
   >
     <div class="container mx-auto flex justify-between items-center">
       <!-- Logo and Sidebar Toggle Section -->

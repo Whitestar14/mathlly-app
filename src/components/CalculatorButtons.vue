@@ -56,17 +56,4 @@ const handleBaseChange = (base) => {
   emit('base-change', base);
 };
 
-// You'll need to implement a method to update displayValue
-// This method should be called whenever the calculator's value changes
-const updateDisplayValue = (value) => {
-  displayValue.value = {
-    hex: parseInt(value).toString(16).toUpperCase(),
-    dec: value.toString(),
-    oct: parseInt(value).toString(8),
-    bin: parseInt(value).toString(2)
-  };
-};
-
-// Call this method whenever the calculator's value changes
-// For example, you might call it in response to a 'value-change' event from a parent component
 </script>

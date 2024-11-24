@@ -30,7 +30,7 @@
 
     <!-- Copy button -->
     <div
-      v-tippy="{ content: 'Copy to clipboard', placement: 'top' }"
+      v-tippy="{ content: 'Copy To Clipboard', placement: 'top' }"
       @click="copyToClipboard"
       class="absolute right-2 top-2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
     >
@@ -121,7 +121,7 @@ const props = defineProps({
   error: String,
   isAnimating: Boolean,
   animatedResult: String,
-  activeBase: String, // Add this prop
+  activeBase: String, 
 });
 
 const inputDisplay = ref(null);
@@ -148,7 +148,6 @@ const formattedInput = computed(() => {
   return parts.join(".");
 });
 
-// Add the formatBinary function here
 const formatBinary = (binString) => {
   binString = binString.replace(/[^01]/g, '').replace(/^0+/, '');
   if (binString === '') return '0';
