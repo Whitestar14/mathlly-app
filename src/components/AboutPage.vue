@@ -1,126 +1,121 @@
 <template>
   <div
-    class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300"
+    class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
   >
     <header
-      class="bg-white dark:bg-gray-800 p-4 flex items-center border-b border-gray-200 dark:border-gray-700"
+      class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4"
     >
-      <button
-        @click="goBack"
-        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mr-4"
-      >
-        <ArrowLeftIcon class="h-6 w-6" />
-      </button>
-      <h1 class="text-2xl font-semibold">About Mathlly</h1>
+      <div class="container mx-auto flex items-center">
+        <button
+          @click="goBack"
+          class="mr-4 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+        >
+          <ArrowLeftIcon class="h-6 w-6" />
+        </button>
+        <h1 class="text-2xl font-bold">About Mathlly</h1>
+      </div>
     </header>
 
-    <main class="flex-grow p-6">
-      <div
-        class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-min"
+    <main class="container mx-auto px-4 py-8 md:py-12">
+      <section
+        class="mb-16 sm:mb-32 text-left"
+        style="font-family: 'Geist mono'"
       >
-        <section
-          class="bg-white dark:bg-gray-800 p-6 col-span-1 md:col-span-2 flex flex-col border border-gray-200 dark:border-gray-700 rounded-md"
+        <h2 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-4">
+          The toolset by developers,
+          <span
+            class="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl mb-4 opacity-70"
+            >for developers</span
+          >
+        </h2>
+
+        <p
+          class="text-base sm:text-lg md:text-xl max-w-2xl opacity-50 text-left"
+          style="font-family: 'Geist'"
         >
-          <h2 class="text-xl font-semibold mb-4">Why Choose Mathlly?</h2>
-          <ul class="space-y-2 flex-grow">
+          Mathlly is more than just a calculator. It's a comprehensive suite of
+          mathematical tools designed to streamline your workflow and boost your
+          productivity.
+        </p>
+      </section>
+
+      <section class="mb-12">
+        <h3
+          class="text-2xl font-semibold mb-2 border-t border-gray-200 dark:border-gray-700 py-2 mt-12"
+        >
+          Key Features
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <FeatureCard
+            v-for="feature in features"
+            :key="feature.title"
+            :icon="feature.icon"
+            :title="feature.title"
+            :description="feature.description"
+          />
+        </div>
+      </section>
+
+      <section class="mb-12">
+        <h3
+          class="text-2xl font-semibold mb-2 border-t border-gray-200 dark:border-gray-700 py-2 mt-12"
+        >
+          Why Choose Mathlly?
+        </h3>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+        >
+          <ul class="space-y-4">
             <li
-              v-for="(feature, index) in features"
+              v-for="(reason, index) in reasons"
               :key="index"
-              class="flex items-center"
+              class="flex items-start"
             >
-              <span
-                :class="`border-${feature.color}-500 border rounded-full p-1 mr-2 `"
-              >
-                <component
-                  :is="feature.icon"
-                  :class="`text-${feature.color}-600 dark:text-${feature.color}-400`"
-                  class="h-4 w-4"
-                />
-              </span>
-              {{ feature.text }}
+              <CheckCircleIcon
+                class="h-4 w-4 text-green-500 mr-2 flex-shrink-0"
+              />
+              <span class="text-sm">{{ reason }}</span>
             </li>
           </ul>
-        </section>
+        </div>
+      </section>
 
-        <section
-          class="bg-white dark:bg-gray-800 p-6 col-span-1 md:col-span-2 flex flex-col border border-gray-200 dark:border-gray-700 rounded-md"
+      <section>
+        <h3
+          class="text-2xl font-semibold mb-2 border-t border-gray-200 dark:border-gray-700 py-2 mt-12"
         >
-          <h2 class="text-xl font-semibold mb-4">Our Mission</h2>
-          <p class="flex-grow">
-            At Mathlly, we're committed to making complex calculations simple
-            and accessible. Our goal is to provide a powerful, intuitive, and
-            beautiful calculator that enhances your productivity and makes math
-            enjoyable.
+          Our Mission
+        </h3>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+        >
+          <p class="text-sm leading-relaxed">
+            At Mathlly, we're committed to empowering developers with powerful,
+            intuitive, and efficient mathematical tools. Our goal is to
+            streamline complex calculations, making your coding journey smoother
+            and more productive.
           </p>
-        </section>
-
-        <section
-          class="bg-white dark:bg-gray-800 px-6 col-span-1 md:col-span-2 lg:col-span-4 flex flex-col border border-gray-200 dark:border-gray-700 py-8 rounded-md"
-        >
-          <h2 class="text-xl font-semibold mb-4">Features</h2>
-          <div
-            class="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-grow"
-          >
-            <div
-              v-for="feature in features"
-              :key="feature.text"
-              class="flex flex-col items-center text-center"
-            >
-              <component
-                :is="feature.icon"
-                :class="`h-8 w-8 mb-2 text-${feature.color}-500 dark:text-${feature.color}-400`"
-              />
-              <h3 class="font-semibold">{{ feature.title }}</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ feature.description }}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          class="bg-white dark:bg-gray-800 p-6 col-span-1 md:col-span-2 lg:col-span-4 border border-gray-200 dark:border-gray-700 rounded-md"
-        >
-          <h2 class="text-xl font-semibold mb-4">What Our Users Say</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div
-              v-for="testimonial in testimonials"
-              :key="testimonial.author"
-              class="bg-gray-100 dark:bg-gray-700 p-4 border border-gray-200 dark:border-gray-600"
-            >
-              <p class="mb-2">"{{ testimonial.text }}"</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                - {{ testimonial.author }}, {{ testimonial.role }}
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
 
     <footer
-      class="bg-white dark:bg-gray-800 p-6 text-center border-t border-gray-200 dark:border-gray-700"
+      class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-6 mt-12"
     >
-      <p class="mb-4">Ready to elevate your calculations?</p>
-      <button
-        @click="goBack"
-        class="text-md font-semibold px-4 py-3 text-gray-200 dark:text-gray-700 bg-gray-700 dark:bg-gray-200 rounded-md duration-300 hover:bg-gray-600 dark:hover:bg-gray-300"
-      >
-        Return To App
-      </button>
+      <div class="container mx-auto px-4 text-center">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          &copy; {{ new Date().getFullYear() }} Mathlly. All rights reserved.
+        </p>
+      </div>
     </footer>
   </div>
 </template>
 
 <script setup>
-import {
-  ArrowLeftIcon,
-  CalculatorIcon,
-  EyeIcon,
-  HistoryIcon,
-  PaletteIcon,
-} from "lucide-vue-next";
+import { ArrowLeftIcon, CheckCircleIcon } from "lucide-vue-next";
 import { useRouter } from "vue-router";
+import FeatureCard from "./FeatureCard.vue";
+
 const router = useRouter();
 
 const goBack = () => {
@@ -129,45 +124,48 @@ const goBack = () => {
 
 const features = [
   {
-    icon: CalculatorIcon,
-    color: "blue",
-    text: "Advanced calculation modes",
-    title: "Multiple Modes",
-    description: "Basic, Standard, and Programmer",
+    icon: "CalculatorIcon",
+    title: "Advanced Modes",
+    description:
+      "From basic arithmetic to complex programming calculations, we've got you covered.",
   },
   {
-    icon: EyeIcon,
-    color: "green",
-    text: "Real-time calculation preview",
-    title: "Preview",
-    description: "See results as you type",
+    icon: "EyeIcon",
+    title: "Real-time Preview",
+    description:
+      "See your results instantly as you type, enhancing your productivity.",
   },
   {
-    icon: HistoryIcon,
-    color: "yellow",
-    text: "Comprehensive history",
-    title: "History",
-    description: "Track your calculations",
+    icon: "HistoryIcon",
+    title: "Calculation History",
+    description:
+      "Never lose track of your work with our comprehensive history feature.",
   },
   {
-    icon: PaletteIcon,
-    color: "purple",
-    text: "Customizable settings",
-    title: "Customizable",
-    description: "Tailor to your preferences",
+    icon: "PaletteIcon",
+    title: "Customizable UI",
+    description:
+      "Tailor the interface to your preferences for a personalized experience.",
+  },
+  {
+    icon: "CodeIcon",
+    title: "Developer-Focused",
+    description:
+      "Built with the needs of developers in mind, including programmer-specific functions.",
+  },
+  {
+    icon: "CloudIcon",
+    title: "Cloud Sync",
+    description:
+      "Access your calculations and settings across all your devices.",
   },
 ];
 
-const testimonials = [
-  {
-    text: "Mathlly has revolutionized the way I do calculations. It's intuitive and powerful!",
-    author: "Jane Doe",
-    role: "Engineer",
-  },
-  {
-    text: "The programmer mode is a game-changer for my work. I can't imagine using anything else now.",
-    author: "John Smith",
-    role: "Developer",
-  },
+const reasons = [
+  "Designed specifically for developers and programmers",
+  "Constantly updated with new features based on user feedback",
+  "Open-source and community-driven development",
+  "Seamless integration with popular IDEs and text editors",
+  "Extensive documentation and support resources",
 ];
 </script>
