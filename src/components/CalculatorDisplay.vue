@@ -28,9 +28,17 @@
       <ChevronRight size="24" class="animate-pulse" />
     </div>
 
-    <!-- Copy button -->
+    <!-- Copy button with persistent tooltip -->
     <div
-      v-tippy="{ content: 'Copy To Clipboard', placement: 'top' }"
+      ref="copyButton"
+      v-tippy="{ 
+        content: tooltipContent,
+        placement: 'top',
+        trigger: 'manual',
+        duration: 300
+      }"
+      @mouseenter="showTooltip"
+      @mouseleave="hideTooltipDelayed"
       @click="copyToClipboard"
       class="absolute right-2 top-2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
     >
@@ -57,6 +65,16 @@
           {{ formattedInput }}
         </div>
 
+        <!-- Display the preview for incomplete expressions -->
+        <div
+          v-if="preview && !error"
+          class="text-right text-xl text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {{ preview }}
+        </div>
+
         <!-- Display the error message if an error exists -->
         <div
           v-if="error"
@@ -68,7 +86,7 @@
         </div>
       </div>
 
-      <!-- Animated result section (becomes the main display when animating) -->
+      <!-- Animated result section -->
       <div
         class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
         :class="{
@@ -85,39 +103,20 @@
         </div>
       </div>
     </div>
-
-    <!-- Toast Notification -->
-    <Transition name="toast">
-      <div
-        v-if="showToast"
-        :class="[
-          'font-semibold text-white rounded-md px-3 py-2 fixed top-5 left-1/2 -translate-x-1/2 z-50',
-          toastType === 'success' ? 'bg-green-500' : 'bg-red-500',
-        ]"
-      >
-        <div class="flex items-center">
-          <CheckCircle v-if="toastType === 'success'" class="mr-2" size="20" />
-          <XCircle v-else class="mr-2" size="20" />
-          <span>{{ toastMessage }}</span>
-        </div>
-      </div>
-    </Transition>
   </div>
 </template>
 
 <script setup>
 import {
-  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Copy,
-  XCircle,
 } from "lucide-vue-next";
 import { computed, defineProps, nextTick, ref, watch } from "vue";
 
-// Define the props passed to this component
 const props = defineProps({
   input: String,
+  preview: String,
   error: String,
   isAnimating: Boolean,
   animatedResult: String,
@@ -125,11 +124,11 @@ const props = defineProps({
 });
 
 const inputDisplay = ref(null);
+const copyButton = ref(null);
 const showLeftChevron = ref(false);
 const showRightChevron = ref(false);
-const showToast = ref(false);
-const toastMessage = ref("");
-const toastType = ref("success");
+const tooltipContent = ref('Copy to Clipboard');
+let hideTooltipTimeout = null;
 
 const formattedInput = computed(() => {
   if (!props.input) return "";
@@ -143,7 +142,6 @@ const formattedInput = computed(() => {
     return parts.join(".");
   }
   
-  // For decimal, add thousand separators
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
 });
@@ -176,6 +174,50 @@ watch(
     });
   }
 );
+
+function showTooltip() {
+  if (hideTooltipTimeout) {
+    clearTimeout(hideTooltipTimeout);
+  }
+  tooltipContent.value = 'Copy to Clipboard';
+  copyButton.value?._tippy?.show();
+}
+
+function hideTooltip() {
+  copyButton.value?._tippy?.hide();
+}
+
+function hideTooltipDelayed() {
+  hideTooltipTimeout = setTimeout(() => {
+    hideTooltip();
+  }, 3300);
+}
+
+function copyToClipboard() {
+  navigator.clipboard
+    .writeText(copyContent.value)
+    .then(() => {
+      tooltipContent.value = 'Saved!';
+      if (hideTooltipTimeout) {
+        clearTimeout(hideTooltipTimeout);
+      }
+      setTimeout(() => {
+        hideTooltip();
+        tooltipContent.value = 'Copy to Clipboard';
+      }, 1500);
+    })
+    .catch((err) => {
+      console.error("Failed to copy: ", err);
+      tooltipContent.value = 'Failed to copy';
+      if (hideTooltipTimeout) {
+        clearTimeout(hideTooltipTimeout);
+      }
+      setTimeout(() => {
+        hideTooltip();
+        tooltipContent.value = 'Copy to Clipboard';
+      }, 1500);
+    });
+}
 
 function checkScroll() {
   if (inputDisplay.value) {
@@ -212,31 +254,9 @@ function scrollToNext() {
     inputDisplay.value.scrollTo({ left: newScrollLeft, behavior: "smooth" });
   }
 }
-
-function copyToClipboard() {
-  navigator.clipboard
-    .writeText(copyContent.value)
-    .then(() => {
-      showToastNotification("Saved to Clipboard!", "success");
-    })
-    .catch((err) => {
-      console.error("Failed to copy: ", err);
-      showToastNotification("Error Saving to Clipboard", "error");
-    });
-}
-
-function showToastNotification(message, type) {
-  toastMessage.value = message;
-  toastType.value = type;
-  showToast.value = true;
-  setTimeout(() => {
-    showToast.value = false;
-  }, 3000);
-}
 </script>
 
 <style scoped>
-/* Existing styles */
 .translate-y-full {
   transform: translate3d(0, 100%, 0);
 }
@@ -278,16 +298,5 @@ function showToastNotification(message, type) {
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-20px);
 }
 </style>

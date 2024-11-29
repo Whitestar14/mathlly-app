@@ -38,9 +38,7 @@ const currentModeComponent = computed(() => {
 });
 
 const displayValue = ref({
-  hex: '0',
   dec: '0',
-  oct: '0',
   bin: '0'
 });
 

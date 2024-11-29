@@ -1,11 +1,5 @@
 import { evaluate } from "mathjs";
-import {
-  HexCalculator,
-  DecCalculator,
-  OctCalculator,
-  BinCalculator,
-} from "./BaseCalculators";
-import { BaseConverter } from "./BaseConverter";
+import { DecCalculator, BinCalculator } from "./BaseCalculator";
 
 export class ProgrammerCalculator {
   constructor(settings) {
@@ -14,9 +8,7 @@ export class ProgrammerCalculator {
     this.error = "";
     this.settings = settings;
     this.calculators = {
-      HEX: new HexCalculator(),
       DEC: new DecCalculator(),
-      OCT: new OctCalculator(),
       BIN: new BinCalculator(),
     };
   }
@@ -32,40 +24,33 @@ export class ProgrammerCalculator {
         .replace(/×/g, "*")
         .replace(/÷/g, "/");
 
-      if (this.activeBase !== "DEC") {
+      // Remove trailing operators
+      sanitizedExpr = sanitizedExpr.replace(/[+\-*/]\s*$/, "");
+
+      if (this.activeBase === "BIN") {
         const parts = sanitizedExpr.split(/([+\-*/])/);
         sanitizedExpr = parts
           .map((part) => {
             if (!["+", "-", "*", "/"].includes(part) && part !== "") {
-              return BaseConverter.convertBase(
-                part,
-                this.activeBase.toLowerCase(),
-                10
-              );
+              return parseInt(part, 2).toString(10);
             }
             return part;
           })
           .join("");
       }
 
-      if (sanitizedExpr.includes("/0")) {
-        throw new Error("Division by zero is not allowed");
-      }
+      if (sanitizedExpr === "") return 0;
 
       const result = evaluate(sanitizedExpr);
-
-      if (typeof result !== "number" && !result.isBigNumber) {
-        throw new Error("Invalid result");
-      }
-
-      return Math.floor(Number(result));
+      return this.activeBase === "BIN" ? Math.floor(result) : result;
     } catch (err) {
       console.error("Error in evaluateExpression:", err);
-      throw new Error("Invalid expression: " + err.message);
+      return null;
     }
   }
 
   formatResult(result) {
+    if (result === null) return "";
     return this.activeCalculator.formatResult(result);
   }
 
@@ -73,7 +58,7 @@ export class ProgrammerCalculator {
     try {
       const decValue = this.evaluateExpression(this.input);
       this.activeBase = newBase;
-      this.input = this.formatResult(decValue);
+      this.input = decValue !== null ? this.formatResult(decValue) : "0";
       return { input: this.input, error: this.error };
     } catch (err) {
       console.error("Error changing base:", err);
@@ -83,18 +68,11 @@ export class ProgrammerCalculator {
   }
 
   updateDisplayValue(value) {
-    try {
-      const decValue = this.evaluateExpression(value);
-      return {
-        hex: this.calculators.HEX.formatResult(decValue),
-        dec: this.calculators.DEC.formatResult(decValue),
-        oct: this.calculators.OCT.formatResult(decValue),
-        bin: this.calculators.BIN.formatResult(decValue),
-      };
-    } catch (err) {
-      console.error("Error updating display value:", err);
-      return { hex: "0", dec: "0", oct: "0", bin: "0" };
-    }
+    const decValue = this.evaluateExpression(value);
+    return {
+      dec: this.calculators.DEC.formatResult(decValue),
+      bin: this.calculators.BIN.formatResult(decValue),
+    };
   }
 
   handleButtonClick(btn) {
@@ -115,28 +93,33 @@ export class ProgrammerCalculator {
       return { input: this.input, error: this.error };
     }
 
-    switch (btn) {
-      case "=":
-        this.handleEquals();
-        break;
-      case "AC":
-      case "C":
-        this.handleClear();
-        break;
-      case "CE":
-        this.handleClearEntry();
-        break;
-      case "backspace":
-        this.handleBackspace();
-        break;
-      case "+":
-      case "-":
-      case "×":
-      case "÷":
-        this.handleOperator(btn);
-        break;
-      default:
-        this.handleNumber(btn);
+    try {
+      switch (btn) {
+        case "=":
+          this.handleEquals();
+          break;
+        case "AC":
+        case "C":
+          this.handleClear();
+          break;
+        case "CE":
+          this.handleClearEntry();
+          break;
+        case "backspace":
+          this.handleBackspace();
+          break;
+        case "+":
+        case "-":
+        case "×":
+        case "÷":
+          this.handleOperator(btn);
+          break;
+        default:
+          this.handleNumber(btn);
+      }
+    } catch (err) {
+      this.error = err.message;
+      this.input = "Error";
     }
 
     return { input: this.input, error: this.error };

@@ -67,23 +67,21 @@
 </template>
 
 <script setup>
+import { Delete } from 'lucide-vue-next';
 import { defineProps, defineEmits, ref, computed } from 'vue';
-import { Delete } from "lucide-vue-next";
-
-const emit = defineEmits(["button-click", "clear", "base-change"]);
 
 const props = defineProps({
   displayValue: {
     type: Object,
     required: true,
     default: () => ({
-      hex: '0',
       dec: '0',
-      oct: '0',
       bin: '0'
     })
   }
 });
+
+const emit = defineEmits(["button-click", "clear", "base-change"]);
 
 const activeBase = ref('DEC');
 
@@ -102,12 +100,8 @@ const handleClick = (value) => {
 
 const isButtonEnabled = computed(() => (button) => {
   switch (activeBase.value) {
-    case 'HEX':
-      return /^[0-9A-F]$/.test(button);
     case 'DEC':
       return /^[0-9]$/.test(button);
-    case 'OCT':
-      return /^[0-7]$/.test(button);
     case 'BIN':
       return /^[01]$/.test(button);
     default:
@@ -115,32 +109,10 @@ const isButtonEnabled = computed(() => (button) => {
   }
 });
 
-const formatBinary = (binString) => {
-  // Remove any non-binary characters and leading zeros
-  binString = binString.replace(/[^01]/g, '').replace(/^0+/, '');
-  
-  if (binString === '') return '0';
-  
-  // Pad the string to make its length a multiple of 4
-  const padding = 4 - (binString.length % 4);
-  if (padding < 4) {
-    binString = '0'.repeat(padding) + binString;
-  }
-  
-  // Insert a space every 4 digits
-  return binString.match(/.{1,4}/g).join(' ');
-};
-
 const formatDisplayValue = (value, base) => {
-  // Remove any prefixes
-  value = value.replace(/^(0x|0b|0o)/, '');
-  
   switch (base.toLowerCase()) {
     case 'bin':
-      return formatBinary(value);
-    case 'hex':
-      return value.toUpperCase();
-    case 'oct':
+      return value.replace(/^0+/, '') || '0';
     case 'dec':
     default:
       return value;

@@ -1,5 +1,11 @@
 <template>
   <main class="flex-grow flex">
+    <!-- Welcome Modal -->
+    <welcome-modal
+      v-model:is-open="showWelcomeModal"
+      @close="closeWelcomeModal"
+    />
+
     <div
       class="flex-grow bg-white dark:bg-gray-800 shadow-xl overflow-hidden transition-colors duration-300"
     >
@@ -51,20 +57,19 @@
     <div v-if="!isMobile" class="fixed bottom-16 right-4 z-[100]">
       <button
         @click="openShortcutModal"
-        v-tippy="{content:'Keyboard Shortcuts'}"
+        v-tippy="{ content: 'Keyboard Shortcuts' }"
         class="text-gray-600 bg-gray-200 hover:bg-gray-300 hover:text-indigo-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded-full p-3 shadow-lg transition-colors duration-300"
       >
         <KeyboardIcon class="h-6 w-6" />
       </button>
     </div>
 
-    <shortcut-guide v-model:open="isShortcutModalOpen"/>
+    <shortcut-guide v-model:open="isShortcutModalOpen" />
   </main>
 </template>
 
 <script setup>
 import { HistoryIcon, KeyboardIcon } from "lucide-vue-next";
-import { bignumber, evaluate, format, fraction } from "mathjs";
 import {
   computed,
   defineEmits,
@@ -81,9 +86,10 @@ import CalculatorButtons from "./CalculatorButtons.vue";
 import CalculatorDisplay from "./CalculatorDisplay.vue";
 import HistoryPanel from "./HistoryPanel.vue";
 import ShortcutGuide from "./ShortcutGuide.vue";
-import { ProgrammerCalculator } from './utils/ProgrammerCalculator';
-import { StandardCalculator } from './utils/StandardCalculator';
-import { BasicCalculator } from './utils/BasicCalculator';
+import WelcomeModal from "./WelcomeModal.vue";
+import { BasicCalculator } from "./utils/BasicCalculator";
+import { ProgrammerCalculator } from "./utils/ProgrammerCalculator";
+import { StandardCalculator } from "./utils/StandardCalculator";
 
 const props = defineProps(["mode", "settings", "isMobile", "isHistoryOpen"]);
 
@@ -94,14 +100,19 @@ const isAnimating = ref(false);
 const animatedResult = ref("");
 const historyPanelRef = ref(null);
 const isShortcutModalOpen = ref(false);
+const showWelcomeModal = ref(!localStorage.getItem('mathlly-welcome-shown'));
+
+const closeWelcomeModal = () => {
+  showWelcomeModal.value = false;
+};
 
 const calculator = computed(() => {
   switch (props.mode) {
-    case 'Programmer':
+    case "Programmer":
       return new ProgrammerCalculator(props.settings);
-    case 'Standard':
+    case "Standard":
       return new StandardCalculator(props.settings);
-    case 'Basic':
+    case "Basic":
       return new BasicCalculator(props.settings);
     default:
       return new StandardCalculator(props.settings);
@@ -127,36 +138,46 @@ watch(currentInput, (newValue) => {
 });
 
 // Watch for changes in local input and update currentInput
-watch(() => calculatorState.value.input, (newValue) => {
-  currentInput.value = newValue;
-});
+watch(
+  () => calculatorState.value.input,
+  (newValue) => {
+    currentInput.value = newValue;
+  }
+);
 
 // Watch for changes in mode and reset the calculator state
-watch(() => props.mode, () => {
-  calculatorState.value = {
-    input: "0",
-    error: "",
-  };
-  activeBase.value = "DEC";
-  displayValue.value = {
-    hex: "0",
-    dec: "0",
-    oct: "0",
-    bin: "0",
-  };
-});
+watch(
+  () => props.mode,
+  () => {
+    calculatorState.value = {
+      input: "0",
+      error: "",
+    };
+    activeBase.value = "DEC";
+    displayValue.value = {
+      hex: "0",
+      dec: "0",
+      oct: "0",
+      bin: "0",
+    };
+  }
+);
 
 const preview = computed(() => {
-  if (props.mode === 'Programmer') {
+  if (props.mode === "Programmer") {
     try {
-      const result = calculator.value.evaluateExpression(calculatorState.value.input);
+      const result = calculator.value.evaluateExpression(
+        calculatorState.value.input
+      );
       return calculator.value.formatResult(result);
     } catch (err) {
       return "";
     }
   } else {
     try {
-      const result = calculator.value.evaluateExpression(calculatorState.value.input);
+      const result = calculator.value.evaluateExpression(
+        calculatorState.value.input
+      );
       return calculator.value.formatResult(result);
     } catch (err) {
       return "";
@@ -164,19 +185,22 @@ const preview = computed(() => {
   }
 });
 
-const addToHistory = async (expression, result) => {
-  const timestamp = new Date().getTime();
-  const id = await db.history.add({ expression, result, timestamp });
-  emit("update-history");
+const addToHistoryDebounced = (() => {
+  let timeout;
+  return (expression, result) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(async () => {
+      const timestamp = new Date().getTime();
+      const id = await db.history.add({ expression, result, timestamp });
+      emit("update-history");
 
-  // Update the history panel
-  if (historyPanelRef.value) {
-    await nextTick();
-    historyPanelRef.value.updateHistory();
-  }
-
-  return id;
-};
+      if (historyPanelRef.value) {
+        await nextTick();
+        historyPanelRef.value.updateHistory();
+      }
+    }, 500); // 500ms debounce time
+  };
+})();
 
 const selectHistoryItem = (item) => {
   calculatorState.value.input = item.expression;
@@ -204,23 +228,24 @@ const handleButtonClick = (btn) => {
       isAnimating.value = false;
     }, 500);
 
-    addToHistory(calculatorState.value.input, calculatorState.value.input);
+    addToHistoryDebounced(calculatorState.value.input, calculatorState.value.input);
   }
 
-  if (props.mode === 'Programmer') {
+  if (props.mode === "Programmer") {
     updateDisplayValue(calculatorState.value.input);
   }
 };
 
+
 const handleClear = () => {
-  calculatorState.value = calculator.value.handleButtonClick('AC');
-  if (props.mode === 'Programmer') {
+  calculatorState.value = calculator.value.handleButtonClick("AC");
+  if (props.mode === "Programmer") {
     updateDisplayValue(calculatorState.value.input);
   }
 };
 
 const handleBaseChange = (newBase) => {
-  if (props.mode === 'Programmer') {
+  if (props.mode === "Programmer") {
     activeBase.value = newBase;
     const result = calculator.value.handleBaseChange(newBase);
     calculatorState.value = result;
@@ -229,7 +254,7 @@ const handleBaseChange = (newBase) => {
 };
 
 const updateDisplayValue = (value) => {
-  if (props.mode === 'Programmer') {
+  if (props.mode === "Programmer") {
     displayValue.value = calculator.value.updateDisplayValue(value);
   }
 };
@@ -240,38 +265,40 @@ const handleKeyDown = (event) => {
     HEX: /^[0-9A-Fa-f]$/,
     DEC: /^[0-9]$/,
     OCT: /^[0-7]$/,
-    BIN: /^[01]$/
+    BIN: /^[01]$/,
   };
 
-  if (props.mode === 'Programmer' && allowedKeys[activeBase.value].test(key)) {
+  if (props.mode === "Programmer" && allowedKeys[activeBase.value].test(key)) {
     handleButtonClick(key.toUpperCase());
-  } else if (['+', '-', '*', '/', '=', 'Enter', 'Escape', 'Backspace'].includes(key)) {
+  } else if (
+    ["+", "-", "*", "/", "=", "Enter", "Escape", "Backspace"].includes(key)
+  ) {
     event.preventDefault();
     switch (key) {
-      case '+':
-        handleButtonClick('+');
+      case "+":
+        handleButtonClick("+");
         break;
-      case '-':
-        handleButtonClick('-');
+      case "-":
+        handleButtonClick("-");
         break;
-      case '*':
-        handleButtonClick('×');
+      case "*":
+        handleButtonClick("×");
         break;
-      case '/':
-        handleButtonClick('÷');
+      case "/":
+        handleButtonClick("÷");
         break;
-      case '=':
-      case 'Enter':
-        handleButtonClick('=');
+      case "=":
+      case "Enter":
+        handleButtonClick("=");
         break;
-      case 'Escape':
-        handleButtonClick('C');
+      case "Escape":
+        handleButtonClick("C");
         break;
-      case 'Backspace':
-        handleButtonClick('backspace');
+      case "Backspace":
+        handleButtonClick("backspace");
         break;
     }
-  } else if (props.mode !== 'Programmer') {
+  } else if (props.mode !== "Programmer") {
     if (/^[0-9.]$/.test(key)) {
       handleButtonClick(key);
     }
@@ -285,6 +312,12 @@ const openShortcutModal = () => {
 };
 
 onMounted(() => {
+  // Check if it's the first visit
+  const hasSeenWelcome = localStorage.getItem("mathlly-welcome-shown");
+  if (!hasSeenWelcome) {
+    showWelcomeModal.value = true;
+  }
+ 
   window.addEventListener("keydown", handleKeyDown);
 });
 
@@ -295,13 +328,23 @@ onUnmounted(() => {
 
 <style scoped>
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .animate-fade-in {

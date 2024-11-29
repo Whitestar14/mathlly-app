@@ -105,6 +105,7 @@ const emit = defineEmits([
 ]);
 
 const history = ref([]);
+const MAX_HISTORY_ITEMS = 100;
 
 const closePanel = () => {
   emit("close");
@@ -130,7 +131,7 @@ const handleClearHistory = async () => {
 };
 
 const loadHistory = async () => {
-  history.value = await db.history.orderBy("timestamp").reverse().toArray();
+  history.value = await db.history.orderBy("timestamp").reverse().limit(MAX_HISTORY_ITEMS).toArray();
 };
 
 const panelStyle = computed(() => ({
