@@ -1,35 +1,35 @@
 <template>
-  <SelectRoot v-model="selectedValue" :modelValue="modelValue" @update:modelValue="$emit('update:modelValue', $event)">
-    <SelectTrigger class="inline-flex items-center text-gray-700 dark:text-gray-300 justify-between w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-      <SelectValue :placeholder="placeholder" />
-      <SelectIcon class="w-5 h-5 ml-2 -mr-1 text-gray-400" aria-hidden="true">
-        <ChevronDownIcon />
-      </SelectIcon>
-    </SelectTrigger>
-    <SelectPortal>
-      <SelectContent class="overflow-hidden bg-white dark:bg-gray-700 rounded-md shadow-lg">
-        <SelectScrollUpButton class="flex items-center justify-center h-[25px] bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-default">
-          <ChevronUpIcon />
-        </SelectScrollUpButton>
-        <SelectViewport class="p-1">
-          <SelectGroup>
-            <SelectLabel class="px-2 py-1.5 text-xs font-semibold text-gray-900 dark:text-gray-300">
+  <select-root v-model="selectedValue" :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
+    <select-trigger class="inline-flex items-center text-gray-700 dark:text-gray-300 justify-between w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      <select-value :placeholder="placeholder" />
+      <select-icon class="w-5 h-5 ml-2 -mr-1 text-gray-400" aria-hidden="true">
+        <chevron-down-icon />
+      </select-icon>
+    </select-trigger>
+    <select-portal>
+      <select-content class="overflow-hidden bg-white dark:bg-gray-700 rounded-md shadow-lg">
+        <select-scroll-up-button class="flex items-center justify-center h-[25px] bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-default">
+          <chevron-up-icon />
+        </select-scroll-up-button>
+        <select-viewport class="p-1">
+          <select-group>
+            <select-label class="px-2 py-1.5 text-xs font-semibold text-gray-900 dark:text-gray-300">
               {{ label }}
-            </SelectLabel>
-            <SelectItem v-for="option in options" :key="option.value" :value="option.value" class="relative flex items-center px-8 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-default select-none hover:bg-gray-100 dark:hover:bg-gray-600">
-              <SelectItemText>{{ option.label }}</SelectItemText>
-              <SelectItemIndicator class="absolute left-2 inline-flex items-center">
-                <CheckIcon class="w-4 h-4" />
-              </SelectItemIndicator>
-            </SelectItem>
-          </SelectGroup>
-        </SelectViewport>
-        <SelectScrollDownButton class="flex items-center justify-center h-[25px] bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-default">
-          <ChevronDownIcon />
-        </SelectScrollDownButton>
-      </SelectContent>
-    </SelectPortal>
-  </SelectRoot>
+            </select-label>
+            <select-item v-for="option in options" :key="option.value" :value="option.value" class="relative flex items-center px-8 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-default select-none hover:bg-gray-100 dark:hover:bg-gray-600">
+              <select-item-text>{{ option.label }}</select-item-text>
+              <select-item-indicator class="absolute left-2 inline-flex items-center">
+                <check-icon class="w-4 h-4" />
+              </select-item-indicator>
+            </select-item>
+          </select-group>
+        </select-viewport>
+        <select-scroll-down-button class="flex items-center justify-center h-[25px] bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-default">
+          <chevron-down-icon />
+        </select-scroll-down-button>
+      </select-content>
+    </select-portal>
+  </select-root>
 </template>
 
 <script setup>

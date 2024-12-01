@@ -1,7 +1,14 @@
 <template>
-  <div>
+    <div class="relative">
+    <div 
+      v-if="props.mode === 'Programmer'"
+      class="absolute inset-0 bg-gray-200 dark:bg-gray-700 bg-opacity-70 dark:bg-opacity-70 z-10 flex items-center justify-center cursor-not-allowed"
+      v-tippy="{ content: 'History is disabled in Programmer mode', placement: 'top', arrow: false, followCursor: true }"
+    >
+      <LockIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" />
+    </div>
     <div
-      v-if="isMobile && isOpen"
+      v-if="isMobile && isOpen && props.mode !== 'Programmer'"
       class="fixed inset-0 bg-black bg-opacity-50 z-40"
       @click="closePanel"
     ></div>
@@ -74,7 +81,7 @@
 </template>
 
 <script setup>
-import { TrashIcon, XIcon } from "lucide-vue-next";
+import { TrashIcon, XIcon, LockIcon } from "lucide-vue-next";
 import {
   computed,
   defineEmits,
@@ -94,6 +101,10 @@ const props = defineProps({
   isMobile: {
     type: Boolean,
     default: false,
+  },
+  mode: {
+    type: String,
+    required: true,
   },
 });
 

@@ -1,5 +1,5 @@
+<!-- Calculator Page.vue -->
 <template>
-  <!-- Calculator Page.vue -->
   <main class="flex-grow flex">
     <!-- Welcome Modal -->
     <welcome-modal
@@ -49,6 +49,7 @@
       ref="historyPanelRef"
       :is-open="isHistoryOpen"
       :is-mobile="isMobile"
+      :mode="mode"
       @select-history-item="selectHistoryItem"
       @delete-history-item="deleteHistoryItem"
       @clear-history="clearHistory"
@@ -80,6 +81,7 @@ import {
   onUnmounted,
   ref,
   watch,
+  reactive
 } from "vue";
 import db from "../data/db";
 import CalculatorButtons from "./CalculatorButtons.vue";
@@ -206,36 +208,69 @@ watch(
   }
 );
 
+watch(() => calculatorState.value.input, (newInput) => {
+  if (props.mode === "Programmer") {
+    // Force an update of display values
+    try {
+      const updatedDisplayValues = calculator.value.updateDisplayValues(newInput);
+      displayValues.value = {
+        ...displayValues.value,
+        ...updatedDisplayValues
+      };
+    } catch (error) {
+      console.error("Error updating display values:", error);
+    }
+  }
+}, { deep: true });
+
+const updateDisplayState = () => {
+  if (props.mode === "Programmer") {
+    try {
+      const updatedValues = calculator.value.updateDisplayValues();
+      displayValues.value = {
+        ...displayValues.value,
+        ...updatedValues
+      };
+      calculatorState.value.input = updatedValues[activeBase.value]?.input || "0";
+    } catch (error) {
+      console.error("Error in updateDisplayState:", error);
+    }
+  }
+};
+
 const handleButtonClick = (btn) => {
+  console.log('Button clicked:', btn);
+  console.log('Before update - displayValues:', JSON.parse(JSON.stringify(displayValues.value)));
+  
   const result = calculator.value.handleButtonClick(btn);
+  console.log('Result from calculator:', result);
+  
   calculatorState.value = result;
 
+  
+  console.log('Final calculatorState:', JSON.parse(JSON.stringify(calculatorState.value)));
+  
+  
   if (props.mode === "Programmer") {
-    const displayValues = calculator.value.updateDisplayValues();
-    console.log(displayValues);
-    calculatorState.value.input = displayValues[activeBase.value]?.input || 0;
+    // console.log('After update - displayValues:', JSON.parse(JSON.stringify(displayValues.value)));
+    updateDisplayState();
   }
-
   if (btn === "=") {
     animatedResult.value = calculatorState.value.input;
     isAnimating.value = true;
-
+    
     setTimeout(() => {
       isAnimating.value = false;
     }, 500);
-
-    addToHistoryDebounced(
-      calculatorState.value.input,
-      calculatorState.value.input
-    );
+    
+    addToHistoryDebounced(calculatorState.value.input, preview.value);
   }
 };
 
 const handleClear = () => {
   calculatorState.value = calculator.value.handleButtonClick("AC");
   if (props.mode === "Programmer") {
-    const displayValues = calculator.value.updateDisplayValues();
-    calculatorState.value.input = displayValues[activeBase.value].input;
+    updateDisplayState();
   }
 };
 
@@ -244,14 +279,17 @@ const handleBaseChange = (newBase) => {
     activeBase.value = newBase;
     const result = calculator.value.handleBaseChange(newBase);
     calculatorState.value = result;
-    displayValues.value = result.displayValues;
+    updateDisplayState();
   }
 };
+
 
 const handleKeyDown = (event) => {
   const key = event.key;
   const allowedKeys = {
+   HEX: /^[0-9A-Fa-f]$/,
     DEC: /^[0-9]$/,
+    OCT: /^[0-7]$/,
     BIN: /^[01]$/,
   };
 
@@ -303,6 +341,8 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeyDown);
 });
+
+
 </script>
 
 <style scoped>

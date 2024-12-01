@@ -18,7 +18,7 @@
 
     <main class="container mx-auto px-4 py-8 md:py-12">
      <div class="-mt-4 mb-4 flex flex-row justify-center items-center ml-2 p-1 rounded-2xl w-32 align-middle  
-     text-gray-100 bg-indigo-500 dark:bg-gray-600 tracking-wider gap-1 pointer-events-none"><span class="h-2 w-2 bg-gray-100 rounded-full"></span><span class="text-sm font-bold vertical-middle" style="font-family: 'Reddit mono'">v0.1.2-beta</span></div>
+     text-gray-100 bg-indigo-500 dark:bg-gray-600 tracking-wider gap-1 pointer-events-none"><span class="h-2 w-2 bg-gray-100 rounded-full"></span><span class="text-sm font-bold vertical-middle" style="font-family: 'Geist mono'">v0.1.2-beta</span></div>
       <section
         class="mb-16 sm:mb-32 text-left"
         style="font-family: 'Geist mono'"

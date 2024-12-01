@@ -1,15 +1,17 @@
+<!-- CalculatorButtons.vue -->
 <template>
   <component 
     :is="currentModeComponent" 
     @button-click="handleButtonClick" 
     @clear="handleClear"
     @base-change="handleBaseChange"
-    :display-value="displayValue"
+    :display-values="displayValues"
+    :active-base="activeBase"
   />
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits } from 'vue';
+import { computed, defineProps, defineEmits } from 'vue';
 import BasicMode from './modes/BasicMode.vue';
 import StandardMode from './modes/StandardMode.vue';
 import ProgrammerMode from './modes/ProgrammerMode.vue';
@@ -19,6 +21,14 @@ const props = defineProps({
     type: String,
     required: true,
     validator: (value) => ['Basic', 'Standard', 'Programmer'].includes(value)
+  },
+  displayValues: {
+    type: Object,
+    required: true
+  },
+  activeBase: {
+    type: String,
+    required: true
   }
 });
 
@@ -37,11 +47,6 @@ const currentModeComponent = computed(() => {
   }
 });
 
-const displayValue = ref({
-  dec: '0',
-  
-});
-
 const handleButtonClick = (value) => {
   emit('button-click', value);
 };
@@ -53,5 +58,13 @@ const handleClear = () => {
 const handleBaseChange = (base) => {
   emit('base-change', base);
 };
+import { watch, toRef } from 'vue';
+
+const displayValuesRef = toRef(props, 'displayValues');
+
+watch(displayValuesRef, (newValues) => {
+  console.log("CalculatorButtons displayValues updated:", newValues);
+}, { deep: true });
+
 
 </script>
