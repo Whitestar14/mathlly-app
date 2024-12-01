@@ -10,9 +10,7 @@ import "tippy.js/animations/shift-toward.css"
 import "tippy.js/dist/border.css";
 
 function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 const app = createApp(App);

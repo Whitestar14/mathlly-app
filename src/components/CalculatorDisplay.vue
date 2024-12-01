@@ -44,7 +44,6 @@
     >
       <Copy size="20" />
     </div>
-
     <div class="h-20 relative overflow-hidden">
       <!-- Main display -->
       <div
@@ -134,7 +133,12 @@ const formattedInput = computed(() => {
   if (!props.input) return "";
   
   if (props.activeBase === 'BIN') {
-    return formatBinary(props.input);
+    // Split on operators, format each part, then rejoin with operators
+    const parts = props.input.split(/([+\-×÷])/);
+    return parts.map(part => {
+      if (['+', '-', '×', '÷'].includes(part)) return part;
+      return formatBinary(part);
+    }).join('');
   }
   
   const parts = props.input.split(".");
@@ -145,6 +149,7 @@ const formattedInput = computed(() => {
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
 });
+
 
 const formatBinary = (binString) => {
   binString = binString.replace(/[^01]/g, '').replace(/^0+/, '');
@@ -179,7 +184,6 @@ function showTooltip() {
   if (hideTooltipTimeout) {
     clearTimeout(hideTooltipTimeout);
   }
-  tooltipContent.value = 'Copy to Clipboard';
   copyButton.value?._tippy?.show();
 }
 
@@ -198,6 +202,7 @@ function copyToClipboard() {
     .writeText(copyContent.value)
     .then(() => {
       tooltipContent.value = 'Saved!';
+      showTooltip();
       if (hideTooltipTimeout) {
         clearTimeout(hideTooltipTimeout);
       }
@@ -209,6 +214,7 @@ function copyToClipboard() {
     .catch((err) => {
       console.error("Failed to copy: ", err);
       tooltipContent.value = 'Failed to copy';
+      showTooltip();
       if (hideTooltipTimeout) {
         clearTimeout(hideTooltipTimeout);
       }

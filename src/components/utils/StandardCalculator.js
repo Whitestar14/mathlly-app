@@ -118,7 +118,6 @@ export class StandardCalculator {
   handleOperator(op) {
     this.error = "";
     const lastChar = this.input.trim().slice(-1);
-    const isArithmetic = ["+", "-", "×", "÷"].includes(op);
     const isLastCharOperator = this.isLastCharOperator();
 
     // Allow negative numbers after arithmetic operators
