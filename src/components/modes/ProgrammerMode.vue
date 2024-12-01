@@ -6,7 +6,7 @@
         :key="base"
         @click="handleBaseChange(base)"
         :class="['flex justify-between items-center p-2 rounded', 
-                 activeBase === base ? ' bg-indigo-200 hover:bg-indigo-300 dark:bg-gray-700 dark:hover:bg-gray-600' : 'border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700']"
+                 activeBase === base ? 'bg-indigo-200 hover:bg-indigo-300 dark:bg-gray-700 dark:hover:bg-gray-600' : 'border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700']"
       >
         <span class="dark:text-gray-300" :class="[activeBase === base ? 'text-gray-500': 'text-gray-700']">{{ base }}</span>
         <span>{{ formatDisplayValue(displayValue[base.toLowerCase()], base) }}</span>
@@ -68,14 +68,16 @@
 
 <script setup>
 import { Delete } from 'lucide-vue-next';
-import { defineProps, defineEmits, ref, computed } from 'vue';
+import { defineProps, defineEmits, ref, computed, watch } from 'vue';
 
 const props = defineProps({
   displayValue: {
     type: Object,
     required: true,
     default: () => ({
+      hex: '0',
       dec: '0',
+      oct: '0',
       bin: '0'
     })
   }
@@ -100,8 +102,12 @@ const handleClick = (value) => {
 
 const isButtonEnabled = computed(() => (button) => {
   switch (activeBase.value) {
+    case 'HEX':
+      return /^[0-9A-F]$/.test(button.toUpperCase());
     case 'DEC':
       return /^[0-9]$/.test(button);
+    case 'OCT':
+      return /^[0-7]$/.test(button);
     case 'BIN':
       return /^[01]$/.test(button);
     default:
@@ -110,14 +116,32 @@ const isButtonEnabled = computed(() => (button) => {
 });
 
 const formatDisplayValue = (value, base) => {
+  if (!value) return '0';
   switch (base.toLowerCase()) {
-    case 'bin':
-      return value.replace(/^0+/, '') || '0';
+    case 'hex':
+      return value.toUpperCase();
     case 'dec':
+      return value;
+    case 'oct':
+      return value;
+    case 'bin':
+      return value.replace(/\s/g, '');
     default:
       return value;
   }
 };
+
+// Watch for changes in displayValue and update the UI
+watch(() => props.displayValue, (newValue) => {
+  // This ensures that all base representations are updated when one changes
+  Object.keys(newValue).forEach(base => {
+    if (newValue[base] !== props.displayValue[base]) {
+      // Emit an event to update the parent component if needed
+      emit('update:displayValue', newValue);
+    }
+  });
+}, { deep: true });
+
 </script>
 
 <style scoped>

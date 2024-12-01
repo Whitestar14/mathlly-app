@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]">
           <div class="w-full h-full relative">
             <div class="absolute max-h-8 flex items-center">
-              <kbd aria-label="logo" class="text-gray-600 font-semibold px-2 py-1 my-0 text-2xl dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg pointer-events-none" style="font-family: 'Reddit mono'">{math<span class="text-indigo-400 italic font-black dark:text-indigo-600 inline-block mx-0.5">//</span>y}<span class="ml-2 text-xs font-bold text-gray-100 dark:text-indigo-200 px-1.5 py-0.5 bg-indigo-500 dark:bg-gray-600 rounded-md align-middle tracking-wider" style="font-family: 'Reddit mono'">BETA</span></kbd>
+              <kbd aria-label="logo" class="text-gray-600 font-semibold px-2 py-1 my-0 text-2xl dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg pointer-events-none" style="font-family: 'Reddit mono'">{math<span class="text-indigo-400 italic font-black dark:text-indigo-600 inline-block mx-0.5">//</span>y}</kbd>
               
             </div>
           </div>
@@ -113,7 +113,7 @@ const indicatorPosition = ref(0);
 const showIndicator = ref(true);
 
 const menuItems = [
-  { name: "Calculator", path: "/", icon: CalculatorIcon, indicatorOffset: 2 },
+  { name: "Calculator", path: "/", icon: CalculatorIcon, indicatorOffset: 2.15 },
   { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 5.25 },
 ];
 

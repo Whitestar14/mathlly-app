@@ -1,4 +1,5 @@
 <template>
+  <!-- Calculator Page.vue -->
   <main class="flex-grow flex">
     <!-- Welcome Modal -->
     <welcome-modal
@@ -27,30 +28,30 @@
           :input="calculatorState.input"
           :preview="preview"
           :error="calculatorState.error"
-          :isAnimating="isAnimating"
-          :animatedPreview="animatedResult"
-          :activeBase="activeBase"
+          :is-animating="isAnimating"
+          :animated-preview="animatedResult"
+          :active-base="activeBase"
         />
 
         <calculator-buttons
-          :mode="mode"
-          @button-click="handleButtonClick"
-          @clear="handleClear"
-          @base-change="handleBaseChange"
-          :display-value="displayValue"
-          :active-base="activeBase"
-        />
+      :mode="mode"
+      @button-click="handleButtonClick"
+      @clear="handleClear"
+      @base-change="handleBaseChange"
+      :display-values="displayValues"
+      :active-base="activeBase"
+    />
       </div>
     </div>
 
     <history-panel
       v-if="!isMobile"
       ref="historyPanelRef"
-      :isOpen="isHistoryOpen"
-      :isMobile="isMobile"
-      @selectHistoryItem="selectHistoryItem"
-      @deleteHistoryItem="deleteHistoryItem"
-      @clearHistory="clearHistory"
+      :is-open="isHistoryOpen"
+      :is-mobile="isMobile"
+      @select-history-item="selectHistoryItem"
+      @delete-history-item="deleteHistoryItem"
+      @clear-history="clearHistory"
       class="w-1/4 min-w-[250px] max-w-[400px]"
     />
 
@@ -74,7 +75,6 @@ import {
   computed,
   defineEmits,
   defineProps,
-  inject,
   nextTick,
   onMounted,
   onUnmounted,
@@ -91,19 +91,25 @@ import { BasicCalculator } from "./utils/BasicCalculator";
 import { ProgrammerCalculator } from "./utils/ProgrammerCalculator";
 import { StandardCalculator } from "./utils/StandardCalculator";
 
-const props = defineProps(["mode", "settings", "isMobile", "isHistoryOpen"]);
+const props = defineProps({
+  mode: { type: String, required: true },
+  settings: { type: Object, required: true },
+  isMobile: { type: Boolean, required: true },
+  isHistoryOpen: { type: Boolean, required: true },
+});
 
 const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
-const currentInput = inject("currentInput");
+const currentInput = ref("0");
 const isAnimating = ref(false);
 const animatedResult = ref("");
 const historyPanelRef = ref(null);
 const isShortcutModalOpen = ref(false);
-const showWelcomeModal = ref(!localStorage.getItem('mathlly-welcome-shown'));
+const showWelcomeModal = ref(!localStorage.getItem("mathlly-welcome-shown"));
 
 const closeWelcomeModal = () => {
   showWelcomeModal.value = false;
+  localStorage.setItem("mathlly-welcome-shown", "true");
 };
 
 const calculator = computed(() => {
@@ -125,51 +131,15 @@ const calculatorState = ref({
 });
 
 const activeBase = ref("DEC");
-const displayValue = ref({
-  hex: "0",
-  dec: "0",
-  oct: "0",
-  bin: "0",
-});
-
-// Watch for changes in currentInput
-watch(currentInput, (newValue) => {
-  calculatorState.value.input = newValue;
-});
-
-// Watch for changes in local input and update currentInput
-watch(
-  () => calculatorState.value.input,
-  (newValue) => {
-    currentInput.value = newValue;
-  }
-);
-
-// Watch for changes in mode and reset the calculator state
-watch(
-  () => props.mode,
-  () => {
-    calculatorState.value = {
-      input: "0",
-      error: "",
-    };
-    activeBase.value = "DEC";
-    displayValue.value = {
-      hex: "0",
-      dec: "0",
-      oct: "0",
-      bin: "0",
-    };
-  }
-);
 
 const preview = computed(() => {
   if (props.mode === "Programmer") {
     try {
       const result = calculator.value.evaluateExpression(
-        calculatorState.value.input
+        calculatorState.value.input,
+        activeBase.value
       );
-      return calculator.value.formatResult(result);
+      return calculator.value.formatResult(result, activeBase.value);
     } catch (err) {
       return "";
     }
@@ -185,13 +155,15 @@ const preview = computed(() => {
   }
 });
 
+// Import useDebounce from vueuse
+
 const addToHistoryDebounced = (() => {
   let timeout;
   return (expression, result) => {
     clearTimeout(timeout);
     timeout = setTimeout(async () => {
       const timestamp = new Date().getTime();
-      const id = await db.history.add({ expression, result, timestamp });
+      await db.history.add({ expression, result, timestamp });
       emit("update-history");
 
       if (historyPanelRef.value) {
@@ -216,9 +188,33 @@ const clearHistory = async () => {
   emit("update-history");
 };
 
+const displayValues = ref({
+  HEX: { input: "0", display: "0" },
+  DEC: { input: "0", display: "0" },
+  OCT: { input: "0", display: "0" },
+  BIN: { input: "0", display: "0" },
+});
+
+watch(
+  () => props.mode,
+  () => {
+    calculatorState.value = {
+      input: "0",
+      error: "",
+    };
+    activeBase.value = "DEC";
+  }
+);
+
 const handleButtonClick = (btn) => {
   const result = calculator.value.handleButtonClick(btn);
   calculatorState.value = result;
+
+  if (props.mode === "Programmer") {
+    const displayValues = calculator.value.updateDisplayValues();
+    console.log(displayValues);
+    calculatorState.value.input = displayValues[activeBase.value]?.input || 0;
+  }
 
   if (btn === "=") {
     animatedResult.value = calculatorState.value.input;
@@ -228,19 +224,18 @@ const handleButtonClick = (btn) => {
       isAnimating.value = false;
     }, 500);
 
-    addToHistoryDebounced(calculatorState.value.input, calculatorState.value.input);
-  }
-
-  if (props.mode === "Programmer") {
-    updateDisplayValue(calculatorState.value.input);
+    addToHistoryDebounced(
+      calculatorState.value.input,
+      calculatorState.value.input
+    );
   }
 };
-
 
 const handleClear = () => {
   calculatorState.value = calculator.value.handleButtonClick("AC");
   if (props.mode === "Programmer") {
-    updateDisplayValue(calculatorState.value.input);
+    const displayValues = calculator.value.updateDisplayValues();
+    calculatorState.value.input = displayValues[activeBase.value].input;
   }
 };
 
@@ -249,22 +244,14 @@ const handleBaseChange = (newBase) => {
     activeBase.value = newBase;
     const result = calculator.value.handleBaseChange(newBase);
     calculatorState.value = result;
-    updateDisplayValue(calculatorState.value.input);
-  }
-};
-
-const updateDisplayValue = (value) => {
-  if (props.mode === "Programmer") {
-    displayValue.value = calculator.value.updateDisplayValue(value);
+    displayValues.value = result.displayValues;
   }
 };
 
 const handleKeyDown = (event) => {
   const key = event.key;
   const allowedKeys = {
-    HEX: /^[0-9A-Fa-f]$/,
     DEC: /^[0-9]$/,
-    OCT: /^[0-7]$/,
     BIN: /^[01]$/,
   };
 
@@ -302,8 +289,6 @@ const handleKeyDown = (event) => {
     if (/^[0-9.]$/.test(key)) {
       handleButtonClick(key);
     }
-  } else {
-    event.preventDefault();
   }
 };
 
@@ -312,12 +297,6 @@ const openShortcutModal = () => {
 };
 
 onMounted(() => {
-  // Check if it's the first visit
-  const hasSeenWelcome = localStorage.getItem("mathlly-welcome-shown");
-  if (!hasSeenWelcome) {
-    showWelcomeModal.value = true;
-  }
- 
   window.addEventListener("keydown", handleKeyDown);
 });
 

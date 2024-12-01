@@ -76,7 +76,7 @@ export class BasicCalculator {
       setTimeout(() => {
         this.error = "";
       }, 1000);
-      return;
+      return { input: this.input, error: this.error };
     }
 
     switch (btn) {
@@ -86,6 +86,9 @@ export class BasicCalculator {
       case "AC":
       case "C":
         this.handleClear();
+        break;
+      case "CE":
+        this.handleClearEntry();
         break;
       case "backspace":
         this.handleBackspace();
@@ -108,7 +111,21 @@ export class BasicCalculator {
 
   handleOperator(op) {
     this.error = "";
-    if (!this.isLastCharOperator()) {
+    const lastChar = this.input.trim().slice(-1);
+    const isArithmetic = ["+", "-", "×", "÷"].includes(op);
+    const isLastCharOperator = this.isLastCharOperator();
+
+    // Allow negative numbers after arithmetic operators
+    if (
+      op === "-" &&
+      isLastCharOperator &&
+      ["×", "÷", "+"].includes(lastChar)
+    ) {
+      this.input += ` ${op} `;
+      return;
+    }
+
+    if (!isLastCharOperator) {
       this.input += ` ${op} `;
     } else {
       this.input = this.input.slice(0, -3) + ` ${op} `;
@@ -138,6 +155,16 @@ export class BasicCalculator {
   handleClear() {
     this.input = "0";
     this.error = "";
+  }
+
+  handleClearEntry() {
+    if (this.input !== "0" && this.input !== "Error") {
+      const parts = this.input.split(" ");
+      parts.pop();
+      this.input = parts.join(" ") || "0";
+    } else {
+      this.handleClear();
+    }
   }
 
   handleBackspace() {

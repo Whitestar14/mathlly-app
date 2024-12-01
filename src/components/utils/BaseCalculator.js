@@ -1,4 +1,5 @@
 import { format } from "mathjs";
+// BaseCalculator.js
 
 class BaseCalculator {
   constructor() {

@@ -39,7 +39,7 @@ const currentModeComponent = computed(() => {
 
 const displayValue = ref({
   dec: '0',
-  bin: '0'
+  
 });
 
 const handleButtonClick = (value) => {

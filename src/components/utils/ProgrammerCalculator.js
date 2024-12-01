@@ -1,15 +1,24 @@
 import { evaluate } from "mathjs";
-import { DecCalculator, BinCalculator } from "./BaseCalculator";
+import { DecCalculator, BinCalculator, HexCalculator, OctCalculator } from "./BaseCalculator";
+
+// ProgrammerCalculator.js
 
 export class ProgrammerCalculator {
   constructor(settings) {
     this.activeBase = "DEC";
-    this.input = "0";
+    this.states = {
+      DEC: { input: "0", display: "0" },
+      BIN: { input: "0", display: "0" },
+      HEX: { input: "0", display: "0" },
+      OCT: { input: "0", display: "0" },
+    };
     this.error = "";
     this.settings = settings;
     this.calculators = {
       DEC: new DecCalculator(),
       BIN: new BinCalculator(),
+      HEX: new HexCalculator(),
+      OCT: new OctCalculator(),
     };
   }
 
@@ -17,17 +26,16 @@ export class ProgrammerCalculator {
     return this.calculators[this.activeBase];
   }
 
-  evaluateExpression(expr) {
+  evaluateExpression(expr, base = this.activeBase) {
     try {
-      let sanitizedExpr = this.activeCalculator
+      let sanitizedExpr = this.calculators[base]
         .sanitizeInput(expr)
         .replace(/×/g, "*")
         .replace(/÷/g, "/");
 
-      // Remove trailing operators
       sanitizedExpr = sanitizedExpr.replace(/[+\-*/]\s*$/, "");
 
-      if (this.activeBase === "BIN") {
+      if (base === "BIN") {
         const parts = sanitizedExpr.split(/([+\-*/])/);
         sanitizedExpr = parts
           .map((part) => {
@@ -37,51 +45,91 @@ export class ProgrammerCalculator {
             return part;
           })
           .join("");
+      } else if (base !== "DEC") {
+        const parts = sanitizedExpr.split(/([+\-*/])/);
+        sanitizedExpr = parts
+          .map((part) => {
+            if (!["+", "-", "*", "/"].includes(part) && part !== "") {
+              return parseInt(part, this.getBaseInt(base)).toString(10);
+            }
+            return part;
+          })
+          .join("");
       }
 
       if (sanitizedExpr === "") return 0;
 
       const result = evaluate(sanitizedExpr);
-      return this.activeBase === "BIN" ? Math.floor(result) : result;
+      return base === "BIN" ? Math.floor(result) : result;
     } catch (err) {
       console.error("Error in evaluateExpression:", err);
       return null;
     }
   }
 
-  formatResult(result) {
+  getBaseInt(base) {
+    switch (base) {
+      case "BIN":
+        return 2;
+      case "OCT":
+        return 8;
+      case "DEC":
+        return 10;
+      case "HEX":
+        return 16;
+      default:
+        throw new Error("Invalid base");
+    }
+  }
+
+  formatResult(result, base = this.activeBase) {
     if (result === null) return "";
-    return this.activeCalculator.formatResult(result);
+    if (base === "BIN") {
+      return Math.floor(result).toString(2);
+    }
+    return this.calculators[base].formatResult(result);
   }
 
   handleBaseChange(newBase) {
-    try {
-      const decValue = this.evaluateExpression(this.input);
-      this.activeBase = newBase;
-      this.input = decValue !== null ? this.formatResult(decValue) : "0";
-      return { input: this.input, error: this.error };
-    } catch (err) {
-      console.error("Error changing base:", err);
-      this.error = "Invalid input for base conversion";
-      return { input: this.input, error: this.error };
+    const currentValue = this.evaluateExpression(
+      this.states[this.activeBase].input,
+      this.activeBase
+    );
+    this.activeBase = newBase;
+    if (currentValue !== null) {
+      Object.keys(this.states).forEach((base) => {
+        this.states[base].input = this.formatResult(currentValue, base);
+        this.states[base].display = this.states[base].input;
+      });
     }
-  }
-
-  updateDisplayValue(value) {
-    const decValue = this.evaluateExpression(value);
     return {
-      dec: this.calculators.DEC.formatResult(decValue),
-      bin: this.calculators.BIN.formatResult(decValue),
+      input: this.states[newBase].input,
+      error: this.error,
+      displayValues: this.states,
     };
   }
 
+  updateDisplayValues() {
+    const currentValue = this.evaluateExpression(
+      this.states[this.activeBase].input,
+      this.activeBase
+    );
+    if (currentValue !== null) {
+      Object.keys(this.states).forEach((base) => {
+        this.states[base].display = this.formatResult(currentValue, base);
+      });
+    }
+    return this.states;
+  }
+
   handleButtonClick(btn) {
-    if (this.input === "Error") {
+    if (this.states[this.activeBase].input === "Error") {
       this.handleClear();
     }
 
+    const maxLength = this.activeCalculator.maxInputLength;
     if (
-      this.input.length >= this.activeCalculator.maxInputLength &&
+      this.states[this.activeBase].input.length >= maxLength &&
       btn !== "=" &&
       btn !== "AC" &&
       btn !== "backspace"
@@ -90,7 +138,7 @@ export class ProgrammerCalculator {
       setTimeout(() => {
         this.error = "";
       }, 1000);
-      return { input: this.input, error: this.error };
+      return { input: this.states[this.activeBase].input, error: this.error };
     }
 
     try {
@@ -114,72 +162,132 @@ export class ProgrammerCalculator {
         case "÷":
           this.handleOperator(btn);
           break;
+        // Add bitwise operations
+        case "AND":
+        case "OR":
+        case "XOR":
+        case "NOT":
+        case "<<":
+        case ">>":
+          this.handleBitwiseOperation(btn);
+          break;
         default:
           this.handleNumber(btn);
       }
     } catch (err) {
       this.error = err.message;
-      this.input = "Error";
+      this.states[this.activeBase].input = "Error";
     }
 
-    return { input: this.input, error: this.error };
+    this.updateDisplayValues();
+    return { input: this.states[this.activeBase].input, error: this.error };
+  }
+
+  handleBitwiseOperation(op) {
+    const currentValue = this.evaluateExpression(
+      this.states[this.activeBase].input,
+      this.activeBase
+    );
+    if (currentValue === null) return;
+
+    let result;
+    switch (op) {
+      case "AND":
+        this.states[this.activeBase].input += " & ";
+        break;
+      case "OR":
+        this.states[this.activeBase].input += " | ";
+        break;
+      case "XOR":
+        this.states[this.activeBase].input += " ^ ";
+        break;
+      case "NOT":
+        result = ~currentValue;
+        this.states[this.activeBase].input = this.formatResult(
+          result,
+          this.activeBase
+        );
+        break;
+      case "<<":
+        this.states[this.activeBase].input += " << ";
+        break;
+      case ">>":
+        this.states[this.activeBase].input += " >> ";
+        break;
+    }
   }
 
   handleOperator(op) {
     this.error = "";
     if (!this.isLastCharOperator()) {
-      this.input += ` ${op} `;
+      this.states[this.activeBase].input += ` ${op} `;
     } else {
-      this.input = this.input.slice(0, -3) + ` ${op} `;
+      this.states[this.activeBase].input =
+        this.states[this.activeBase].input.slice(0, -3) + ` ${op} `;
     }
   }
 
   handleNumber(num) {
     this.error = "";
-    if (this.input === "Error" || this.input === "0") {
-      this.input = num;
+    if (
+      this.states[this.activeBase].input === "Error" ||
+      this.states[this.activeBase].input === "0"
+    ) {
+      this.states[this.activeBase].input = num;
     } else {
-      this.input += num;
+      this.states[this.activeBase].input += num;
     }
   }
 
   handleEquals() {
     this.error = "";
     try {
-      const result = this.evaluateExpression(this.input);
-      this.input = this.formatResult(result);
+      const result = this.evaluateExpression(
+        this.states[this.activeBase].input
+      );
+      this.states[this.activeBase].input = this.formatResult(result);
     } catch (err) {
-      this.input = "Error";
+      this.states[this.activeBase].input = "Error";
       this.error = err.message;
     }
   }
 
   handleClear() {
-    this.input = "0";
+    this.states[this.activeBase].input = "0";
     this.error = "";
   }
 
   handleClearEntry() {
-    if (this.input !== "0" && this.input !== "Error") {
-      const parts = this.input.split(" ");
+    if (
+      this.states[this.activeBase].input !== "0" &&
+      this.states[this.activeBase].input !== "Error"
+    ) {
+      const parts = this.states[this.activeBase].input.split(" ");
       parts.pop();
-      this.input = parts.join(" ") || "0";
+      this.states[this.activeBase].input = parts.join(" ") || "0";
     } else {
       this.handleClear();
     }
   }
 
   handleBackspace() {
-    if (this.input !== "0" && this.input !== "Error") {
-      if (this.input.length === 1) {
-        this.input = "0";
+    if (
+      this.states[this.activeBase].input !== "0" &&
+      this.states[this.activeBase].input !== "Error"
+    ) {
+      if (this.states[this.activeBase].input.length === 1) {
+        this.states[this.activeBase].input = "0";
       } else {
-        this.input = this.input.slice(0, -1);
+        this.states[this.activeBase].input = this.states[
+          this.activeBase
+        ].input.slice(0, -1);
       }
     }
   }
 
   isLastCharOperator() {
-    return ["+", "-", "×", "÷"].includes(this.input.trim().slice(-1));
+    return ["+", "-", "×", "÷"].includes(
+      this.states[this.activeBase].input.trim().slice(-1)
+    );
   }
 }
