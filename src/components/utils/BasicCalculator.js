@@ -1,4 +1,4 @@
-import { fraction, evaluate, format } from "mathjs";
+import { evaluate, format, fraction } from "mathjs";
 
 export class BasicCalculator {
   constructor(settings) {
@@ -6,6 +6,7 @@ export class BasicCalculator {
     this.input = "0";
     this.error = "";
     this.settings = settings;
+    this.currentExpression = "";
   }
 
   sanitizeInput(expr) {
@@ -78,34 +79,38 @@ export class BasicCalculator {
       }, 1000);
       return { input: this.input, error: this.error };
     }
-
-    switch (btn) {
-      case "=":
-        this.handleEquals();
-        break;
-      case "AC":
-      case "C":
-        this.handleClear();
-        break;
-      case "CE":
-        this.handleClearEntry();
-        break;
-      case "backspace":
-        this.handleBackspace();
-        break;
-      case "+":
-      case "-":
-      case "×":
-      case "÷":
-        this.handleOperator(btn);
-        break;
-      default:
-        this.handleNumber(btn);
+    try {
+      switch (btn) {
+        case "AC":
+        case "C":
+          this.handleClear();
+          break;
+        case "CE":
+          this.handleClearEntry();
+          break;
+        case "backspace":
+          this.handleBackspace();
+          break;
+        case "+":
+        case "-":
+        case "×":
+        case "÷":
+          this.handleOperator(btn);
+          break;
+        case "=":
+          return this.handleEquals();
+        default:
+          this.handleNumber(btn);
+      }
+    } catch (err) {
+      this.error = err.message;
+      this.input = "Error";
     }
 
     return {
       input: this.input,
       error: this.error,
+      expression: this.currentExpression,
     };
   }
 
@@ -143,11 +148,23 @@ export class BasicCalculator {
   handleEquals() {
     this.error = "";
     try {
-      const result = this.evaluateExpression(this.input);
+      // Store the current expression before evaluation
+      this.currentExpression = this.input;
+      const result = this.evaluateExpression(this.currentExpression);
       this.input = this.formatResult(result);
+
+      return {
+        expression: this.currentExpression,
+        result: this.input,
+        input: this.input
+      };
     } catch (err) {
       this.input = "Error";
       this.error = err.message;
+      return {
+        expression: this.currentExpression,
+        input: "Error",
+      };
     }
   }
 

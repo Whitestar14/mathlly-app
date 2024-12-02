@@ -6,6 +6,7 @@ export class StandardCalculator {
     this.input = "0";
     this.error = "";
     this.settings = settings;
+    this.currentExpression = "";
   }
 
   sanitizeInput(expr) {
@@ -81,8 +82,7 @@ export class StandardCalculator {
 
     switch (btn) {
       case "=":
-        this.handleEquals();
-        break;
+        return this.handleEquals();
       case "%":
         this.handlePercentage();
         break;
@@ -112,6 +112,7 @@ export class StandardCalculator {
     return {
       input: this.input,
       error: this.error,
+      expression: this.currentExpression,
     };
   }
 
@@ -149,11 +150,23 @@ export class StandardCalculator {
   handleEquals() {
     this.error = "";
     try {
-      const result = this.evaluateExpression(this.input);
+      // Store the current expression before evaluation
+      this.currentExpression = this.input;
+      const result = this.evaluateExpression(this.currentExpression);
       this.input = this.formatResult(result);
+
+      return {
+        expression: this.currentExpression,
+        result: this.input,
+        input: this.input,
+      };
     } catch (err) {
       this.input = "Error";
       this.error = err.message;
+      return {
+        expression: this.currentExpression,
+        input: "Error",
+      };
     }
   }
 

@@ -51,7 +51,6 @@
     />
   </div>
 
-  <shortcut-guide v-model:open="isShortcutGuideOpen" />
 </template>
 
 <script setup>
@@ -60,7 +59,6 @@ import { useRouter } from "vue-router";
 import CalculatorHeader from "./components/CalculatorHeader.vue";
 import HistoryPanel from "./components/HistoryPanel.vue";
 import SidebarMenu from "./components/SidebarMenu.vue";
-import ShortcutGuide from './components/ShortcutGuide.vue';
 import db from "./data/db";
 
 const router = useRouter();
@@ -74,7 +72,6 @@ const isSidebarOpen = ref(false);
 const isHistoryOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
 const currentInput = ref("");
-const isShortcutGuideOpen = ref(false);
 
 provide("currentInput", currentInput);
 
@@ -133,9 +130,6 @@ const handleResize = () => {
   isSidebarOpen.value = !isMobile.value;
 };
 
-const openShortcutGuide = () => {
-  isShortcutGuideOpen.value = true;
-};
 
 const handleKeyDown = (e) => {
   if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
@@ -153,10 +147,6 @@ const handleKeyDown = (e) => {
         break;
       case 's':
         navigateToSettings();
-        e.preventDefault();
-        break;
-      case 'k':
-        openShortcutGuide();
         e.preventDefault();
         break;
     }

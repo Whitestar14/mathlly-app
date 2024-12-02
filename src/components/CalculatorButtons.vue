@@ -58,13 +58,6 @@ const handleClear = () => {
 const handleBaseChange = (base) => {
   emit('base-change', base);
 };
-import { watch, toRef } from 'vue';
-
-const displayValuesRef = toRef(props, 'displayValues');
-
-watch(displayValuesRef, (newValues) => {
-  console.log("CalculatorButtons displayValues updated:", newValues);
-}, { deep: true });
 
 
 </script>

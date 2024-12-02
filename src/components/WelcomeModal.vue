@@ -1,3 +1,4 @@
+<!-- WelcomeModal.vue  -->
 <template>
   <DialogRoot :open="isOpen" @update:open="$emit('update:isOpen')">
     <!-- Backdrop -->

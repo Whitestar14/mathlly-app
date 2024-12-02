@@ -1,9 +1,15 @@
+<!-- HistoryPanel.vue -->
 <template>
-    <div class="relative">
-    <div 
+  <div class="relative">
+    <div
       v-if="props.mode === 'Programmer'"
       class="absolute inset-0 bg-gray-200 dark:bg-gray-700 bg-opacity-70 dark:bg-opacity-70 z-10 flex items-center justify-center cursor-not-allowed"
-      v-tippy="{ content: 'History is disabled in Programmer mode', placement: 'top', arrow: false, followCursor: true }"
+      v-tippy="{
+        content: 'History is disabled in Programmer mode',
+        placement: 'top',
+        arrow: false,
+        followCursor: true,
+      }"
     >
       <LockIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" />
     </div>
@@ -81,7 +87,7 @@
 </template>
 
 <script setup>
-import { TrashIcon, XIcon, LockIcon } from "lucide-vue-next";
+import { LockIcon, TrashIcon, XIcon } from "lucide-vue-next";
 import {
   computed,
   defineEmits,
@@ -142,7 +148,11 @@ const handleClearHistory = async () => {
 };
 
 const loadHistory = async () => {
-  history.value = await db.history.orderBy("timestamp").reverse().limit(MAX_HISTORY_ITEMS).toArray();
+  history.value = await db.history
+    .orderBy("timestamp")
+    .reverse()
+    .limit(MAX_HISTORY_ITEMS)
+    .toArray();
 };
 
 const panelStyle = computed(() => ({

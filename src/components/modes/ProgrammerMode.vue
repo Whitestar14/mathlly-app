@@ -17,7 +17,7 @@
           :class="[activeBase === base ? 'text-gray-800' : 'text-gray-700']"
           >{{ base }}</span
         >
-        <span>{{ currentDisplayValues[base]?.display || '0' }}</span>
+        <span>{{ formatDisplayValue(displayValues[base]?.display || 0) }}</span>
       </button>
     </div>
 
@@ -144,18 +144,12 @@
 
 <script setup>
 import { Delete } from "lucide-vue-next";
-import { computed, defineEmits, defineProps, watch, toRef } from "vue";
+import { computed, defineEmits, defineProps } from "vue";
 
 const props = defineProps({
   displayValues: {
     type: Object,
     required: true,
-    default: () => ({
-      HEX: { input: "0", display: "0" },
-      DEC: { input: "0", display: "0" },
-      OCT: { input: "0", display: "0" },
-      BIN: { input: "0", display: "0" },
-    }),
   },
   activeBase: {
     type: String,
@@ -192,33 +186,12 @@ const isButtonEnabled = computed(() => (button) => {
   }
 });
 
-const formatDisplayValue = (value, base) => {
+const formatDisplayValue = (value) => {
   if (!value) return "0";
   // Remove prefixes and return the value as is
   let result = value.replace(/^(0x|0o|0b)/, "").toUpperCase();
-  console.log("Result:" + result);
   return result;
 };
-
-// Replace the existing watch with this deep watcher
-watch(
-  () => props.displayValues,
-  (newValues) => {
-    console.log("Display values updated:", newValues);
-  },
-  { deep: true, immediate: true }
-);
-
-const currentDisplayValues = computed(() => {
-  return Object.entries(props.displayValues).reduce((acc, [base, value]) => {
-    acc[base] = {
-      ...value,
-      display: formatDisplayValue(value.display, base)
-    };
-    return acc;
-  }, {});
-});
-
 
 </script>
 

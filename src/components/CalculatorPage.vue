@@ -80,8 +80,7 @@ import {
   onMounted,
   onUnmounted,
   ref,
-  watch,
-  reactive
+  watch
 } from "vue";
 import db from "../data/db";
 import CalculatorButtons from "./CalculatorButtons.vue";
@@ -176,6 +175,8 @@ const addToHistoryDebounced = (() => {
   };
 })();
 
+
+
 const selectHistoryItem = (item) => {
   calculatorState.value.input = item.expression;
 };
@@ -239,31 +240,24 @@ const updateDisplayState = () => {
 };
 
 const handleButtonClick = (btn) => {
-  console.log('Button clicked:', btn);
-  console.log('Before update - displayValues:', JSON.parse(JSON.stringify(displayValues.value)));
-  
   const result = calculator.value.handleButtonClick(btn);
-  console.log('Result from calculator:', result);
   
   calculatorState.value = result;
 
-  
-  console.log('Final calculatorState:', JSON.parse(JSON.stringify(calculatorState.value)));
-  
-  
   if (props.mode === "Programmer") {
-    // console.log('After update - displayValues:', JSON.parse(JSON.stringify(displayValues.value)));
     updateDisplayState();
   }
+
   if (btn === "=") {
-    animatedResult.value = calculatorState.value.input;
+    animatedResult.value = result.result;
     isAnimating.value = true;
     
     setTimeout(() => {
       isAnimating.value = false;
     }, 500);
     
-    addToHistoryDebounced(calculatorState.value.input, preview.value);
+    // Store both the expression and the result
+    addToHistoryDebounced(result.expression, result.result);
   }
 };
 

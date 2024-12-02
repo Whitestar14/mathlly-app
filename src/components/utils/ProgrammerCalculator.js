@@ -1,5 +1,10 @@
 import { evaluate } from "mathjs";
-import { DecCalculator, BinCalculator, HexCalculator, OctCalculator } from "./BaseCalculator";
+import {
+  BinCalculator,
+  DecCalculator,
+  HexCalculator,
+  OctCalculator,
+} from "./BaseCalculator";
 
 // ProgrammerCalculator.js
 
@@ -14,6 +19,7 @@ export class ProgrammerCalculator {
     };
     this.error = "";
     this.settings = settings;
+    this.currentExpression = "";
     this.calculators = {
       DEC: new DecCalculator(),
       BIN: new BinCalculator(),
@@ -143,9 +149,6 @@ export class ProgrammerCalculator {
 
     try {
       switch (btn) {
-        case "=":
-          this.handleEquals();
-          break;
         case "AC":
         case "C":
           this.handleClear();
@@ -171,6 +174,8 @@ export class ProgrammerCalculator {
         case ">>":
           this.handleBitwiseOperation(btn);
           break;
+        case "=":
+          return this.handleEquals();
         default:
           this.handleNumber(btn);
       }
@@ -180,7 +185,12 @@ export class ProgrammerCalculator {
     }
 
     this.updateDisplayValues();
-    return { input: this.states[this.activeBase].input, error: this.error };
+    return { 
+      input: this.states[this.activeBase].input, 
+      error: this.error,
+      expression: this.currentExpression
+    };
+  
   }
 
   handleBitwiseOperation(op) {
@@ -242,13 +252,22 @@ export class ProgrammerCalculator {
   handleEquals() {
     this.error = "";
     try {
-      const result = this.evaluateExpression(
-        this.states[this.activeBase].input
-      );
+      // Store the current expression before evaluation
+      this.currentExpression = this.states[this.activeBase].input;
+      const result = this.evaluateExpression(this.currentExpression);
       this.states[this.activeBase].input = this.formatResult(result);
+      // Return both the expression and the result
+      return {
+        expression: this.currentExpression,
+        result: this.states[this.activeBase].input,
+      };
     } catch (err) {
       this.states[this.activeBase].input = "Error";
       this.error = err.message;
+      return {
+        expression: this.currentExpression,
+        result: "Error",
+      };
     }
   }
 
