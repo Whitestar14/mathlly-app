@@ -97,6 +97,9 @@ export class BasicCalculator {
         case "÷":
           this.handleOperator(btn);
           break;
+        case "±":
+          this.handlePlusMinus();
+          break;
         case "=":
           return this.handleEquals();
         default:
@@ -156,7 +159,7 @@ export class BasicCalculator {
       return {
         expression: this.currentExpression,
         result: this.input,
-        input: this.input
+        input: this.input,
       };
     } catch (err) {
       this.input = "Error";
@@ -171,6 +174,21 @@ export class BasicCalculator {
   handleClear() {
     this.input = "0";
     this.error = "";
+  }
+
+  handlePlusMinus() {
+    this.error = "";
+    if (this.input !== "Error" && !this.isLastCharOperator()) {
+      try {
+        const result = parseFloat(this.input) * -1;
+        if (!isFinite(result)) {
+          throw new Error("Invalid negation");
+        }
+        this.input = this.formatResult(result);
+      } catch (err) {
+        this.error = err.message;
+      }
+    }
   }
 
   handleClearEntry() {

@@ -1,12 +1,10 @@
-import { evaluate } from "mathjs";
+import { evaluate, bignumber } from "mathjs";
 import {
   BinCalculator,
   DecCalculator,
   HexCalculator,
   OctCalculator,
 } from "./BaseCalculator";
-
-// ProgrammerCalculator.js
 
 export class ProgrammerCalculator {
   constructor(settings) {
@@ -41,21 +39,14 @@ export class ProgrammerCalculator {
 
       sanitizedExpr = sanitizedExpr.replace(/[+\-*/]\s*$/, "");
 
-      if (base === "BIN") {
+      if (base !== "DEC") {
         const parts = sanitizedExpr.split(/([+\-*/])/);
         sanitizedExpr = parts
           .map((part) => {
-            if (!["+", "-", "*", "/"].includes(part) && part !== "") {
-              return parseInt(part, 2).toString(10);
-            }
-            return part;
-          })
-          .join("");
-      } else if (base !== "DEC") {
-        const parts = sanitizedExpr.split(/([+\-*/])/);
-        sanitizedExpr = parts
-          .map((part) => {
-            if (!["+", "-", "*", "/"].includes(part) && part !== "") {
+            if (
+              !["+", "-", "*", "/", "(", ")", "<<", ">>"].includes(part) &&
+              part.trim() !== ""
+            ) {
               return parseInt(part, this.getBaseInt(base)).toString(10);
             }
             return part;
@@ -63,10 +54,24 @@ export class ProgrammerCalculator {
           .join("");
       }
 
-      if (sanitizedExpr === "") return 0;
+      // Handle shift operations
+      sanitizedExpr = sanitizedExpr.replace(
+        /(\d+)\s*<<\s*(\d+)/g,
+        (_, a, b) => {
+          return (BigInt(a) << BigInt(b)).toString();
+        }
+      );
+      sanitizedExpr = sanitizedExpr.replace(
+        /(\d+)\s*>>\s*(\d+)/g,
+        (_, a, b) => {
+          return (BigInt(a) >> BigInt(b)).toString();
+        }
+      );
+
+      if (sanitizedExpr === "") return bignumber(0);
 
       const result = evaluate(sanitizedExpr);
-      return base === "BIN" ? Math.floor(result) : result;
+      return bignumber(result);
     } catch (err) {
       console.error("Error in evaluateExpression:", err);
       return null;
@@ -90,10 +95,11 @@ export class ProgrammerCalculator {
 
   formatResult(result, base = this.activeBase) {
     if (result === null) return "";
+    const intValue = parseInt(result.toString());
     if (base === "BIN") {
-      return Math.floor(result).toString(2);
+      return intValue.toString(2);
     }
-    return this.calculators[base].formatResult(result);
+    return this.calculators[base].formatResult(intValue);
   }
 
   handleBaseChange(newBase) {
@@ -138,7 +144,11 @@ export class ProgrammerCalculator {
       this.states[this.activeBase].input.length >= maxLength &&
       btn !== "=" &&
       btn !== "AC" &&
-      btn !== "backspace"
+      btn !== "backspace" &&
+      btn !== "C" &&
+      btn !== "<<" &&
+      btn !== ">>" &&
+      btn !== "±"
     ) {
       this.error = "Maximum input length reached";
       setTimeout(() => {
@@ -149,6 +159,8 @@ export class ProgrammerCalculator {
 
     try {
       switch (btn) {
+        case "=":
+          return this.handleEquals();
         case "AC":
         case "C":
           this.handleClear();
@@ -163,19 +175,20 @@ export class ProgrammerCalculator {
         case "-":
         case "×":
         case "÷":
-          this.handleOperator(btn);
-          break;
-        // Add bitwise operations
-        case "AND":
-        case "OR":
-        case "XOR":
-        case "NOT":
         case "<<":
         case ">>":
-          this.handleBitwiseOperation(btn);
+          this.handleOperator(btn);
           break;
-        case "=":
-          return this.handleEquals();
+        case "±":
+          this.handleToggleSign();
+          break;
+        case "(":
+        case ")":
+          this.handleParenthesis(btn);
+          break;
+        case "%":
+          this.handlePercent();
+          break;
         default:
           this.handleNumber(btn);
       }
@@ -185,53 +198,65 @@ export class ProgrammerCalculator {
     }
 
     this.updateDisplayValues();
-    return { 
-      input: this.states[this.activeBase].input, 
+    return {
+      input: this.states[this.activeBase].input,
       error: this.error,
-      expression: this.currentExpression
+      expression: this.currentExpression,
     };
-  
   }
 
-  handleBitwiseOperation(op) {
-    const currentValue = this.evaluateExpression(
-      this.states[this.activeBase].input,
-      this.activeBase
-    );
-    if (currentValue === null) return;
+  handleLeftShift() {
+    this.handleOperator("<<");
+  }
 
-    let result;
-    switch (op) {
-      case "AND":
-        this.states[this.activeBase].input += " & ";
-        break;
-      case "OR":
-        this.states[this.activeBase].input += " | ";
-        break;
-      case "XOR":
-        this.states[this.activeBase].input += " ^ ";
-        break;
-      case "NOT":
-        result = ~currentValue;
-        this.states[this.activeBase].input = this.formatResult(
-          result,
-          this.activeBase
-        );
-        break;
-      case "<<":
-        this.states[this.activeBase].input += " << ";
-        break;
-      case ">>":
-        this.states[this.activeBase].input += " >> ";
-        break;
+  handleRightShift() {
+    this.handleOperator(">>");
+  }
+
+  handleToggleSign() {
+    if (this.states[this.activeBase].input !== "0") {
+      if (this.states[this.activeBase].input.startsWith("-")) {
+        this.states[this.activeBase].input =
+          this.states[this.activeBase].input.slice(1);
+      } else {
+        this.states[this.activeBase].input =
+          "-" + this.states[this.activeBase].input;
+      }
     }
+  }
+
+  handleParenthesis(parenthesis) {
+    const currentInput = this.states[this.activeBase].input;
+    if (
+      parenthesis === "(" &&
+      (currentInput === "0" || this.isLastCharOperator())
+    ) {
+      this.states[this.activeBase].input =
+        currentInput === "0" ? "(" : currentInput + "(";
+    } else if (parenthesis === "(" && this.isLastCharNumber()) {
+      this.states[this.activeBase].input += " × (";
+    } else {
+      this.states[this.activeBase].input += parenthesis;
+    }
+  }
+
+  handlePercent() {
+    const currentValue = this.evaluateExpression(
+      this.states[this.activeBase].input
+    );
+    this.states[this.activeBase].input = this.formatResult(
+      currentValue.div(100)
+    );
   }
 
   handleOperator(op) {
     this.error = "";
-    if (!this.isLastCharOperator()) {
+    if (
+      !this.isLastCharOperator() &&
+      !this.states[this.activeBase].input.endsWith("(")
+    ) {
       this.states[this.activeBase].input += ` ${op} `;
-    } else {
+    } else if (this.isLastCharOperator()) {
       this.states[this.activeBase].input =
         this.states[this.activeBase].input.slice(0, -3) + ` ${op} `;
     }
@@ -240,10 +265,12 @@ export class ProgrammerCalculator {
   handleNumber(num) {
     this.error = "";
     if (
-      this.states[this.activeBase].input === "Error" ||
-      this.states[this.activeBase].input === "0"
+      this.states[this.activeBase].input === "0" ||
+      this.states[this.activeBase].input === "Error"
     ) {
       this.states[this.activeBase].input = num;
+    } else if (this.isLastCharClosingParenthesis()) {
+      this.states[this.activeBase].input += ` × ${num}`;
     } else {
       this.states[this.activeBase].input += num;
     }
@@ -252,11 +279,9 @@ export class ProgrammerCalculator {
   handleEquals() {
     this.error = "";
     try {
-      // Store the current expression before evaluation
       this.currentExpression = this.states[this.activeBase].input;
       const result = this.evaluateExpression(this.currentExpression);
       this.states[this.activeBase].input = this.formatResult(result);
-      // Return both the expression and the result
       return {
         expression: this.currentExpression,
         result: this.states[this.activeBase].input,
@@ -305,8 +330,14 @@ export class ProgrammerCalculator {
   }
 
   isLastCharOperator() {
-    return ["+", "-", "×", "÷"].includes(
-      this.states[this.activeBase].input.trim().slice(-1)
-    );
+    return /[+\-×÷<<>>]\s*$/.test(this.states[this.activeBase].input);
+  }
+
+  isLastCharNumber() {
+    return /[0-9A-Fa-f]$/.test(this.states[this.activeBase].input);
+  }
+
+  isLastCharClosingParenthesis() {
+    return this.states[this.activeBase].input.trim().endsWith(")");
   }
 }

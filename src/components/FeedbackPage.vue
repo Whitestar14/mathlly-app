@@ -25,7 +25,7 @@
               <p class="text-sm text-gray-500 dark:text-gray-400">Found a bug? Create an issue on GitHub</p>
             </div>
             <a
-              href="https://github.com/your-username/mathlly/issues/new?template=bug_report.md"
+              href="https://github.com/Whitestar14/mathlly-app/issues/new?template=bug_report.md"
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-colors"
@@ -41,7 +41,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Have an idea? Share it with us</p>
               </div>
               <a
-                href="https://github.com/your-username/mathlly/issues/new?template=feature_request.md"
+                href="https://github.com/Whitestar14/mathlly-app/issues/new?template=feature_request.md"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-colors"
