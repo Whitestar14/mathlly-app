@@ -85,8 +85,8 @@
 import { ArrowLeftIcon } from "lucide-vue-next";
 import { defineEmits, defineProps, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import Select from "./Select.vue";
-import Switch from "./Switch.vue";
+import Select from "../Select.vue";
+import Switch from "../Switch.vue";
 
 const router = useRouter();
 

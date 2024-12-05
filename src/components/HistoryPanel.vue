@@ -1,6 +1,6 @@
-<!-- HistoryPanel.vue -->
 <template>
   <div class="relative">
+    <!-- Disabled overlay for Programmer mode on both mobile and desktop -->
     <div
       v-if="props.mode === 'Programmer'"
       class="absolute inset-0 bg-gray-200 dark:bg-gray-700 bg-opacity-70 dark:bg-opacity-70 z-10 flex items-center justify-center cursor-not-allowed"
@@ -13,16 +13,19 @@
     >
       <LockIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" />
     </div>
+
+    <!-- Mobile backdrop for Programmer mode -->
     <div
-      v-if="isMobile && isOpen && props.mode !== 'Programmer'"
+      v-if="isMobile && isOpen"
       class="fixed inset-0 bg-black bg-opacity-50 z-40"
       @click="closePanel"
     ></div>
+
     <div
       :class="[
         'bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ease-in-out',
         isMobile
-          ? 'fixed bottom-0 left-0 right-0 z-50 rounded-t-lg h-1/2'
+          ? 'fixed bottom-0 left-0 right-0 z-50 rounded-t-lg h-1/2 border-l-0 border-t'
           : 'h-full',
       ]"
       :style="isMobile ? panelStyle : {}"
@@ -63,10 +66,12 @@
                   {{ item.result }}
                 </div>
               </div>
+              <!-- Always visible delete button on mobile, conditionally visible on desktop -->
               <button
                 @click.stop="handleDeleteHistoryItem(item.id)"
                 v-tippy="{ content: 'Delete item', placement: 'top' }"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 p-2 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                :class="isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
               >
                 <TrashIcon class="h-4 w-4" />
               </button>
@@ -125,7 +130,9 @@ const history = ref([]);
 const MAX_HISTORY_ITEMS = 100;
 
 const closePanel = () => {
-  emit("close");
+  if (props.isMobile) {
+    emit("close");
+  }
 };
 
 const handleDeleteHistoryItem = async (id) => {
@@ -135,6 +142,11 @@ const handleDeleteHistoryItem = async (id) => {
 };
 
 const handleSelectHistoryItem = (item) => {
+  // Prevent selecting history items in Programmer mode
+  if (props.mode === 'Programmer') {
+    return;
+  }
+  
   emit("selectHistoryItem", item);
   if (props.isMobile) {
     closePanel();

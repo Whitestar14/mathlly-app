@@ -34,13 +34,13 @@
         />
 
         <calculator-buttons
-      :mode="mode"
-      @button-click="handleButtonClick"
-      @clear="handleClear"
-      @base-change="handleBaseChange"
-      :display-values="displayValues"
-      :active-base="activeBase"
-    />
+          :mode="mode"
+          @button-click="handleButtonClick"
+          @clear="handleClear"
+          @base-change="handleBaseChange"
+          :display-values="displayValues"
+          :active-base="activeBase"
+        />
       </div>
     </div>
 
@@ -53,6 +53,7 @@
       @select-history-item="selectHistoryItem"
       @delete-history-item="deleteHistoryItem"
       @clear-history="clearHistory"
+      @close="$emit('toggle-history')"
       class="w-1/4 min-w-[250px] max-w-[400px]"
     />
 
@@ -80,17 +81,17 @@ import {
   onMounted,
   onUnmounted,
   ref,
-  watch
+  watch,
 } from "vue";
-import db from "../data/db";
-import CalculatorButtons from "./CalculatorButtons.vue";
-import CalculatorDisplay from "./CalculatorDisplay.vue";
-import HistoryPanel from "./HistoryPanel.vue";
-import ShortcutGuide from "./ShortcutGuide.vue";
-import WelcomeModal from "./WelcomeModal.vue";
-import { BasicCalculator } from "./utils/BasicCalculator";
-import { ProgrammerCalculator } from "./utils/ProgrammerCalculator";
-import { StandardCalculator } from "./utils/StandardCalculator";
+import db from "../../data/db";
+import { BasicCalculator } from "../utils/BasicCalculator";
+import { ProgrammerCalculator } from "../utils/ProgrammerCalculator";
+import { StandardCalculator } from "../utils/StandardCalculator";
+import CalculatorButtons from "../CalculatorButtons.vue";
+import CalculatorDisplay from "../CalculatorDisplay.vue";
+import HistoryPanel from "../HistoryPanel.vue";
+import ShortcutGuide from "../ShortcutGuide.vue";
+import WelcomeModal from "../WelcomeModal.vue";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -175,10 +176,13 @@ const addToHistoryDebounced = (() => {
   };
 })();
 
-
-
 const selectHistoryItem = (item) => {
+  if (props.mode === "Programmer") {
+    // Optionally, you can show a tooltip or prevent selection
+    return;
+  }
   calculatorState.value.input = item.expression;
+  currentInput.value = item.expression;
 };
 
 const deleteHistoryItem = async (id) => {
@@ -209,20 +213,25 @@ watch(
   }
 );
 
-watch(() => calculatorState.value.input, (newInput) => {
-  if (props.mode === "Programmer") {
-    // Force an update of display values
-    try {
-      const updatedDisplayValues = calculator.value.updateDisplayValues(newInput);
-      displayValues.value = {
-        ...displayValues.value,
-        ...updatedDisplayValues
-      };
-    } catch (error) {
-      console.error("Error updating display values:", error);
+watch(
+  () => calculatorState.value.input,
+  (newInput) => {
+    if (props.mode === "Programmer") {
+      // Force an update of display values
+      try {
+        const updatedDisplayValues =
+          calculator.value.updateDisplayValues(newInput);
+        displayValues.value = {
+          ...displayValues.value,
+          ...updatedDisplayValues,
+        };
+      } catch (error) {
+        console.error("Error updating display values:", error);
+      }
     }
-  }
-}, { deep: true });
+  },
+  { deep: true }
+);
 
 const updateDisplayState = () => {
   if (props.mode === "Programmer") {
@@ -230,9 +239,10 @@ const updateDisplayState = () => {
       const updatedValues = calculator.value.updateDisplayValues();
       displayValues.value = {
         ...displayValues.value,
-        ...updatedValues
+        ...updatedValues,
       };
-      calculatorState.value.input = updatedValues[activeBase.value]?.input || "0";
+      calculatorState.value.input =
+        updatedValues[activeBase.value]?.input || "0";
     } catch (error) {
       console.error("Error in updateDisplayState:", error);
     }
@@ -241,7 +251,6 @@ const updateDisplayState = () => {
 
 const handleButtonClick = (btn) => {
   const result = calculator.value.handleButtonClick(btn);
-  
   calculatorState.value = result;
 
   if (props.mode === "Programmer") {
@@ -251,13 +260,15 @@ const handleButtonClick = (btn) => {
   if (btn === "=") {
     animatedResult.value = result.result;
     isAnimating.value = true;
-    
+
     setTimeout(() => {
       isAnimating.value = false;
     }, 500);
-    
+
     // Store both the expression and the result
-    addToHistoryDebounced(result.expression, result.result);
+    if (props.mode !== "Programmer") {
+      addToHistoryDebounced(result.expression, result.result);
+    }
   }
 };
 
@@ -277,11 +288,10 @@ const handleBaseChange = (newBase) => {
   }
 };
 
-
 const handleKeyDown = (event) => {
   const key = event.key;
   const allowedKeys = {
-   HEX: /^[0-9A-Fa-f]$/,
+    HEX: /^[0-9A-Fa-f]$/,
     DEC: /^[0-9]$/,
     OCT: /^[0-7]$/,
     BIN: /^[01]$/,
@@ -335,8 +345,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("keydown", handleKeyDown);
 });
-
-
 </script>
 
 <style scoped>

@@ -1,28 +1,28 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import CalculatorPage from '../components/CalculatorPage.vue';
-import AboutPage from '../components/AboutPage.vue';
-import SettingsPage from '../components/SettingsPage.vue';
-import FeedbackPage from '../components/FeedbackPage.vue';
+import { createRouter, createWebHistory } from "vue-router";
+import AboutPage from "../components/pages/AboutPage.vue";
+import FeedbackPage from "../components/pages/FeedbackPage.vue";
+import CalculatorPage from "../components/pages/CalculatorPage.vue";
+import SettingsPage from "../components/pages/SettingsPage.vue";
 
 const routes = [
   {
-    path: '/',
-    name: 'Calculator',
+    path: "/",
+    name: "Calculator",
     component: CalculatorPage,
   },
   {
-    path: '/about',
-    name: 'About',
+    path: "/about",
+    name: "About",
     component: AboutPage,
   },
   {
-    path: '/settings',
-    name: 'Settings',
+    path: "/settings",
+    name: "Settings",
     component: SettingsPage,
   },
   {
-    path: '/feedback',
-    name: 'Feedback',
+    path: "/feedback",
+    name: "Feedback",
     component: FeedbackPage,
   },
 ];
@@ -33,4 +33,3 @@ const router = createRouter({
 });
 
 export default router;
-

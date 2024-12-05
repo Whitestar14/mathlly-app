@@ -1,4 +1,4 @@
-import { fraction, evaluate, format } from "mathjs";
+import { evaluate, format, fraction } from "mathjs";
 
 export class StandardCalculator {
   constructor(settings) {
@@ -87,7 +87,7 @@ export class StandardCalculator {
         this.handlePercentage();
         break;
       case "±":
-        this.handlePlusMinus();
+        this.handleToggleSign();
         break;
       case "AC":
       case "C":
@@ -210,17 +210,12 @@ export class StandardCalculator {
     }
   }
 
-  handlePlusMinus() {
-    this.error = "";
-    if (this.input !== "Error" && !this.isLastCharOperator()) {
-      try {
-        const result = parseFloat(this.input) * -1;
-        if (!isFinite(result)) {
-          throw new Error("Invalid negation");
-        }
-        this.input = this.formatResult(result);
-      } catch (err) {
-        this.error = err.message;
+  handleToggleSign() {
+    if (this.input !== "0") {
+      if (this.input.startsWith("-")) {
+        this.input = this.input.slice(1);
+      } else {
+        this.input = "-" + this.input;
       }
     }
   }

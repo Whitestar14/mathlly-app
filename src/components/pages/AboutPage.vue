@@ -116,7 +116,7 @@
 <script setup>
 import { ArrowLeftIcon, CheckCircleIcon } from "lucide-vue-next";
 import { useRouter } from "vue-router";
-import FeatureCard from "./FeatureCard.vue";
+import FeatureCard from "../FeatureCard.vue";
 
 const router = useRouter();
 

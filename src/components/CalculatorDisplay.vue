@@ -55,7 +55,7 @@
       >
         <!-- Display the current input value -->
         <div
-          ref="inputDisplay"
+          ref="currentInput"
           class="main-display text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide"
           aria-live="polite"
           aria-atomic="true"
@@ -122,7 +122,7 @@ const props = defineProps({
   activeBase: String, 
 });
 
-const inputDisplay = ref(null);
+const currentInput = ref(0);
 const copyButton = ref(null);
 const showLeftChevron = ref(false);
 const showRightChevron = ref(false);
@@ -172,7 +172,7 @@ watch(
   () => props.input,
   () => {
     nextTick(() => {
-      if (inputDisplay.value) {
+      if (currentInput.value) {
         scrollToEnd();
         checkScroll();
       }
@@ -226,38 +226,38 @@ function copyToClipboard() {
 }
 
 function checkScroll() {
-  if (inputDisplay.value) {
-    const { scrollLeft, scrollWidth, clientWidth } = inputDisplay.value;
+  if (currentInput.value) {
+    const { scrollLeft, scrollWidth, clientWidth } = currentInput.value;
     showLeftChevron.value = scrollLeft > 0;
     showRightChevron.value = scrollLeft + clientWidth < scrollWidth;
   }
 }
 
 function scrollToEnd() {
-  if (inputDisplay.value) {
-    inputDisplay.value.scrollLeft = inputDisplay.value.scrollWidth;
+  if (currentInput.value) {
+    currentInput.value.scrollLeft = currentInput.value.scrollWidth;
   }
 }
 
 function scrollToPrevious() {
-  if (inputDisplay.value) {
-    const currentScrollLeft = inputDisplay.value.scrollLeft;
-    const clientWidth = inputDisplay.value.clientWidth;
+  if (currentInput.value) {
+    const currentScrollLeft = currentInput.value.scrollLeft;
+    const clientWidth = currentInput.value.clientWidth;
     let newScrollLeft = Math.max(0, currentScrollLeft - clientWidth);
-    inputDisplay.value.scrollTo({ left: newScrollLeft, behavior: "smooth" });
+    currentInput.value.scrollTo({ left: newScrollLeft, behavior: "smooth" });
   }
 }
 
 function scrollToNext() {
-  if (inputDisplay.value) {
-    const currentScrollLeft = inputDisplay.value.scrollLeft;
-    const clientWidth = inputDisplay.value.clientWidth;
-    const scrollWidth = inputDisplay.value.scrollWidth;
+  if (currentInput.value) {
+    const currentScrollLeft = currentInput.value.scrollLeft;
+    const clientWidth = currentInput.value.clientWidth;
+    const scrollWidth = currentInput.value.scrollWidth;
     let newScrollLeft = Math.min(
       scrollWidth - clientWidth,
       currentScrollLeft + clientWidth
     );
-    inputDisplay.value.scrollTo({ left: newScrollLeft, behavior: "smooth" });
+    currentInput.value.scrollTo({ left: newScrollLeft, behavior: "smooth" });
   }
 }
 </script>

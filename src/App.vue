@@ -1,10 +1,11 @@
+<!-- App.vue -->
 <template>
   <div
     class="min-h-screen flex bg-background dark:bg-gray-900 transition-colors duration-300"
   >
     <sidebar-menu
-      :isOpen="isSidebarOpen"
-      :isMobile="isMobile"
+      :is-open="isSidebarOpen"
+      :is-mobile="isMobile"
       @update:isOpen="updateSidebarOpen"
       @openAbout="navigateToAbout"
       @openSettings="navigateToSettings"
@@ -17,8 +18,8 @@
       <calculator-header
         v-model:mode="mode"
         @toggle-sidebar="toggleSidebar"
-        :isSidebarOpen="isSidebarOpen"
-        :isMobile="isMobile"
+        :is-sidebar-open="isSidebarOpen"
+        :is-mobile="isMobile"
       />
 
       <router-view v-slot="{ Component }">
@@ -26,14 +27,11 @@
           :is="Component"
           :mode="mode"
           :settings="settings"
-          :isMobile="isMobile"
-          :isHistoryOpen="isHistoryOpen"
+          :is-mobile="isMobile"
+          :is-history-open="isHistoryOpen"
           @settings-change="updateSettings"
           @update:mode="updateMode"
-          @add-to-history="addToHistory"
-          @clear-history="clearHistory"
           @select-history-item="selectHistoryItem"
-          @delete-history-item="deleteHistoryItem"
           @toggle-history="toggleHistory"
           @update-history="updateHistory"
         />
@@ -42,15 +40,16 @@
 
     <history-panel
       v-if="isMobile"
-      :isOpen="isHistoryOpen"
-      :isMobile="isMobile"
-      @selectHistoryItem="selectHistoryItem"
-      @deleteHistoryItem="deleteHistoryItem"
-      @clearHistory="clearHistory"
+      :is-open="isHistoryOpen"
+      :is-mobile="isMobile"
+      :mode="mode"
+      @select-history-item="selectHistoryItem"
+      @delete-history-item="deleteHistoryItem"
+      @clear-history="clearHistory"
       @close="closeHistory"
+      disabled="mode === 'Programmer'"
     />
   </div>
-
 </template>
 
 <script setup>
@@ -71,7 +70,7 @@ const settings = ref({
 const isSidebarOpen = ref(false);
 const isHistoryOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
-const currentInput = ref("");
+const currentInput = ref(0);
 
 provide("currentInput", currentInput);
 
@@ -108,17 +107,17 @@ const clearHistory = async () => {
 };
 
 const selectHistoryItem = (item) => {
-  currentInput.value = item.expression;
+  try {
+    currentInput.value = item.expression;
+  } catch (err) {
+    console.error("Error:", err)
+  }
   if (isMobile.value) closeHistory();
 };
 
 const deleteHistoryItem = async (id) => {
   await db.history.delete(id);
-};
-
-const addToHistory = async (expression, result) => {
-  const timestamp = new Date().getTime();
-  await db.history.add({ expression, result, timestamp });
+  updateHistory();
 };
 
 const updateHistory = () => {
@@ -130,22 +129,21 @@ const handleResize = () => {
   isSidebarOpen.value = !isMobile.value;
 };
 
-
 const handleKeyDown = (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
     toggleFullScreen();
     e.preventDefault();
   } else if (e.ctrlKey) {
     switch (e.key) {
-      case 'l':
+      case "l":
         toggleSidebar();
         e.preventDefault();
         break;
-      case 'h':
+      case "h":
         toggleHistory();
         e.preventDefault();
         break;
-      case 's':
+      case "s":
         navigateToSettings();
         e.preventDefault();
         break;
@@ -161,8 +159,8 @@ const toggleFullScreen = () => {
       document.exitFullscreen();
     }
   }
-}
- 
+};
+
 const loadSettings = async () => {
   const savedSettings = await db.settings.toArray();
   if (savedSettings.length > 0) {
