@@ -54,7 +54,7 @@
             <p class="text-sm text-gray-600 dark:text-gray-300">
               Found a bug or have a suggestion? 
               <a
-                href="https://github.com/yourusername/mathlly/issues"
+                href="https://github.com/Whitestar14/mathlly-app/issues"
                 target="_blank"
                 class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
               >

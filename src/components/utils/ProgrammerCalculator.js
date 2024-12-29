@@ -58,13 +58,13 @@ export class ProgrammerCalculator {
       sanitizedExpr = sanitizedExpr.replace(
         /(\d+)\s*<<\s*(\d+)/g,
         (_, a, b) => {
-          return (BigInt(a) << BigInt(b)).toString();
+          return (bignumber(a) << bignumber(b)).toString();
         }
       );
       sanitizedExpr = sanitizedExpr.replace(
         /(\d+)\s*>>\s*(\d+)/g,
         (_, a, b) => {
-          return (BigInt(a) >> BigInt(b)).toString();
+          return (bignumber(a) >> bignumber(b)).toString();
         }
       );
 
