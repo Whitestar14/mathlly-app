@@ -31,6 +31,7 @@
           :is-animating="isAnimating"
           :animated-preview="animatedResult"
           :active-base="activeBase"
+          :settings="settings"
         />
 
         <calculator-buttons
@@ -120,10 +121,8 @@ const calculator = computed(() => {
       return new ProgrammerCalculator(props.settings);
     case "Standard":
       return new StandardCalculator(props.settings);
-    case "Basic":
-      return new BasicCalculator(props.settings);
     default:
-      return new StandardCalculator(props.settings);
+      return new BasicCalculator(props.settings);
   }
 });
 
@@ -178,10 +177,21 @@ const addToHistoryDebounced = (() => {
 
 const selectHistoryItem = (item) => {
   if (props.mode === "Programmer") {
-    // Optionally, you can show a tooltip or prevent selection
-    return;
+    return; // Maintain disabled state for Programmer mode
   }
-  calculatorState.value.input = item.expression;
+  
+  // Update both the display state and calculator state
+  calculatorState.value = {
+    input: item.expression,
+    error: "",
+    expression: item.expression
+  };
+  
+  // Update the calculator's internal state
+  calculator.value.input = item.expression;
+  calculator.value.currentExpression = item.expression;
+  calculator.value.error = "";
+  
   currentInput.value = item.expression;
 };
 

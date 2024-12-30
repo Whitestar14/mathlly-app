@@ -16,7 +16,7 @@
 
     <!-- Mobile backdrop for Programmer mode -->
     <div
-      v-if="isMobile && isOpen"
+      v-if="isMobile && isOpen && props.mode === 'Programmer'"
       class="fixed inset-0 bg-black bg-opacity-50 z-40"
       @click="closePanel"
     ></div>
@@ -147,10 +147,16 @@ const handleSelectHistoryItem = (item) => {
     return;
   }
   
-  emit("selectHistoryItem", item);
-  if (props.isMobile) {
-    closePanel();
+  // Add type checking and sanitization
+  if (!item || typeof item.expression !== 'string') {
+    console.error('Invalid history item');
+    return;
   }
+  
+  emit("selectHistoryItem", {
+    expression: item.expression.trim(),
+    result: item.result
+  });
 };
 
 const handleClearHistory = async () => {

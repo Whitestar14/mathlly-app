@@ -96,11 +96,27 @@ export class ProgrammerCalculator {
   formatResult(result, base = this.activeBase) {
     if (result === null) return "";
     const intValue = parseInt(result.toString());
+    let formattedResult;
     if (base === "BIN") {
-      return intValue.toString(2);
+      formattedResult = intValue.toString(2);
+    } else {
+      formattedResult = this.calculators[base].formatResult(intValue);
     }
-    return this.calculators[base].formatResult(intValue);
+
+    if (this.settings.useThousandsSeparator) {
+      const [integerPart, decimalPart] = formattedResult.split(".");
+      const formattedIntegerPart = integerPart.replace(
+        /\B(?=(\d{3})+(?!\d))/g,
+        ","
+      );
+      formattedResult = decimalPart
+        ? `${formattedIntegerPart}.${decimalPart}`
+        : formattedIntegerPart;
+    }
+
+    return formattedResult;
   }
+
 
   handleBaseChange(newBase) {
     const currentValue = this.evaluateExpression(

@@ -120,6 +120,7 @@ const props = defineProps({
   isAnimating: Boolean,
   animatedResult: String,
   activeBase: String, 
+  settings: Object,
 });
 
 const currentInput = ref(0);
@@ -145,8 +146,10 @@ const formattedInput = computed(() => {
   if (props.activeBase === 'HEX' || props.activeBase === 'OCT') {
     return parts.join(".");
   }
-  
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  if (props.settings.useThousandsSeparator) {
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
   return parts.join(".");
 });
 
