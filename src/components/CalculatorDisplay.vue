@@ -5,27 +5,33 @@
     <!-- Left Chevron indicator -->
     <div
       v-if="showLeftChevron"
-      @click="scrollToPrevious"
       class="absolute left-2 top-8 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
       :class="{
         'opacity-0': !showLeftChevron,
         'opacity-100': showLeftChevron,
       }"
+      @click="scrollToPrevious"
     >
-      <ChevronLeft size="24" class="animate-pulse w-full" />
+      <ChevronLeft
+        size="24"
+        class="animate-pulse w-full"
+      />
     </div>
 
     <!-- Right Chevron indicator -->
     <div
       v-if="showRightChevron"
-      @click="scrollToNext"
       class="absolute right-2 top-8 transform translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
       :class="{
         'opacity-0': !showRightChevron,
         'opacity-100': showRightChevron,
       }"
+      @click="scrollToNext"
     >
-      <ChevronRight size="24" class="animate-pulse" />
+      <ChevronRight
+        size="24"
+        class="animate-pulse"
+      />
     </div>
 
     <!-- Copy button with persistent tooltip -->
@@ -37,10 +43,10 @@
         trigger: 'manual',
         duration: 300
       }"
+      class="absolute right-2 top-2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
       @mouseenter="showTooltip"
       @mouseleave="hideTooltipDelayed"
       @click="copyToClipboard"
-      class="absolute right-2 top-2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
     >
       <Copy size="20" />
     </div>

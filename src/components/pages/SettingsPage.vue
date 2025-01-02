@@ -6,12 +6,14 @@
       class="bg-white dark:bg-gray-800 p-4 flex items-center border-b border-gray-200 dark:border-gray-700"
     >
       <button
-        @click="goBack"
         class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mr-4"
+        @click="goBack"
       >
         <ArrowLeftIcon class="h-6 w-6" />
       </button>
-      <h1 class="text-2xl font-semibold">Settings</h1>
+      <h1 class="text-2xl font-semibold">
+        Settings
+      </h1>
     </header>
 
     <main class="flex-grow p-6">
@@ -20,14 +22,15 @@
           <section
             class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700 rounded-md"
           >
-            <h2 class="text-xl font-semibold mb-4">Display Settings</h2>
+            <h2 class="text-xl font-semibold mb-4">
+              Display Settings
+            </h2>
             <div class="space-y-4">
               <div>
                 <label
                   for="precision"
                   class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >Precision</label
-                >
+                >Precision</label>
                 <Select
                   v-model="localSettings.precision"
                   :options="precisionOptions"
@@ -37,16 +40,14 @@
                 <label
                   for="useFractions"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >Use Fractions</label
-                >
+                >Use Fractions</label>
                 <Switch v-model="localSettings.useFractions" />
               </div>
               <div class="flex items-center justify-between">
                 <label
                   for="useThousandsSeparator"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >Use Thousands Separator</label
-                >
+                >Use Thousands Separator</label>
                 <Switch v-model="localSettings.useThousandsSeparator" />
               </div>
             </div>
@@ -55,7 +56,9 @@
           <section
             class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700 rounded-md"
           >
-            <h2 class="text-xl font-semibold mb-4">Theme</h2>
+            <h2 class="text-xl font-semibold mb-4">
+              Theme
+            </h2>
             <div class="flex items-center justify-between">
               <!-- Add theme toggle here if needed -->
             </div>
@@ -64,14 +67,14 @@
 
         <div class="mt-8 flex justify-end space-x-2">
           <button
-            @click="goBack"
             class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            @click="goBack"
           >
             Cancel
           </button>
           <button
-            @click="saveSettings"
             class="px-6 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700 transition-colors duration-300"
+            @click="saveSettings"
           >
             Save Changes
           </button>
@@ -85,8 +88,8 @@
 import { ArrowLeftIcon } from "lucide-vue-next";
 import { defineEmits, defineProps, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import Select from "../Select.vue";
-import Switch from "../Switch.vue";
+import Select from "../SelectBar.vue";
+import Switch from "../ToggleBar.vue";
 
 const router = useRouter();
 

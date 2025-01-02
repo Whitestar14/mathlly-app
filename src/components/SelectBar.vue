@@ -1,8 +1,15 @@
 <template>
-  <select-root v-model="selectedValue" :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
+  <select-root
+    v-model="selectedValue"
+    :model-value="modelValue"
+    @update:model-value="$emit('update:modelValue', $event)"
+  >
     <select-trigger class="inline-flex items-center text-gray-700 dark:text-gray-300 justify-between w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
       <select-value :placeholder="placeholder" />
-      <select-icon class="w-5 h-5 ml-2 -mr-1 text-gray-400" aria-hidden="true">
+      <select-icon
+        class="w-5 h-5 ml-2 -mr-1 text-gray-400"
+        aria-hidden="true"
+      >
         <chevron-down-icon />
       </select-icon>
     </select-trigger>
@@ -16,7 +23,12 @@
             <select-label class="px-2 py-1.5 text-xs font-semibold text-gray-900 dark:text-gray-300">
               {{ label }}
             </select-label>
-            <select-item v-for="option in options" :key="option.value" :value="option.value" class="relative flex items-center px-8 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-default select-none hover:bg-gray-100 dark:hover:bg-gray-600">
+            <select-item
+              v-for="option in options"
+              :key="option.value"
+              :value="option.value"
+              class="relative flex items-center px-8 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-default select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+            >
               <select-item-text>{{ option.label }}</select-item-text>
               <select-item-indicator class="absolute left-2 inline-flex items-center">
                 <check-icon class="w-4 h-4" />

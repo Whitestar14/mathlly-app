@@ -2,11 +2,11 @@
 <template>
   <component 
     :is="currentModeComponent" 
-    @button-click="handleButtonClick" 
+    :display-values="displayValues" 
+    :active-base="activeBase"
+    @button-click="handleButtonClick"
     @clear="handleClear"
     @base-change="handleBaseChange"
-    :display-values="displayValues"
-    :active-base="activeBase"
   />
 </template>
 

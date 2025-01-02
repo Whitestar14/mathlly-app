@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "dev": "vue-cli-service serve --mode development --open",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -15,6 +16,7 @@
     "lucide-vue-next": "^0.439.0",
     "mathjs": "^13.1.1",
     "radix-vue": "^1.9.5",
+    "tippy.js": "^6.3.7",
     "vue": "^3.2.13",
     "vue-router": "^4.4.5",
     "vue-tippy": "^6.4.4"
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@babel/preset-env": "^7.26.0",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
@@ -30,7 +33,8 @@
     "eslint-plugin-vue": "^8.0.3",
     "postcss": "^8.4.45",
     "tailwindcss": "^3.4.10",
-    "webpack-bundle-analyzer": "^4.10.2"
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-dev-server": "^5.2.0"
   },
   "eslintConfig": {
     "root": true,
@@ -38,18 +42,22 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/vue3-essential",
+      "plugin:vue/recommended",
       "eslint:recommended"
     ],
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "vue/no-unused-refs": "warn",
+      "vue/no-unused-vars": "warn"
+    }
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
 }

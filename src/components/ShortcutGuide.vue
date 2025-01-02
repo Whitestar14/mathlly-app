@@ -1,6 +1,9 @@
 <!-- ShortcutGuide.vue -->
 <template>
-  <DialogRoot :open="open" @update:open="$emit('update:open', $event)">
+  <DialogRoot
+    :open="open"
+    @update:open="$emit('update:open', $event)"
+  >
     <!-- Backdrop -->
     <DialogOverlay class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
 
@@ -14,8 +17,8 @@
       >
         <!-- Close Button -->
         <button
-          @click="closeModal"
           class="absolute right-4 top-4 rounded-full p-2 opacity-70 ring-offset-background transition-opacity dark:text-gray-100 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+          @click="closeModal"
         >
           <XIcon class="h-4 w-4" />
           <span class="sr-only">Close</span>
@@ -54,8 +57,7 @@
                 <span
                   v-if="modIndex < shortcut.modifiers.length - 1"
                   class="text-indigo-500 dark:text-indigo-400"
-                  >+</span
-                >
+                >+</span>
               </template>
               <kbd
                 class="bg-indigo-200 dark:bg-indigo-800 px-2 py-1 rounded text-xs font-semibold text-indigo-800 dark:text-indigo-200 shadow"

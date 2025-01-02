@@ -17,9 +17,9 @@
     >
       <calculator-header
         v-model:mode="mode"
-        @toggle-sidebar="toggleSidebar"
         :is-sidebar-open="isSidebarOpen"
         :is-mobile="isMobile"
+        @toggle-sidebar="toggleSidebar"
       />
 
       <router-view v-slot="{ Component }">
@@ -43,11 +43,11 @@
       :is-open="isHistoryOpen"
       :is-mobile="isMobile"
       :mode="mode"
+      disabled="mode === 'Programmer'"
       @select-history-item="selectHistoryItem"
       @delete-history-item="deleteHistoryItem"
       @clear-history="clearHistory"
       @close="closeHistory"
-      disabled="mode === 'Programmer'"
     />
   </div>
 </template>

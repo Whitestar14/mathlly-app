@@ -10,10 +10,9 @@
 }
 
 @font-face {
-  font-family: 'san-fancisco';
-  src: url(./fonts/san_francisco-webfont.woff);
+  font-family: 'Reddit mono';
+  src: url(./fonts/RedditMono.ttf);
 }
-
 * {
   @apply transition-colors
 }

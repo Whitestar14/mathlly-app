@@ -3,13 +3,13 @@
     <!-- Disabled overlay for Programmer mode on both mobile and desktop -->
     <div
       v-if="props.mode === 'Programmer'"
-      class="absolute inset-0 bg-gray-200 dark:bg-gray-700 bg-opacity-70 dark:bg-opacity-70 z-10 flex items-center justify-center cursor-not-allowed"
       v-tippy="{
         content: 'History is disabled in Programmer mode',
         placement: 'top',
         arrow: false,
         followCursor: true,
       }"
+      class="absolute inset-0 bg-gray-200 dark:bg-gray-700 bg-opacity-70 dark:bg-opacity-70 z-10 flex items-center justify-center cursor-not-allowed"
     >
       <LockIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" />
     </div>
@@ -19,7 +19,7 @@
       v-if="isMobile && isOpen && props.mode === 'Programmer'"
       class="fixed inset-0 bg-black bg-opacity-50 z-40"
       @click="closePanel"
-    ></div>
+    />
 
     <div
       :class="[
@@ -37,8 +37,8 @@
           </h2>
           <button
             v-if="isMobile"
-            @click="closePanel"
             class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            @click="closePanel"
           >
             <XIcon class="h-6 w-6" />
           </button>
@@ -50,7 +50,11 @@
           >
             There's no history yet
           </div>
-          <TransitionGroup name="list" tag="div" class="space-y-2">
+          <TransitionGroup
+            name="list"
+            tag="div"
+            class="space-y-2"
+          >
             <div
               v-for="item in history"
               :key="item.id"
@@ -68,10 +72,10 @@
               </div>
               <!-- Always visible delete button on mobile, conditionally visible on desktop -->
               <button
-                @click.stop="handleDeleteHistoryItem(item.id)"
                 v-tippy="{ content: 'Delete item', placement: 'top' }"
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
                 :class="isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+                @click.stop="handleDeleteHistoryItem(item.id)"
               >
                 <TrashIcon class="h-4 w-4" />
               </button>
@@ -80,8 +84,8 @@
         </div>
         <button
           v-if="history.length > 0"
-          @click="handleClearHistory"
           class="mt-4 flex items-center justify-center w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          @click="handleClearHistory"
         >
           <TrashIcon class="w-4 h-4 mr-2" />
           Clear History

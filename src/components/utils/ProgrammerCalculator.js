@@ -103,7 +103,7 @@ export class ProgrammerCalculator {
       formattedResult = this.calculators[base].formatResult(intValue);
     }
 
-    if (this.settings.useThousandsSeparator) {
+    if (this.settings.useThousandsSeparator && base == "DEC") {
       const [integerPart, decimalPart] = formattedResult.split(".");
       const formattedIntegerPart = integerPart.replace(
         /\B(?=(\d{3})+(?!\d))/g,

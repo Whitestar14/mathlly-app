@@ -1,31 +1,99 @@
 <template>
   <div class="grid grid-cols-4 gap-2">
-    <button @click="handleClick('C')" class="btn special-btn-ac">AC</button>
-    <button @click="handleClick('CE')" class="btn function-btn">CE</button>
-    <button @click="handleClick('backspace')" class="btn function-btn flex justify-center items-center">
+    <button
+      class="btn special-btn-ac"
+      @click="handleClick('C')"
+    >
+      AC
+    </button>
+    <button
+      class="btn function-btn"
+      @click="handleClick('CE')"
+    >
+      CE
+    </button>
+    <button
+      class="btn function-btn flex justify-center items-center"
+      @click="handleClick('backspace')"
+    >
       <Delete class="h-5 w-5" />
     </button>
-    <button @click="handleClick('÷')" class="btn operator-btn">÷</button>
+    <button
+      class="btn operator-btn"
+      @click="handleClick('÷')"
+    >
+      ÷
+    </button>
 
-    <button v-for="num in ['7', '8', '9']" :key="num" @click="handleClick(num)" class="btn number-btn">
+    <button
+      v-for="num in ['7', '8', '9']"
+      :key="num"
+      class="btn number-btn"
+      @click="handleClick(num)"
+    >
       {{ num }}
     </button>
-    <button @click="handleClick('×')" class="btn operator-btn">×</button>
+    <button
+      class="btn operator-btn"
+      @click="handleClick('×')"
+    >
+      ×
+    </button>
 
-    <button v-for="num in ['4', '5', '6']" :key="num" @click="handleClick(num)" class="btn number-btn">
+    <button
+      v-for="num in ['4', '5', '6']"
+      :key="num"
+      class="btn number-btn"
+      @click="handleClick(num)"
+    >
       {{ num }}
     </button>
-    <button @click="handleClick('-')" class="btn operator-btn">−</button>
+    <button
+      class="btn operator-btn"
+      @click="handleClick('-')"
+    >
+      −
+    </button>
 
-    <button v-for="num in ['1', '2', '3']" :key="num" @click="handleClick(num)" class="btn number-btn">
+    <button
+      v-for="num in ['1', '2', '3']"
+      :key="num"
+      class="btn number-btn"
+      @click="handleClick(num)"
+    >
       {{ num }}
     </button>
-    <button @click="handleClick('+')" class="btn operator-btn">+</button>
+    <button
+      class="btn operator-btn"
+      @click="handleClick('+')"
+    >
+      +
+    </button>
 
-    <button @click="handleClick('±')" class="btn number-btn">±</button>
-    <button @click="handleClick('0')" class="btn number-btn">0</button>
-    <button @click="handleClick('.')" class="btn number-btn">.</button>
-    <button @click="handleClick('=')" class="btn operator-btn equals-btn">=</button>
+    <button
+      class="btn number-btn"
+      @click="handleClick('±')"
+    >
+      ±
+    </button>
+    <button
+      class="btn number-btn"
+      @click="handleClick('0')"
+    >
+      0
+    </button>
+    <button
+      class="btn number-btn"
+      @click="handleClick('.')"
+    >
+      .
+    </button>
+    <button
+      class="btn operator-btn equals-btn"
+      @click="handleClick('=')"
+    >
+      =
+    </button>
   </div>
 </template>
 

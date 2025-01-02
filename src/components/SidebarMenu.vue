@@ -1,6 +1,10 @@
 <template>
   <Transition name="slide">
-    <div v-show="isOpen" class="sidebar-container" :class="sidebarClasses">
+    <div
+      v-show="isOpen"
+      class="sidebar-container"
+      :class="sidebarClasses"
+    >
       <div class="flex flex-col h-full">
         <div
           class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
@@ -11,18 +15,16 @@
                 aria-label="logo"
                 class="text-gray-600 font-semibold px-2 py-1 my-0 text-2xl dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg pointer-events-none"
                 style="font-family: 'Reddit mono'"
-                >{math<span
-                  class="text-indigo-400 italic font-black dark:text-indigo-600 inline-block mx-0.5"
-                  >//</span
-                >y}</kbd
-              >
+              >{math<span
+                class="text-indigo-400 italic font-black dark:text-indigo-600 inline-block mx-0.5"
+              >//</span>y}</kbd>
             </div>
           </div>
           <button
-            @click="closeSidebar"
             v-tippy="{ content: 'Close Sidebar', placement: 'bottom' }"
             class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-opacity duration-300"
             :class="{ 'opacity-0': !isOpen }"
+            @click="closeSidebar"
           >
             <PanelLeftIcon class="h-6 w-6" />
           </button>
@@ -34,22 +36,28 @@
               v-if="showIndicator"
               class="absolute z-50 left-4 w-1 rounded-lg bg-indigo-500 dark:bg-gray-400 transition-all duration-300 ease-in-out"
               :style="{ top: `${indicatorPosition}em`, height: '15px' }"
-            ></div>
+            />
             <NavigationMenuItem
               v-for="(item, index) in menuItems"
               :key="item.path"
             >
-              <NavigationMenuLink :active="currentRoute === item.path" asChild>
+              <NavigationMenuLink
+                :active="currentRoute === item.path"
+                as-child
+              >
                 <button
-                  @click="navigateTo(item.path, index)"
                   :class="[
                     'w-full flex items-center gap-2 px-2 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all duration-300',
                     currentRoute === item.path
                       ? 'bg-gray-100 dark:bg-gray-800 font-medium text-indigo-600 dark:text-gray-400'
                       : 'font-normal',
                   ]"
+                  @click="navigateTo(item.path, index)"
                 >
-                  <component :is="item.icon" class="h-5 w-5 inline-block" />
+                  <component
+                    :is="item.icon"
+                    class="h-5 w-5 inline-block"
+                  />
                   <span class="inline-block">{{ item.name }}</span>
                 </button>
               </NavigationMenuLink>
@@ -67,16 +75,16 @@
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     :active="currentRoute === `/${item}`"
-                    asChild
+                    as-child
                   >
                     <button
-                      @click="navigateTo(`/${item}`, menuItems.length)"
                       :class="[
                         'flex w-full items-center justify-center gap-2 rounded-md p-2 text-sm transition-colors',
                         currentRoute === `/${item}`
                           ? 'bg-gray-100 text-indigo-600 dark:bg-gray-800 dark:text-indigo-400'
                           : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                       ]"
+                      @click="navigateTo(`/${item}`, menuItems.length)"
                     >
                       <component
                         :is="

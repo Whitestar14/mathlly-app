@@ -1,6 +1,9 @@
 <!-- WelcomeModal.vue  -->
 <template>
-  <DialogRoot :open="isOpen" @update:open="$emit('update:isOpen')">
+  <DialogRoot
+    :open="isOpen"
+    @update:open="$emit('update:isOpen')"
+  >
     <!-- Backdrop -->
     <DialogOverlay class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
 
@@ -14,15 +17,18 @@
       >
         <!-- Close Button -->
         <button
-          @click="closeModal"
           class="absolute right-4 top-4 rounded-full p-2 opacity-70 ring-offset-background transition-opacity dark:text-gray-100 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+          @click="closeModal"
         >
           <X class="h-4 w-4" />
           <span class="sr-only">Close</span>
         </button>
 
         <!-- Title -->
-        <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+        <DialogTitle
+          as="h3"
+          class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
+        >
           Welcome to Mathlly Beta
         </DialogTitle>
 
@@ -33,7 +39,9 @@
           </p>
 
           <div class="space-y-2">
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white">What you should know:</h4>
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+              What you should know:
+            </h4>
             <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
               <li class="flex items-start">
                 <span class="text-indigo-500 mr-2">•</span>
@@ -68,10 +76,10 @@
         <div class="mt-6 flex justify-between items-center">
           <label class="flex items-center space-x-2">
             <input
-              type="checkbox"
               v-model="dontShowAgain"
+              type="checkbox"
               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
-            />
+            >
             <span class="text-sm text-gray-600 dark:text-gray-300">Don't show again</span>
           </label>
 

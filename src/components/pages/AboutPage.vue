@@ -7,18 +7,27 @@
     >
       <div class="container mx-auto flex items-center">
         <button
-          @click="goBack"
           class="mr-4 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          @click="goBack"
         >
           <ArrowLeftIcon class="h-6 w-6" />
         </button>
-        <h1 class="text-2xl font-bold">About Mathlly</h1>
+        <h1 class="text-2xl font-bold">
+          About Mathlly
+        </h1>
       </div>
     </header>
 
     <main class="container mx-auto px-4 py-8 md:py-12">
-     <div class="-mt-4 mb-4 flex flex-row justify-center items-center ml-2 p-1 rounded-2xl w-32 align-middle  
-     text-gray-100 bg-indigo-500 dark:bg-gray-600 tracking-wider gap-1 pointer-events-none"><span class="h-2 w-2 bg-gray-100 rounded-full"></span><span class="text-sm font-bold vertical-middle" style="font-family: 'Geist mono'">v0.2.0-beta</span></div>
+      <div
+        class="-mt-4 mb-4 flex flex-row justify-center items-center ml-2 p-1 rounded-2xl w-32 align-middle  
+     text-gray-100 bg-indigo-500 dark:bg-gray-600 tracking-wider gap-1 pointer-events-none"
+      >
+        <span class="h-2 w-2 bg-gray-100 rounded-full" /><span
+          class="text-sm font-bold vertical-middle"
+          style="font-family: 'Geist mono'"
+        >v0.2.0-beta</span>
+      </div>
       <section
         class="mb-16 sm:mb-32 text-left"
         style="font-family: 'Geist mono'"
@@ -27,8 +36,7 @@
           The toolset by developers,
           <span
             class="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl mb-4 opacity-70"
-            >for developers</span
-          >
+          >for developers</span>
         </h2>
 
         <p

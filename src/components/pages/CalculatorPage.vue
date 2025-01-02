@@ -10,13 +10,16 @@
     <div
       class="flex-grow bg-white dark:bg-gray-800 shadow-xl overflow-hidden transition-colors duration-300"
     >
-      <div class="px-6 mx-auto" :class="isMobile ? 'py-6' : ''">
+      <div
+        class="px-6 mx-auto"
+        :class="isMobile ? 'py-6' : ''"
+      >
         <div class="flex justify-between items-center mb-4">
           <div class="flex items-center space-x-2">
             <div class="flex items-center space-x-4 md:hidden">
               <button
-                @click="$emit('toggle-history')"
                 class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                @click="$emit('toggle-history')"
               >
                 <HistoryIcon class="h-6 w-6" />
               </button>
@@ -36,11 +39,11 @@
 
         <calculator-buttons
           :mode="mode"
+          :display-values="displayValues"
+          :active-base="activeBase"
           @button-click="handleButtonClick"
           @clear="handleClear"
           @base-change="handleBaseChange"
-          :display-values="displayValues"
-          :active-base="activeBase"
         />
       </div>
     </div>
@@ -51,18 +54,21 @@
       :is-open="isHistoryOpen"
       :is-mobile="isMobile"
       :mode="mode"
+      class="w-1/4 min-w-[250px] max-w-[400px]"
       @select-history-item="selectHistoryItem"
       @delete-history-item="deleteHistoryItem"
       @clear-history="clearHistory"
       @close="$emit('toggle-history')"
-      class="w-1/4 min-w-[250px] max-w-[400px]"
     />
 
-    <div v-if="!isMobile" class="fixed bottom-16 right-4 z-[100]">
+    <div
+      v-if="!isMobile"
+      class="fixed bottom-16 right-4 z-[100]"
+    >
       <button
-        @click="openShortcutModal"
         v-tippy="{ content: 'Keyboard Shortcuts' }"
         class="text-gray-600 bg-gray-200 hover:bg-gray-300 hover:text-indigo-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded-full p-3 shadow-lg transition-colors duration-300"
+        @click="openShortcutModal"
       >
         <KeyboardIcon class="h-6 w-6" />
       </button>
