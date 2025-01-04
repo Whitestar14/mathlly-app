@@ -89,6 +89,7 @@ import {
   onUnmounted,
   ref,
   watch,
+  inject
 } from "vue";
 import db from "../../data/db";
 import { BasicCalculator } from "../utils/BasicCalculator";
@@ -109,7 +110,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
-const currentInput = ref("0");
+const currentInput = inject("currentInput");
 const isAnimating = ref(false);
 const animatedResult = ref("");
 const historyPanelRef = ref(null);
@@ -183,23 +184,30 @@ const addToHistoryDebounced = (() => {
 
 const selectHistoryItem = (item) => {
   if (props.mode === "Programmer") {
-    return; // Maintain disabled state for Programmer mode
+    return;
   }
   
-  // Update both the display state and calculator state
+  // Update calculator's internal state first
+  calculator.value.input = item.expression;
+  calculator.value.currentExpression = item.expression;
+  calculator.value.error = "";
+  
+  // Then update the display state
   calculatorState.value = {
     input: item.expression,
     error: "",
     expression: item.expression
   };
   
-  // Update the calculator's internal state
-  calculator.value.input = item.expression;
-  calculator.value.currentExpression = item.expression;
-  calculator.value.error = "";
-  
+  // Update shared input state
   currentInput.value = item.expression;
-};
+  
+  // For mobile: Close history panel after selection
+  if (props.isMobile) {
+    emit('toggle-history');
+  }
+}
+
 
 const deleteHistoryItem = async (id) => {
   await db.history.delete(id);
@@ -228,6 +236,21 @@ watch(
     activeBase.value = "DEC";
   }
 );
+
+// Add this watch in your script setup
+watch(currentInput, (newValue) => {
+  if (newValue !== calculatorState.value.input) {
+    calculatorState.value = {
+      input: newValue,
+      error: '',
+      expression: newValue
+    };
+    
+    if (props.mode === 'Programmer') {
+      updateDisplayState();
+    }
+  }
+});
 
 watch(
   () => calculatorState.value.input,

@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   entry: './src/main.js',
@@ -36,4 +37,9 @@ module.exports = {
       modules: [path.resolve(__dirname, 'src'), 'node_modules'],
     },
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify('false'),
+    }),
+  ],
 };

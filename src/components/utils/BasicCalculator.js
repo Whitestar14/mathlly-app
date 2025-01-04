@@ -146,6 +146,8 @@ export class BasicCalculator {
     } else {
       this.input += num;
     }
+    // Update currentExpression to match input
+    this.currentExpression = this.input;
   }
 
   handleEquals() {
@@ -167,6 +169,7 @@ export class BasicCalculator {
       return {
         expression: this.currentExpression,
         input: "Error",
+        error: this.error,
       };
     }
   }

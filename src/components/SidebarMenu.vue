@@ -33,8 +33,8 @@
         <NavigationMenuRoot>
           <NavigationMenuList class="flex-grow p-4 relative space-y-1">
             <div
-              v-if="showIndicator"
-              class="absolute z-50 left-4 w-1 rounded-lg bg-indigo-500 dark:bg-gray-400 transition-all duration-300 ease-in-out"
+              class="absolute z-50 left-4 w-[3px] rounded-lg bg-indigo-500 dark:bg-gray-400 transition-all duration-300 ease-in-out"
+              :class="showIndicator ? '': 'opacity-0'"
               :style="{ top: `${indicatorPosition}em`, height: '15px' }"
             />
             <NavigationMenuItem
@@ -56,7 +56,7 @@
                 >
                   <component
                     :is="item.icon"
-                    class="h-5 w-5 inline-block"
+                    class="h-5 w-5 inline-block opacity-75"
                   />
                   <span class="inline-block">{{ item.name }}</span>
                 </button>

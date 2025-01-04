@@ -3,20 +3,13 @@
     <!-- Disabled overlay for Programmer mode on both mobile and desktop -->
     <div
       v-if="props.mode === 'Programmer'"
-      v-tippy="{
-        content: 'History is disabled in Programmer mode',
-        placement: 'top',
-        arrow: false,
-        followCursor: true,
-      }"
-      class="absolute inset-0 bg-gray-200 dark:bg-gray-700 bg-opacity-70 dark:bg-opacity-70 z-10 flex items-center justify-center cursor-not-allowed"
+      class="absolute inset-0 bg-gray-200 dark:bg-gray-700 bg-opacity-50 dark:bg-opacity-50 z-10 flex items-center justify-center cursor-not-allowed"
     >
       <LockIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" />
     </div>
-
-    <!-- Mobile backdrop for Programmer mode -->
+ 
     <div
-      v-if="isMobile && isOpen && props.mode === 'Programmer'"
+      v-if="isMobile && isOpen"
       class="fixed inset-0 bg-black bg-opacity-50 z-40"
       @click="closePanel"
     />
@@ -45,10 +38,16 @@
         </div>
         <div class="overflow-y-auto flex-grow custom-scrollbar">
           <div
-            v-if="history.length === 0"
+            v-if="history.length === 0 && props.mode !== 'Programmer'"
             class="text-center text-sm text-gray-500 dark:text-gray-400 py-4"
           >
             There's no history yet
+          </div>
+          <div
+            v-else-if="props.mode === 'Programmer'"
+            class="text-center text-sm text-gray-500 dark:text-gray-400 py-4"
+          >
+            History is disabled in <kbd class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-nowrap">Programmer Mode</kbd>
           </div>
           <TransitionGroup
             name="list"
@@ -99,9 +98,6 @@
 import { LockIcon, TrashIcon, XIcon } from "lucide-vue-next";
 import {
   computed,
-  defineEmits,
-  defineExpose,
-  defineProps,
   onMounted,
   ref,
   watch,
@@ -133,12 +129,6 @@ const emit = defineEmits([
 const history = ref([]);
 const MAX_HISTORY_ITEMS = 100;
 
-const closePanel = () => {
-  if (props.isMobile) {
-    emit("close");
-  }
-};
-
 const handleDeleteHistoryItem = async (id) => {
   await db.history.delete(id);
   emit("deleteHistoryItem", id);
@@ -161,6 +151,11 @@ const handleSelectHistoryItem = (item) => {
     expression: item.expression.trim(),
     result: item.result
   });
+
+  // Close the panel on mobile after selection
+  if (props.isMobile) {
+    closePanel();
+  }
 };
 
 const handleClearHistory = async () => {
@@ -197,6 +192,10 @@ watch(
 // Add this method to update history from outside
 const updateHistory = async () => {
   await loadHistory();
+};
+
+const closePanel = () => {
+  emit("close");
 };
 
 // Expose the updateHistory method

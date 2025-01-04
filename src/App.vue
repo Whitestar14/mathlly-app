@@ -39,16 +39,15 @@
     </div>
 
     <history-panel
-      v-if="isMobile"
-      :is-open="isHistoryOpen"
-      :is-mobile="isMobile"
-      :mode="mode"
-      disabled="mode === 'Programmer'"
-      @select-history-item="selectHistoryItem"
-      @delete-history-item="deleteHistoryItem"
-      @clear-history="clearHistory"
-      @close="closeHistory"
-    />
+  v-if="isMobile"
+  :is-open="isHistoryOpen"
+  :is-mobile="isMobile"
+  :mode="mode"
+  @select-history-item="selectHistoryItem"
+  @delete-history-item="deleteHistoryItem"
+  @clear-history="clearHistory"
+  @close="closeHistory"
+/>
   </div>
 </template>
 
@@ -60,6 +59,9 @@ import HistoryPanel from "./components/HistoryPanel.vue";
 import SidebarMenu from "./components/SidebarMenu.vue";
 import db from "./data/db";
 
+const currentInput = ref("0"); // Ensure this is a string to hold expressions
+provide("currentInput", currentInput);
+
 const router = useRouter();
 const mode = ref("Programmer");
 const settings = ref({
@@ -70,9 +72,6 @@ const settings = ref({
 const isSidebarOpen = ref(false);
 const isHistoryOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
-const currentInput = ref(0);
-
-provide("currentInput", currentInput);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -109,11 +108,12 @@ const clearHistory = async () => {
 const selectHistoryItem = (item) => {
   try {
     currentInput.value = item.expression;
+    if (isMobile.value) closeHistory();
   } catch (err) {
     console.error("Error:", err)
   }
-  if (isMobile.value) closeHistory();
 };
+
 
 const deleteHistoryItem = async (id) => {
   await db.history.delete(id);

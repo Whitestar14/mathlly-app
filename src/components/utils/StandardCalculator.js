@@ -143,6 +143,7 @@ export class StandardCalculator {
     if (this.input === "Error" || this.input === "0") {
       this.input = num;
     } else {
+      // Continue building the expression
       this.input += num;
     }
   }
