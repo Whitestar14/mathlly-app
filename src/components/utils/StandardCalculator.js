@@ -121,12 +121,13 @@ export class StandardCalculator {
     const lastChar = this.input.trim().slice(-1);
     const isLastCharOperator = this.isLastCharOperator();
 
+    // If the input is a result, allow using it in a new expression
+    if (this.input === this.currentExpression?.result) {
+      this.currentExpression = "";
+    }
+
     // Allow negative numbers after arithmetic operators
-    if (
-      op === "-" &&
-      isLastCharOperator &&
-      ["×", "÷", "+"].includes(lastChar)
-    ) {
+    if (op === "-" && isLastCharOperator && ["×", "÷", "+"].includes(lastChar)) {
       this.input += ` ${op} `;
       return;
     }
@@ -140,7 +141,13 @@ export class StandardCalculator {
 
   handleNumber(num) {
     this.error = "";
-    if (this.input === "Error" || this.input === "0") {
+    
+    // If the input is a result from history or calculation
+    if (this.input === this.currentExpression?.result) {
+      // Start a new expression
+      this.input = num;
+      this.currentExpression = "";
+    } else if (this.input === "Error" || this.input === "0") {
       this.input = num;
     } else {
       // Continue building the expression
@@ -151,13 +158,15 @@ export class StandardCalculator {
   handleEquals() {
     this.error = "";
     try {
-      // Store the current expression before evaluation
-      this.currentExpression = this.input;
-      const result = this.evaluateExpression(this.currentExpression);
-      this.input = this.formatResult(result);
+      this.currentExpression = {
+        expression: this.input,
+        result: this.formatResult(this.evaluateExpression(this.input))
+      };
+      
+      this.input = this.currentExpression.result;
 
       return {
-        expression: this.currentExpression,
+        expression: this.currentExpression.expression,
         result: this.input,
         input: this.input,
       };
@@ -165,7 +174,7 @@ export class StandardCalculator {
       this.input = "Error";
       this.error = err.message;
       return {
-        expression: this.currentExpression,
+        expression: this.currentExpression?.expression || "",
         input: "Error",
       };
     }

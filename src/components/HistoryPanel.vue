@@ -58,8 +58,10 @@
               v-for="item in history"
               :key="item.id"
               class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative group"
+              :class="{ 'highlight dark:highlight': selectedItemId === item.id }"
+              @click="handleSelectHistoryItem(item)"
             >
-              <div @click.stop="handleSelectHistoryItem(item)">
+              <div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">
                   {{ item.expression }}
                 </div>
@@ -119,6 +121,12 @@ const props = defineProps({
   },
 });
 
+const history = ref([
+  { id: 1, title: 'Item 1' },
+  { id: 2, title: 'Item 2' },
+  { id: 3, title: 'Item 3' },
+]);
+
 const emit = defineEmits([
   "close",
   "selectHistoryItem",
@@ -126,7 +134,6 @@ const emit = defineEmits([
   "clearHistory",
 ]);
 
-const history = ref([]);
 const MAX_HISTORY_ITEMS = 100;
 
 const handleDeleteHistoryItem = async (id) => {
@@ -135,11 +142,18 @@ const handleDeleteHistoryItem = async (id) => {
   await loadHistory();
 };
 
+const selectedItemId = ref(null);
+
 const handleSelectHistoryItem = (item) => {
   // Prevent selecting history items in Programmer mode
   if (props.mode === 'Programmer') {
     return;
   }
+
+  selectedItemId.value = item.id;
+  setTimeout(() => {
+    selectedItemId.value = null;
+  }, 300); // Reset after 300ms
   
   // Add type checking and sanitization
   if (!item || typeof item.expression !== 'string') {
@@ -239,5 +253,31 @@ defineExpose({ updateHistory });
 }
 .list-move {
   transition: transform 0.5s ease;
+}
+
+.highlight {
+  animation: highlight 0.3s ease-out;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: theme('colors.gray.400');
+  }
+  100% {
+    background-color: theme('colors.gray.200');
+  }
+}
+
+.dark .highlight {
+  animation: highlight-dark 0.1s ease-out;
+}
+
+@keyframes highlight-dark {
+  0% {
+    background-color: theme('colors.gray.600');
+  }
+  100% {
+    background-color: theme('colors.gray.700');
+  }
 }
 </style>

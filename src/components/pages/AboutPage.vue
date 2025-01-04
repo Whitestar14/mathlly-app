@@ -26,7 +26,7 @@
         <span class="h-2 w-2 bg-gray-100 rounded-full" /><span
           class="text-sm font-bold vertical-middle"
           style="font-family: 'Geist mono'"
-        >v0.2.0-beta</span>
+        >v0.3.0-beta</span>
       </div>
       <section
         class="mb-16 sm:mb-32 text-left"

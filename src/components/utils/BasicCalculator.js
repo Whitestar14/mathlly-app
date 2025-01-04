@@ -137,6 +137,7 @@ export class BasicCalculator {
     } else {
       this.input = this.input.slice(0, -3) + ` ${op} `;
     }
+    this.currentExpression = this.input;
   }
 
   handleNumber(num) {

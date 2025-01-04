@@ -187,25 +187,14 @@ const selectHistoryItem = (item) => {
     return;
   }
   
-  // Update calculator's internal state first
-  calculator.value.input = item.expression;
-  calculator.value.currentExpression = item.expression;
-  calculator.value.error = "";
-  
-  // Then update the display state
+  // Update calculator state
   calculatorState.value = {
     input: item.expression,
     error: "",
-    expression: item.expression
   };
   
   // Update shared input state
   currentInput.value = item.expression;
-  
-  // For mobile: Close history panel after selection
-  if (props.isMobile) {
-    emit('toggle-history');
-  }
 }
 
 

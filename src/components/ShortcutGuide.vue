@@ -43,7 +43,7 @@
               {{ shortcut.description }}
             </span>
             <div
-              class="flex items-center space-x-1 bg-indigo-100 dark:bg-indigo-900 px-3 py-1 rounded-md shadow-sm"
+              class="flex items-center space-x-1 bg-indigo-100 dark:bg-indigo-900 px-3 py-2 rounded-md shadow-sm"
             >
               <template
                 v-for="(modifier, modIndex) in shortcut.modifiers"

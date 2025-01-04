@@ -9,7 +9,7 @@
       @update:isOpen="updateSidebarOpen"
       @openAbout="navigateToAbout"
       @openSettings="navigateToSettings"
-    />
+    /> 
 
     <div
       class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
@@ -39,15 +39,15 @@
     </div>
 
     <history-panel
-  v-if="isMobile"
-  :is-open="isHistoryOpen"
-  :is-mobile="isMobile"
-  :mode="mode"
-  @select-history-item="selectHistoryItem"
-  @delete-history-item="deleteHistoryItem"
-  @clear-history="clearHistory"
-  @close="closeHistory"
-/>
+      v-if="isMobile"
+      :is-open="isHistoryOpen"
+      :is-mobile="isMobile"
+      :mode="mode"
+      @select-history-item="selectHistoryItem"
+      @delete-history-item="deleteHistoryItem"
+      @clear-history="clearHistory"
+      @close="closeHistory"
+    />
   </div>
 </template>
 
@@ -69,6 +69,7 @@ const settings = ref({
   useFractions: false,
   useThousandsSeparator: true,
 });
+
 const isSidebarOpen = ref(false);
 const isHistoryOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
@@ -108,12 +109,10 @@ const clearHistory = async () => {
 const selectHistoryItem = (item) => {
   try {
     currentInput.value = item.expression;
-    if (isMobile.value) closeHistory();
   } catch (err) {
-    console.error("Error:", err)
+    console.error("Error:", err);
   }
 };
-
 
 const deleteHistoryItem = async (id) => {
   await db.history.delete(id);
