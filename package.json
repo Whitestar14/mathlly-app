@@ -1,12 +1,13 @@
 {
   "name": "mathlly",
-  "version": "0.3.0",
+  "version": "0.3.0-beta",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode development --open",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "version:bump": "node scripts/bump-version.js"
   },
   "dependencies": {
     "@vueuse/core": "^11.0.3",
@@ -15,7 +16,8 @@
     "dexie": "^4.0.8",
     "lucide-vue-next": "^0.439.0",
     "mathjs": "^13.1.1",
-    "radix-vue": "^1.9.5",
+    "pinia": "^2.3.0",
+    "radix-vue": "^1.9.12",
     "tippy.js": "^6.3.7",
     "vue": "^3.2.13",
     "vue-router": "^4.4.5",

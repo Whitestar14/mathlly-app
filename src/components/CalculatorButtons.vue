@@ -1,20 +1,29 @@
 <!-- CalculatorButtons.vue -->
 <template>
-  <component 
-    :is="currentModeComponent" 
-    :display-values="displayValues" 
-    :active-base="activeBase"
-    @button-click="handleButtonClick"
-    @clear="handleClear"
-    @base-change="handleBaseChange"
-  />
+  <Suspense>
+    <!-- Main Content -->
+    <template #default>
+      <component 
+        :is="currentModeComponent" 
+        :display-values="displayValues" 
+        :active-base="activeBase"
+        @button-click="handleButtonClick"
+        @clear="handleClear"
+        @base-change="handleBaseChange"
+      />
+    </template>
+
+    <!-- Loading State -->
+    <template #fallback>
+      <div class="flex items-center justify-center p-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-t-indigo-500"></div>
+      </div>
+    </template>
+  </Suspense>
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits } from 'vue';
-import BasicMode from './modes/BasicMode.vue';
-import StandardMode from './modes/StandardMode.vue';
-import ProgrammerMode from './modes/ProgrammerMode.vue';
+import { computed, defineProps, defineEmits, defineAsyncComponent } from 'vue';
 
 const props = defineProps({
   mode: {
@@ -33,6 +42,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['button-click', 'clear', 'base-change']);
+
+// Lazy load components with loading delay to prevent flash
+const BasicMode = defineAsyncComponent(() => import('./modes/BasicMode.vue'));
+const StandardMode = defineAsyncComponent(() => import('./modes/StandardMode.vue'));
+const ProgrammerMode = defineAsyncComponent(() => import('./modes/ProgrammerMode.vue'));
 
 const currentModeComponent = computed(() => {
   switch (props.mode) {
@@ -58,6 +72,4 @@ const handleClear = () => {
 const handleBaseChange = (base) => {
   emit('base-change', base);
 };
-
-
 </script>
