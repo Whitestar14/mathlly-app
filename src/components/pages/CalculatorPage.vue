@@ -187,7 +187,11 @@ const selectHistoryItem = (item) => {
     return;
   }
   
-  // Update calculator state
+  // Update calculator's internal state first
+  calculator.value.input = item.expression;
+  calculator.value.currentExpression = ""; // Reset currentExpression so handleNumber treats this as a new input
+  
+  // Then update the display state
   calculatorState.value = {
     input: item.expression,
     error: "",
@@ -195,6 +199,11 @@ const selectHistoryItem = (item) => {
   
   // Update shared input state
   currentInput.value = item.expression;
+  
+  // For mobile: Close history panel after selection
+  if (props.isMobile) {
+    emit('toggle-history');
+  }
 }
 
 
@@ -229,17 +238,22 @@ watch(
 // Add this watch in your script setup
 watch(currentInput, (newValue) => {
   if (newValue !== calculatorState.value.input) {
+    // Update both the calculator state and the internal calculator instance
     calculatorState.value = {
       input: newValue,
       error: '',
-      expression: newValue
     };
+    
+    // Reset the calculator's internal state with the new input
+    calculator.value.input = newValue;
+    calculator.value.currentExpression = "";
+    calculator.value.error = "";
     
     if (props.mode === 'Programmer') {
       updateDisplayState();
     }
   }
-});
+}, { immediate: true });
 
 watch(
   () => calculatorState.value.input,

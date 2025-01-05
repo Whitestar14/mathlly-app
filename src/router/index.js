@@ -1,29 +1,30 @@
 import { createRouter, createWebHistory } from "vue-router";
-import AboutPage from "../components/pages/AboutPage.vue";
-import FeedbackPage from "../components/pages/FeedbackPage.vue";
-import CalculatorPage from "../components/pages/CalculatorPage.vue";
-import SettingsPage from "../components/pages/SettingsPage.vue";
 
 const routes = [
   {
     path: "/",
     name: "Calculator",
-    component: CalculatorPage,
+    component: () => import('../components/pages/CalculatorPage.vue')
   },
   {
     path: "/about",
     name: "About",
-    component: AboutPage,
+    component: () => import('../components/pages/AboutPage.vue')
   },
   {
     path: "/settings",
     name: "Settings",
-    component: SettingsPage,
+    component: () => import('../components/pages/SettingsPage.vue')
   },
   {
     path: "/feedback",
     name: "Feedback",
-    component: FeedbackPage,
+    component: () => import('../components/pages/FeedbackPage.vue')
+  },
+  {
+    path: '/whats-new',
+    name: 'WhatsNew',
+    component: () => import('../components/pages/WhatsNewPage.vue')
   },
 ];
 

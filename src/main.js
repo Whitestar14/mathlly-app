@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { createPinia } from 'pinia';
 import App from "./App.vue";
 import "./assets/css/tailwind.css"; 
 import "./assets/css/global.css"
@@ -15,6 +16,7 @@ function isMobileDevice() {
 
 const app = createApp(App);
 app
+  .use(createPinia())
   .use(router)
   .use(VueTippy, {
     defaultProps: {

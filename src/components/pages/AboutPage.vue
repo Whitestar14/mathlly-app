@@ -25,8 +25,8 @@
       >
         <span class="h-2 w-2 bg-gray-100 rounded-full" /><span
           class="text-sm font-bold vertical-middle"
-          style="font-family: 'Geist mono'"
-        >v0.3.0-beta</span>
+          style="font-family: 'Geist mono'">v{{version.versionInfo.full}}
+</span>
       </div>
       <section
         class="mb-16 sm:mb-32 text-left"
@@ -125,6 +125,9 @@
 import { ArrowLeftIcon, CheckCircleIcon } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import FeatureCard from "../FeatureCard.vue";
+import { useVersionStore } from '../../stores/version'
+
+const version = useVersionStore()
 
 const router = useRouter();
 

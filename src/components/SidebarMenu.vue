@@ -117,6 +117,7 @@ import {
   MessageSquareIcon,
   PanelLeftIcon,
   SettingsIcon,
+  ZapIcon
 } from "lucide-vue-next";
 import {
   NavigationMenuItem,
@@ -147,9 +148,9 @@ const showIndicator = ref(true);
 
 const menuItems = [
   { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.15 },
-  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 5.15 },
+  { name: "What's New", path: "/whats-new", icon: ZapIcon, indicatorOffset: 5.15 },
+  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 8.15 },
 ];
-
 const closeSidebar = () => emit("update:isOpen", false);
 
 const navigateTo = (path, index) => {

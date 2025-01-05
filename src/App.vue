@@ -58,17 +58,15 @@ import CalculatorHeader from "./components/CalculatorHeader.vue";
 import HistoryPanel from "./components/HistoryPanel.vue";
 import SidebarMenu from "./components/SidebarMenu.vue";
 import db from "./data/db";
+import { useSettingsStore } from './stores/settings'
 
 const currentInput = ref("0"); // Ensure this is a string to hold expressions
 provide("currentInput", currentInput);
 
 const router = useRouter();
 const mode = ref("Programmer");
-const settings = ref({
-  precision: 4,
-  useFractions: false,
-  useThousandsSeparator: true,
-});
+const settings = useSettingsStore()
+
 
 const isSidebarOpen = ref(false);
 const isHistoryOpen = ref(false);
@@ -86,8 +84,7 @@ const navigateToSettings = () => router.push("/settings");
 const navigateToAbout = () => router.push("/about");
 
 const updateSettings = async (newSettings) => {
-  settings.value = { ...newSettings };
-  await saveSettings(newSettings);
+  await settings.saveSettings(newSettings)
 };
 
 const updateMode = (newMode) => {
@@ -160,28 +157,11 @@ const toggleFullScreen = () => {
   }
 };
 
-const loadSettings = async () => {
-  const savedSettings = await db.settings.toArray();
-  if (savedSettings.length > 0) {
-    settings.value = savedSettings[0];
-  }
-};
-
-const saveSettings = async (newSettings) => {
-  const settingsToSave = {
-    precision: newSettings.precision,
-    useFractions: newSettings.useFractions,
-    useThousandsSeparator: newSettings.useThousandsSeparator,
-  };
-  await db.settings.clear();
-  await db.settings.add(settingsToSave);
-};
-
 onMounted(async () => {
   window.addEventListener("resize", handleResize);
   window.addEventListener("keydown", handleKeyDown);
   handleResize();
-  await loadSettings();
+  await settings.loadSettings()
 });
 
 onUnmounted(() => {
