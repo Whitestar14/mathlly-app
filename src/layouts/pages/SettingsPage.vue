@@ -116,9 +116,9 @@
 import { ArrowLeftIcon } from "lucide-vue-next";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useSettingsStore } from '../../stores/settings';
-import Select from "../SelectBar.vue";
-import Switch from "../ToggleBar.vue";
+import { useSettingsStore } from '@/stores/settings';
+import Select from "@/components/SelectBar.vue";
+import Switch from "@/components/ToggleBar.vue";
 
 const router = useRouter();
 const settingsStore = useSettingsStore();

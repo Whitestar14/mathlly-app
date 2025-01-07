@@ -1,6 +1,10 @@
 <template>
   <Transition name="slide">
-    <div v-show="isOpen" class="sidebar-container" :class="sidebarClasses">
+    <div
+      v-show="isOpen"
+      class="sidebar-container"
+      :class="sidebarClasses"
+    >
       <div class="flex flex-col h-full">
         <div
           class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
@@ -39,7 +43,10 @@
               v-for="(item, index) in menuItems"
               :key="item.path"
             >
-              <NavigationMenuLink :active="currentRoute === item.path" as-child>
+              <NavigationMenuLink
+                :active="currentRoute === item.path"
+                as-child
+              >
                 <button
                   :class="[
                     'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors duration-200',
@@ -49,7 +56,10 @@
                   ]"
                   @click="navigateTo(item.path, index)"
                 >
-                  <component :is="item.icon" class="h-4 w-4 shrink-0" />
+                  <component
+                    :is="item.icon"
+                    class="h-4 w-4 shrink-0"
+                  />
                   <span>{{ item.name }}</span>
                 </button>
               </NavigationMenuLink>

@@ -1,6 +1,6 @@
 // settings.js (Pinia Store)
 import { defineStore } from 'pinia';
-import db from '../data/db';
+import db from '@/data/db';
 
 const DEFAULT_SETTINGS = {
   id: 1,

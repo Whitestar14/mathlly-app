@@ -17,12 +17,18 @@
     <main class="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
       <div class="inline-flex items-center rounded-full border border-indigo-200 dark:border-gray-800 bg-indigo-50 dark:bg-gray-800/50 px-3 py-1 text-sm font-medium mb-8">
         <span class="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400 mr-2" />
-        <span class="text-indigo-600 dark:text-indigo-400" style="font-family: 'Geist mono'">
+        <span
+          class="text-indigo-600 dark:text-indigo-400"
+          style="font-family: 'Geist mono'"
+        >
           v{{ version.versionInfo.full }}
         </span>
       </div>
 
-      <section class="mb-24" style="font-family: 'Geist mono'">
+      <section
+        class="mb-24"
+        style="font-family: 'Geist mono'"
+      >
         <h2 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-tight mb-4">
           The toolset by developers,
           <span class="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl mb-4 text-gray-600 dark:text-gray-400">
@@ -30,7 +36,10 @@
           </span>
         </h2>
 
-        <p class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400" style="font-family: 'Geist'">
+        <p
+          class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400"
+          style="font-family: 'Geist'"
+        >
           Mathlly is more than just a calculator. It's a comprehensive suite of mathematical tools crafted to streamline your workflow and boost your productivity.
         </p>
       </section>
@@ -92,8 +101,8 @@
 <script setup>
 import { ArrowLeftIcon, CheckCircleIcon } from "lucide-vue-next";
 import { useRouter } from "vue-router";
-import FeatureCard from "../FeatureCard.vue";
-import { useVersionStore } from '../../stores/version'
+import FeatureCard from "@/components/FeatureCard.vue";
+import { useVersionStore } from '@/stores/version'
 
 const version = useVersionStore()
 

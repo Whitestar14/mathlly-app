@@ -61,20 +61,7 @@
       @close="$emit('toggle-history')"
     />
 
-    <div
-      v-if="!isMobile"
-      class="fixed bottom-16 right-4 z-[100]"
-    >
-      <button
-        v-tippy="{ content: 'Keyboard Shortcuts' }"
-        class="text-gray-600 bg-gray-200 hover:bg-gray-300 hover:text-indigo-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded-full p-3 shadow-lg transition-colors duration-300"
-        @click="openShortcutModal"
-      >
-        <KeyboardIcon class="h-6 w-6" />
-      </button>
-    </div>
 
-    <shortcut-guide v-model:open="isShortcutModalOpen" />
   </main>
 </template>
 
@@ -95,15 +82,14 @@ import {
   watch,
   inject
 } from "vue";
-import db from "../../data/db";
-import { BasicCalculator } from "../utils/BasicCalculator";
-import { ProgrammerCalculator } from "../utils/ProgrammerCalculator";
-import { StandardCalculator } from "../utils/StandardCalculator";
-import CalculatorButtons from "../CalculatorButtons.vue";
-import CalculatorDisplay from "../CalculatorDisplay.vue";
-import HistoryPanel from "../HistoryPanel.vue";
-import ShortcutGuide from "../ShortcutGuide.vue";
-import WelcomeModal from "../WelcomeModal.vue";
+import db from "@/data/db";
+import { BasicCalculator } from "@/utils/BasicCalculator";
+import { ProgrammerCalculator } from "@/utils/ProgrammerCalculator";
+import { StandardCalculator } from "@/utils/StandardCalculator";
+import CalculatorButtons from "@/layouts/CalculatorButtons.vue";
+import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
+import HistoryPanel from "@/layouts/HistoryPanel.vue";
+import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -118,7 +104,6 @@ const currentInput = inject("currentInput");
 const isAnimating = ref(false);
 const animatedResult = ref("");
 const historyPanelRef = ref(null);
-const isShortcutModalOpen = ref(false);
 const showWelcomeModal = ref(!localStorage.getItem("mathlly-welcome-shown"));
 
 const closeWelcomeModal = () => {
@@ -380,9 +365,7 @@ const handleKeyDown = (event) => {
   }
 };
 
-const openShortcutModal = () => {
-  isShortcutModalOpen.value = true;
-};
+
 
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDown);
