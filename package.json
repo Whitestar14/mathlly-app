@@ -8,6 +8,8 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "version:bump": "node scripts/bump-version.js"
+    "lint": "vue-cli-service lint",
+    "version:bump": "node scripts/bump-version.js"
   },
   "dependencies": {
     "@vueuse/core": "^11.0.3",

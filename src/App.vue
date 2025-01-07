@@ -67,6 +67,7 @@ import SidebarMenu from "./components/SidebarMenu.vue";
 import CalculatorLoader from './components/CalculatorLoader.vue'
 import db from "./data/db";
 import { useSettingsStore } from './stores/settings'
+import { useSettingsStore } from './stores/settings'
 
 const currentInput = ref("0"); // Ensure this is a string to hold expressions
 provide("currentInput", currentInput);
