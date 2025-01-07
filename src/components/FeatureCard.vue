@@ -1,16 +1,16 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+  <div class="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all">
     <component
       :is="icon"
-      class="h-12 w-12 text-indigo-500 mb-4"
+      class="h-10 w-10 text-indigo-500 dark:text-indigo-400 mb-4 opacity-75 group-hover:opacity-100 transition-opacity"
     />
     <h4
-      class="text-xl font-semibold mb-2"
+      class="text-lg font-semibold tracking-tight mb-2"
       style="font-family:'Geist mono'"
     >
       {{ title }}
     </h4>
-    <p class="text-sm text-gray-500 dark:text-gray-400">
+    <p class="text-sm text-gray-600 dark:text-gray-300">
       {{ description }}
     </p>
   </div>

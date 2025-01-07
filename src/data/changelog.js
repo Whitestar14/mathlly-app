@@ -1,5 +1,20 @@
 export const updates = [
   {
+    version: 'v0.4.0',
+    date: 'January 2025',
+    features: [
+      'Refined polished and several pages, components and aesthetics for a better user experience',
+      'Added context menus to the History Panel\'s items visible on right click',
+      'Removed redundant and repititive code across the codebase',
+      'Implemented a cleaner font "Inter" to ensure a visually consistent look and brand',
+      'Resolved exponents being unacknowledged and evaluated with stringent restrictions',
+      'Solidifed the store by ensuring a consolidated, centralised space for space management',
+      'Introduced primitive memory and some special functions to Standard Calculator mode for quick access and ease of use',
+      'Improved accessibility for a better user experience and SEO',
+      'Fixed unexpected interface behavior in Basic mode'
+    ]
+  },
+  {
     version: 'v0.3.0-beta',
     date: 'January 2025', 
     features: [

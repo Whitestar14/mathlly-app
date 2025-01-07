@@ -142,14 +142,33 @@ export class BasicCalculator {
 
   handleNumber(num) {
     this.error = "";
-    if (this.input === "Error" || this.input === "0") {
-      this.input = num;
-    } else {
-      this.input += num;
+
+    // Handle special case when the input is '0'
+    if (this.input === '0' && num !== '.') {
+        this.input = num; // Replace leading zero with the number
+        return;
     }
-    // Update currentExpression to match input
-    this.currentExpression = this.input;
-  }
+
+    // Handle multiple decimal points in a number
+    if (num === '.') {
+        // Split the input into parts around operators
+        const parts = this.input.split(/[\+\-\×\÷]+/); // Split around operators (+, -, ×, ÷)
+        const lastPart = parts[parts.length - 1];
+
+        if (lastPart.includes('.')) {
+            // Prevent multiple decimal points in the same number
+            return;
+        }
+
+        if (this.input === '0') {
+            this.input = '0.'; // Start a decimal number
+            return;
+        }
+    }
+
+    // Append the number if it's valid
+    this.input += num;
+}
 
   handleEquals() {
     this.error = "";

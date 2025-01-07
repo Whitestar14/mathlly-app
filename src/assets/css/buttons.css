@@ -3,6 +3,7 @@
          active:scale-95 active:opacity-80;
 }
 
+
 .letter-btn, .number-btn {
   @apply bg-gray-200 text-gray-800 hover:bg-gray-300 
          dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500;
@@ -30,4 +31,7 @@
 
 .bitwise-select-btn {
     @apply appearance-none text-sm cursor-pointer text-gray-800 dark:bg-gray-800 dark:text-white py-2 px-4 pr-8 rounded leading-tight focus:outline-none dark:hover:bg-gray-700 focus:opacity-50 dark:focus:bg-gray-700 dark:focus:border-gray-500;
+}
+.c {
+  @apply dark:bg-gray-300 dark:text-gray-700 dark:hover:bg-gray-200
 }

@@ -1,22 +1,18 @@
 <template>
   <Transition name="slide">
-    <div
-      v-show="isOpen"
-      class="sidebar-container"
-      :class="sidebarClasses"
-    >
+    <div v-show="isOpen" class="sidebar-container" :class="sidebarClasses">
       <div class="flex flex-col h-full">
         <div
           class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
         >
           <div class="w-full h-full relative">
-            <div class="absolute max-h-8 flex items-center">
+            <div class="flex items-center absolute max-h-8 space-x-2">
               <kbd
                 aria-label="logo"
-                class="text-gray-600 font-semibold px-2 py-1 my-0 text-2xl dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg pointer-events-none"
+                class="text-gray-600 font-medium px-2.5 py-1.5 pointer-events-none text-2xl dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm"
                 style="font-family: 'Reddit mono'"
               >{math<span
-                class="text-indigo-400 italic font-black dark:text-indigo-600 inline-block mx-0.5"
+                class="text-indigo-400 font-black dark:text-indigo-600 inline-block mx-0.5"
               >//</span>y}</kbd>
             </div>
           </div>
@@ -30,35 +26,31 @@
           </button>
         </div>
 
+        <!-- Navigation Menu with refined styling -->
         <NavigationMenuRoot>
-          <NavigationMenuList class="flex-grow p-4 relative space-y-1">
+          <NavigationMenuList class="flex-grow px-3 py-4 space-y-1">
+            <!-- Refined indicator -->
             <div
-              class="absolute z-50 left-4 w-[3px] rounded-lg bg-indigo-500 dark:bg-gray-400 transition-all duration-300 ease-in-out"
-              :class="showIndicator ? '': 'opacity-0'"
+              class="absolute z-50 left-3 w-[2px] rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-300 ease-in-out"
+              :class="showIndicator ? '' : 'opacity-0'"
               :style="{ top: `${indicatorPosition}em`, height: '15px' }"
             />
             <NavigationMenuItem
               v-for="(item, index) in menuItems"
               :key="item.path"
             >
-              <NavigationMenuLink
-                :active="currentRoute === item.path"
-                as-child
-              >
+              <NavigationMenuLink :active="currentRoute === item.path" as-child>
                 <button
                   :class="[
-                    'w-full flex items-center gap-2 px-2 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all duration-300',
+                    'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors duration-200',
                     currentRoute === item.path
-                      ? 'bg-gray-100 dark:bg-gray-800 font-medium text-indigo-600 dark:text-gray-400'
-                      : 'font-normal',
+                      ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
+                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300',
                   ]"
                   @click="navigateTo(item.path, index)"
                 >
-                  <component
-                    :is="item.icon"
-                    class="h-5 w-5 inline-block opacity-75"
-                  />
-                  <span class="inline-block">{{ item.name }}</span>
+                  <component :is="item.icon" class="h-4 w-4 shrink-0" />
+                  <span>{{ item.name }}</span>
                 </button>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -78,6 +70,12 @@
                     as-child
                   >
                     <button
+                      v-tippy="{
+                        content:
+                          item === 'settings' ? 'Settings' : 'Send Feedback',
+                        placement: 'top',
+                        delay: [200, 0],
+                      }"
                       :class="[
                         'flex w-full items-center justify-center gap-2 rounded-md p-2 text-sm transition-colors',
                         currentRoute === `/${item}`
@@ -117,7 +115,7 @@ import {
   MessageSquareIcon,
   PanelLeftIcon,
   SettingsIcon,
-  ZapIcon
+  ZapIcon,
 } from "lucide-vue-next";
 import {
   NavigationMenuItem,
@@ -148,8 +146,8 @@ const showIndicator = ref(true);
 
 const menuItems = [
   { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.15 },
-  { name: "What's New", path: "/whats-new", icon: ZapIcon, indicatorOffset: 5.15 },
-  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 8.15 },
+  { name: "What's New", path: "/whats-new", icon: ZapIcon, indicatorOffset: 4.85 },
+  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 7.55 },
 ];
 const closeSidebar = () => emit("update:isOpen", false);
 

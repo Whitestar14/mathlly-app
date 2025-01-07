@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { useDark, useToggle } from "@vueuse/core";
+import { useDark } from "@vueuse/core";
 import { ChevronDown, Moon, PanelRightIcon, Sun } from "lucide-vue-next";
 import {
   SelectContent,
@@ -88,17 +88,48 @@ import {
   SelectValue,
   SelectViewport,
 } from "radix-vue";
-import { defineEmits, defineProps, ref, watch } from "vue";
+import { computed, watch } from "vue";
+import { useSettingsStore } from '../stores/settings';
+const settings = useSettingsStore();
 
-const props = defineProps(["mode", "isSidebarOpen", "isMobile"]);
+const props = defineProps({
+    isSidebarOpen: {
+      type: Boolean
+    },
+    isMobile: {
+      type: Boolean
+    },
+  })
 const emit = defineEmits(["update:mode", "toggle-sidebar"]);
 const isDark = useDark();
-const toggleDark = useToggle(isDark);
-const selectedMode = ref(props.mode);
+const selectedMode = computed({
+  get: () => settings.mode,
+  set: async (newMode) => {
+    await settings.updateMode(newMode);
+  }
+});
 
-watch(selectedMode, (newMode) => emit("update:mode", newMode));
+// Sync theme changes between settings and VueUse dark mode
+const selectedTheme = computed(() => settings.theme);
 
-const toggleTheme = () => toggleDark();
+
+watch(selectedTheme, (newTheme) => {
+  if (newTheme === 'dark') {
+    isDark.value = true;
+  } else if (newTheme === 'light') {
+    isDark.value = false;
+  } else if (newTheme === 'system') {
+    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+});
+
+const toggleTheme = async () => {
+  const newTheme = isDark.value ? 'light' : 'dark';
+  await settings.saveSettings({
+    ...settings.$state,
+    theme: newTheme
+  });
+};
 </script>
 
 <style scoped>

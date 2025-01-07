@@ -180,6 +180,6 @@ const handleClick = (value) => {
 </script>
 
 <style scoped>
-@import "../../assets/css/CalculatorButtons.css";
+@import "../../assets/css/buttons.css";
 
 </style>

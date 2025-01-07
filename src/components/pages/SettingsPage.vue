@@ -1,49 +1,47 @@
 <template>
-  <div
-    class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300"
-  >
-    <header
-      class="bg-white dark:bg-gray-800 p-4 flex items-center border-b border-gray-200 dark:border-gray-700"
-    >
-      <button
-        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mr-4"
-        @click="goBack"
-      >
-        <ArrowLeftIcon class="h-6 w-6" />
-      </button>
-      <h1 class="text-2xl font-semibold">
-        Settings
-      </h1>
+  <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <header class="sticky top-0 z-40 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="container mx-auto flex items-center h-16 px-4">
+        <button
+          class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          @click="goBack"
+        >
+          <ArrowLeftIcon class="h-5 w-5" />
+        </button>
+        <h1 class="text-xl font-semibold">
+          Settings
+        </h1>
+      </div>
     </header>
 
-    <main class="flex-grow p-6">
-      <div class="max-w-2xl mx-auto">
-        <div class="space-y-6">
-          <section
-            class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700 rounded-md"
-          >
-            <h2 class="text-xl font-semibold mb-4">
+    <main class="container mx-auto px-4 py-8 md:py-12">
+      <div class="max-w-2xl mx-auto space-y-8">
+        <section class="space-y-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold tracking-tight">
               Display Settings
             </h2>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
             <div class="space-y-4">
               <div>
                 <label
                   for="precision"
-                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
                 >Precision</label>
                 <Select
                   v-model="localSettings.precision"
                   :options="precisionOptions"
                 />
               </div>
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between py-2">
                 <label
                   for="useFractions"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
                 >Use Fractions</label>
                 <Switch v-model="localSettings.useFractions" />
               </div>
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between py-2">
                 <label
                   for="useThousandsSeparator"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -51,29 +49,58 @@
                 <Switch v-model="localSettings.useThousandsSeparator" />
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section
-            class="bg-white dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700 rounded-md"
-          >
-            <h2 class="text-xl font-semibold mb-4">
+        <section class="space-y-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold tracking-tight">
+              Calculator Mode
+            </h2>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div>
+              <label
+                for="mode"
+                class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
+              >Default Mode</label>
+              <Select
+                v-model="localSettings.mode"
+                :options="modeOptions"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold tracking-tight">
               Theme
             </h2>
-            <div class="flex items-center justify-between">
-              <!-- Add theme toggle here if needed -->
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div>
+              <label
+                for="theme"
+                class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
+              >Theme Preference</label>
+              <Select
+                v-model="localSettings.theme"
+                :options="themeOptions"
+              />
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
 
-        <div class="mt-8 flex justify-end space-x-2">
+        <div class="flex justify-end space-x-4 pt-4">
           <button
-            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            class="inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
             @click="goBack"
           >
             Cancel
           </button>
           <button
-            class="px-6 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700 transition-colors duration-300"
+            class="inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700"
             @click="saveSettings"
           >
             Save Changes
@@ -84,39 +111,28 @@
   </div>
 </template>
 
+
 <script setup>
 import { ArrowLeftIcon } from "lucide-vue-next";
-import { defineEmits, defineProps, ref, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useSettingsStore } from '../../stores/settings';
 import Select from "../SelectBar.vue";
 import Switch from "../ToggleBar.vue";
 
 const router = useRouter();
+const settingsStore = useSettingsStore();
 
-const props = defineProps({
-  settings: Object,
-});
-
-const emit = defineEmits(["settings-change"]);
-
+// Initialize local settings from store
 const localSettings = ref({
-  precision: props.settings.precision,
-  useFractions: props.settings.useFractions,
-  useThousandsSeparator: props.settings.useThousandsSeparator
+  precision: settingsStore.precision,
+  useFractions: settingsStore.useFractions,
+  useThousandsSeparator: settingsStore.useThousandsSeparator,
+  theme: settingsStore.theme,
+  mode: settingsStore.mode
 });
 
-watch(
-  () => props.settings,
-  (newSettings) => {
-    localSettings.value = {
-      precision: newSettings.precision,
-      useFractions: newSettings.useFractions,
-      useThousandsSeparator: newSettings.useThousandsSeparator
-    };
-  },
-  { deep: true }
-);
-
+// Options for select inputs
 const precisionOptions = [
   { value: 0, label: "0" },
   { value: 1, label: "1" },
@@ -131,17 +147,36 @@ const precisionOptions = [
   { value: 10, label: "10" },
 ];
 
+const modeOptions = [
+  { value: 'Basic', label: 'Basic' },
+  { value: 'Standard', label: 'Standard' },
+  { value: 'Programmer', label: 'Programmer' }
+];
+
+const themeOptions = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' }
+];
+
+onMounted(async () => {
+  await settingsStore.loadSettings();
+  // Update local settings after loading from store
+  localSettings.value = {
+    precision: settingsStore.precision,
+    useFractions: settingsStore.useFractions,
+    useThousandsSeparator: settingsStore.useThousandsSeparator,
+    theme: settingsStore.theme,
+    mode: settingsStore.mode
+  };
+});
+
 const goBack = () => {
   router.push("/");
 };
 
-const saveSettings = () => {
-  const settingsToSave = {
-    precision: localSettings.value.precision,
-    useFractions: localSettings.value.useFractions,
-    useThousandsSeparator: localSettings.value.useThousandsSeparator
-  };
-  emit("settings-change", settingsToSave);
+const saveSettings = async () => {
+  await settingsStore.saveSettings(localSettings.value);
   goBack();
 };
 </script>

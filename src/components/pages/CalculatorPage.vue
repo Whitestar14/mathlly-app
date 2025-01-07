@@ -79,6 +79,10 @@
 </template>
 
 <script setup>
+const init = async () => {
+  await new Promise(resolve => setTimeout(resolve, 1500))
+}
+await init()
 import { HistoryIcon, KeyboardIcon } from "lucide-vue-next";
 import {
   computed,

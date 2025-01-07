@@ -7,10 +7,14 @@ export class StandardCalculator {
     this.error = "";
     this.settings = settings;
     this.currentExpression = "";
+    this.memoryValue = 0;
+    this.isExponentMode = false;
+    this.hasExponent = false;
   }
 
   sanitizeInput(expr) {
-    const allowedChars = /[^0-9+\-×÷.()%]/g;
+    // Allow e/E for scientific notation along with other characters
+    const allowedChars = /[^0-9+\-×÷.()%eE]/g;
     return expr.replace(allowedChars, "").slice(0, this.MAX_INPUT_LENGTH);
   }
 
@@ -18,7 +22,9 @@ export class StandardCalculator {
     try {
       let sanitizedExpr = this.sanitizeInput(expr)
         .replace(/×/g, "*")
-        .replace(/÷/g, "/");
+        .replace(/÷/g, "/")
+        // Properly handle scientific notation
+        .replace(/([0-9])([eE])([-+]?)([0-9]+)/g, '$1 * 10^($3$4)');
 
       if (sanitizedExpr.includes("/0")) {
         throw new Error("Division by zero is not allowed");
@@ -43,11 +49,29 @@ export class StandardCalculator {
     const useFractions = this.settings.useFractions;
     const useThousandsSeparator = this.settings.useThousandsSeparator;
 
-    if (useFractions) {
-      const frac = fraction(result);
-      return frac.d === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
-    } else {
-      let formattedResult = format(result, { precision: precision });
+    try {
+      if (useFractions) {
+        // Convert to fraction with a reasonable tolerance
+        const frac = fraction(result, { tolerance: 1e-12 });
+        
+        // Only show as fraction if denominator is reasonable
+        if (frac.d <= 10000) {
+          return frac.d === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
+        }
+      }
+
+      // Handle very large or small numbers
+      if (Math.abs(result) >= 1e21 || (Math.abs(result) < 1e-7 && result !== 0)) {
+        return result.toExponential(precision);
+      }
+
+      // Format regular numbers
+      let formattedResult = format(result, { 
+        precision: precision,
+        notation: 'fixed'
+      });
+
+      // Apply thousands separator if needed
       if (useThousandsSeparator) {
         const [integerPart, decimalPart] = formattedResult.split(".");
         const formattedIntegerPart = integerPart.replace(
@@ -58,7 +82,11 @@ export class StandardCalculator {
           ? `${formattedIntegerPart}.${decimalPart}`
           : formattedIntegerPart;
       }
+
       return formattedResult;
+    } catch (err) {
+      console.error("Formatting error:", err);
+      return result.toString();
     }
   }
 
@@ -69,9 +97,7 @@ export class StandardCalculator {
 
     if (
       this.input.length >= this.MAX_INPUT_LENGTH &&
-      btn !== "=" &&
-      btn !== "AC" &&
-      btn !== "backspace"
+      !["=", "AC", "backspace", "MC", "MR", "M+", "M-", "MS"].includes(btn)
     ) {
       this.error = "Maximum input length reached";
       setTimeout(() => {
@@ -81,6 +107,35 @@ export class StandardCalculator {
     }
 
     switch (btn) {
+      // Memory operations
+      case "MC":
+        this.handleMemoryClear();
+        break;
+      case "MR":
+        this.handleMemoryRecall();
+        break;
+      case "M+":
+        this.handleMemoryAdd();
+        break;
+      case "M-":
+        this.handleMemorySubtract();
+        break;
+      case "MS":
+        this.handleMemoryStore();
+        break;
+      // Function operations
+      case "1/x":
+        this.handleReciprocal();
+        break;
+      case "x²":
+        this.handleSquare();
+        break;
+      case "√":
+        this.handleSquareRoot();
+        break;
+        case "EXP":
+        this.handleExponent();
+        break;
       case "=":
         return this.handleEquals();
       case "%":
@@ -116,6 +171,15 @@ export class StandardCalculator {
     };
   }
 
+  handleExponent() {
+    if (!this.isLastCharOperator() && !this.hasExponent) {
+      this.input += "e";
+      this.hasExponent = true;
+      this.isExponentMode = true;
+    }
+  }
+
+
   handleOperator(op) {
     this.error = "";
     const lastChar = this.input.trim().slice(-1);
@@ -127,7 +191,11 @@ export class StandardCalculator {
     }
 
     // Allow negative numbers after arithmetic operators
-    if (op === "-" && isLastCharOperator && ["×", "÷", "+"].includes(lastChar)) {
+    if (
+      op === "-" &&
+      isLastCharOperator &&
+      ["×", "÷", "+"].includes(lastChar)
+    ) {
       this.input += ` ${op} `;
       return;
     }
@@ -138,31 +206,54 @@ export class StandardCalculator {
       this.input = this.input.slice(0, -3) + ` ${op} `;
     }
   }
-
   handleNumber(num) {
     this.error = "";
-    
-    // If the input is a result from history or calculation
-    if (this.input === this.currentExpression?.result) {
-      // Start a new expression
+
+    // Reset flags if starting new input
+    if (this.input === "0" && num !== ".") {
       this.input = num;
-      this.currentExpression = "";
-    } else if (this.input === "Error" || this.input === "0") {
-      this.input = num;
-    } else {
-      // Continue building the expression
-      this.input += num;
+      this.hasExponent = false;
+      this.isExponentMode = false;
+      return;
     }
+
+    // Handle decimal point
+    if (num === ".") {
+      if (this.isExponentMode) return; // No decimals in exponent
+      const parts = this.input.split(/[\+\-\×\÷]+/);
+      const lastPart = parts[parts.length - 1];
+      if (lastPart.includes(".")) return;
+      if (this.input === "0") {
+        this.input = "0.";
+        return;
+      }
+    }
+
+    // Handle exponent sign
+    if ((num === "+" || num === "-") && this.isExponentMode) {
+      const lastChar = this.input.slice(-1);
+      if (lastChar === "e") {
+        this.input += num;
+        return;
+      }
+    }
+
+    // Append the number
+    this.input += num;
   }
 
   handleEquals() {
     this.error = "";
     try {
+      // Reset exponent flags
+      this.hasExponent = false;
+      this.isExponentMode = false;
+
       this.currentExpression = {
         expression: this.input,
-        result: this.formatResult(this.evaluateExpression(this.input))
+        result: this.formatResult(this.evaluateExpression(this.input)),
       };
-      
+
       this.input = this.currentExpression.result;
 
       return {
@@ -178,6 +269,70 @@ export class StandardCalculator {
         input: "Error",
       };
     }
+  }
+
+  // Memory Operations - This is a temporary solution, a hotfix if you please, to implementing a fixer upper version of memory functions
+  handleMemoryClear() {
+    this.memoryValue = 0;
+  }
+
+  handleMemoryRecall() {
+    if (this.memoryValue !== null) {
+      this.input = this.formatResult(this.memoryValue);
+    }
+  }
+
+  handleMemoryAdd() {
+    try {
+      const currentValue = this.evaluateExpression(this.input);
+      this.memoryValue += currentValue;
+    } catch (err) {
+      this.error = "Cannot add to memory: " + err.message;
+    }
+  }
+
+  handleMemorySubtract() {
+    try {
+      const currentValue = this.evaluateExpression(this.input);
+      this.memoryValue -= currentValue;
+    } catch (err) {
+      this.error = "Cannot subtract from memory: " + err.message;
+    }
+  }
+
+  handleMemoryStore() {
+    try {
+      this.memoryValue = this.evaluateExpression(this.input);
+    } catch (err) {
+      this.error = "Cannot store in memory: " + err.message;
+    }
+  }
+
+  handleUnaryOperation(operation) {
+    try {
+      const parts = this.input.split(/([+\-×÷])/);
+      const lastValue = parts[parts.length - 1].trim();
+      const value = this.evaluateExpression(lastValue);
+      const result = evaluate(operation(value));
+
+      parts[parts.length - 1] = ` ${this.formatResult(result)}`;
+      this.input = parts.join("");
+    } catch (err) {
+      this.input = "Error";
+      this.error = err.message;
+    }
+  }
+
+  handleReciprocal() {
+    this.handleUnaryOperation((value) => `1/${value}`);
+  }
+
+  handleSquare() {
+    this.handleUnaryOperation((value) => `${value}^2`);
+  }
+
+  handleSquareRoot() {
+    this.handleUnaryOperation((value) => `sqrt(${value})`);
   }
 
   handleClear() {

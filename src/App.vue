@@ -16,25 +16,32 @@
       :class="[!isMobile && isSidebarOpen ? 'ml-64' : '']"
     >
       <calculator-header
-        v-model:mode="mode"
         :is-sidebar-open="isSidebarOpen"
         :is-mobile="isMobile"
         @toggle-sidebar="toggleSidebar"
       />
 
+
       <router-view v-slot="{ Component }">
-        <component
-          :is="Component"
-          :mode="mode"
-          :settings="settings"
-          :is-mobile="isMobile"
-          :is-history-open="isHistoryOpen"
-          @settings-change="updateSettings"
-          @update:mode="updateMode"
-          @select-history-item="selectHistoryItem"
-          @toggle-history="toggleHistory"
-          @update-history="updateHistory"
-        />
+        <Suspense>
+          <template #default>
+            <component
+              :is="Component"
+              :mode="mode"
+              :settings="settings"
+              :is-mobile="isMobile"
+              :is-history-open="isHistoryOpen"
+              @settings-change="updateSettings"
+              @update:mode="updateMode"
+              @select-history-item="selectHistoryItem"
+              @toggle-history="toggleHistory"
+              @update-history="updateHistory"
+            />
+          </template>
+          <template #fallback>
+            <calculator-loader />
+          </template>
+        </Suspense>
       </router-view>
     </div>
 
@@ -52,11 +59,12 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, provide, ref } from "vue";
+import { onMounted, onUnmounted, provide, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import CalculatorHeader from "./components/CalculatorHeader.vue";
 import HistoryPanel from "./components/HistoryPanel.vue";
 import SidebarMenu from "./components/SidebarMenu.vue";
+import CalculatorLoader from './components/CalculatorLoader.vue'
 import db from "./data/db";
 import { useSettingsStore } from './stores/settings'
 
@@ -64,8 +72,8 @@ const currentInput = ref("0"); // Ensure this is a string to hold expressions
 provide("currentInput", currentInput);
 
 const router = useRouter();
-const mode = ref("Programmer");
 const settings = useSettingsStore()
+const mode = computed(() => settings.mode)
 
 
 const isSidebarOpen = ref(false);
@@ -87,8 +95,8 @@ const updateSettings = async (newSettings) => {
   await settings.saveSettings(newSettings)
 };
 
-const updateMode = (newMode) => {
-  mode.value = newMode;
+const updateMode = async (newMode) => {
+  await settings.updateMode(newMode);
 };
 
 const toggleHistory = () => {

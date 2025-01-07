@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-4 gap-2">
     <button
-      class="btn special-btn-ac"
+      class="btn special-btn-ac c"
       @click="handleClick('C')"
     >
       AC
@@ -113,6 +113,6 @@ const handleClick = (value) => {
 </script>
 
 <style scoped>
-@import '../../assets/css/CalculatorButtons.css';
+@import '../../assets/css/buttons.css';
 
 </style>

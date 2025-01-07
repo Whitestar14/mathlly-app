@@ -13,11 +13,16 @@
   font-family: 'Reddit mono';
   src: url(./fonts/RedditMono.ttf);
 }
+
+@font-face {
+  font-family: 'Inter';
+  src: url(./fonts/Inter.ttf);
+}
 * {
   @apply transition-colors
 }
 body {
-  font-family: 'Geist', 'DM Sans', 'Reddit mono', sans-serif;
+  font-family: 'Inter', 'Geist', 'DM Sans', serif;
   font-weight: 400;
   @apply transition-colors
 }
