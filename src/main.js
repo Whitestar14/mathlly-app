@@ -1,12 +1,12 @@
 import { createApp } from "vue";
 import { createPinia } from 'pinia';
-import App from "./App.vue";
-import "./assets/css/tailwind.css"; 
-import "./assets/css/global.css"
-import router from './router'; 
+import App from "@/App.vue";
+import "@/assets/css/tailwind.css"; 
+import "@/assets/css/global.css"
+import router from '@/router'; 
 import VueTippy from "vue-tippy";
 import "tippy.js/dist/tippy.css";
-import "./assets/css/tooltip.css"
+import "@/assets/css/tooltip.css"
 import "tippy.js/animations/shift-toward.css"
 import "tippy.js/dist/border.css";
 

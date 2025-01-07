@@ -220,7 +220,7 @@ export class StandardCalculator {
     // Handle decimal point
     if (num === ".") {
       if (this.isExponentMode) return; // No decimals in exponent
-      const parts = this.input.split(/[\+\-\×\÷]+/);
+      const parts = this.input.split(/[+-×÷]+/); 
       const lastPart = parts[parts.length - 1];
       if (lastPart.includes(".")) return;
       if (this.input === "0") {

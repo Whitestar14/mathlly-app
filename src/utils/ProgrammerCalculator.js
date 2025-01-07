@@ -340,7 +340,7 @@ export class ProgrammerCalculator {
 
     // Handle multiple decimal points in the same number
     if (num === ".") {
-      const parts = currentInput.split(/[\+\-\×\÷]+/); // Split around operators
+      const parts = currentInput.split(/[+-×÷]+/); // Split around operators
       const lastPart = parts[parts.length - 1];
 
       if (lastPart.includes(".")) {
@@ -361,7 +361,7 @@ export class ProgrammerCalculator {
     }
 
     // Handle leading zeros after operators
-    if (/[\+\-\×\÷]/.test(currentInput.trim().slice(-1)) && num === "0") {
+    if (/[+-×÷]/.test(currentInput.trim().slice(-1)) && num === "0") {
       return; // Prevent leading zeros after operators
     }
 

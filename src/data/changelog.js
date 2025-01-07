@@ -1,5 +1,16 @@
 export const updates = [
   {
+    version: 'v0.5.0',
+    date: 'February 2025',
+    features: [
+      'Restructured project architecture by moving components and utils to layouts folder',
+      'Updated import paths across the application for better organization',
+      'Implemented toast notification system for improved user feedback',
+      'Enhanced project maintainability with cleaner folder structure',
+      'Streamlined component organization for better scalability'
+    ]
+  },  
+  {
     version: 'v0.4.0',
     date: 'January 2025',
     features: [

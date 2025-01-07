@@ -1,13 +1,11 @@
 {
   "name": "mathlly",
-  "version": "0.4.0-beta",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode development --open",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "version:bump": "node scripts/bump-version.js"
     "lint": "vue-cli-service lint",
     "version:bump": "node scripts/bump-version.js"
   },

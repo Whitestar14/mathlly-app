@@ -17,7 +17,10 @@
     <main class="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
       <div class="inline-flex items-center rounded-full border border-indigo-200 dark:border-gray-800 bg-indigo-50 dark:bg-gray-800/50 px-3 py-1 text-sm font-medium mb-8">
         <span class="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400 mr-2" />
-        <span class="text-indigo-600 dark:text-indigo-400" style="font-family: 'Geist mono'">
+        <span
+          class="text-indigo-600 dark:text-indigo-400"
+          style="font-family: 'Geist mono'"
+        >
           v{{ version.versionInfo.full }}
         </span>
       </div>
@@ -66,11 +69,11 @@
 
   
   <script setup>
-  import { ArrowLeftIcon, ClockIcon } from 'lucide-vue-next';
   import { useRouter } from 'vue-router';
-  import UpdateCard from './components/UpdateCard.vue';
-  import { updates, upcomingFeatures } from '../../data/changelog';
-  import {useVersionStore} from '../../stores/version.js'
+  import { useVersionStore } from '@/stores/version'
+  import { ArrowLeftIcon, ClockIcon } from 'lucide-vue-next';
+  import { updates, upcomingFeatures } from '@/data/changelog';
+  import UpdateCard from '@/components/UpdateCard.vue';
   
   const router = useRouter();
   const version = useVersionStore();

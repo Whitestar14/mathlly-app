@@ -4,27 +4,27 @@ const routes = [
   {
     path: "/",
     name: "Calculator",
-    component: () => import('../components/pages/CalculatorPage.vue')
+    component: () => import('@/layouts/pages/CalculatorPage.vue')
   },
   {
     path: "/about",
     name: "About",
-    component: () => import('../components/pages/AboutPage.vue')
+    component: () => import('@/layouts/pages/AboutPage.vue')
   },
   {
     path: "/settings",
     name: "Settings",
-    component: () => import('../components/pages/SettingsPage.vue')
+    component: () => import('@/layouts/pages/SettingsPage.vue')
   },
   {
     path: "/feedback",
     name: "Feedback",
-    component: () => import('../components/pages/FeedbackPage.vue')
+    component: () => import('@/layouts/pages/FeedbackPage.vue')
   },
   {
     path: '/whats-new',
     name: 'WhatsNew',
-    component: () => import('../components/pages/WhatsNewPage.vue')
+    component: () => import('@/layouts/pages/WhatsNewPage.vue')
   },
 ];
 

@@ -258,7 +258,7 @@ const formatDisplayValue = (value) => {
 </script>
 
 <style scoped>
-@import "../../assets/css/buttons.css";
+@import "@/assets/css/buttons.css";
 
 .btn {
   @apply px-3 py-2;

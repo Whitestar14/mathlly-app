@@ -152,7 +152,7 @@ export class BasicCalculator {
     // Handle multiple decimal points in a number
     if (num === '.') {
         // Split the input into parts around operators
-        const parts = this.input.split(/[\+\-\×\÷]+/); // Split around operators (+, -, ×, ÷)
+        const parts = this.input.split(/[+-×÷]+/); // Split around operators (+, -, ×, ÷)
         const lastPart = parts[parts.length - 1];
 
         if (lastPart.includes('.')) {

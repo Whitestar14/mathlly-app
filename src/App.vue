@@ -55,19 +55,21 @@
       @clear-history="clearHistory"
       @close="closeHistory"
     />
+
+    <Toast />
   </div>
 </template>
 
 <script setup>
 import { onMounted, onUnmounted, provide, ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import CalculatorHeader from "./components/CalculatorHeader.vue";
-import HistoryPanel from "./components/HistoryPanel.vue";
-import SidebarMenu from "./components/SidebarMenu.vue";
-import CalculatorLoader from './components/CalculatorLoader.vue'
-import db from "./data/db";
-import { useSettingsStore } from './stores/settings'
-import { useSettingsStore } from './stores/settings'
+import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
+import HistoryPanel from "@/layouts/HistoryPanel.vue";
+import SidebarMenu from "@/layouts/SidebarMenu.vue";
+import CalculatorLoader from '@/components/CalculatorLoader.vue'
+import db from "@/data/db";
+import { useSettingsStore } from '@/stores/settings'
+import Toast from "@/components/FeatureToast.vue"
 
 const currentInput = ref("0"); // Ensure this is a string to hold expressions
 provide("currentInput", currentInput);
