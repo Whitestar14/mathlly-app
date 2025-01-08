@@ -1,7 +1,7 @@
 export const updates = [
   {
     version: 'v0.5.0',
-    date: 'February 2025',
+    date: 'January 8, 2025',
     features: [
       'Restructured project architecture by moving components and utils to layouts folder',
       'Updated import paths across the application for better organization',
@@ -12,9 +12,9 @@ export const updates = [
   },  
   {
     version: 'v0.4.0',
-    date: 'January 2025',
+    date: 'January 5, 2025',
     features: [
-      'Refined polished and several pages, components and aesthetics for a better user experience',
+      'Refined and polished several pages, components with aesthetics for a better user experience',
       'Added context menus to the History Panel\'s items visible on right click',
       'Removed redundant and repititive code across the codebase',
       'Implemented a cleaner font "Inter" to ensure a visually consistent look and brand',
@@ -27,7 +27,7 @@ export const updates = [
   },
   {
     version: 'v0.3.0-beta',
-    date: 'January 2025', 
+    date: 'January 3, 2025', 
     features: [
       'Fixed longtime issue with unexpected History Panel behavior on mobile',
       'Implemented dynamic version display and enhanced routing with What\'s New page',
@@ -37,7 +37,7 @@ export const updates = [
   },
     {
       version: 'v0.3.0',
-      date: 'January 2025',
+      date: 'January 1, 2025',
       features: [
         'Introduced Programmer Calculator with HEX, DEC, OCT, and BIN calculations',
         'Added real-time base conversion display with specialized input validation',
@@ -51,7 +51,7 @@ export const updates = [
     },
     {
       version: 'v0.2.1',
-      date: 'December 2024',
+      date: 'December 26, 2024',
       features: [
         'Added history synchronization across calculator modes',
         'Improved scientific notation support in all modes',
@@ -62,7 +62,7 @@ export const updates = [
     },
     {
       version: 'v0.2.0',
-      date: 'November 2024',
+      date: 'November 14, 2024',
       features: [
         'Introduced Standard Calculator mode with advanced operations',
         'Added fraction display support with toggle option',
@@ -73,7 +73,7 @@ export const updates = [
     },
     {
       version: 'v0.1.0',
-      date: 'October 2024',
+      date: 'October 27, 2024',
       features: [
         'Initial release with Basic Calculator functionality',
         'Core arithmetic operations with precise evaluation',
