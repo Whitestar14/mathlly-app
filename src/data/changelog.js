@@ -1,5 +1,12 @@
 export const updates = [
   {
+    version: '0.5.2',
+    date: 'January 9, 2025',
+    features: [
+      'Updated icon library (lucide-vue-next) and devDependencies(eslint, babel, eslint-plugin-vue)'
+    ],
+  }
+  {
     version: '0.5.1',
     date: 'January 9, 2025',
     features: [
@@ -8,7 +15,7 @@ export const updates = [
       'Fixed UI styling collision issues in the pages',
       'Added a BaseModal component for reusability and operable scalability',
       'Made advancements in the adoption of async operations to achieve faster page loads',
-      'Enhanced the UI and refined calculator\s working logic',
+      'Enhanced the UI and refined calculator\'s working logic',
       'Improved accessibility in calculator header and display',
     ]
   },
