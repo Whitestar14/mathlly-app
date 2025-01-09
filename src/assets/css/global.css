@@ -1,10 +1,5 @@
 /* global.css */
 @font-face {
-  font-family: 'Geist';
-  src: url(./fonts/GeistVF.woff2);
-}
-
-@font-face {
   font-family: 'Geist Mono';
   src: url(./fonts/GeistMonoVF.woff2);
 }
@@ -19,14 +14,14 @@
   src: url(./fonts/Inter.ttf);
 }
 * {
-  @apply transition-colors
+  transition: background, opacity, color, background-color 0.3s ease;
 }
 body {
-  font-family: 'Inter', 'Geist', 'DM Sans', serif;
+  font-family: 'Inter', 'DM Sans', sans-serif;
   font-weight: 400;
-  @apply transition-colors
+  transition: all 0.3s ease;
 }
 
-kbd, .main-display, .btn {
+kbd, .monospace, .main-display, .btn {
   font-family: 'Geist Mono', monospace;
 }

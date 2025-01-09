@@ -14,7 +14,7 @@ export class StandardCalculator {
 
   sanitizeInput(expr) {
     // Allow e/E for scientific notation along with other characters
-    const allowedChars = /[^0-9+\-×÷.()%eE]/g;
+    const allowedChars = /[^0-9+\-×÷.()%eE/]/g;
     return expr.replace(allowedChars, "").slice(0, this.MAX_INPUT_LENGTH);
   }
 

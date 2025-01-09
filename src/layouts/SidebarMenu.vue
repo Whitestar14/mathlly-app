@@ -10,24 +10,23 @@
           class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
         >
           <div class="w-full h-full relative">
-            <div class="flex items-center absolute max-h-8 space-x-2">
+            <div class="flex items-center max-h-8 space-x-2 justify-between">
               <kbd
                 aria-label="logo"
-                class="text-gray-600 font-medium px-2.5 py-1.5 pointer-events-none text-2xl dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm"
-                style="font-family: 'Reddit mono'"
+                class="text-gray-600 font-medium px-2.5 monospace py-1.5 pointer-events-none text-2xl dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm"
               >{math<span
                 class="text-indigo-400 font-black dark:text-indigo-600 inline-block mx-0.5"
               >//</span>y}</kbd>
+              <button
+                v-tippy="{ content: 'Close Sidebar', placement: 'bottom' }"
+                class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 duration-300"
+                :class="{ 'opacity-0': !isOpen }"
+                @click="closeSidebar"
+              >
+                <PanelLeftIcon class="h-6 w-6" />
+              </button>
             </div>
           </div>
-          <button
-            v-tippy="{ content: 'Close Sidebar', placement: 'bottom' }"
-            class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-opacity duration-300"
-            :class="{ 'opacity-0': !isOpen }"
-            @click="closeSidebar"
-          >
-            <PanelLeftIcon class="h-6 w-6" />
-          </button>
         </div>
 
         <!-- Navigation Menu with refined styling -->
@@ -139,12 +138,12 @@ import { useRoute, useRouter } from "vue-router";
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    default: true,
+    default: false
   },
   isMobile: {
     type: Boolean,
-    default: false,
-  },
+    default: false
+  }
 });
 const emit = defineEmits(["update:isOpen"]);
 
@@ -195,6 +194,8 @@ watch(
 </script>
 
 <style scoped>
+@import "@/assets/css/global.css";
+
 .sidebar-container {
   position: fixed;
   top: 0;

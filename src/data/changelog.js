@@ -1,5 +1,18 @@
 export const updates = [
   {
+    version: '0.5.1',
+    date: 'January 9, 2025',
+    features: [
+      'Patch fix to breaking issues in v0.5.0',
+      'Removed redundant code to simplify workflow and project cohesion',
+      'Fixed UI styling collision issues in the pages',
+      'Added a BaseModal component for reusability and operable scalability',
+      'Made advancements in the adoption of async operations to achieve faster page loads',
+      'Enhanced the UI and refined calculator\s working logic',
+      'Improved accessibility in calculator header and display',
+    ]
+  },
+  {
     version: 'v0.5.0',
     date: 'January 8, 2025',
     features: [
@@ -90,6 +103,7 @@ export const updates = [
     'Custom function definitions and storage',
     'Mobile apps for iOS and Android platforms',
     'Cloud sync for settings and history',
-    'Lazy loading resources and assets for improved performance'
+    'Lazy loading resources and assets for improved performance',
+    'MathJax integration to display fractions in LaTeX format on the web page'
   ];
   

@@ -1,131 +1,94 @@
-<!-- WelcomeModal.vue  -->
 <template>
-  <DialogRoot
+  <BaseModal 
     :open="isOpen"
-    @update:open="$emit('update:isOpen')"
+    @update:open="$emit('update:isOpen', $event)"
   >
-    <!-- Backdrop -->
-    <DialogOverlay class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+    <template #title>
+      Welcome to Mathlly Beta
+    </template>
 
-    <!-- Content -->
-    <DialogContent
-      class="fixed inset-0 flex items-center justify-center p-4 z-[100]"
-      @close="closeModal"
-    >
-      <div
-        class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all"
-      >
-        <!-- Close Button -->
-        <button
-          class="absolute right-4 top-4 rounded-full p-2 opacity-70 ring-offset-background transition-opacity dark:text-gray-100 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-          @click="closeModal"
-        >
-          <X class="h-4 w-4" />
-          <span class="sr-only">Close</span>
-        </button>
+    <div class="space-y-6">
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        You're among the first to try out Mathlly, our experimental calculator
+        app designed for modern computing needs.
+      </p>
 
-        <!-- Title -->
-        <DialogTitle
-          as="h3"
-          class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
-        >
-          Welcome to Mathlly Beta
-        </DialogTitle>
-
-        <!-- Content -->
-        <div class="mt-4 space-y-4">
-          <p class="text-sm text-gray-600 dark:text-gray-300">
-            You're among the first to try out Mathlly, our experimental calculator app designed for modern computing needs.
-          </p>
-
-          <div class="space-y-2">
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white">
-              What you should know:
-            </h4>
-            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              <li class="flex items-start">
-                <span class="text-indigo-500 mr-2">•</span>
-                This is a beta version and some features might be experimental
-              </li>
-              <li class="flex items-start">
-                <span class="text-indigo-500 mr-2">•</span>
-                Calculations are processed locally for your security
-              </li>
-              <li class="flex items-start">
-                <span class="text-indigo-500 mr-2">•</span>
-                Your feedback is invaluable in shaping Mathlly's future
-              </li>
-            </ul>
-          </div>
-
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-            <p class="text-sm text-gray-600 dark:text-gray-300">
-              Found a bug or have a suggestion? 
-              <a
-                href="https://github.com/Whitestar14/mathlly-app/issues"
-                target="_blank"
-                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
-              >
-                Open an issue on GitHub
-              </a>
-            </p>
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-6 flex justify-between items-center">
-          <label class="flex items-center space-x-2">
-            <input
-              v-model="dontShowAgain"
-              type="checkbox"
-              class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
-            >
-            <span class="text-sm text-gray-600 dark:text-gray-300">Don't show again</span>
-          </label>
-
-          <button
-            type="button"
-            class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 transition-colors duration-200"
-            @click="handleClose"
+      <div class="space-y-3">
+        <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+          What you should know:
+        </h4>
+        <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+          <li
+            v-for="(feature, index) in features"
+            :key="index"
+            class="flex items-start"
           >
-            Get Started
-          </button>
-        </div>
+            <span class="text-indigo-500 mr-2">•</span>
+            {{ feature }}
+          </li>
+        </ul>
       </div>
-    </DialogContent>
-  </DialogRoot>
+
+      <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          Found a bug or have a suggestion?
+          <a
+            href="https://github.com/Whitestar14/mathlly-app/issues"
+            target="_blank"
+            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
+          >
+            Open an issue on GitHub
+          </a>
+        </p>
+      </div>
+
+      <div class="flex justify-between items-center pt-2">
+        <label class="flex items-center space-x-2">
+          <input
+            v-model="dontShowAgain"
+            type="checkbox"
+            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:border-gray-600 dark:bg-gray-700"
+          >
+          <span class="text-sm text-gray-600 dark:text-gray-300">Don't show again</span>
+        </label>
+
+        <button
+          type="button"
+          class="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 transition-colors duration-200"
+          @click="handleClose"
+        >
+          Get Started
+        </button>
+      </div>
+    </div>
+  </BaseModal>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
-import {
-  DialogRoot,
-  DialogOverlay,
-  DialogContent,
-  DialogTitle,
-} from 'radix-vue';
-import { X } from 'lucide-vue-next';
+import { ref } from "vue";
+import BaseModal from "@/components/BaseModal.vue";
 
-const props = defineProps({
+const features = [
+  "This is a beta version and some features might be experimental",
+  "Calculations are processed locally for your security",
+  "Your feedback is invaluable in shaping Mathlly's future",
+];
+
+defineProps({
   isOpen: {
     type: Boolean,
     required: true,
   },
 });
 
-const emit = defineEmits(['update:isOpen', 'close']);
-
+const emit = defineEmits(["update:isOpen", "close"]);
 const dontShowAgain = ref(false);
-
-const closeModal = () => {
-  emit('update:isOpen', false);
-  emit('close');
-};
 
 const handleClose = () => {
   if (dontShowAgain.value) {
-    localStorage.setItem('mathlly-welcome-shown', 'true');
+    localStorage.setItem("mathlly-welcome-shown", "true");
   }
-  closeModal();
+  emit("update:isOpen", false);
+  emit("close");
 };
 </script>

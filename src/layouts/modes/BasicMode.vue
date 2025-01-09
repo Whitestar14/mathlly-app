@@ -112,7 +112,7 @@ const handleClick = (value) => {
 };
 </script>
 
-<style scoped>
+<style>
 @import '@/assets/css/buttons.css';
 
 </style>

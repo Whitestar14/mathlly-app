@@ -10,7 +10,7 @@ export class BasicCalculator {
   }
 
   sanitizeInput(expr) {
-    const allowedChars = /[^0-9+\-×÷.]/g;
+    const allowedChars = /[^0-9+\-×÷./]/g;
     return expr.replace(allowedChars, "").slice(0, this.MAX_INPUT_LENGTH);
   }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <header class="sticky top-0 z-40 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+    <header class="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div class="container mx-auto flex items-center h-16 px-4">
         <button
           class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -38,7 +38,7 @@
 
         <p
           class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400"
-          style="font-family: 'Geist'"
+          style="font-family: 'Inter'"
         >
           Mathlly is more than just a calculator. It's a comprehensive suite of mathematical tools crafted to streamline your workflow and boost your productivity.
         </p>

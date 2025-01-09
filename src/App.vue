@@ -22,27 +22,23 @@
       />
 
 
-      <router-view v-slot="{ Component }">
-        <Suspense>
-          <template #default>
-            <component
-              :is="Component"
-              :mode="mode"
-              :settings="settings"
-              :is-mobile="isMobile"
-              :is-history-open="isHistoryOpen"
-              @settings-change="updateSettings"
-              @update:mode="updateMode"
-              @select-history-item="selectHistoryItem"
-              @toggle-history="toggleHistory"
-              @update-history="updateHistory"
-            />
-          </template>
-          <template #fallback>
-            <calculator-loader />
-          </template>
-        </Suspense>
-      </router-view>
+      <Suspense>
+        <template #default>
+          <router-view
+            :mode="mode"
+            :settings="settings"
+            :is-mobile="isMobile"
+            :is-history-open="isHistoryOpen"
+            @settings-change="updateSettings"
+            @update:mode="updateMode"
+            @select-history-item="selectHistoryItem"
+            @update-history="updateHistory"
+          />
+        </template>
+        <template #fallback>
+          <calculator-loader />
+        </template>
+      </Suspense>
     </div>
 
     <history-panel
@@ -61,15 +57,15 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, provide, ref, computed } from "vue";
+import db from "@/data/db";
 import { useRouter } from "vue-router";
+import { useSettingsStore } from '@/stores/settings'
+import { onMounted, onUnmounted, provide, ref, computed } from "vue";
+import Toast from "@/components/FeatureToast.vue"
+import CalculatorLoader from '@/components/CalculatorLoader.vue'
 import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
-import CalculatorLoader from '@/components/CalculatorLoader.vue'
-import db from "@/data/db";
-import { useSettingsStore } from '@/stores/settings'
-import Toast from "@/components/FeatureToast.vue"
 
 const currentInput = ref("0"); // Ensure this is a string to hold expressions
 provide("currentInput", currentInput);
@@ -78,9 +74,8 @@ const router = useRouter();
 const settings = useSettingsStore()
 const mode = computed(() => settings.mode)
 
-
+const isHistoryOpen = ref(false)
 const isSidebarOpen = ref(false);
-const isHistoryOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
 
 const toggleSidebar = () => {
@@ -102,8 +97,8 @@ const updateMode = async (newMode) => {
   await settings.updateMode(newMode);
 };
 
-const toggleHistory = () => {
-  isHistoryOpen.value = !isHistoryOpen.value;
+const toggleHistory = () => {  // <--- Keep toggleHistory here!
+    isHistoryOpen.value = !isHistoryOpen.value;
 };
 
 const closeHistory = () => {

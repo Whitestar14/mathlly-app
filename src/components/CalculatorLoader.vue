@@ -1,8 +1,8 @@
+<!-- components/CalculatorLoader.vue -->
 <template>
-  <main class="flex-grow flex">
+  <main class="flex-grow flex animate-fade-in">
     <div class="flex-grow bg-white dark:bg-gray-800 shadow-xl overflow-hidden transition-colors duration-300">
       <div class="px-6 mx-auto">
-        <!-- Display skeleton -->
         <div class="animate-pulse space-y-6">
           <!-- Top bar skeleton -->
           <div class="flex justify-between items-center">
@@ -28,4 +28,9 @@
     </div>
   </main>
 </template>
-  
+
+<script setup>
+defineOptions({
+  name: 'CalculatorLoader'
+});
+</script>

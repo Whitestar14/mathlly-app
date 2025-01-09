@@ -12,10 +12,7 @@
       }"
       @click="scrollToPrevious"
     >
-      <ChevronLeft
-        size="24"
-        class="animate-pulse w-full"
-      />
+      <ChevronLeft size="24" class="animate-pulse w-full" />
     </div>
 
     <!-- Right Chevron indicator -->
@@ -28,32 +25,47 @@
       }"
       @click="scrollToNext"
     >
-      <ChevronRight
-        size="24"
-        class="animate-pulse"
-      />
+      <ChevronRight size="24" class="animate-pulse" />
     </div>
 
-    <!-- Copy button with persistent tooltip -->
-    <div
-      ref="copyButton"
-      v-tippy="{ 
-        content: tooltipContent,
-        placement: 'top',
-        trigger: 'manual',
-        duration: 300
-      }"
-      class="absolute right-2 top-2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
-      @mouseenter="showTooltip"
-      @mouseleave="hideTooltipDelayed"
-      @click="copyToClipboard"
-    >
-      <Copy size="20" />
+    <!-- History and Copy button with persistent tooltips -->
+    <div class="flex items-center left-0 top-0 absolute z-40 opacity-30 transition-opacity hover:opacity-100">
+      <div class="flex items-center m-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden">
+        <button
+          v-tippy="{
+            content: 'Open History Panel',
+            placement: 'top',
+          }"
+          class="h-9 w-9 md:hidden p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          @click="toggleHistory"
+        >
+          <HistoryIcon size="20" class="text-gray-600 dark:text-gray-400" />
+        </button>
+
+        <!-- Separator -->
+        <div class="h-6 bg-gray-200 dark:bg-gray-600 w-px md:hidden"></div>
+        
+        <button
+          ref="copyButton"
+          v-tippy="{
+            content: tooltipContent,
+            placement: 'top',
+            trigger: 'manual',
+          }"
+          class="h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          @mouseenter="showTooltip"
+          @mouseleave="hideTooltipDelayed"
+          @click="copyToClipboard"
+        >
+          <Copy size="20" class="text-gray-600 dark:text-gray-400" />
+        </button>
+      </div>
     </div>
+
     <div class="h-20 relative overflow-hidden">
       <!-- Main display -->
       <div
-        class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
+        class="absolute z-10 w-full transition-all duration-500 ease-custom transform-gpu"
         :class="{
           '-translate-y-full opacity-0': isAnimating,
           'translate-y-0 opacity-100': !isAnimating,
@@ -116,6 +128,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  History as HistoryIcon,
 } from "lucide-vue-next";
 import { computed, defineProps, nextTick, ref, watch } from "vue";
 
@@ -125,31 +138,40 @@ const props = defineProps({
   error: String,
   isAnimating: Boolean,
   animatedResult: String,
-  activeBase: String, 
+  activeBase: String,
   settings: Object,
+  
 });
 
 const currentInput = ref(0);
 const copyButton = ref(null);
 const showLeftChevron = ref(false);
 const showRightChevron = ref(false);
-const tooltipContent = ref('Copy to Clipboard');
+const tooltipContent = ref("Copy to Clipboard");
 let hideTooltipTimeout = null;
+
+const emit = defineEmits(["toggle-history"]);
+
+const toggleHistory = () => {
+emit("toggle-history");
+}
 
 const formattedInput = computed(() => {
   if (!props.input) return "";
-  
-  if (props.activeBase === 'BIN') {
+
+  if (props.activeBase === "BIN") {
     // Split on operators, format each part, then rejoin with operators
     const parts = props.input.split(/([+\-×÷])/);
-    return parts.map(part => {
-      if (['+', '-', '×', '÷'].includes(part)) return part;
-      return formatBinary(part);
-    }).join('');
+    return parts
+      .map((part) => {
+        if (["+", "-", "×", "÷"].includes(part)) return part;
+        return formatBinary(part);
+      })
+      .join("");
   }
-  
+
   const parts = props.input.split(".");
-  if (props.activeBase === 'HEX' || props.activeBase === 'OCT') {
+  if (props.activeBase === "HEX" || props.activeBase === "OCT") {
     return parts.join(".");
   }
 
@@ -159,15 +181,14 @@ const formattedInput = computed(() => {
   return parts.join(".");
 });
 
-
 const formatBinary = (binString) => {
-  binString = binString.replace(/[^01]/g, '').replace(/^0+/, '');
-  if (binString === '') return '0';
+  binString = binString.replace(/[^01]/g, "").replace(/^0+/, "");
+  if (binString === "") return "0";
   const padding = 4 - (binString.length % 4);
   if (padding < 4) {
-    binString = '0'.repeat(padding) + binString;
+    binString = "0".repeat(padding) + binString;
   }
-  return binString.match(/.{1,4}/g).join(' ');
+  return binString.match(/.{1,4}/g).join(" ");
 };
 
 const copyContent = computed(() => {
@@ -203,33 +224,33 @@ function hideTooltip() {
 function hideTooltipDelayed() {
   hideTooltipTimeout = setTimeout(() => {
     hideTooltip();
-  }, 3300);
+  }, 0);
 }
 
 function copyToClipboard() {
   navigator.clipboard
     .writeText(copyContent.value)
     .then(() => {
-      tooltipContent.value = 'Saved!';
+      tooltipContent.value = "Saved!";
       showTooltip();
       if (hideTooltipTimeout) {
         clearTimeout(hideTooltipTimeout);
       }
       setTimeout(() => {
         hideTooltip();
-        tooltipContent.value = 'Copy to Clipboard';
+        tooltipContent.value = "Copy to Clipboard";
       }, 1500);
     })
     .catch((err) => {
       console.error("Failed to copy: ", err);
-      tooltipContent.value = 'Failed to copy';
+      tooltipContent.value = "Failed to copy";
       showTooltip();
       if (hideTooltipTimeout) {
         clearTimeout(hideTooltipTimeout);
       }
       setTimeout(() => {
         hideTooltip();
-        tooltipContent.value = 'Copy to Clipboard';
+        tooltipContent.value = "Copy to Clipboard";
       }, 1500);
     });
 }
@@ -306,6 +327,7 @@ function scrollToNext() {
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
