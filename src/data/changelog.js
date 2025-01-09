@@ -5,7 +5,7 @@ export const updates = [
     features: [
       'Updated icon library (lucide-vue-next) and devDependencies(eslint, babel, eslint-plugin-vue)'
     ],
-  }
+  },
   {
     version: '0.5.1',
     date: 'January 9, 2025',
