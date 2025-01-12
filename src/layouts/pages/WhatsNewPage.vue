@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <header class="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+    <header class="sticky top-0 z-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div class="container mx-auto flex items-center h-16 px-4">
         <button
           class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           @click="goBack"
         >
-          <ArrowLeftIcon class="h-5 w-5" />
+          <ArrowLeftIcon class="h-6 w-6" />
         </button>
         <h1 class="text-xl font-semibold">
           What's New
@@ -79,7 +79,7 @@
   const version = useVersionStore();
   
   const goBack = () => {
-    router.push('/');
+    router.go(-1);
   };
   </script>
   

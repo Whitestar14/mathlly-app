@@ -1,13 +1,11 @@
 <template>
   <div class="relative">
-    <!-- Mobile backdrop -->
     <div
       v-if="isMobile && isOpen"
       class="fixed inset-0 bg-black/50 z-40"
       @click="$emit('close')"
     />
 
-    <!-- Main panel -->
     <div
       ref="panelRef"
       :class="[
@@ -18,8 +16,7 @@
       ]"
       :style="isMobile ? panelStyle : {}"
     >
-      <div class="p-4 h-full flex flex-col max-h-[90vh]">
-        <!-- Header -->
+      <div class="p-4 h-full flex flex-col">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
             History
@@ -33,16 +30,13 @@
           </button>
         </div>
 
-        <!-- Content -->
-        <div 
-          class="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
-        >
+        <div class="h-[50svh] overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
           <div
             v-if="mode === 'Programmer'"
             class="text-center text-sm text-gray-500 dark:text-gray-400 py-4"
           >
             History is disabled in
-            <kbd class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-nowrap">
+            <kbd class="bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md text-nowrap">
               Programmer Mode
             </kbd>
           </div>
@@ -68,12 +62,8 @@
                 <ContextMenuRoot>
                   <ContextMenuTrigger>
                     <div
-                      class="rounded-lg bg-gray-100 dark:bg-gray-700 p-3 
-                             hover:bg-gray-200 dark:hover:bg-gray-600 
-                             transition-colors cursor-pointer"
-                      :class="{
-                        'animate-highlight': selectedItemId === item.id
-                      }"
+                      class="rounded-lg bg-gray-100 dark:bg-gray-700 p-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                      :class="{ 'animate-highlight': selectedItemId === item.id }"
                       @click="handleSelectHistoryItem(item)"
                     >
                       <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -83,31 +73,24 @@
                         {{ item.result }}
                       </div>
 
-                      <!-- Delete button -->
                       <button
                         v-tippy="{ content: 'Delete item', placement: 'top' }"
                         class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 
-                               text-gray-500 hover:text-red-500 dark:text-gray-400 
-                               dark:hover:text-red-400 transition-opacity"
+                          text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 
+                          transition-opacity h-9 w-9 inline-flex items-center justify-center rounded-md
+                          hover:bg-gray-100 dark:hover:bg-gray-900/30"
                         :class="isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
                         @click.stop="handleDeleteHistoryItem(item.id)"
-                      > 
+                      >
                         <TrashIcon class="h-4 w-4" />
                       </button>
                     </div>
                   </ContextMenuTrigger>
-
                   <ContextMenuContent
-                    class="z-50 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg 
-                           border border-gray-200 dark:border-gray-700 p-1 shadow-md outline-none"
-                    :align="'end'"
-                    :side-offset="5"
-                    :position="pointerPosition"
+                    class="z-50 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-1 shadow-md"
                   >
                     <ContextMenuItem
-                      class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm 
-                             hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer 
-                             text-gray-700 dark:text-gray-300 outline-none"
+                      class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-300 outline-none"
                       @click="handleSelectHistoryItem(item)"
                     >
                       <CheckIcon class="mr-2 h-4 w-4" />
@@ -115,9 +98,7 @@
                     </ContextMenuItem>
 
                     <ContextMenuItem
-                      class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm 
-                             hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer 
-                             text-gray-700 dark:text-gray-300 outline-none"
+                      class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-300 outline-none"
                       @click="copyHistoryItem(item)"
                     >
                       <CopyIcon class="mr-2 h-4 w-4" />
@@ -127,9 +108,7 @@
                     <ContextMenuSeparator class="h-px bg-gray-200 dark:bg-gray-700 my-1" />
 
                     <ContextMenuItem
-                      class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm 
-                             hover:bg-red-100 dark:hover:bg-red-900/30 cursor-pointer 
-                             text-red-600 dark:text-red-400 outline-none"
+                      class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm hover:bg-red-100 dark:hover:bg-red-900/30 cursor-pointer text-red-600 dark:text-red-400 outline-none"
                       @click="handleDeleteHistoryItem(item.id)"
                     >
                       <TrashIcon class="mr-2 h-4 w-4" />
@@ -142,30 +121,22 @@
           </template>
         </div>
 
-        <!-- Clear history button -->
-        <button
+        <Button
           v-if="history.length > 0 && mode !== 'Programmer'"
-          class="mt-4 flex items-center justify-center w-full py-2 
-                 bg-red-500 hover:bg-red-600 dark:bg-gray-300 
-                 dark:hover:bg-gray-200 text-white dark:text-gray-700 
-                 rounded transition-colors"
+          type="destructive"
+          class="mt-6 flex items-center justify-center py-2 bg-red-500 dark:bg-gray-300 dark:text-gray-700 dark:hover:bg-gray-200 text-white rounded hover:bg-red-600 transition-colors"
           @click="handleClearHistory"
         >
           <TrashIcon class="w-4 h-4 mr-2" />
           Clear History
-        </button>
+        </Button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import {
-  TrashIcon,
-  XIcon,
-  CheckIcon,
-  CopyIcon,
-} from 'lucide-vue-next';
+import { TrashIcon, XIcon, CheckIcon, CopyIcon } from "lucide-vue-next";
 import {
   ContextMenuRoot,
   ContextMenuTrigger,
@@ -174,11 +145,12 @@ import {
   ContextMenuSeparator,
 } from "radix-vue";
 import { computed, onMounted, ref, watch } from "vue";
+import Button from "@/components/ui/BaseButton.vue";
 import db from "@/data/db";
 
 // Name the component (important for debugging)
 defineOptions({
-  name: "HistoryPanel",
+  name: "HistoryPanel", 
 });
 
 const props = defineProps({
@@ -192,7 +164,7 @@ const props = defineProps({
   },
   mode: {
     type: String,
-    default: 'Standard',
+    default: "Standard",
   },
 });
 
@@ -209,17 +181,17 @@ const emit = defineEmits([
   "clearHistory",
 ]);
 
-import { useToast } from '@/composables/useToast'
-const { toast } = useToast()
+import { useToast } from "@/composables/useToast";
+const { toast } = useToast();
 
 const copyHistoryItem = (item) => {
-  const content = `${item.expression} = ${item.result}`
-  navigator.clipboard.writeText(content)
+  const content = `${item.expression} = ${item.result}`;
+  navigator.clipboard.writeText(content);
   toast({
     title: "Copied to clipboard",
-    description: "The calculation has been copied to your clipboard"
-  })
-}
+    description: "The calculation has been copied to your clipboard",
+  });
+};
 
 const MAX_HISTORY_ITEMS = 100;
 
@@ -234,53 +206,56 @@ const panelRef = ref(null);
 
 // Computed
 const panelStyle = computed(() => ({
-  transform: props.isOpen ? 'translateY(0)' : 'translateY(100%)',
+  transform: props.isOpen ? "translateY(0)" : "translateY(100%)",
 }));
 
 // Methods
 const loadHistory = async () => {
   // Replace with your actual DB logic
   history.value = await db.history
-    .orderBy('timestamp')
+    .orderBy("timestamp")
     .reverse()
     .limit(MAX_HISTORY_ITEMS)
     .toArray();
 };
 
 const handleSelectHistoryItem = (item) => {
-  if (props.mode === 'Programmer') return;
+  if (props.mode === "Programmer") return;
 
   selectedItemId.value = item.id;
   setTimeout(() => {
     selectedItemId.value = null;
   }, 300);
 
-  emit('selectHistoryItem', {
+  emit("selectHistoryItem", {
     expression: item.expression.trim(),
     result: item.result,
   });
 
   if (props.isMobile) {
-    emit('close');
+    emit("close");
   }
 };
 
 const handleClearHistory = async () => {
   await db.history.clear();
-  emit('clearHistory');
+  emit("clearHistory");
   history.value = [];
 };
 
 // Lifecycle
 onMounted(() => {
   loadHistory();
+    console.log("HistoryPanel is-open prop:", props.isOpen);
 });
-
-watch(() => props.isOpen, (newValue) => {
-  if (newValue) {
-    loadHistory();
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      loadHistory();
+    }
   }
-});
+);
 
 // Expose methods
 defineExpose({
@@ -307,13 +282,16 @@ defineExpose({
 .list-move {
   transition: transform 0.5s ease;
 }
+.animate-highlight {
+animation: highlight 0.3s ease-out;
+}
 
 @keyframes highlight {
   0% {
-    background-color: theme('colors.gray.400');
+    background-color: theme("colors.gray.300");
   }
   100% {
-    background-color: theme('colors.gray.200');
+    background-color: theme("colors.gray.200");
   }
 }
 
@@ -323,10 +301,10 @@ defineExpose({
 
 @keyframes highlight-dark {
   0% {
-    background-color: theme('colors.gray.600');
+    background-color: theme("colors.gray.600");
   }
   100% {
-    background-color: theme('colors.gray.700');
+    background-color: theme("colors.gray.700");
   }
 }
 

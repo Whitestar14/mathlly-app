@@ -1,6 +1,6 @@
 {
   "name": "mathlly",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -53,7 +53,16 @@
     },
     "rules": {
       "vue/no-unused-refs": "warn",
-      "vue/no-unused-vars": "warn"
+      "vue/no-unused-vars": "warn",
+      "vue/component-options-name-casing": "warn",
+      "vue/component-tags-order": "warn",
+      "vue/define-macros-order": "warn",
+      "vue/no-dupe-keys": "warn",
+      "vue/no-multiple-template-root": "warn",
+      "vue/no-required-prop-with-default": "warn",
+      "vue/no-undef-components": "warn",
+      "vue/no-unused-components": "warn",
+      "vue/no-unused-properties": "warn"
     }
   },
   "browserslist": [

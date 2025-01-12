@@ -6,7 +6,7 @@
           class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           @click="goBack"
         >
-          <ArrowLeftIcon class="h-5 w-5" />
+          <ArrowLeftIcon class="h-6 w-6" />
         </button>
         <h1 class="text-xl font-semibold">
           About Mathlly
@@ -109,7 +109,7 @@ const version = useVersionStore()
 const router = useRouter();
 
 const goBack = () => {
-  router.push("/");
+  router.go(-1);
 };
 
 const features = [

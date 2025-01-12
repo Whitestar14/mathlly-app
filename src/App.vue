@@ -33,6 +33,7 @@
             @update:mode="updateMode"
             @select-history-item="selectHistoryItem"
             @update-history="updateHistory"
+            @toggle-history="toggleHistory"
           />
         </template>
         <template #fallback>
@@ -97,8 +98,10 @@ const updateMode = async (newMode) => {
   await settings.updateMode(newMode);
 };
 
-const toggleHistory = () => {  // <--- Keep toggleHistory here!
+const toggleHistory = () => {
+    console.log("Handling toggle-history event. isHistoryOpen:", !isHistoryOpen.value); // Add this line
     isHistoryOpen.value = !isHistoryOpen.value;
+    console.log("isHistoryOpen after toggle:", isHistoryOpen.value);
 };
 
 const closeHistory = () => {

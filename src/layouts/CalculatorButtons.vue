@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits, defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
 
 const props = defineProps({
   mode: {

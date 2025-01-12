@@ -1,5 +1,19 @@
 export const updates = [
   {
+    version: 'v0.6.0',
+    date: 'January 12, 2025',
+    features: [
+      'Introduced BaseButton component for consistent button styling and behavior',
+      'Enhanced button accessibility with improved focus states and ARIA labels',
+      'Streamlined component imports across the application',
+      'Refined header styles and layout for better visual hierarchy',
+      'Improved toast notification system with configurable duration',
+      'Enhanced history management with robust state handling',
+      'Updated settings interface with new customization options',
+      'Optimized component performance through code cleanup'
+    ]
+  },
+  {
     version: '0.5.2',
     date: 'January 9, 2025',
     features: [

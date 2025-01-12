@@ -13,7 +13,6 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 import { SwitchRoot, SwitchThumb } from 'radix-vue';
 
 const props = defineProps({

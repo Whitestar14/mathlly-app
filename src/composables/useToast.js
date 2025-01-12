@@ -1,16 +1,17 @@
-import { ref } from 'vue'
+// useToast.js
+import { ref } from 'vue';
 
-const toasts = ref([])
+const toasts = ref([]);
 
 export function useToast() {
-  const toast = ({ title, description }) => {
-    const id = Date.now()
-    toasts.value.push({ id, title, description })
+  const toast = ({ title, description, duration = 5000 }) => { // Default duration 5 seconds
+    const id = Date.now();
+    toasts.value.push({ id, title, description });
+
     setTimeout(() => {
-      toasts.value = toasts.value.filter(t => t.id !== id)
-    }, 3000)
-  }
+      toasts.value = toasts.value.filter(t => t.id !== id);
+    }, duration);
+  };
 
-  return { toast, toasts }
+  return { toast, toasts };
 }
-

@@ -8,7 +8,8 @@ const DEFAULT_SETTINGS = {
   useFractions: false,
   useThousandsSeparator: true,
   theme: 'system',
-  mode: 'Basic'
+  mode: 'Basic',
+  borderless: false
 };
 
 export const useSettingsStore = defineStore('settings', {

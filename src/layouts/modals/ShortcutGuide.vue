@@ -19,7 +19,7 @@
         <div
           class="flex items-center space-x-1 bg-indigo-100 dark:bg-indigo-900 px-3 py-2 rounded-md shadow-sm"
         >
-          <template
+          <div
             v-for="(modifier, modIndex) in shortcut.modifiers"
             :key="modIndex"
           >
@@ -32,7 +32,7 @@
               v-if="modIndex < shortcut.modifiers.length - 1"
               class="text-indigo-500 dark:text-indigo-400"
             >+</span>
-          </template>
+          </div>
           <kbd
             class="bg-indigo-200 dark:bg-indigo-800 px-2 py-1 rounded text-xs font-semibold text-indigo-800 dark:text-indigo-200 shadow"
           >

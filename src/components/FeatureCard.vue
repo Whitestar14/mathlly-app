@@ -17,7 +17,6 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
 import * as LucideIcons from 'lucide-vue-next';
 
 const props = defineProps({

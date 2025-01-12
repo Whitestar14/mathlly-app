@@ -1,32 +1,25 @@
 <!-- Calculator Page.vue -->
 <template>
   <main class="flex-grow flex">
-    <!-- Welcome Modal -->
-    <WelcomeModal
-      :is-open="showWelcomeModal"
-      @update:is-open="showWelcomeModal = $event"
-      @close="closeWelcomeModal"
-    />
-
     <div
-      class="flex-grow bg-white dark:bg-gray-800 shadow-xl overflow-hidden transition-colors duration-300"
+      class="flex-grow bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300"
     >
       <div class="p-6 mx-auto">
         <calculator-display
-          :input="calculatorState.input"
+          :input="displayStore.input"
           :preview="preview"
-          :error="calculatorState.error"
-          :is-animating="isAnimating"
-          :animated-preview="animatedResult"
-          :active-base="activeBase"
+          :error="displayStore.error"
+          :is-animating="displayStore.isAnimating"
+          :animated-preview="displayStore.animatedResult"
+          :active-base="displayStore.activeBase"
           :settings="settings"
-          @toggle-history="toggleHistory"
+          @toggle-history="$emit('toggle-history')"
         />
 
         <calculator-buttons
           :mode="mode"
-          :display-values="displayValues"
-          :active-base="activeBase"
+          :display-values="displayStore.displayValues"
+          :active-base="displayStore.activeBase"
           @button-click="handleButtonClick"
           @clear="handleClear"
           @base-change="handleBaseChange"
@@ -35,8 +28,8 @@
     </div>
 
     <history-panel
-    ref="historyPanelRef"
       v-if="!isMobile"
+      ref="historyPanelRef"
       :is-open="isHistoryOpen"
       :is-mobile="isMobile"
       :mode="mode"
@@ -45,54 +38,28 @@
       @delete-history-item="deleteHistoryItem"
       @clear-history="clearHistory"
     />
+
+    <!-- Welcome Modal -->
+    <welcome-modal
+      :is-open="showWelcomeModal"
+      @update:is-open="showWelcomeModal = $event"
+      @close="closeWelcomeModal"
+    />
   </main>
 </template>
 
 <script setup>
-import {
-  computed,
-  defineEmits,
-  defineProps,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-  inject,
-} from "vue";
+import { computed, nextTick, onMounted, watch, inject } from "vue";
 import db from "@/data/db";
-import { BasicCalculator } from "@/utils/BasicCalculator";
-import { ProgrammerCalculator } from "@/utils/ProgrammerCalculator";
-import { StandardCalculator } from "@/utils/StandardCalculator";
-import CalculatorButtons from "@/layouts/CalculatorButtons.vue";
-import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
-
-const asyncSetup = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulated delay
-
-  const calculatorState = ref({
-    input: "0",
-    error: "",
-  });
-
-  const calculator = computed(() => {
-    switch (props.mode) {
-      case "Programmer":
-        return new ProgrammerCalculator(props.settings);
-      case "Standard":
-        return new StandardCalculator(props.settings);
-      default:
-        return new BasicCalculator(props.settings);
-    }
-  });
-
-  return {
-    calculatorState,
-    calculator,
-  };
-};
+import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
+import CalculatorButtons from "@/layouts/CalculatorButtons.vue";
+import { useDisplayStore } from "@/stores/display";
+import { onBeforeRouteLeave } from "vue-router";
+import { useHistory } from "@/composables/useHistory";
+import { useCalculator } from "@/composables/useCalculator";
+import { useTitle, useStorage, useEventListener } from "@vueuse/core";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -101,40 +68,44 @@ const props = defineProps({
   isHistoryOpen: { type: Boolean, required: true },
 });
 
-const { calculatorState, calculator } = await asyncSetup();
+// Dynamic page title
+useTitle(computed(() => `${props.mode} Calculator | Mathlly`));
 
 const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
+const { calculator, updateDisplayState } = useCalculator(
+  props.mode,
+  props.settings
+);
+const { historyPanelRef, addToHistory, clearHistory } = useHistory(() => {
+  emit('update-history')
+})
+
+const displayStore = useDisplayStore();
 const currentInput = inject("currentInput");
-const isAnimating = ref(false);
-const animatedResult = ref("");
-const historyPanelRef = ref(null);
-const showWelcomeModal = ref(!localStorage.getItem("mathlly-welcome-shown"));
-const isHistoryOpen = ref(false);
+const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
 const closeWelcomeModal = () => {
   showWelcomeModal.value = false;
   localStorage.setItem("mathlly-welcome-shown", "true");
 };
 
-const activeBase = ref("DEC");
-
 const preview = computed(() => {
   if (props.mode === "Programmer") {
     try {
       const result = calculator.value.evaluateExpression(
-        calculatorState.value.input,
-        activeBase.value
+        displayStore.input,
+        displayStore.activeBase
       );
-      return calculator.value.formatResult(result, activeBase.value);
+      displayStore.preview = result;
+      return calculator.value.formatResult(result, displayStore.activeBase);
     } catch (err) {
       return "";
     }
   } else {
     try {
-      const result = calculator.value.evaluateExpression(
-        calculatorState.value.input
-      );
+      const result = calculator.value.evaluateExpression(displayStore.input);
+      displayStore.preview = result;
       return calculator.value.formatResult(result);
     } catch (err) {
       return "";
@@ -142,24 +113,28 @@ const preview = computed(() => {
   }
 });
 
-// Import useDebounce from vueuse
+// Update the handleButtonClick method to use the new debounced function
+const handleButtonClick = (btn) => {
+  const result = calculator.value.handleButtonClick(btn);
+  displayStore.updateState(result);
 
-const addToHistoryDebounced = (() => {
-  let timeout;
-  return (expression, result) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(async () => {
-      const timestamp = new Date().getTime();
-      await db.history.add({ expression, result, timestamp });
-      emit("update-history");
+  if (props.mode === "Programmer") {
+    updateDisplayState();
+  }
 
-      if (historyPanelRef.value) {
-        await nextTick();
-        historyPanelRef.value.updateHistory();
-      }
-    }, 500); // 500ms debounce time
-  };
-})();
+  if (btn === "=") {
+    displayStore.setAnimation(result.result);
+    displayStore.isAnimating = true;
+
+    setTimeout(() => {
+      displayStore.isAnimating = false;
+    }, 500);
+
+    if (props.mode !== "Programmer") {
+      addToHistory(result.expression, result.result);
+    }
+  }
+};
 
 const selectHistoryItem = (item) => {
   if (props.mode === "Programmer") {
@@ -171,10 +146,10 @@ const selectHistoryItem = (item) => {
   calculator.value.currentExpression = ""; // Reset currentExpression so handleNumber treats this as a new input
 
   // Then update the display state
-  calculatorState.value = {
+  displayStore.updateState({
     input: item.expression,
     error: "",
-  };
+  });
 
   // Update shared input state
   currentInput.value = item.expression;
@@ -185,43 +160,35 @@ const deleteHistoryItem = async (id) => {
   emit("update-history");
 };
 
-const clearHistory = async () => {
-  await db.history.clear();
-  emit("update-history");
-};
-
-const toggleHistory = () => {
-    isHistoryOpen.value = !isHistoryOpen.value;
-};
-
-const displayValues = ref({
-  HEX: { input: "0", display: "0" },
-  DEC: { input: "0", display: "0" },
-  OCT: { input: "0", display: "0" },
-  BIN: { input: "0", display: "0" },
-});
-
 watch(
   () => props.mode,
   () => {
-    calculatorState.value = {
+    displayStore.updateState({
       input: "0",
       error: "",
-    };
-    activeBase.value = "DEC";
+    });
+    displayStore.setActiveBase("DEC");
   }
 );
 
-// Add this watch in your script setup
+watch(
+  () => props.settings,
+  (newSettings) => {
+    displayStore.setSettings(newSettings);
+    displayStore.recalculateDisplay(calculator.value);
+  },
+  { immediate: true }
+);
+
 watch(
   currentInput,
   (newValue) => {
-    if (newValue !== calculatorState.value.input) {
+    if (newValue !== displayStore.input) {
       // Update both the calculator state and the internal calculator instance
-      calculatorState.value = {
+      displayStore.updateState({
         input: newValue,
         error: "",
-      };
+      });
 
       // Reset the calculator's internal state with the new input
       calculator.value.input = newValue;
@@ -237,66 +204,19 @@ watch(
 );
 
 watch(
-  () => calculatorState.value.input,
-  (newInput) => {
-    if (props.mode === "Programmer") {
-      // Force an update of display values
-      try {
-        const updatedDisplayValues =
-          calculator.value.updateDisplayValues(newInput);
-        displayValues.value = {
-          ...displayValues.value,
-          ...updatedDisplayValues,
-        };
-      } catch (error) {
-        console.error("Error updating display values:", error);
-      }
+  () => displayStore.getCurrentDisplayValue.value,
+  (newValue) => {
+    if (newValue !== displayStore.input) {
+      displayStore.updateState({
+        input: newValue,
+        error: "",
+      });
     }
-  },
-  { deep: true }
+  }
 );
 
-const updateDisplayState = () => {
-  if (props.mode === "Programmer") {
-    try {
-      const updatedValues = calculator.value.updateDisplayValues();
-      displayValues.value = {
-        ...displayValues.value,
-        ...updatedValues,
-      };
-      calculatorState.value.input =
-        updatedValues[activeBase.value]?.input || "0";
-    } catch (error) {
-      console.error("Error in updateDisplayState:", error);
-    }
-  }
-};
-
-const handleButtonClick = (btn) => {
-  const result = calculator.value.handleButtonClick(btn);
-  calculatorState.value = result;
-
-  if (props.mode === "Programmer") {
-    updateDisplayState();
-  }
-
-  if (btn === "=") {
-    animatedResult.value = result.result;
-    isAnimating.value = true;
-
-    setTimeout(() => {
-      isAnimating.value = false;
-    }, 500);
-
-    // Store both the expression and the result
-    if (props.mode !== "Programmer") {
-      addToHistoryDebounced(result.expression, result.result);
-    }
-  }
-};
-
 const handleClear = () => {
-  calculatorState.value = calculator.value.handleButtonClick("AC");
+  displayStore.updateState(calculator.value.handleButtonClick("AC"));
   if (props.mode === "Programmer") {
     updateDisplayState();
   }
@@ -304,9 +224,9 @@ const handleClear = () => {
 
 const handleBaseChange = (newBase) => {
   if (props.mode === "Programmer") {
-    activeBase.value = newBase;
+    displayStore.setActiveBase(newBase);
     const result = calculator.value.handleBaseChange(newBase);
-    calculatorState.value = result;
+    displayStore.updateState(result);
     updateDisplayState();
   }
 };
@@ -320,7 +240,10 @@ const handleKeyDown = (event) => {
     BIN: /^[01]$/,
   };
 
-  if (props.mode === "Programmer" && allowedKeys[activeBase.value].test(key)) {
+  if (
+    props.mode === "Programmer" &&
+    allowedKeys[displayStore.activeBase].test(key)
+  ) {
     handleButtonClick(key.toUpperCase());
   } else if (
     ["+", "-", "*", "/", "=", "Enter", "Escape", "Backspace"].includes(key)
@@ -357,12 +280,33 @@ const handleKeyDown = (event) => {
   }
 };
 
-onMounted(() => {
-  window.addEventListener("keydown", handleKeyDown);
+onBeforeRouteLeave(() => {
+  if (displayStore.hasPendingOperation()) {
+    const currentOp = displayStore.getCurrentOperation();
+    const lastNum = displayStore.getLastNumber();
+
+    if (currentOp) {
+      displayStore.storePendingOperation(currentOp, lastNum);
+    }
+  }
+
+  displayStore.lastMode = props.mode;
+  displayStore.persistState();
 });
 
-onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeyDown);
+useEventListener("keydown", handleKeyDown, window);
+onMounted(() => {
+  displayStore.initializeSession();
+  displayStore.loadState();
+
+  // Resume any pending calculations
+  if (displayStore.getPendingCalculation) {
+    nextTick(() => displayStore.resumeCalculation(calculator.value));
+  }
+
+  if (displayStore.input !== "0") {
+    nextTick(() => displayStore.recalculateDisplay(calculator.value));
+  }
 });
 </script>
 
