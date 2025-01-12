@@ -1,5 +1,19 @@
 export const updates = [
   {
+    version: 'v0.6.1',
+    date: 'January 15, 2025',
+    features: [
+      'Enhanced loading states with smooth transitions and minimum display time',
+      'Refined skeleton loader animations for improved user experience',
+      'Adjusted z-index hierarchy for consistent header visibility',
+      'Standardized button dimensions across calculator modes',
+      'Implemented fade transitions for seamless page navigation',
+      'Optimized component loading strategy with static imports',
+      'Updated button styles for better visual consistency',
+      'Improved UI responsiveness during state transitions'
+    ]
+  },
+  {
     version: 'v0.6.0',
     date: 'January 12, 2025',
     features: [

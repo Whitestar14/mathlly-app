@@ -2,6 +2,7 @@
 <template>
   <div
     class="min-h-screen flex bg-background dark:bg-gray-900 transition-colors duration-300"
+    :class="{ 'borders-transparent': settings.borderless }"
   >
     <sidebar-menu
       :is-open="isSidebarOpen"
@@ -9,7 +10,7 @@
       @update:isOpen="updateSidebarOpen"
       @openAbout="navigateToAbout"
       @openSettings="navigateToSettings"
-    /> 
+    />
 
     <div
       class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
@@ -21,25 +22,24 @@
         @toggle-sidebar="toggleSidebar"
       />
 
-
-      <Suspense>
-        <template #default>
-          <router-view
-            :mode="mode"
-            :settings="settings"
-            :is-mobile="isMobile"
-            :is-history-open="isHistoryOpen"
-            @settings-change="updateSettings"
-            @update:mode="updateMode"
-            @select-history-item="selectHistoryItem"
-            @update-history="updateHistory"
-            @toggle-history="toggleHistory"
-          />
-        </template>
-        <template #fallback>
-          <calculator-loader />
-        </template>
-      </Suspense>
+      <router-view v-slot="{ Component }">
+        <Transition name="fade" mode="out-in">
+    <calculator-loader v-if="isLoading"/>
+    <component 
+      v-else
+      :is="Component"
+      :mode="mode"
+      :settings="settings"
+      :is-mobile="isMobile"
+      :is-history-open="isHistoryOpen"
+      @settings-change="updateSettings"
+      @update:mode="updateMode"
+      @select-history-item="selectHistoryItem"
+      @update-history="updateHistory"
+      @toggle-history="toggleHistory"
+    />
+  </Transition>
+</router-view>
     </div>
 
     <history-panel
@@ -60,10 +60,11 @@
 <script setup>
 import db from "@/data/db";
 import { useRouter } from "vue-router";
-import { useSettingsStore } from '@/stores/settings'
-import { onMounted, onUnmounted, provide, ref, computed } from "vue";
-import Toast from "@/components/FeatureToast.vue"
-import CalculatorLoader from '@/components/CalculatorLoader.vue'
+import { useEventListener } from "@vueuse/core";
+import { useSettingsStore } from "@/stores/settings";
+import { onMounted, provide, ref, defineAsyncComponent, computed } from "vue";
+import Toast from "@/components/FeatureToast.vue";
+import CalculatorLoader from "@/components/CalculatorLoader.vue";
 import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
@@ -71,11 +72,19 @@ import SidebarMenu from "@/layouts/SidebarMenu.vue";
 const currentInput = ref("0"); // Ensure this is a string to hold expressions
 provide("currentInput", currentInput);
 
-const router = useRouter();
-const settings = useSettingsStore()
-const mode = computed(() => settings.mode)
+const isLoading = ref(true)
 
-const isHistoryOpen = ref(false)
+onMounted(async () => {
+  handleResize()
+  await settings.loadSettings()
+  isLoading.value = false
+})
+
+const router = useRouter();
+const settings = useSettingsStore();
+const mode = computed(() => settings.mode);
+
+const isHistoryOpen = ref(false);
 const isSidebarOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
 
@@ -91,7 +100,7 @@ const navigateToSettings = () => router.push("/settings");
 const navigateToAbout = () => router.push("/about");
 
 const updateSettings = async (newSettings) => {
-  await settings.saveSettings(newSettings)
+  await settings.saveSettings(newSettings);
 };
 
 const updateMode = async (newMode) => {
@@ -99,9 +108,7 @@ const updateMode = async (newMode) => {
 };
 
 const toggleHistory = () => {
-    console.log("Handling toggle-history event. isHistoryOpen:", !isHistoryOpen.value); // Add this line
-    isHistoryOpen.value = !isHistoryOpen.value;
-    console.log("isHistoryOpen after toggle:", isHistoryOpen.value);
+  isHistoryOpen.value = !isHistoryOpen.value;
 };
 
 const closeHistory = () => {
@@ -166,15 +173,28 @@ const toggleFullScreen = () => {
   }
 };
 
-onMounted(async () => {
-  window.addEventListener("resize", handleResize);
-  window.addEventListener("keydown", handleKeyDown);
-  handleResize();
-  await settings.loadSettings()
-});
+useEventListener(window, "resize", handleResize);
+useEventListener(window, "keydown", handleKeyDown);
 
-onUnmounted(() => {
-  window.removeEventListener("resize", handleResize);
-  window.removeEventListener("keydown", handleKeyDown);
+onMounted(async () => {
+  handleResize()
+  const minLoadTime = new Promise(resolve => setTimeout(resolve, 800))
+  await Promise.all([
+    settings.loadSettings(),
+    minLoadTime
+  ])
+  isLoading.value = false
 });
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

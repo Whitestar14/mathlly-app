@@ -68,12 +68,6 @@
 import { ref } from "vue";
 import BaseModal from "@/components/BaseModal.vue";
 
-const features = [
-  "This is a beta version and some features might be experimental",
-  "Calculations are processed locally for your security",
-  "Your feedback is invaluable in shaping Mathlly's future",
-];
-
 defineProps({
   isOpen: {
     type: Boolean,
@@ -82,6 +76,13 @@ defineProps({
 });
 
 const emit = defineEmits(["update:isOpen", "close"]);
+
+const features = [
+  "This is a beta version and some features might be experimental",
+  "Calculations are processed locally for your security",
+  "Your feedback is invaluable in shaping Mathlly's future",
+];
+
 const dontShowAgain = ref(false);
 
 const handleClose = () => {

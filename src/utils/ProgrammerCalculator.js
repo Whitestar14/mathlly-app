@@ -5,6 +5,7 @@ import {
   HexCalculator,
   OctCalculator,
 } from "./BaseCalculator";
+import { ParenthesesTracker } from "./ParenthesesTracker"
 
 export class ProgrammerCalculator {
   constructor(settings) {
@@ -24,23 +25,24 @@ export class ProgrammerCalculator {
       HEX: new HexCalculator(),
       OCT: new OctCalculator(),
     };
-    this.parenthesesCount = 0;
+    this.parenthesesTracker = new ParenthesesTracker();
   }
 
   get activeCalculator() {
     return this.calculators[this.activeBase];
   }
 
-  evaluateExpression(expr, base = this.activeBase) {
+evaluateExpression(expr, base = this.activeBase) {
     try {
       if (!expr || expr.trim() === "") return bignumber(0);
 
-      // First, standardize spacing around parentheses
-      let sanitizedExpr = expr
-        .replace(/\(/g, " ( ")
-        .replace(/\)/g, " ) ")
-        .replace(/\s+/g, " ")
-        .trim();
+      // Handle base conversion for numbers within parentheses
+      let sanitizedExpr = expr.replace(/\(([^)]+)\)/g, (match, group) => {
+        if (base !== "DEC") {
+          return "(" + this.convertNumbersInGroup(group, base) + ")";
+        }
+        return match;
+      });
 
       // Convert operators
       sanitizedExpr = sanitizedExpr.replace(/×/g, "*").replace(/÷/g, "/");
@@ -78,6 +80,17 @@ export class ProgrammerCalculator {
       console.error("Error in evaluateExpression:", err, { expr });
       return null;
     }
+  }
+
+  convertNumbersInGroup(group, fromBase) {
+    return group.split(/([+\-×÷]|\s+)/).map(part => {
+      part = part.trim();
+      if (!part) return "";
+      if (/^[0-9A-Fa-f]+$/.test(part)) {
+        return parseInt(part, this.getBaseInt(fromBase)).toString(10);
+      }
+      return part;
+    }).join("");
   }
 
   // Add this helper method
@@ -255,28 +268,25 @@ export class ProgrammerCalculator {
 
   handleParenthesis(parenthesis) {
     const currentInput = this.states[this.activeBase].input.trim();
+    const position = currentInput.length;
 
     if (parenthesis === "(") {
-      // Handle opening parenthesis
       if (currentInput === "0" || currentInput === "Error") {
         this.states[this.activeBase].input = "(";
-        this.parenthesesCount++;
+        this.parenthesesTracker.open(0);
         return;
       }
 
-      // Add multiplication operator if needed
       const lastChar = currentInput.slice(-1);
       const needsMultiplication = /[0-9A-Fa-f)]/.test(lastChar);
-
       this.states[this.activeBase].input = `${currentInput}${
         needsMultiplication ? " × " : " "
       }(`;
-      this.parenthesesCount++;
+      this.parenthesesTracker.open(position + (needsMultiplication ? 3 : 1));
     } else if (parenthesis === ")") {
-      // Handle closing parenthesis
-      if (this.canAddClosingParenthesis(currentInput)) {
+      if (this.parenthesesTracker.canClose(currentInput)) {
         this.states[this.activeBase].input = `${currentInput})`;
-        this.parenthesesCount--;
+        this.parenthesesTracker.close(position);
       }
     }
   }
@@ -316,6 +326,20 @@ export class ProgrammerCalculator {
 
   handleOperator(op) {
     this.error = "";
+    
+    // Special handling for shift operators
+    if (op === "<<" || op === ">>") {
+      if (this.isLastCharOperator()) {
+        // Replace the last operator with the shift operator
+        this.states[this.activeBase].input = this.states[this.activeBase].input
+          .replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
+      } else if (!this.states[this.activeBase].input.endsWith("(")) {
+        this.states[this.activeBase].input += ` ${op} `;
+      }
+      return;
+    }
+
+    // Regular operator handling
     if (
       !this.isLastCharOperator() &&
       !this.states[this.activeBase].input.endsWith("(")
@@ -323,7 +347,7 @@ export class ProgrammerCalculator {
       this.states[this.activeBase].input += ` ${op} `;
     } else if (this.isLastCharOperator()) {
       this.states[this.activeBase].input =
-        this.states[this.activeBase].input.slice(0, -3) + ` ${op} `;
+        this.states[this.activeBase].input.replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
     }
   }
 
@@ -374,9 +398,9 @@ export class ProgrammerCalculator {
       let expression = this.states[this.activeBase].input;
 
       // Add missing closing parentheses
-      while (this.parenthesesCount > 0) {
-        expression += " )";
-        this.parenthesesCount--;
+      const openCount = this.parenthesesTracker.getOpenCount();
+      if (openCount > 0) {
+        expression += " )".repeat(openCount);
       }
 
       this.currentExpression = expression;
@@ -385,6 +409,9 @@ export class ProgrammerCalculator {
       if (result === null) throw new Error("Invalid expression");
 
       this.states[this.activeBase].input = this.formatResult(result);
+
+      // Reset parentheses tracking after successful evaluation
+      this.parenthesesTracker = new ParenthesesTracker();
 
       return {
         expression: this.currentExpression,
@@ -399,6 +426,7 @@ export class ProgrammerCalculator {
       };
     }
   }
+
 
   handleClear() {
     this.states[this.activeBase].input = "0";
@@ -421,17 +449,67 @@ export class ProgrammerCalculator {
 
   handleBackspace() {
     if (
-      this.states[this.activeBase].input !== "0" &&
-      this.states[this.activeBase].input !== "Error"
+      this.states[this.activeBase].input === "0" ||
+      this.states[this.activeBase].input === "Error"
     ) {
-      if (this.states[this.activeBase].input.length === 1) {
-        this.states[this.activeBase].input = "0";
-      } else {
-        this.states[this.activeBase].input = this.states[
-          this.activeBase
-        ].input.slice(0, -1);
+      return;
+    }
+
+    let currentInput = this.states[this.activeBase].input;
+    
+    // Check for shift operators first
+    if (currentInput.endsWith(" >> ") || currentInput.endsWith(" << ")) {
+      // Remove the entire shift operator including spaces
+      this.states[this.activeBase].input = currentInput.slice(0, -4);
+      return;
+    }
+
+    // Check if we're about to delete a number followed by an operator
+    const operatorMatch = currentInput.match(/(.*?)(\s*[+\-×÷]\s*)$/);
+    if (operatorMatch) {
+      const [, beforeOperator, operator] = operatorMatch;
+      
+      // If the number before the operator is a single digit
+      if (beforeOperator.match(/(\d|\w)$/)) {
+        // Remove both the number and the operator group
+        this.states[this.activeBase].input = beforeOperator.slice(0, -1);
+        return;
       }
     }
+
+    // Check if we're about to delete a single number/character followed by a space
+    const singleNumberWithSpaceMatch = currentInput.match(/(.*?)(\s*[0-9A-Fa-f]\s+)$/);
+    if (singleNumberWithSpaceMatch) {
+      const [, beforeNumber] = singleNumberWithSpaceMatch;
+      // Remove both the number and the following space
+      this.states[this.activeBase].input = beforeNumber;
+      return;
+    }
+
+    // Handle parentheses
+    const position = currentInput.length - 1;
+    const currentChar = currentInput[position];
+    
+    if (currentChar === "(" || currentChar === ")") {
+      this.parenthesesTracker.handleBackspace(
+        position,
+        currentInput
+      );
+    }
+
+    // Default case: remove one character
+    if (currentInput.length === 1) {
+      this.states[this.activeBase].input = "0";
+    } else {
+      // Remove trailing spaces if present
+      if (currentInput.endsWith(" ")) {
+        currentInput = currentInput.trimEnd();
+      }
+      this.states[this.activeBase].input = currentInput.slice(0, -1);
+    }
+
+    // Clean up any trailing spaces after operators
+    this.states[this.activeBase].input = this.states[this.activeBase].input.replace(/\s+$/, "");
   }
 
   isLastCharOperator() {

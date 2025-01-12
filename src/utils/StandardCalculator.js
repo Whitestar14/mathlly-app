@@ -42,7 +42,7 @@ export class StandardCalculator {
     }
   }
 
-  formatResult(result) {
+formatResult(result) {
     if (result === undefined) return "";
 
     const precision = this.settings.precision;
@@ -50,45 +50,45 @@ export class StandardCalculator {
     const useThousandsSeparator = this.settings.useThousandsSeparator;
 
     try {
-      if (useFractions) {
-        // Convert to fraction with a reasonable tolerance
-        const frac = fraction(result, { tolerance: 1e-12 });
-        
-        // Only show as fraction if denominator is reasonable
-        if (frac.d <= 10000) {
-          return frac.d === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
+        if (useFractions) {
+            let frac;
+            if (typeof result === 'number') {
+                frac = fraction(result); // Correct way for numbers
+            } else if (typeof result === 'string') {
+                frac = fraction(result, { tolerance: 1e-12 }); // Correct for strings
+            } else if (result && result.isBigNumber){
+                frac = fraction(result.toString(), { tolerance: 1e-12 });
+            }
+            else {
+                throw new Error("Unexpected result type for fraction conversion")
+            }
+
+            if (frac.d <= 10000) {
+                return frac.d === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
+            }
         }
-      }
 
-      // Handle very large or small numbers
-      if (Math.abs(result) >= 1e21 || (Math.abs(result) < 1e-7 && result !== 0)) {
-        return result.toExponential(precision);
-      }
+        if (Math.abs(result) >= 1e21 || (Math.abs(result) < 1e-7 && result !== 0)) {
+            return result.toExponential(precision);
+        }
 
-      // Format regular numbers
-      let formattedResult = format(result, { 
-        precision: precision,
-        notation: 'fixed'
-      });
+        let formattedResult = format(result, {
+            precision: precision,
+            notation: 'fixed'
+        });
 
-      // Apply thousands separator if needed
-      if (useThousandsSeparator) {
-        const [integerPart, decimalPart] = formattedResult.split(".");
-        const formattedIntegerPart = integerPart.replace(
-          /\B(?=(\d{3})+(?!\d))/g,
-          ","
-        );
-        formattedResult = decimalPart
-          ? `${formattedIntegerPart}.${decimalPart}`
-          : formattedIntegerPart;
-      }
+        if (useThousandsSeparator) {
+            const [integerPart, decimalPart] = formattedResult.split(".");
+            const formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            formattedResult = decimalPart ? `${formattedIntegerPart}.${decimalPart}` : formattedIntegerPart;
+        }
 
-      return formattedResult;
+        return formattedResult;
     } catch (err) {
-      console.error("Formatting error:", err);
-      return result.toString();
+        console.error("Formatting error:", err);
+        return result?.toString() || "0"; // Handle potential null/undefined result
     }
-  }
+}
 
   handleButtonClick(btn) {
     if (this.input === "Error") {

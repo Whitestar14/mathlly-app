@@ -77,6 +77,7 @@ const { calculator, updateDisplayState } = useCalculator(
   props.mode,
   props.settings
 );
+
 const { historyPanelRef, addToHistory, clearHistory } = useHistory(() => {
   emit('update-history')
 })
@@ -113,7 +114,6 @@ const preview = computed(() => {
   }
 });
 
-// Update the handleButtonClick method to use the new debounced function
 const handleButtonClick = (btn) => {
   const result = calculator.value.handleButtonClick(btn);
   displayStore.updateState(result);
@@ -311,33 +311,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.2s ease-out;
-}
+@import url("@/assets/css/animation.css");
 </style>

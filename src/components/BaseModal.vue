@@ -13,8 +13,15 @@
       leave-from-class="opacity-100 scale-100"
       leave-to-class="opacity-0 scale-95"
     >
-      <DialogContent class="fixed inset-0 flex items-center justify-center p-4 z-[100]">
-        <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl">
+      <DialogContent 
+        class="fixed inset-0 flex items-center justify-center p-4 z-[100]"
+        aria-describedby="modal-description"
+        description="modal-description"
+      >
+        <div 
+          id="modal-description"
+          class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl"
+        >
           <!-- Close Button -->
           <button
             class="absolute right-4 top-4 rounded-full p-2 opacity-70 ring-offset-background transition-opacity dark:text-gray-100 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"

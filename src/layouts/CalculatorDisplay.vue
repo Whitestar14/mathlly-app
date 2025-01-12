@@ -1,77 +1,83 @@
 <template>
   <div
-    class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-4 transition-all duration-300 relative h-32"
+    class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-4 transition-all duration-300 relative h-32 flex items-center"
   >
-    <!-- Left Chevron indicator -->
-    <div
-      v-if="showLeftChevron"
-      class="absolute left-2 top-8 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
-      :class="{
-        'opacity-0': !showLeftChevron,
-        'opacity-100': showLeftChevron,
-      }"
-      @click="scrollToPrevious"
-    >
-      <ChevronLeft size="24" class="animate-pulse w-full" />
+    <!-- Chevron scroll indicators -->
+    <div class="left-0 bottom-0 w-full absolute z-10">
+      <div class="flex w-full justify-between items-center">
+        <div
+          class="opacity-30 hover:opacity-100 p-2 cursor-pointer transition-colors"
+        >
+          <div
+            v-if="showLeftChevron"
+            :class="{ 'bg-gray-200 dark:bg-gray-600': activeChevron === 'left' }"
+            class="border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600"
+            @click="scrollToPrevious"
+          >
+            <ChevronLeft
+              size="24"
+              class="text-gray-600 dark:text-gray-400"
+            />
+          </div>
+        </div>
+
+        <div
+          class="opacity-30 hover:opacity-100 p-2 cursor-pointer transition-colors"
+        >
+          <div
+            v-if="showRightChevron"
+            class="border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600"
+            @click="scrollToNext"
+          >
+            <ChevronRight
+              size="24"
+              class="text-gray-600 dark:text-gray-400"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Right Chevron indicator -->
     <div
-      v-if="showRightChevron"
-      class="absolute right-2 top-8 transform translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 cursor-pointer transition-opacity duration-300"
-      :class="{
-        'opacity-0': !showRightChevron,
-        'opacity-100': showRightChevron,
-      }"
-      @click="scrollToNext"
+      class="flex items-center left-0 top-0 absolute z-40 opacity-30 transition-opacity hover:opacity-100 group"
     >
-      <ChevronRight size="24" class="animate-pulse" />
-    </div>
-
-    <!-- History and Copy button with persistent tooltips -->
-    <div class="flex items-center left-0 top-0 absolute z-40 opacity-30 transition-opacity hover:opacity-100">
-      <div class="flex items-center m-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden">
+      <div
+        class="flex items-center m-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden"
+      >
         <button
-          v-tippy="{
-            content: 'Open History Panel',
-            placement: 'top',
-          }"
-          class="h-9 w-9 md:hidden p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          v-tippy="{ content: 'Open History Panel', placement: 'top' }"
+          class="h-9 w-9 md:hidden p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer group-hover:bg-opacity-100"
           @click="toggleHistory"
         >
-          <HistoryIcon size="20" class="text-gray-600 dark:text-gray-400" />
+          <HistoryIcon
+            size="20"
+            class="text-gray-600 dark:text-gray-400"
+          />
         </button>
-
-        <!-- Separator -->
-        <div class="h-6 bg-gray-200 dark:bg-gray-600 w-px md:hidden"></div>
-        
+        <div
+          class="h-6 bg-gray-200 dark:bg-gray-600 w-px md:hidden group-hover:opacity-0 transition-opacity"
+        />
         <button
-          ref="copyButton"
-          v-tippy="{
-            content: tooltipContent,
-            placement: 'top',
-            trigger: 'manual',
-          }"
-          class="h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-          @mouseenter="showTooltip"
-          @mouseleave="hideTooltipDelayed"
+          v-tippy="copyOptions"
+          class="h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer group-hover:bg-opacity-100"
           @click="copyToClipboard"
         >
-          <Copy size="20" class="text-gray-600 dark:text-gray-400" />
+          <Copy
+            size="20"
+            class="text-gray-600 dark:text-gray-400"
+          />
         </button>
       </div>
     </div>
 
-    <div class="h-20 relative overflow-hidden">
-      <!-- Main display -->
+    <div class="flex-grow h-full relative overflow-hidden">
       <div
-        class="absolute z-10 w-full transition-all duration-500 ease-custom transform-gpu"
+        class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
         :class="{
           '-translate-y-full opacity-0': isAnimating,
           'translate-y-0 opacity-100': !isAnimating,
         }"
       >
-        <!-- Display the current input value -->
         <div
           ref="currentInput"
           class="main-display text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide"
@@ -81,8 +87,6 @@
         >
           {{ formattedInput }}
         </div>
-
-        <!-- Display the preview for incomplete expressions -->
         <div
           v-if="preview && !error"
           class="text-right text-xl text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
@@ -91,8 +95,6 @@
         >
           {{ preview }}
         </div>
-
-        <!-- Display the error message if an error exists -->
         <div
           v-if="error"
           class="text-right text-xl text-red-500 overflow-x-auto whitespace-nowrap scrollbar-hide"
@@ -102,8 +104,6 @@
           {{ error }}
         </div>
       </div>
-
-      <!-- Animated result section -->
       <div
         class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
         :class="{
@@ -120,9 +120,9 @@
         </div>
       </div>
     </div>
+    <FeatureToast />
   </div>
 </template>
-
 <script setup>
 import {
   ChevronLeft,
@@ -130,7 +130,10 @@ import {
   Copy,
   History as HistoryIcon,
 } from "lucide-vue-next";
-import { computed, defineProps, nextTick, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
+import { useToast } from "@/composables/useToast";
+import FeatureToast from "@/components/FeatureToast.vue";
+import { useElementSize, useScroll } from "@vueuse/core";
 
 const props = defineProps({
   input: String,
@@ -140,27 +143,46 @@ const props = defineProps({
   animatedResult: String,
   activeBase: String,
   settings: Object,
-  
 });
-
-const currentInput = ref(0);
-const copyButton = ref(null);
-const showLeftChevron = ref(false);
-const showRightChevron = ref(false);
-const tooltipContent = ref("Copy to Clipboard");
-let hideTooltipTimeout = null;
 
 const emit = defineEmits(["toggle-history"]);
 
+const { toast } = useToast();
+
+import { useEventListener } from '@vueuse/core'
+
+const activeChevron = ref(null)
+
+useEventListener(window, 'keydown', (e) => {
+  if (e.key === 'ArrowLeft' && showLeftChevron.value) {
+    activeChevron.value = 'left'
+    scrollToPrevious()
+  }
+  if (e.key === 'ArrowRight' && showRightChevron.value) {
+    activeChevron.value = 'right'
+    scrollToNext()
+  }
+})
+
+useEventListener(window, 'keyup', () => {
+  activeChevron.value = null
+})
+
+const currentInput = ref(null);
+const { width: containerWidth } = useElementSize(currentInput);
+const { x: scrollLeft, arrivedState } = useScroll(currentInput);
+
+const showLeftChevron = computed(() => scrollLeft.value > 1);
+const showRightChevron = computed(() => !arrivedState.right);
+
 const toggleHistory = () => {
-emit("toggle-history");
-}
+  emit("toggle-history");
+};
 
 const formattedInput = computed(() => {
   if (!props.input) return "";
 
   if (props.activeBase === "BIN") {
-    // Split on operators, format each part, then rejoin with operators
     const parts = props.input.split(/([+\-×÷])/);
     return parts
       .map((part) => {
@@ -191,6 +213,17 @@ const formatBinary = (binString) => {
   return binString.match(/.{1,4}/g).join(" ");
 };
 
+watch(
+  () => props.input,
+  () => {
+    nextTick(() => {
+      if (currentInput.value) {
+        scrollToEnd();
+      }
+    });
+  }
+);
+
 const copyContent = computed(() => {
   if (props.animatedResult) {
     return `${props.input} = ${props.animatedResult}`;
@@ -198,70 +231,23 @@ const copyContent = computed(() => {
   return props.input;
 });
 
-watch(
-  () => props.input,
-  () => {
-    nextTick(() => {
-      if (currentInput.value) {
-        scrollToEnd();
-        checkScroll();
-      }
-    });
-  }
-);
+const copyOptions = computed(() => ({
+  content: "Copy to Clipboard",
+  placement: "top",
+}));
 
-function showTooltip() {
-  if (hideTooltipTimeout) {
-    clearTimeout(hideTooltipTimeout);
-  }
-  copyButton.value?._tippy?.show();
-}
+import { useClipboard } from '@vueuse/core'
 
-function hideTooltip() {
-  copyButton.value?._tippy?.hide();
-}
-
-function hideTooltipDelayed() {
-  hideTooltipTimeout = setTimeout(() => {
-    hideTooltip();
-  }, 0);
-}
+const { copy } = useClipboard()
 
 function copyToClipboard() {
-  navigator.clipboard
-    .writeText(copyContent.value)
-    .then(() => {
-      tooltipContent.value = "Saved!";
-      showTooltip();
-      if (hideTooltipTimeout) {
-        clearTimeout(hideTooltipTimeout);
-      }
-      setTimeout(() => {
-        hideTooltip();
-        tooltipContent.value = "Copy to Clipboard";
-      }, 1500);
-    })
-    .catch((err) => {
-      console.error("Failed to copy: ", err);
-      tooltipContent.value = "Failed to copy";
-      showTooltip();
-      if (hideTooltipTimeout) {
-        clearTimeout(hideTooltipTimeout);
-      }
-      setTimeout(() => {
-        hideTooltip();
-        tooltipContent.value = "Copy to Clipboard";
-      }, 1500);
-    });
+  copy(copyContent.value)
+  toast({ 
+    title: "Copied!", 
+    description: "Content copied to clipboard." 
+  })
 }
 
-function checkScroll() {
-  if (currentInput.value) {
-    const { scrollLeft, scrollWidth, clientWidth } = currentInput.value;
-    showLeftChevron.value = scrollLeft > 0;
-    showRightChevron.value = scrollLeft + clientWidth < scrollWidth;
-  }
-}
 
 function scrollToEnd() {
   if (currentInput.value) {
@@ -271,21 +257,16 @@ function scrollToEnd() {
 
 function scrollToPrevious() {
   if (currentInput.value) {
-    const currentScrollLeft = currentInput.value.scrollLeft;
-    const clientWidth = currentInput.value.clientWidth;
-    let newScrollLeft = Math.max(0, currentScrollLeft - clientWidth);
+    const newScrollLeft = Math.max(0, scrollLeft.value - containerWidth.value);
     currentInput.value.scrollTo({ left: newScrollLeft, behavior: "smooth" });
   }
 }
 
 function scrollToNext() {
   if (currentInput.value) {
-    const currentScrollLeft = currentInput.value.scrollLeft;
-    const clientWidth = currentInput.value.clientWidth;
-    const scrollWidth = currentInput.value.scrollWidth;
-    let newScrollLeft = Math.min(
-      scrollWidth - clientWidth,
-      currentScrollLeft + clientWidth
+    const newScrollLeft = Math.min(
+      currentInput.value.scrollWidth - containerWidth.value,
+      scrollLeft.value + containerWidth.value
     );
     currentInput.value.scrollTo({ left: newScrollLeft, behavior: "smooth" });
   }
@@ -293,47 +274,5 @@ function scrollToNext() {
 </script>
 
 <style scoped>
-.translate-y-full {
-  transform: translate3d(0, 100%, 0);
-}
-
-.-translate-y-full {
-  transform: translate3d(0, -100%, 0);
-}
-
-.translate-y-0 {
-  transform: translate3d(0, 0, 0);
-}
-
-.ease-custom {
-  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.transform-gpu {
-  will-change: transform, opacity;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
+@import url(@/assets/css/animation.css)
 </style>

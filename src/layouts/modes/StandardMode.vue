@@ -166,7 +166,6 @@
 
 <script setup>
 import { Delete } from 'lucide-vue-next';
-import { defineEmits } from 'vue';
 
 const emit = defineEmits(['button-click', 'clear']);
 
@@ -180,6 +179,16 @@ const handleClick = (value) => {
 </script>
 
 <style scoped>
-@import "@/assets/css/buttons.css";
+@import url('@/assets/css/buttons.css');
+
+.btn {
+  font-family: 'Geist Mono', monospace;
+}
+
+.btn {
+  @apply text-xl font-semibold rounded-lg transition-all duration-100 ease-in-out p-3
+         active:scale-95 active:opacity-80;
+}
+
 
 </style>

@@ -7,13 +7,13 @@
     >
       <div class="flex flex-col h-full">
         <div
-          class="flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
+          class="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
         >
           <div class="w-full h-full relative">
             <div class="flex items-center max-h-8 space-x-2 justify-between">
               <kbd
                 aria-label="logo"
-                class="text-gray-600 font-medium px-2.5 monospace py-1.5 pointer-events-none text-2xl dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm"
+                class="text-gray-600 font-medium px-2.5 monospace py-1.5 pointer-events-none text-2xl dark:text-gray-400 bg-gray-100/80 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm"
               >{math<span
                 class="text-indigo-400 font-black dark:text-indigo-600 inline-block mx-0.5"
               >//</span>y}</kbd>
@@ -52,14 +52,21 @@
                     currentRoute === item.path
                       ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300',
+                    item.comingSoon ? 'opacity-60 cursor-not-allowed' : '',
                   ]"
-                  @click="navigateTo(item.path, index)"
+                  @click="!item.comingSoon && navigateTo(item.path, index)"
                 >
                   <component
                     :is="item.icon"
                     class="h-4 w-4 shrink-0"
                   />
                   <span>{{ item.name }}</span>
+                  <span
+                    v-if="item.comingSoon"
+                    class="ml-auto text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                  >
+                    Coming Soon
+                  </span>
                 </button>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -95,7 +102,9 @@
                     >
                       <component
                         :is="
-                          item === 'settings' ? SettingsIcon : MessageSquareIcon
+                          item === 'settings'
+                            ? Settings2Icon
+                            : MessageSquareIcon
                         "
                         class="h-5 w-5"
                       />
@@ -122,9 +131,13 @@ import {
   Code2Icon,
   InfoIcon,
   MessageSquareIcon,
-  PanelLeftIcon,
-  SettingsIcon,
-  ZapIcon,
+  Settings2Icon,
+  SparklesIcon,
+  FunctionSquareIcon,
+  RegexIcon,
+  LineChartIcon,
+  ArrowRightLeftIcon,
+  PanelLeftIcon
 } from "lucide-vue-next";
 import {
   NavigationMenuItem,
@@ -132,18 +145,18 @@ import {
   NavigationMenuList,
   NavigationMenuRoot,
 } from "radix-vue";
-import { computed, defineEmits, defineProps, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isMobile: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 const emit = defineEmits(["update:isOpen"]);
 
@@ -153,11 +166,18 @@ const currentRoute = ref(route.path);
 const indicatorPosition = ref(0);
 const showIndicator = ref(true);
 
+// The indicator only positions correctly when the absolute value (2.7em) and a common difference of (0.05em)
+//  is added to get the required value.
 const menuItems = [
-  { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.15 },
-  { name: "What's New", path: "/whats-new", icon: ZapIcon, indicatorOffset: 4.85 },
-  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 7.55 },
+  { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.05 },
+  { name: "Functions", path: "/functions", icon: FunctionSquareIcon, indicatorOffset: 4.80, comingSoon: true },
+  { name: "Regex", path: "/regex", icon: RegexIcon, indicatorOffset: 7.55, comingSoon: true },
+  { name: "Graphing", path: "/graphing", icon: LineChartIcon, indicatorOffset: 10.30, comingSoon: true },
+  { name: "Converter", path: "/converter", icon: ArrowRightLeftIcon, indicatorOffset: 13.05, comingSoon: true },
+  { name: "What's New", path: "/whats-new", icon: SparklesIcon, indicatorOffset: 15.80, },
+  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 18.55 },
 ];
+
 const closeSidebar = () => emit("update:isOpen", false);
 
 const navigateTo = (path, index) => {
@@ -178,8 +198,8 @@ const updateIndicatorPos = (index) => {
 };
 
 const sidebarClasses = computed(() => [
-  "fixed inset-y-0 left-0 z-50 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all",
-  props.isMobile ? "w-full" : "w-64",
+  "overflow-y-auto fixed inset-y-0 left-0 z-50 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-all",
+  props.isMobile ? "w-full" : "w-64 border-r",
 ]);
 
 watch(
@@ -194,8 +214,6 @@ watch(
 </script>
 
 <style scoped>
-@import "@/assets/css/global.css";
-
 .sidebar-container {
   position: fixed;
   top: 0;

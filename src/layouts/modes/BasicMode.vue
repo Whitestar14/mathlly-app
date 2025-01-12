@@ -16,7 +16,7 @@
       class="btn function-btn flex justify-center items-center"
       @click="handleClick('backspace')"
     >
-      <Delete class="h-5 w-5" />
+      <Delete class="h-6 w-6" />
     </button>
     <button
       class="btn operator-btn"
@@ -99,7 +99,6 @@
 
 <script setup>
 import { Delete } from 'lucide-vue-next';
-import { defineEmits } from 'vue';
 
 const emit = defineEmits(['button-click', 'clear']);
 
@@ -112,7 +111,17 @@ const handleClick = (value) => {
 };
 </script>
 
-<style>
-@import '@/assets/css/buttons.css';
+<style scoped>
+@import url('@/assets/css/buttons.css');
+
+.btn {
+  font-family: 'Geist Mono', monospace;
+}
+
+.btn {
+  @apply text-xl font-semibold rounded-lg transition-all duration-100 ease-in-out p-3
+         active:scale-95 active:opacity-80;
+}
+
 
 </style>

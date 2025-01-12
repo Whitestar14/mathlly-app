@@ -12,12 +12,15 @@
         @base-change="handleBaseChange"
       />
     </template>
-
     <!-- Loading State -->
     <template #fallback>
-      <div class="flex items-center justify-center p-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-2 border-t-indigo-500" />
-      </div>
+      <div class="grid grid-cols-4 gap-2">
+          <div 
+            v-for="n in 20" 
+            :key="n" 
+            class="h-14 bg-gray-200 dark:bg-gray-700 rounded-lg"
+          ></div>
+        </div>
     </template>
   </Suspense>
 </template>

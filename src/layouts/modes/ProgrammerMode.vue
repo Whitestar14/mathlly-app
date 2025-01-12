@@ -43,13 +43,13 @@
           class="btn function-btn"
           @click="handleClick('<<')"
         >
-          ≪
+          <ChevronsLeftIcon class="w-6 h-6 mx-auto" />
         </button>
         <button
           class="btn function-btn"
           @click="handleClick('>>')"
         >
-          ≫
+          <ChevronsRightIcon class="w-6 h-6 mx-auto" />
         </button>
         <button
           class="btn function-btn"
@@ -205,8 +205,8 @@
 </template>
 
 <script setup>
-import { Delete } from "lucide-vue-next";
-import { computed, defineEmits, defineProps } from "vue";
+import { Delete, ChevronsRightIcon, ChevronsLeftIcon } from "lucide-vue-next";
+import { computed } from "vue";
 
 const props = defineProps({
   displayValues: {
@@ -258,7 +258,7 @@ const formatDisplayValue = (value) => {
 </script>
 
 <style scoped>
-@import "@/assets/css/buttons.css";
+@import url('@/assets/css/buttons.css');
 
 .btn {
   @apply px-3 py-2;
@@ -268,4 +268,15 @@ const formatDisplayValue = (value) => {
 .number-btn:disabled {
   @apply opacity-50 cursor-not-allowed scale-100 active:scale-100 active:opacity-50 hover:bg-gray-200 dark:hover:bg-gray-600;
 }
+
+.btn {
+  font-family: 'Geist Mono', monospace;
+}
+
+.btn {
+  @apply text-xl font-semibold rounded-lg transition-all duration-100 ease-in-out p-3
+         active:scale-95 active:opacity-80;
+}
+
+
 </style>

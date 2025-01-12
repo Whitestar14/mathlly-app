@@ -78,7 +78,7 @@
               Theme
             </h2>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
             <div>
               <label
                 for="theme"
@@ -89,8 +89,16 @@
                 :options="themeOptions"
               />
             </div>
+            <div class="flex items-center justify-between py-2">
+              <label
+                for="borderless"
+                class="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Borderless Mode</label>
+              <Switch v-model="localSettings.borderless" />
+            </div>
           </div>
         </section>
+
 
         <div class="flex justify-end space-x-4 pt-4">
           <button
@@ -129,7 +137,8 @@ const localSettings = ref({
   useFractions: settingsStore.useFractions,
   useThousandsSeparator: settingsStore.useThousandsSeparator,
   theme: settingsStore.theme,
-  mode: settingsStore.mode
+  mode: settingsStore.mode,
+  borderless: settingsStore.borderless
 });
 
 // Options for select inputs
@@ -167,12 +176,13 @@ onMounted(async () => {
     useFractions: settingsStore.useFractions,
     useThousandsSeparator: settingsStore.useThousandsSeparator,
     theme: settingsStore.theme,
-    mode: settingsStore.mode
+    mode: settingsStore.mode,
+    borderless: settingsStore.borderless
   };
 });
 
 const goBack = () => {
-  router.push("/");
+  router.go(-1);
 };
 
 const saveSettings = async () => {
