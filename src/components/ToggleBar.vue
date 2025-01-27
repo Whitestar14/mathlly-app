@@ -15,7 +15,7 @@
 <script setup>
 import { SwitchRoot, SwitchThumb } from 'radix-vue';
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: Boolean,
     required: true

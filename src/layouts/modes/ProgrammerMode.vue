@@ -18,8 +18,7 @@
               ? 'text-indigo-600 dark:text-indigo-300'
               : 'text-gray-600 dark:text-gray-400',
           ]"
-          >{{ base }}</span
-        >
+        >{{ base }}</span>
         <span
           :class="[
             'monospace',
@@ -27,10 +26,9 @@
               ? 'text-indigo-500 dark:text-indigo-300 font-semibold'
               : 'text-gray-800 dark:text-gray-300',
           ]"
-          >{{
-            formatDisplayValue(displayValues[base]?.display || 0, base)
-          }}</span
-        >
+        >{{
+          formatDisplayValue(displayValues[base]?.display || 0, base)
+        }}</span>
       </button>
     </div>
 
@@ -55,21 +53,61 @@
         </button>
       </div>
       <div class="col-span-4 grid grid-cols-4 gap-[0.2em]">
-        <button class="btn function-btn" @click="handleClick('<<')" :disabled="isMaxLengthReached">
+        <button
+          class="btn function-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('<<')"
+        >
           <ChevronsLeftIcon class="w-6 h-6 mx-auto" />
         </button>
-        <button class="btn function-btn" @click="handleClick('>>')" :disabled="isMaxLengthReached">
+        <button
+          class="btn function-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('>>')"
+        >
           <ChevronsRightIcon class="w-6 h-6 mx-auto" />
         </button>
-        <button class="btn function-btn" @click="handleClick('C')">C</button> 
-        <button class="btn function-btn" @click="handleClick('backspace')">
+        <button
+          class="btn function-btn"
+          @click="handleClick('C')"
+        >
+          C
+        </button> 
+        <button
+          class="btn function-btn"
+          @click="handleClick('backspace')"
+        >
           <Delete class="w-6 h-6 mx-auto" />
         </button>
 
-        <button class="btn function-btn" @click="handleClick('(')" :disabled="isMaxLengthReached">(</button>
-        <button class="btn function-btn" @click="handleClick(')')" :disabled="isMaxLengthReached">)</button>
-        <button class="btn function-btn" @click="handleClick('%')" :disabled="isMaxLengthReached">%</button>
-        <button class="btn operator-btn" @click="handleClick('÷')" :disabled="isMaxLengthReached">÷</button>
+        <button
+          class="btn function-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('(')"
+        >
+          (
+        </button>
+        <button
+          class="btn function-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick(')')"
+        >
+          )
+        </button>
+        <button
+          class="btn function-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('%')"
+        >
+          %
+        </button>
+        <button
+          class="btn operator-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('÷')"
+        >
+          ÷
+        </button>
 
         <button
           :disabled="!isButtonEnabled('7') || isMaxLengthReached"
@@ -92,7 +130,13 @@
         >
           9
         </button>
-        <button class="btn operator-btn" @click="handleClick('×')" :disabled="isMaxLengthReached">×</button>
+        <button
+          class="btn operator-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('×')"
+        >
+          ×
+        </button>
 
         <button
           :disabled="!isButtonEnabled('4') || isMaxLengthReached"
@@ -115,7 +159,13 @@
         >
           6
         </button>
-        <button class="btn operator-btn" @click="handleClick('-')" :disabled="isMaxLengthReached">−</button>
+        <button
+          class="btn operator-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('-')"
+        >
+          −
+        </button>
 
         <button
           :disabled="!isButtonEnabled('1') || isMaxLengthReached"
@@ -138,9 +188,21 @@
         >
           3
         </button>
-        <button class="btn operator-btn" @click="handleClick('+')" :disabled="isMaxLengthReached">+</button>
+        <button
+          class="btn operator-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('+')"
+        >
+          +
+        </button>
 
-        <button class="btn function-btn" @click="handleClick('±')" :disabled="isMaxLengthReached">±</button>
+        <button
+          class="btn function-btn"
+          :disabled="isMaxLengthReached"
+          @click="handleClick('±')"
+        >
+          ±
+        </button>
         <button
           :disabled="!isButtonEnabled('0') || isMaxLengthReached"
           class="btn number-btn"
@@ -155,7 +217,12 @@
         >
           .
         </button>
-        <button class="btn operator-btn" @click="handleClick('=')">=</button>
+        <button
+          class="btn operator-btn"
+          @click="handleClick('=')"
+        >
+          =
+        </button>
       </div>
     </div>
   </div>

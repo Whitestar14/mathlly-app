@@ -69,10 +69,10 @@ const props = defineProps({
   isHistoryOpen: { type: Boolean, required: true },
 });
 
+const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
+
 // Dynamic page title
 useTitle(computed(() => `${ props.mode } Calculator | Mathlly`));
-
-const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
 const {
   calculator,

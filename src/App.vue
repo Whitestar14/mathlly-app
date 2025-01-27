@@ -23,11 +23,14 @@
       />
 
       <router-view v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
+        <Transition
+          name="fade"
+          mode="out-in"
+        >
           <calculator-loader v-if="displayStore.isLoading" />
           <component
-            v-else
             :is="Component"
+            v-else
             :mode="mode"
             :settings="settings"
             :is-mobile="isMobile"

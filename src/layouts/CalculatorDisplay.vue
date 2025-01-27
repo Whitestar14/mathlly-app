@@ -12,7 +12,10 @@
             class="border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600"
             @click="scrollToPrevious"
           >
-            <ChevronLeft size="24" class="text-gray-600 dark:text-gray-400" />
+            <ChevronLeft
+              size="24"
+              class="text-gray-600 dark:text-gray-400"
+            />
           </div>
         </div>
 
@@ -22,7 +25,10 @@
             class="border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600"
             @click="scrollToNext"
           >
-            <ChevronRight size="24" class="text-gray-600 dark:text-gray-400" />
+            <ChevronRight
+              size="24"
+              class="text-gray-600 dark:text-gray-400"
+            />
           </div>
         </div>
       </div>
@@ -36,7 +42,10 @@
           class="h-9 w-9 md:hidden p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer group-hover:bg-opacity-100"
           @click="toggleHistory"
         >
-          <HistoryIcon size="20" class="text-gray-600 dark:text-gray-400" />
+          <HistoryIcon
+            size="20"
+            class="text-gray-600 dark:text-gray-400"
+          />
         </button>
         <div class="h-6 bg-gray-200 dark:bg-gray-600 w-px md:hidden group-hover:opacity-0 transition-opacity" />
         <button
@@ -44,7 +53,10 @@
           class="h-9 w-9 p-1 inline-flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer group-hover:bg-opacity-100"
           @click="copyToClipboard"
         >
-          <Copy size="20" class="text-gray-600 dark:text-gray-400" />
+          <Copy
+            size="20"
+            class="text-gray-600 dark:text-gray-400"
+          />
         </button>
       </div>
     </div>
@@ -64,10 +76,10 @@
             'main-display text-right font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
             getFontSizeClass(input)
           ]"
-          v-html="formattedInput"
           aria-live="polite"
           aria-atomic="true"
           @scroll="checkScroll"
+          v-html="formattedInput"
         />
         <div
           v-if="preview && !error"

@@ -17,12 +17,12 @@
     <!-- Loading State -->
     <template #fallback>
       <div class="grid grid-cols-4 gap-2">
-          <div 
-            v-for="n in 20" 
-            :key="n" 
-            class="h-14 bg-gray-200 dark:bg-gray-700 rounded-lg"
-          ></div>
-        </div>
+        <div 
+          v-for="n in 20" 
+          :key="n" 
+          class="h-14 bg-gray-200 dark:bg-gray-700 rounded-lg"
+        />
+      </div>
     </template>
   </Suspense>
 </template>

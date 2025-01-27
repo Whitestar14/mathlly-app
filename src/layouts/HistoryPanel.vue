@@ -34,13 +34,17 @@
           </Button>
         </div>
 
-        <div class="h-[50svh] overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <div
+          class="h-[50svh] overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+        >
           <div
             v-if="mode === 'Programmer'"
             class="text-center text-sm text-gray-500 dark:text-gray-400 py-4"
           >
             History is disabled in
-            <kbd class="bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md text-nowrap">
+            <kbd
+              class="bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md text-nowrap"
+            >
               Programmer Mode
             </kbd>
           </div>
@@ -53,9 +57,9 @@
               There's no history yet
             </div>
 
-            <TransitionGroup 
-              name="list" 
-              tag="div" 
+            <TransitionGroup
+              name="list"
+              tag="div"
               class="space-y-2"
             >
               <div
@@ -108,7 +112,7 @@
                       <span>Copy Item</span>
                     </ContextMenuItem>
 
-                    <ContextMenuItem 
+                    <ContextMenuItem
                       class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-300 outline-none"
                       @click="copyAsJson(item)"
                     >
@@ -145,8 +149,9 @@
     </div>
 
     <BaseModal
-      v-model:open="showClearConfirmation"
+      :open="showClearConfirmation"
       description="confirmation-dialog"
+      @update:open="showClearConfirmation = $event"
     >
       <template #title>
         Clear History
@@ -241,7 +246,7 @@ const copyAsJson = (item) => {
     result: item.result,
     timestamp: item.timestamp
   }, null, 2)
-  
+
   copy(jsonData)
   toast({
     title: "Copied as JSON",
@@ -321,6 +326,7 @@ defineExpose({ updateHistory: loadHistory })
   0% {
     background-color: theme("colors.gray.300");
   }
+
   100% {
     background-color: theme("colors.gray.200");
   }
@@ -334,6 +340,7 @@ defineExpose({ updateHistory: loadHistory })
   0% {
     background-color: theme("colors.gray.600");
   }
+
   100% {
     background-color: theme("colors.gray.700");
   }

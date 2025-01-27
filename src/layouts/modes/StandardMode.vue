@@ -13,8 +13,8 @@
     <div class="grid grid-cols-4 gap-1 flex-grow">
       <button
         class="btn function-btn"
-        @click="handleClick('%')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('%')"
       >
         %
       </button>
@@ -39,138 +39,138 @@
 
       <button
         class="btn function-btn"
-        @click="handleClick('1/x')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('1/x')"
       >
         1/x
       </button>
       <button
         class="btn function-btn"
-        @click="handleClick('x²')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('x²')"
       >
         x²
       </button>
       <button
         class="btn function-btn"
-        @click="handleClick('√')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('√')"
       >
         √
       </button>
       <button
         class="btn operator-btn"
-        @click="handleClick('÷')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('÷')"
       >
         ÷
       </button>
 
       <button
         class="btn  number-btn"
-        @click="handleClick('7')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('7')"
       >
         7
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('8')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('8')"
       >
         8
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('9')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('9')"
       >
         9
       </button>
       <button
         class="btn operator-btn"
-        @click="handleClick('×')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('×')"
       >
         ×
       </button>
 
       <button
         class="btn number-btn"
-        @click="handleClick('4')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('4')"
       >
         4
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('5')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('5')"
       >
         5
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('6')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('6')"
       >
         6
       </button>
       <button
         class="btn operator-btn"
-        @click="handleClick('-')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('-')"
       >
         −
       </button>
 
       <button
         class="btn number-btn"
-        @click="handleClick('1')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('1')"
       >
         1
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('2')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('2')"
       >
         2
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('3')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('3')"
       >
         3
       </button>
       <button
         class="btn operator-btn"
-        @click="handleClick('+')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('+')"
       >
         +
       </button>
 
       <button
         class="btn number-btn"
-        @click="handleClick('±')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('±')"
       >
         ±
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('0')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('0')"
       >
         0
       </button>
       <button
         class="btn number-btn"
-        @click="handleClick('.')"
         :disabled="isMaxLengthReached"
+        @click="handleClick('.')"
       >
         .
       </button>
@@ -187,8 +187,6 @@
 <script setup>
 import { Delete } from 'lucide-vue-next';
 import { computed } from "vue";
-const emit = defineEmits(['button-click', 'clear']);
-
 const props = defineProps({
   inputLength: {
     type: Number,
@@ -199,6 +197,8 @@ const props = defineProps({
     default: 29
   }
 });
+
+const emit = defineEmits(['button-click', 'clear']);
 
 const isMaxLengthReached = computed(() => 
   props.inputLength >= props.maxLength
