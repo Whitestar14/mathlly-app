@@ -106,7 +106,9 @@ import { useVersionStore } from '@/stores/version'
 
 const version = useVersionStore()
 
+import { useTitle } from '@vueuse/core';
 const router = useRouter();
+useTitle(`${router.currentRoute.value.name} | Mathlly`);
 
 const goBack = () => {
   router.go(-1);

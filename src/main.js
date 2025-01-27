@@ -4,15 +4,17 @@ import VueTippy from "vue-tippy";
 import router from "@/router";
 import App from "@/App.vue";
 import "@/assets/css/tailwind.css";
-import "@/styles/style.css";
 import "@/assets/css/global.css";
 import "@/assets/css/tooltip.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/dist/border.css";
 import "tippy.js/animations/scale.css";
 import { useDeviceStore } from "@/stores/device";
+
 const app = createApp(App);
 const pinia = createPinia(); 
+
+app.use(pinia).use(router);
 
 const props = {
   placement: "top",
@@ -20,22 +22,13 @@ const props = {
   arrow: false,
   allowHTML: true,
   animation: "scale",
-  disabled: () => {
-    const deviceStore = useDeviceStore(pinia);
-    return deviceStore.isMobile;
-  },
+  onShow() {
+    const device = useDeviceStore();
+    device.initializeDeviceInfo();
+    return !device.isMobile;
+  }
 };
 
-app.use(pinia); 
-app.use(router);
-app.use(VueTippy, {
-  defaultProps: props,
-});
+app.use(VueTippy, { defaultProps: props });
 app.mount("#app");
 
-const deviceStore = useDeviceStore();
-deviceStore.initializeDeviceInfo();
-
-app.config.globalProperties.$unmount = () => {
-  deviceStore.destroyDeviceInfo();
-};

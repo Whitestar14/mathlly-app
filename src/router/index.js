@@ -1,30 +1,36 @@
 import { createRouter, createWebHistory } from "vue-router";
+import CalculatorPage from "@/layouts/pages/CalculatorPage.vue"
 
 const routes = [
   {
     path: "/",
     name: "Calculator",
-    component: () => import('@/layouts/pages/CalculatorPage.vue')
+    component: CalculatorPage,
+    meta: { transition: 'fade' }
   },
   {
     path: "/about",
     name: "About",
-    component: () => import('@/layouts/pages/AboutPage.vue')
+    component: () => import('@/layouts/pages/AboutPage.vue'),
+    meta: { transition: 'fade' }
   },
   {
     path: "/settings",
     name: "Settings",
-    component: () => import('@/layouts/pages/SettingsPage.vue')
+    component: () => import('@/layouts/pages/SettingsPage.vue'),
+    meta: { transition: 'fade' }
   },
   {
     path: "/feedback",
     name: "Feedback",
-    component: () => import('@/layouts/pages/FeedbackPage.vue')
+    component: () => import('@/layouts/pages/FeedbackPage.vue'),
+    meta: { transition: 'fade' }
   },
   {
     path: '/whats-new',
     name: 'WhatsNew',
-    component: () => import('@/layouts/pages/WhatsNewPage.vue')
+    component: () => import('@/layouts/pages/WhatsNewPage.vue'),
+    meta: { transition: 'fade' }
   },
 ];
 

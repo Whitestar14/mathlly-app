@@ -3,7 +3,6 @@ import { format } from "mathjs";
 
 class BaseCalculator {
   constructor() {
-    this.maxInputLength = 29;
   }
 
   sanitizeInput(expr) {

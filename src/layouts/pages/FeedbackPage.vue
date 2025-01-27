@@ -93,8 +93,10 @@
 
 <script setup>
 import { CheckCircleIcon, ArrowLeftIcon } from 'lucide-vue-next';
+import { useTitle } from '@vueuse/core';
 import { useRouter } from "vue-router";
 const router = useRouter();
+useTitle(`${router.currentRoute.value.name} | Mathlly`);
 
 const goBack = () => {
   router.go(-1);

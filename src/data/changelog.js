@@ -1,5 +1,23 @@
 export const updates = [
   {
+    version: 'v0.7.0',
+    date: 'January 20, 2025',
+    features: [
+      'Reorganized codebase for easier extensibility',
+      'Leveraged Tailwind @component classes for general consistency',
+      'Improved UI and general user experience on mobile',
+      'Performance improvements and stability with calculator state management',
+      'Enhanced accessibility with ARIA roles and labels',
+      'Fixed edge cases and improved error handling',
+      'Added new settings for customizing calculator behavior',
+      'Implemented new keyboard shortcuts for quicker navigation',
+      'Updated history panel with additional functionality',
+      'Enhanced calculator logic for better precision and accuracy',
+      'Added DisplayFormatter class for consistent display formatting',
+      'Optimized the codebase for better performance and maintainability'
+    ]
+  },
+  {
     version: 'v0.6.1',
     date: 'January 15, 2025',
     features: [

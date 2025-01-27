@@ -24,22 +24,22 @@
 
       <router-view v-slot="{ Component }">
         <Transition name="fade" mode="out-in">
-    <calculator-loader v-if="isLoading"/>
-    <component 
-      v-else
-      :is="Component"
-      :mode="mode"
-      :settings="settings"
-      :is-mobile="isMobile"
-      :is-history-open="isHistoryOpen"
-      @settings-change="updateSettings"
-      @update:mode="updateMode"
-      @select-history-item="selectHistoryItem"
-      @update-history="updateHistory"
-      @toggle-history="toggleHistory"
-    />
-  </Transition>
-</router-view>
+          <calculator-loader v-if="displayStore.isLoading" />
+          <component
+            v-else
+            :is="Component"
+            :mode="mode"
+            :settings="settings"
+            :is-mobile="isMobile"
+            :is-history-open="isHistoryOpen"
+            @settings-change="updateSettings"
+            @update:mode="updateMode"
+            @select-history-item="selectHistoryItem"
+            @update-history="updateHistory"
+            @toggle-history="toggleHistory"
+          />
+        </Transition>
+      </router-view>
     </div>
 
     <history-panel
@@ -62,26 +62,21 @@ import db from "@/data/db";
 import { useRouter } from "vue-router";
 import { useEventListener } from "@vueuse/core";
 import { useSettingsStore } from "@/stores/settings";
-import { onMounted, provide, ref, defineAsyncComponent, computed } from "vue";
+import { useDisplayStore } from "@/stores/display"; // Import display store
+import { onMounted, provide, ref, computed } from "vue";
 import Toast from "@/components/FeatureToast.vue";
 import CalculatorLoader from "@/components/CalculatorLoader.vue";
 import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
+import { useFullscreen } from "@vueuse/core";
 
 const currentInput = ref("0"); // Ensure this is a string to hold expressions
 provide("currentInput", currentInput);
 
-const isLoading = ref(true)
-
-onMounted(async () => {
-  handleResize()
-  await settings.loadSettings()
-  isLoading.value = false
-})
-
 const router = useRouter();
 const settings = useSettingsStore();
+const displayStore = useDisplayStore(); // Use display store
 const mode = computed(() => settings.mode);
 
 const isHistoryOpen = ref(false);
@@ -141,9 +136,11 @@ const handleResize = () => {
   isSidebarOpen.value = !isMobile.value;
 };
 
+const toggleFullScreen = useFullscreen(document.documentElement);
+
 const handleKeyDown = (e) => {
   if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
-    toggleFullScreen();
+    toggleFullScreen.toggle();
     e.preventDefault();
   } else if (e.ctrlKey) {
     switch (e.key) {
@@ -163,27 +160,14 @@ const handleKeyDown = (e) => {
   }
 };
 
-const toggleFullScreen = () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
-};
-
 useEventListener(window, "resize", handleResize);
 useEventListener(window, "keydown", handleKeyDown);
 
 onMounted(async () => {
-  handleResize()
-  const minLoadTime = new Promise(resolve => setTimeout(resolve, 800))
-  await Promise.all([
-    settings.loadSettings(),
-    minLoadTime
-  ])
-  isLoading.value = false
+  handleResize();
+  const minLoadTime = new Promise((resolve) => setTimeout(resolve, 800));
+  await Promise.all([settings.loadSettings(), minLoadTime]);
+  displayStore.updateState({ isLoading: false }); // Update isLoading state in display store
 });
 </script>
 

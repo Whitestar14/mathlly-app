@@ -15,8 +15,8 @@
     >
       <DialogContent 
         class="fixed inset-0 flex items-center justify-center p-4 z-[100]"
-        aria-describedby="modal-description"
-        description="modal-description"
+        aria-describedby="undefined"
+        Description="modal-description"
       >
         <div 
           id="modal-description"

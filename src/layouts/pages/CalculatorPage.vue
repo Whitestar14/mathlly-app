@@ -6,20 +6,23 @@
     >
       <div class="p-6 mx-auto">
         <calculator-display
-          :input="displayStore.input"
+          :input="input"
           :preview="preview"
-          :error="displayStore.error"
-          :is-animating="displayStore.isAnimating"
-          :animated-preview="displayStore.animatedResult"
-          :active-base="displayStore.activeBase"
+          :error="error"
+          :is-animating="isAnimating"
+          :animated-preview="animatedResult"
+          :active-base="activeBase"
           :settings="settings"
+          :mode="mode"
           @toggle-history="$emit('toggle-history')"
         />
 
         <calculator-buttons
           :mode="mode"
-          :display-values="displayStore.displayValues"
-          :active-base="displayStore.activeBase"
+          :display-values="displayValues"
+          :active-base="activeBase"
+          :input-length="input.length"
+          :max-length="maxInputLength"
           @button-click="handleButtonClick"
           @clear="handleClear"
           @base-change="handleBaseChange"
@@ -49,14 +52,12 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, watch, inject } from "vue";
+import { computed, watch, inject, nextTick } from "vue";
 import db from "@/data/db";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
 import CalculatorButtons from "@/layouts/CalculatorButtons.vue";
-import { useDisplayStore } from "@/stores/display";
-import { onBeforeRouteLeave } from "vue-router";
 import { useHistory } from "@/composables/useHistory";
 import { useCalculator } from "@/composables/useCalculator";
 import { useTitle, useStorage, useEventListener } from "@vueuse/core";
@@ -69,20 +70,35 @@ const props = defineProps({
 });
 
 // Dynamic page title
-useTitle(computed(() => `${props.mode} Calculator | Mathlly`));
+useTitle(computed(() => `${ props.mode } Calculator | Mathlly`));
 
 const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
-const { calculator, updateDisplayState } = useCalculator(
-  props.mode,
-  props.settings
-);
+const {
+  calculator,
+  createCalculator, // Add this to destructuring
+  state,
+  updateState,
+  updateDisplayValues,
+  setActiveBase,
+  setAnimation,
+  clearState,
+  updateDisplayState
+} = useCalculator(props.mode, props.settings);
+
+// Replace all refs with computed properties based on state
+const input = computed(() => state.value.input);
+const error = computed(() => state.value.error);
+const isAnimating = computed(() => state.value.isAnimating);
+const animatedResult = computed(() => state.value.animatedResult);
+const activeBase = computed(() => state.value.activeBase);
+const displayValues = computed(() => state.value.displayValues);
+const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH);
 
 const { historyPanelRef, addToHistory, clearHistory } = useHistory(() => {
-  emit('update-history')
-})
+  emit("update-history");
+});
 
-const displayStore = useDisplayStore();
 const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
@@ -95,18 +111,16 @@ const preview = computed(() => {
   if (props.mode === "Programmer") {
     try {
       const result = calculator.value.evaluateExpression(
-        displayStore.input,
-        displayStore.activeBase
+        input.value,
+        activeBase.value
       );
-      displayStore.preview = result;
-      return calculator.value.formatResult(result, displayStore.activeBase);
+      return calculator.value.formatResult(result, activeBase.value);
     } catch (err) {
       return "";
     }
   } else {
     try {
-      const result = calculator.value.evaluateExpression(displayStore.input);
-      displayStore.preview = result;
+      const result = calculator.value.evaluateExpression(input.value);
       return calculator.value.formatResult(result);
     } catch (err) {
       return "";
@@ -114,26 +128,58 @@ const preview = computed(() => {
   }
 });
 
+// First, update the handleButtonClick in CalculatorPage.vue
 const handleButtonClick = (btn) => {
-  const result = calculator.value.handleButtonClick(btn);
-  displayStore.updateState(result);
-
-  if (props.mode === "Programmer") {
-    updateDisplayState();
+  if (input.value === "Error") {
+    handleClear();
+    return;
   }
 
-  if (btn === "=") {
-    displayStore.setAnimation(result.result);
-    displayStore.isAnimating = true;
+  const result = calculator.value.handleButtonClick(btn);
 
-    setTimeout(() => {
-      displayStore.isAnimating = false;
-    }, 500);
+  // For equals operation in Programmer mode
+  if (btn === "=" && props.mode === "Programmer") {
+    if (result.result && result.displayValues) {
+      // Update display values first
+      updateDisplayValues(result.displayValues);
 
-    if (props.mode !== "Programmer") {
-      addToHistory(result.expression, result.result);
+      // Then update the input state to match the result
+      updateState({
+        input: result.result,
+        error: result.error || "",
+      });
+
+      setAnimation(result.result);
+    }
+  } else {
+    // For non-equals operations
+    updateState({
+      input: result.input,
+      error: result.error || ""
+    });
+
+    if (props.mode === "Programmer") {
+      nextTick(() => {
+        updateDisplayState();
+      });
+    }
+
+    if (btn === "=" && props.mode !== "Programmer") {
+      if (result.error) {
+        // If there's an error, don't add to history
+        setAnimation(result.result);
+      } else {
+        setAnimation(result.result);
+        addToHistory(result.expression, result.result);
+      }
     }
   }
+    // Clear the error after a short delay
+    if (result.error) {
+        setTimeout(() => {
+            updateState({ error: "" });
+        }, 2000); // Adjust the delay as needed
+    }
 };
 
 const selectHistoryItem = (item) => {
@@ -141,12 +187,11 @@ const selectHistoryItem = (item) => {
     return;
   }
 
-  // Update calculator's internal state first
   calculator.value.input = item.expression;
   calculator.value.currentExpression = ""; // Reset currentExpression so handleNumber treats this as a new input
 
-  // Then update the display state
-  displayStore.updateState({
+  // Update calculator's internal state first
+  updateState({
     input: item.expression,
     error: "",
   });
@@ -162,20 +207,13 @@ const deleteHistoryItem = async (id) => {
 
 watch(
   () => props.mode,
-  () => {
-    displayStore.updateState({
-      input: "0",
-      error: "",
-    });
-    displayStore.setActiveBase("DEC");
-  }
-);
+  (newMode) => {
+    clearState();
+    calculator.value = createCalculator(newMode); // Now createCalculator is available
 
-watch(
-  () => props.settings,
-  (newSettings) => {
-    displayStore.setSettings(newSettings);
-    displayStore.recalculateDisplay(calculator.value);
+    if (newMode === 'Programmer') {
+      setActiveBase("DEC");
+    }
   },
   { immediate: true }
 );
@@ -183,9 +221,9 @@ watch(
 watch(
   currentInput,
   (newValue) => {
-    if (newValue !== displayStore.input) {
+    if (newValue !== input.value && newValue !== "Error") { // Check if the new value is an error
       // Update both the calculator state and the internal calculator instance
-      displayStore.updateState({
+      updateState({
         input: newValue,
         error: "",
       });
@@ -204,19 +242,29 @@ watch(
 );
 
 watch(
-  () => displayStore.getCurrentDisplayValue.value,
-  (newValue) => {
-    if (newValue !== displayStore.input) {
-      displayStore.updateState({
-        input: newValue,
-        error: "",
+  () => input.value,
+  (newInput) => {
+    if (props.mode === "Programmer" && newInput !== "Error") { // Check if the new input is an error
+      nextTick(() => {
+        try {
+          const updatedDisplayValues = calculator.value.updateDisplayValues(newInput);
+          updateDisplayValues(updatedDisplayValues);
+        } catch (error) {
+          console.error("Error updating display values:", error);
+        }
       });
     }
-  }
+  },
+  { deep: true }
 );
 
 const handleClear = () => {
-  displayStore.updateState(calculator.value.handleButtonClick("AC"));
+  const result = calculator.value.handleButtonClick("AC");
+  updateState({
+    input: result.input,
+    error: "" // Clear the error here
+  });
+
   if (props.mode === "Programmer") {
     updateDisplayState();
   }
@@ -224,10 +272,17 @@ const handleClear = () => {
 
 const handleBaseChange = (newBase) => {
   if (props.mode === "Programmer") {
-    displayStore.setActiveBase(newBase);
     const result = calculator.value.handleBaseChange(newBase);
-    displayStore.updateState(result);
-    updateDisplayState();
+
+    // Update the state after base change
+    nextTick(() => {
+      setActiveBase(newBase);
+      updateState({
+        input: result.input,
+        error: result.error || "",
+        displayValues: result.displayValues
+      });
+    });
   }
 };
 
@@ -242,7 +297,7 @@ const handleKeyDown = (event) => {
 
   if (
     props.mode === "Programmer" &&
-    allowedKeys[displayStore.activeBase].test(key)
+    allowedKeys[activeBase.value].test(key)
   ) {
     handleButtonClick(key.toUpperCase());
   } else if (
@@ -280,34 +335,7 @@ const handleKeyDown = (event) => {
   }
 };
 
-onBeforeRouteLeave(() => {
-  if (displayStore.hasPendingOperation()) {
-    const currentOp = displayStore.getCurrentOperation();
-    const lastNum = displayStore.getLastNumber();
-
-    if (currentOp) {
-      displayStore.storePendingOperation(currentOp, lastNum);
-    }
-  }
-
-  displayStore.lastMode = props.mode;
-  displayStore.persistState();
-});
-
 useEventListener("keydown", handleKeyDown, window);
-onMounted(() => {
-  displayStore.initializeSession();
-  displayStore.loadState();
-
-  // Resume any pending calculations
-  if (displayStore.getPendingCalculation) {
-    nextTick(() => displayStore.resumeCalculation(calculator.value));
-  }
-
-  if (displayStore.input !== "0") {
-    nextTick(() => displayStore.recalculateDisplay(calculator.value));
-  }
-});
 </script>
 
 <style scoped>

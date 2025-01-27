@@ -115,6 +115,7 @@ import {
   PanelRightIcon,
   Command,
   Sun,
+  GithubIcon
 } from "lucide-vue-next";
 import {
   SelectContent,
@@ -131,7 +132,7 @@ import { computed, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
-import { GithubIcon } from "lucide-vue-next";
+
 defineProps({
   isSidebarOpen: {
     type: Boolean,
@@ -140,6 +141,7 @@ defineProps({
     type: Boolean,
   },
 });
+
 defineEmits(["update:mode", "toggle-sidebar", "update:open"]);
 const settings = useSettingsStore();
 const route = useRoute();

@@ -1,12 +1,79 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@tailwind variants;
 
-@layer components {
-  /* Add your custom component styles here */
+@layer base {
+  :root {
+    --border-input: theme('colors.gray.200');
+    --ring: theme('colors.indigo.500');
+    --ring-offset: theme('colors.white');
+  }
+  .dark {
+    --border-input: theme('colors.gray.700');
+    --ring: theme('colors.indigo.400');
+    --ring-offset: theme('colors.gray.900');
+  }
 }
 
-@layer utilities {
-  /* Add your custom utility styles here */
+.btn {
+  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
 }
+
+.btn-default {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+}
+
+.btn-destructive {
+  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+}
+
+.btn-outline {
+  @apply border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+}
+
+.btn-ghost {
+  @apply hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100;
+}
+
+.btn-link {
+  @apply text-primary underline-offset-4 hover:underline;
+}
+
+
+  .btn-default-size {
+    @apply h-10 py-2 px-4;
+  }
+
+  .btn-sm {
+    @apply h-9 px-3 rounded-md;
+  }
+
+  .btn-lg {
+    @apply h-11 px-8 rounded-md;
+  }
+
+  .btn-icon {
+    @apply h-10 w-10;
+  }
+
+  @layer utilities {
+    .bg-muted {
+      @apply bg-gray-300 dark:bg-gray-500 opacity-30;
+    }
+  
+    .bg-accent {
+      @apply bg-indigo-500 dark:bg-indigo-600;
+    }
+  
+    .bg-muted-30 {
+      @apply bg-muted opacity-30;
+    }
+  
+    .ring-offset-background {
+      --tw-ring-offset-color: theme('colors.background.DEFAULT');
+    }
+  }

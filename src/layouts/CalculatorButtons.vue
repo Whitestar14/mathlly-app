@@ -7,6 +7,8 @@
         :is="currentModeComponent" 
         :display-values="displayValues" 
         :active-base="activeBase"
+        :input-length="inputLength"
+        :max-length="maxLength"
         @button-click="handleButtonClick"
         @clear="handleClear"
         @base-change="handleBaseChange"
@@ -41,6 +43,14 @@ const props = defineProps({
   activeBase: {
     type: String,
     required: true
+  },
+  inputLength: {
+    type: Number,
+    required: true
+  },
+  maxLength: {
+    type: Number,
+    default: 50
   }
 });
 

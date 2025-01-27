@@ -75,7 +75,9 @@
   import { updates, upcomingFeatures } from '@/data/changelog';
   import UpdateCard from '@/components/UpdateCard.vue';
   
-  const router = useRouter();
+  import { useTitle } from '@vueuse/core';
+const router = useRouter();
+useTitle(`${router.currentRoute.value.name} | Mathlly`);
   const version = useVersionStore();
   
   const goBack = () => {

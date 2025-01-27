@@ -127,8 +127,9 @@ import { useRouter } from "vue-router";
 import { useSettingsStore } from '@/stores/settings';
 import Select from "@/components/SelectBar.vue";
 import Switch from "@/components/ToggleBar.vue";
-
+import { useTitle } from '@vueuse/core';
 const router = useRouter();
+useTitle(`${router.currentRoute.value.name} | Mathlly`);
 const settingsStore = useSettingsStore();
 
 // Initialize local settings from store

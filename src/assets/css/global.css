@@ -35,3 +35,11 @@ kbd,
 .toast + .toast {
   @apply mt-2;
 }
+
+.borders-transparent {
+  --border-opacity: 0;
+}
+
+.borders-transparent * {
+  border-color: rgba(255, 255, 255, var(--border-opacity)) !important;
+}

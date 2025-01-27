@@ -27,7 +27,7 @@
               v-for="option in options"
               :key="option.value"
               :value="option.value"
-              class="relative flex items-center px-8 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-default select-none hover:bg-gray-100 dark:hover:bg-gray-600"
+              class="outline-none relative flex items-center px-8 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md cursor-default select-none hover:bg-gray-100 dark:hover:bg-gray-600"
             >
               <select-item-text>{{ option.label }}</select-item-text>
               <select-item-indicator class="absolute left-2 inline-flex items-center">
@@ -50,7 +50,10 @@ import { SelectRoot, SelectTrigger, SelectValue, SelectIcon, SelectPortal, Selec
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from 'lucide-vue-next';
 
 const props = defineProps({
-  modelValue: Number,
+  modelValue: {
+    type: [Number, String],
+    required: true
+  },
   options: Array,
   placeholder: {
     type: String,
@@ -61,6 +64,7 @@ const props = defineProps({
     default: 'Options'
   }
 });
+
 
 const emit = defineEmits(['update:modelValue']);
 

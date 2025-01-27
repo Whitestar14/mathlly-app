@@ -115,13 +115,8 @@ const handleClick = (value) => {
 @import url('@/assets/css/buttons.css');
 
 .btn {
-  font-family: 'Geist Mono', monospace;
-}
-
-.btn {
+  font-family: 'Geist Mono', monospace; 
   @apply text-xl font-semibold rounded-lg transition-all duration-100 ease-in-out p-3
          active:scale-95 active:opacity-80;
 }
-
-
 </style>
