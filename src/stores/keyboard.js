@@ -61,14 +61,20 @@ export const useKeyboardStore = defineStore("keyboard", () => {
   const isEnabled = ref(true);
   const contextStack = ref(['global']); // Use a stack to manage context hierarchy
   const debug = ref(true);
+  const currentBase = ref('DEC');
 
   // Base validation maps
-  const baseValidation = {
-    HEX: /^[0-9A-Fa-f]$/,
-    DEC: /^[0-9]$/,
+  const BASE_VALIDATORS = {
+    BIN: /^[0-1]$/,
     OCT: /^[0-7]$/,
-    BIN: /^[0-1]$/
+    DEC: /^[0-9]$/,
+    HEX: /^[0-9a-fA-F]$/,
   };
+  
+  const COMMON_KEYS = [
+    'backspace', 'enter', 'escape',
+    '+', '-', '×', '÷', '(',  ')',
+  ];
 
   // Compute active shortcuts based on context stack
   const activeShortcuts = computed(() => {
@@ -82,12 +88,6 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     return contextStack.value[contextStack.value.length - 1];
   });
 
-  // Add method to check if key is valid for base
-  function isValidForBase(key, base) {
-    if (!base || !baseValidation[base]) return true; // Allow all keys if base is not recognized
-    return baseValidation[base].test(key);
-  }
-
   function setContext(ctx) {
     if (debug.value) console.log('Setting context:', ctx);
     // Remove existing instance of context if it exists
@@ -100,8 +100,43 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     if (debug.value) console.log('Clearing context:', ctx);
     contextStack.value = contextStack.value.filter(c => c !== ctx);
     if (contextStack.value.length === 0) {
-      contextStack.value = ['global']; // Ensure global context always remains
+      contextStack.value = ['global']; 
     }
+  }
+
+  function setBase(base) {
+    currentBase.value = base;
+  }
+
+  // Enhanced input validation
+  function isValidInput(key) {
+    // Normalize the key to handle special cases
+    const normalizedKey = key.toLowerCase();
+
+    // Always allow common keys
+    if (COMMON_KEYS.includes(normalizedKey)) return true;
+
+    // If not in programmer mode, allow all numeric input
+    if (!contextStack.value.includes('programmer')) {
+      return /^[0-9.]$/.test(normalizedKey);
+    }
+
+    // For programmer mode, validate against current base
+    const validator = BASE_VALIDATORS[currentBase.value];
+    // Ensure validation happens against the normalized key
+    return validator?.test(normalizedKey) ?? false;
+  }
+
+  function normalizeKey(key) {
+    // Handle special key mappings
+    const keyMap = {
+      'enter': 'enter',
+      'backspace': 'backspace',
+      'escape': 'escape',
+      '*': '×',
+      '/': '÷'
+    };
+    return keyMap[key] || key;
   }
 
   return {
@@ -110,9 +145,12 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     contextStack,
     currentContext,
     activeShortcuts,
+    currentBase,
     debug,
-    isValidForBase,
     setContext,
     clearContext,
+    setBase,
+    isValidInput,
+    normalizeKey,
   };
 });

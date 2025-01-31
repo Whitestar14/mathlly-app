@@ -1,5 +1,18 @@
 export const updates = [
   {
+    version: 'v0.7.3',
+    date: 'February 1, 2025',
+    features: [
+      'Refactored keyboard handling system for simpler key combination logic',
+      'Enhanced input validation with improved base number checks',
+      'Streamlined keyboard event management across components',
+      'Added focused state handling for better accessibility',
+      'Optimized key mapping configuration structure',
+      'Improved error prevention for invalid number inputs',
+      'Enhanced calculator mode transitions with keyboard shortcuts'
+    ]
+    },
+  {
     version: 'v0.7.2',
     date: 'January 31, 2025',
     features: [

@@ -129,15 +129,21 @@ const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
 // Calculator operation handlers
-const isValidInput = (value, base) => {
-  const basePatterns = {
-    HEX: /^[0-9A-Fa-f]$/,
-    DEC: /^[0-9]$/,
-    OCT: /^[0-7]$/,
+
+// Add this validation helper function at the top level of your Calculator Page
+const isValidForBase = (value, base) => {
+  const validators = {
     BIN: /^[0-1]$/,
+    OCT: /^[0-7]$/,
+    DEC: /^[0-9]$/,
+    HEX: /^[0-9a-fA-F]$/,
   };
 
-  return !base || !basePatterns[base] || basePatterns[base].test(value);
+  // Always allow these special buttons
+  const allowedKeys = ['AC', 'backspace', '=', '+', '-', '×', '÷', '(', ')'];
+  if (allowedKeys.includes(value)) return true; 
+
+  return validators[base]?.test(value) ?? false;
 };
 
 const handleButtonClick = (btn) => {
@@ -148,16 +154,9 @@ const handleButtonClick = (btn) => {
 
   const result = calculator.value.handleButtonClick(btn);
 
-  // Add validation for programmer mode inputs
-  if (
-    props.mode === "Programmer" &&
-    btn.length === 1 &&
-    !isValidInput(btn, activeBase.value)
-  ) {
-    setTimeout(() => {
-      updateState({ error: "" });
-    }, 2000);
-    return;
+    // Add validation for Programmer mode
+    if (props.mode === "Programmer" && !isValidForBase(btn, activeBase.value)) {
+    return; // Silently ignore invalid inputs for the current base
   }
 
   if (btn === "=" && props.mode === "Programmer") {
@@ -215,35 +214,32 @@ const handleBaseChange = (newBase) => {
     const result = calculator.value.handleBaseChange(newBase);
     nextTick(() => {
       setActiveBase(newBase);
+      setBase(newBase);
       updateState({
         input: result.input,
         error: result.error || "",
-        displayValues: result.displayValues,
+        displayValues: result.displayValues
       });
     });
   }
 };
 
-const keyboardHandlers = {
-  clear: () => handleButtonClick("AC"),
-  calculate: () => handleButtonClick("="),
-  backspace: () => handleButtonClick("backspace"),
+const { setContext, clearContext, setBase } = useKeyboard('calculator', {
+  clear: () => handleButtonClick('AC'),
+  calculate: () => handleButtonClick('='),
+  backspace: () => handleButtonClick('backspace'),
   input: (value) => {
-    // Validate input before processing
-    if (props.mode === "Programmer" && !isValidInput(value, activeBase.value)) {
-      return;
+    // Additional validation layer before handling input
+    if (props.mode === "Programmer") {
+      if (isValidForBase(value, activeBase.value)) {
+        handleButtonClick(value);
+      }
+    } else {
+      handleButtonClick(value);
     }
-    handleButtonClick(value);
   },
-  setBase: handleBaseChange,
-};
-
-// Keyboard handling
-const { setContext, clearContext } = useKeyboard(
-  "calculator",
-  keyboardHandlers,
-  { activeBase: activeBase.value }
-);
+  setBase: (base) => handleBaseChange(base),
+});
 
 // Mode change handling
 watch(

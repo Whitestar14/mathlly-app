@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted } from 'vue';
 import { useKeyboardStore } from '@/stores/keyboard';
 
-export function useKeyboard(initialContext = 'global', handlers, options = {}) {
+export function useKeyboard(initialContext = 'global', handlers) {
   const keyboardStore = useKeyboardStore();
 
   const getKeyCombo = (event) => {
@@ -16,41 +16,32 @@ export function useKeyboard(initialContext = 'global', handlers, options = {}) {
   const handleKeyDown = (event) => {
     if (!keyboardStore.isEnabled) return;
 
-    const key = getKeyCombo(event);
+    const combo = getKeyCombo(event);
+    const singleKey = keyboardStore.normalizeKey(event.key.toLowerCase());
+
     if (keyboardStore.debug) {
-      console.log('Key pressed:', key);
+      console.log('Key pressed:', singleKey);
       console.log('Current context:', keyboardStore.currentContext);
-      console.log('Active shortcuts:', keyboardStore.activeShortcuts);
+      console.log('Current base:', keyboardStore.currentBase);
     }
 
-    // Check if key is valid for current base in programmer mode
-    if (options.activeBase && 
-        keyboardStore.currentContext === 'programmer' && 
-        key.length === 1) { // Single character key
-      if (!keyboardStore.isValidForBase(key, options.activeBase)) {
-        if (keyboardStore.debug) {
-          console.log(`Key ${key} is not allowed in ${options.activeBase} mode.`);
-        }
-        return; // Skip execution if the key is not allowed
-      }
-    }
-
-    // Check if the shortcut exists in active contexts
-    const shortcut = keyboardStore.activeShortcuts[key];
+    // Check for shortcuts first
+    const shortcut = keyboardStore.activeShortcuts[combo];
     if (shortcut) {
       event.preventDefault();
-      if (keyboardStore.debug) {
-        console.log('Executing shortcut:', shortcut);
-      }
       handlers[shortcut.action]?.(shortcut.payload);
+      return;
+    }
+
+    // Validate input before processing
+    if (keyboardStore.isValidInput(singleKey)) {
+      event.preventDefault();
+      handlers.input?.(singleKey);
     }
   };
 
   onMounted(() => {
-    // Register event listener
     window.addEventListener('keydown', handleKeyDown);
-    
-    // Set initial context if provided
     if (initialContext && initialContext !== 'global') {
       keyboardStore.setContext(initialContext);
     }
@@ -66,5 +57,6 @@ export function useKeyboard(initialContext = 'global', handlers, options = {}) {
   return {
     setContext: keyboardStore.setContext,
     clearContext: keyboardStore.clearContext,
+    setBase: keyboardStore.setBase,
   };
 }
