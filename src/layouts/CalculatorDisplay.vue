@@ -128,13 +128,13 @@ import { useElementSize, useScroll, useClipboard, useEventListener } from "@vueu
 import { DisplayFormatter } from '@/services/DisplayFormatter';
 
 const props = defineProps({
-  input: String,
-  preview: String,
-  error: String,
-  isAnimating: Boolean,
-  animatedResult: String,
-  activeBase: String,
-  mode: String,
+  input: { type: String, default: "" },
+  preview: { type: String, default: "" },
+  error: { type: String, default: "" },
+  isAnimating: { type: Boolean, default: false },
+  animatedResult: { type: String, default: "" },
+  activeBase: { type: String, default: "DEC" },
+  mode: { type: String, default: "Standard" },
 });
 
 const emit = defineEmits(["toggle-history"]);

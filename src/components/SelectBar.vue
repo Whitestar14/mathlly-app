@@ -54,7 +54,10 @@ const props = defineProps({
     type: [Number, String],
     required: true
   },
-  options: Array,
+  options: {
+    type: Array,
+    default: () => []
+  },
   placeholder: {
     type: String,
     default: 'Select an option'
@@ -64,7 +67,6 @@ const props = defineProps({
     default: 'Options'
   }
 });
-
 
 const emit = defineEmits(['update:modelValue']);
 

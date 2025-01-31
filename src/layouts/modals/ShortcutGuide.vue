@@ -1,86 +1,118 @@
 <template>
-  <BaseModal 
+  <BaseModal
     :open="open"
     @update:open="$emit('update:open', $event)"
   >
     <template #title>
-      Keyboard Shortcuts 
+      <div class="flex items-center">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Keyboard Shortcuts
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Quick access to available shortcuts
+          </p>
+        </div>
+      </div>
     </template>
 
-    <ul class="space-y-3">
-      <li
-        v-for="(shortcut, index) in shortcuts"
-        :key="index"
-        class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+    <TabsRoot
+      :default-value="Object.keys(shortcutGroups)[0]"
+      class="mt-4"
+    >
+      <TabsList
+        class="inline-flex h-9 bg-gray-100 space-x-2 items-center justify-center rounded dark:bg-gray-800 p-1 text-muted-foreground"
       >
-        <span class="text-sm text-gray-600 dark:text-gray-300 mb-1 sm:mb-0">
-          {{ shortcut.description }}
-        </span>
-        <div
-          class="flex items-center space-x-1 bg-indigo-100 dark:bg-indigo-900 px-3 py-2 rounded-md shadow-sm"
+        <TabsTrigger
+          v-for="category in Object.keys(shortcutGroups)"
+          :key="category"
+          :value="category"
+          class="inline-flex font-medium text-sm px-3 py-1 items-center justify-center whitespace-nowrap data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-primary dark:data-[state=active]:text-primary-light rounded data-[state=active]:border data-[state=active]:border-gray-200 dark:data-[state=active]:border-gray-700 data-[state=active]:shadow-sm"
+        >
+          {{ category }}
+        </TabsTrigger>
+      </TabsList>
+
+      <div class="relative overflow-hidden">
+        <TabsContent
+          v-for="(group, category) in shortcutGroups"
+          :key="category"
+          :value="category"
+          class="mt-4 focus:outline-none tabs-content"
         >
           <div
-            v-for="(modifier, modIndex) in shortcut.modifiers"
-            :key="modIndex"
+            v-for="(shortcut, key) in group"
+            :key="key"
+            class="flex items-center justify-between p-3 last:border-0 border-b border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900/50"
           >
-            <kbd
-              class="bg-indigo-200 dark:bg-indigo-800 px-2 py-1 rounded text-xs font-semibold text-indigo-800 dark:text-indigo-200 shadow"
-            >
-              {{ modifier }}
-            </kbd>
-            <span
-              v-if="modIndex < shortcut.modifiers.length - 1"
-              class="text-indigo-500 dark:text-indigo-400"
-            >+</span>
+            <span class="text-sm text-gray-700 dark:text-muted-foreground">
+              {{ shortcut.description }}
+            </span>
+
+            <div class="flex items-center gap-1.5">
+              <template v-if="key.includes('+')">
+                <div
+                  v-for="(part, index) in key.split('+')"
+                  :key="index"
+                >
+                  <kbd
+                    class="px-2 py-1 text-xs font-semibold bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
+                  >
+                    {{ part }}
+                  </kbd>
+                  <span
+                    v-if="index < key.split('+').length - 1"
+                    class="text-gray-400 dark:text-gray-500"
+                  >+</span>
+                </div>
+              </template>
+              <kbd
+                v-else
+                class="px-2 py-1 text-xs font-semibold bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
+              >
+                {{ key }}
+              </kbd>
+            </div>
           </div>
-          <kbd
-            class="bg-indigo-200 dark:bg-indigo-800 px-2 py-1 rounded text-xs font-semibold text-indigo-800 dark:text-indigo-200 shadow"
-          >
-            {{ shortcut.key.toUpperCase() }}
-          </kbd>
-        </div>
-      </li>
-    </ul>
+        </TabsContent>
+      </div>
+    </TabsRoot>
   </BaseModal>
 </template>
 
 <script setup>
+import { TabsContent, TabsList, TabsRoot, TabsTrigger } from "radix-vue";
 import BaseModal from "@/components/BaseModal.vue";
 
 defineProps({
-  open: {
-    type: Boolean,
-    default: false,
-  },
+  open: Boolean,
 });
 
 defineEmits(["update:open"]);
 
-const shortcuts = [
-  {
-    modifiers: ["Ctrl"],
-    key: "l",
-    description: "Toggle Sidebar",
+const shortcutGroups = {
+  Global: {
+    "ctrl+shift+f": { description: "Toggle Fullscreen" },
+    "ctrl+l": { description: "Toggle Sidebar" },
+    "ctrl+h": { description: "Toggle History" },
+    "ctrl+s": { description: "Open Settings" },
   },
-  {
-    modifiers: ["Ctrl"],
-    key: "h",
-    description: "Toggle History",
+  Calculator: {
+    escape: { description: "Clear Input" },
+    enter: { description: "Calculate Result" },
+    backspace: { description: "Delete Last Character" },
   },
-  {
-    modifiers: ["Ctrl"],
-    key: "s",
-    description: "Navigate to Settings",
+  Programmer: {
+    "ctrl+1": { description: "Switch to Decimal" },
+    "ctrl+2": { description: "Switch to Hexadecimal" },
+    "ctrl+3": { description: "Switch to Octal" },
+    "ctrl+4": { description: "Switch to Binary" },
   },
-  {
-    modifiers: ["Ctrl"],
-    key: "k",
-    description: "Open Shortcut Guide",
-  },
-  {
-    modifiers: ["Shift", "Ctrl"],
-    key: "f",
-    description: "Toggle Full Screen",
-  },
-];
+};
 </script>
+
+<style scoped>
+.shortcut-key {
+  @apply px-2 py-1 min-w-[1.8rem] text-center rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono shadow-sm;
+}
+</style>

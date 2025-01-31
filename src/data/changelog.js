@@ -1,5 +1,18 @@
 export const updates = [
   {
+    version: 'v0.7.2',
+    date: 'January 31, 2025',
+    features: [
+      'Enhanced component architecture with updated props defaults',
+      'Expanded keyboard shortcuts system for improved navigation',
+      'Improved modal accessibility with ARIA attributes and focus management',
+      'Refined component interfaces for better type safety',
+      'Optimized keyboard event handling across calculator modes',
+      'Enhanced modal system with improved state management',
+      'Standardized component default values for consistency'
+    ]
+  },
+  {
     version: 'v0.7.0',
     date: 'January 20, 2025',
     features: [

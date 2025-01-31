@@ -132,7 +132,7 @@ import { computed, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
-
+import { useKeyboard } from "@/composables/useKeyboard"
 defineProps({
   isSidebarOpen: {
     type: Boolean,
@@ -189,6 +189,10 @@ const toggleTheme = async () => {
 const openShortcutModal = () => {
   isShortcutModalOpen.value = true;
 };
+
+useKeyboard("global", {
+  openShortcutModal: () => openShortcutModal(),
+})
 </script>
 
 <style scoped>

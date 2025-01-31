@@ -53,14 +53,15 @@
 
 <script setup>
 import { computed, watch, inject, nextTick } from "vue";
-import db from "@/data/db";
+import { useTitle, useStorage } from "@vueuse/core";
+import { useHistory } from "@/composables/useHistory";
+import { useCalculator } from "@/composables/useCalculator";
+import { useKeyboard } from "@/composables/useKeyboard";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
 import CalculatorButtons from "@/layouts/CalculatorButtons.vue";
-import { useHistory } from "@/composables/useHistory";
-import { useCalculator } from "@/composables/useCalculator";
-import { useTitle, useStorage, useEventListener } from "@vueuse/core";
+import db from "@/data/db";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -72,21 +73,22 @@ const props = defineProps({
 const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
 // Dynamic page title
-useTitle(computed(() => `${ props.mode } Calculator | Mathlly`));
+useTitle(computed(() => `${props.mode} Calculator | Mathlly`));
 
+// Core calculator setup
 const {
   calculator,
-  createCalculator, // Add this to destructuring
+  createCalculator,
   state,
   updateState,
   updateDisplayValues,
   setActiveBase,
   setAnimation,
   clearState,
-  updateDisplayState
+  updateDisplayState,
 } = useCalculator(props.mode, props.settings);
 
-// Replace all refs with computed properties based on state
+// Computed properties from state
 const input = computed(() => state.value.input);
 const error = computed(() => state.value.error);
 const isAnimating = computed(() => state.value.isAnimating);
@@ -95,18 +97,7 @@ const activeBase = computed(() => state.value.activeBase);
 const displayValues = computed(() => state.value.displayValues);
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH);
 
-const { historyPanelRef, addToHistory, clearHistory } = useHistory(() => {
-  emit("update-history");
-});
-
-const currentInput = inject("currentInput");
-const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
-
-const closeWelcomeModal = () => {
-  showWelcomeModal.value = false;
-  localStorage.setItem("mathlly-welcome-shown", "true");
-};
-
+// Preview computation for display
 const preview = computed(() => {
   if (props.mode === "Programmer") {
     try {
@@ -128,7 +119,27 @@ const preview = computed(() => {
   }
 });
 
-// First, update the handleButtonClick in CalculatorPage.vue
+// History management
+const { historyPanelRef, addToHistory, clearHistory } = useHistory(() => {
+  emit("update-history");
+});
+
+// Other setup
+const currentInput = inject("currentInput");
+const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
+
+// Calculator operation handlers
+const isValidInput = (value, base) => {
+  const basePatterns = {
+    HEX: /^[0-9A-Fa-f]$/,
+    DEC: /^[0-9]$/,
+    OCT: /^[0-7]$/,
+    BIN: /^[0-1]$/,
+  };
+
+  return !base || !basePatterns[base] || basePatterns[base].test(value);
+};
+
 const handleButtonClick = (btn) => {
   if (input.value === "Error") {
     handleClear();
@@ -137,25 +148,31 @@ const handleButtonClick = (btn) => {
 
   const result = calculator.value.handleButtonClick(btn);
 
-  // For equals operation in Programmer mode
+  // Add validation for programmer mode inputs
+  if (
+    props.mode === "Programmer" &&
+    btn.length === 1 &&
+    !isValidInput(btn, activeBase.value)
+  ) {
+    setTimeout(() => {
+      updateState({ error: "" });
+    }, 2000);
+    return;
+  }
+
   if (btn === "=" && props.mode === "Programmer") {
     if (result.result && result.displayValues) {
-      // Update display values first
       updateDisplayValues(result.displayValues);
-
-      // Then update the input state to match the result
       updateState({
         input: result.result,
         error: result.error || "",
       });
-
       setAnimation(result.result);
     }
   } else {
-    // For non-equals operations
     updateState({
       input: result.input,
-      error: result.error || ""
+      error: result.error || "",
     });
 
     if (props.mode === "Programmer") {
@@ -166,7 +183,6 @@ const handleButtonClick = (btn) => {
 
     if (btn === "=" && props.mode !== "Programmer") {
       if (result.error) {
-        // If there's an error, don't add to history
         setAnimation(result.result);
       } else {
         setAnimation(result.result);
@@ -174,61 +190,87 @@ const handleButtonClick = (btn) => {
       }
     }
   }
-    // Clear the error after a short delay
-    if (result.error) {
-        setTimeout(() => {
-            updateState({ error: "" });
-        }, 2000); // Adjust the delay as needed
-    }
+
+  if (result.error) {
+    setTimeout(() => {
+      updateState({ error: "" });
+    }, 2000);
+  }
 };
 
-const selectHistoryItem = (item) => {
-  if (props.mode === "Programmer") {
-    return;
-  }
-
-  calculator.value.input = item.expression;
-  calculator.value.currentExpression = ""; // Reset currentExpression so handleNumber treats this as a new input
-
-  // Update calculator's internal state first
+const handleClear = () => {
+  const result = calculator.value.handleButtonClick("AC");
   updateState({
-    input: item.expression,
+    input: result.input,
     error: "",
   });
 
-  // Update shared input state
-  currentInput.value = item.expression;
+  if (props.mode === "Programmer") {
+    updateDisplayState();
+  }
 };
 
-const deleteHistoryItem = async (id) => {
-  await db.history.delete(id);
-  emit("update-history");
+const handleBaseChange = (newBase) => {
+  if (props.mode === "Programmer") {
+    const result = calculator.value.handleBaseChange(newBase);
+    nextTick(() => {
+      setActiveBase(newBase);
+      updateState({
+        input: result.input,
+        error: result.error || "",
+        displayValues: result.displayValues,
+      });
+    });
+  }
 };
 
+const keyboardHandlers = {
+  clear: () => handleButtonClick("AC"),
+  calculate: () => handleButtonClick("="),
+  backspace: () => handleButtonClick("backspace"),
+  input: (value) => {
+    // Validate input before processing
+    if (props.mode === "Programmer" && !isValidInput(value, activeBase.value)) {
+      return;
+    }
+    handleButtonClick(value);
+  },
+  setBase: handleBaseChange,
+};
+
+// Keyboard handling
+const { setContext, clearContext } = useKeyboard(
+  "calculator",
+  keyboardHandlers,
+  { activeBase: activeBase.value }
+);
+
+// Mode change handling
 watch(
   () => props.mode,
   (newMode) => {
     clearState();
-    calculator.value = createCalculator(newMode); // Now createCalculator is available
+    calculator.value = createCalculator(newMode);
 
-    if (newMode === 'Programmer') {
+    if (newMode === "Programmer") {
       setActiveBase("DEC");
+      setContext("programmer");
+    } else {
+      clearContext("programmer");
     }
   },
   { immediate: true }
 );
 
+// Input synchronization
 watch(
   currentInput,
   (newValue) => {
-    if (newValue !== input.value && newValue !== "Error") { // Check if the new value is an error
-      // Update both the calculator state and the internal calculator instance
+    if (newValue !== input.value && newValue !== "Error") {
       updateState({
         input: newValue,
         error: "",
       });
-
-      // Reset the calculator's internal state with the new input
       calculator.value.input = newValue;
       calculator.value.currentExpression = "";
       calculator.value.error = "";
@@ -241,13 +283,15 @@ watch(
   { immediate: true }
 );
 
+// Programmer mode display value updates
 watch(
   () => input.value,
   (newInput) => {
-    if (props.mode === "Programmer" && newInput !== "Error") { // Check if the new input is an error
+    if (props.mode === "Programmer" && newInput !== "Error") {
       nextTick(() => {
         try {
-          const updatedDisplayValues = calculator.value.updateDisplayValues(newInput);
+          const updatedDisplayValues =
+            calculator.value.updateDisplayValues(newInput);
           updateDisplayValues(updatedDisplayValues);
         } catch (error) {
           console.error("Error updating display values:", error);
@@ -258,84 +302,30 @@ watch(
   { deep: true }
 );
 
-const handleClear = () => {
-  const result = calculator.value.handleButtonClick("AC");
+// History operations
+const selectHistoryItem = (item) => {
+  if (props.mode === "Programmer") return;
+
+  calculator.value.input = item.expression;
+  calculator.value.currentExpression = "";
+
   updateState({
-    input: result.input,
-    error: "" // Clear the error here
+    input: item.expression,
+    error: "",
   });
 
-  if (props.mode === "Programmer") {
-    updateDisplayState();
-  }
+  currentInput.value = item.expression;
 };
 
-const handleBaseChange = (newBase) => {
-  if (props.mode === "Programmer") {
-    const result = calculator.value.handleBaseChange(newBase);
-
-    // Update the state after base change
-    nextTick(() => {
-      setActiveBase(newBase);
-      updateState({
-        input: result.input,
-        error: result.error || "",
-        displayValues: result.displayValues
-      });
-    });
-  }
+const deleteHistoryItem = async (id) => {
+  await db.history.delete(id);
+  emit("update-history");
 };
 
-const handleKeyDown = (event) => {
-  const key = event.key;
-  const allowedKeys = {
-    HEX: /^[0-9A-Fa-f]$/,
-    DEC: /^[0-9]$/,
-    OCT: /^[0-7]$/,
-    BIN: /^[01]$/,
-  };
-
-  if (
-    props.mode === "Programmer" &&
-    allowedKeys[activeBase.value].test(key)
-  ) {
-    handleButtonClick(key.toUpperCase());
-  } else if (
-    ["+", "-", "*", "/", "=", "Enter", "Escape", "Backspace"].includes(key)
-  ) {
-    event.preventDefault();
-    switch (key) {
-      case "+":
-        handleButtonClick("+");
-        break;
-      case "-":
-        handleButtonClick("-");
-        break;
-      case "*":
-        handleButtonClick("×");
-        break;
-      case "/":
-        handleButtonClick("÷");
-        break;
-      case "=":
-      case "Enter":
-        handleButtonClick("=");
-        break;
-      case "Escape":
-        handleButtonClick("C");
-        break;
-      case "Backspace":
-        handleButtonClick("backspace");
-        break;
-    }
-  } else if (props.mode !== "Programmer") {
-    if (/^[0-9.]$/.test(key)) {
-      handleButtonClick(key);
-    }
-  }
+const closeWelcomeModal = () => {
+  showWelcomeModal.value = false;
+  localStorage.setItem("mathlly-welcome-shown", "true");
 };
-
-useEventListener("keydown", handleKeyDown, window);
 </script>
 
 <style scoped>

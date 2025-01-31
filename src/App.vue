@@ -23,7 +23,7 @@
       />
 
       <router-view v-slot="{ Component }">
-        <Transition
+        <Transition 
           name="fade"
           mode="out-in"
         >
@@ -62,29 +62,28 @@
 
 <script setup>
 import db from "@/data/db";
-import { useRouter } from "vue-router";
-import { useEventListener } from "@vueuse/core";
+import { useRouter, RouterView } from "vue-router";
+import { useEventListener, useFullscreen } from "@vueuse/core";
+import { onMounted, provide, ref, computed, watch } from "vue";
+import { useDisplayStore } from "@/stores/display"; 
 import { useSettingsStore } from "@/stores/settings";
-import { useDisplayStore } from "@/stores/display"; // Import display store
-import { onMounted, provide, ref, computed } from "vue";
+import { useKeyboard } from "@/composables/useKeyboard";
 import Toast from "@/components/FeatureToast.vue";
 import CalculatorLoader from "@/components/CalculatorLoader.vue";
 import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
-import { useFullscreen } from "@vueuse/core";
 
-const currentInput = ref("0"); // Ensure this is a string to hold expressions
-provide("currentInput", currentInput);
-
-const router = useRouter();
-const settings = useSettingsStore();
-const displayStore = useDisplayStore(); // Use display store
-const mode = computed(() => settings.mode);
-
+const currentInput = ref("0"); 
 const isHistoryOpen = ref(false);
 const isSidebarOpen = ref(false);
 const isMobile = ref(window.innerWidth < 768);
+const router = useRouter();
+const settings = useSettingsStore();
+const displayStore = useDisplayStore(); 
+const mode = computed(() => settings.mode);
+
+provide("currentInput", currentInput);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -130,6 +129,10 @@ const deleteHistoryItem = async (id) => {
   updateHistory();
 };
 
+watch(isMobile, (newVal) => {
+  if (newVal) isHistoryOpen.value = false
+})
+
 const updateHistory = () => {
   // This function can be used to trigger any necessary updates
 };
@@ -139,32 +142,23 @@ const handleResize = () => {
   isSidebarOpen.value = !isMobile.value;
 };
 
-const toggleFullScreen = useFullscreen(document.documentElement);
-
-const handleKeyDown = (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "f") {
-    toggleFullScreen.toggle();
-    e.preventDefault();
-  } else if (e.ctrlKey) {
-    switch (e.key) {
-      case "l":
-        toggleSidebar();
-        e.preventDefault();
-        break;
-      case "h":
-        toggleHistory();
-        e.preventDefault();
-        break;
-      case "s":
-        navigateToSettings();
-        e.preventDefault();
-        break;
-    }
-  }
-};
+// Then use the composable
+useKeyboard("global", {
+  toggleHistory: () => {
+    toggleHistory();
+  },
+  toggleSidebar: () => {
+    toggleSidebar();
+  },
+  openSettings: () => {
+    router.push("/settings");
+  },
+  toggleFullscreen: () => {
+    useFullscreen(document.documentElement).toggle();
+  },
+});
 
 useEventListener(window, "resize", handleResize);
-useEventListener(window, "keydown", handleKeyDown);
 
 onMounted(async () => {
   handleResize();
