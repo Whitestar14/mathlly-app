@@ -1,6 +1,6 @@
 export const updates = [
   {
-    version: '0.7.4',
+    version: 'v0.7.4',
     date: 'February 3, 2025',
     features: [
       'Improved display formtting rule for Programmer Mode',
