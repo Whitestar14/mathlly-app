@@ -11,7 +11,8 @@ export const useKeyboardStore = defineStore("keyboard", () => {
       "ctrl+l": { action: "toggleSidebar", description: "Toggle Sidebar" },
       "ctrl+h": { action: "toggleHistory", description: "Toggle History" },
       "ctrl+s": { action: "openSettings", description: "Open Settings" },
-      "ctrl+ ": { action: "openShortcutModal", description: "Open Shortcuts"}
+      "ctrl+ ": { action: "openShortcutModal", description: "Open Shortcuts"},
+      "ctrl+shift+m": {action: "toggleTheme", description: "Toggle Theme"},
     },
     calculator: {
       escape: { action: "clear", description: "Clear Input" },

@@ -1,6 +1,6 @@
 import { evaluate, format, fraction } from "mathjs";
 import { EngineCalculator } from "./EngineCalculator";
-import { DisplayFormatter } from "@/services/DisplayFormatter"
+import { DisplayFormatter } from "@/services/calculator/DisplayFormatter"
 export class StandardCalculator extends EngineCalculator {
   constructor(settings) {
     super(settings);

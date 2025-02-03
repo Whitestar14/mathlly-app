@@ -34,6 +34,9 @@ export class DisplayFormatter {
         }
         if (["+", "-", "×", "÷", "(", ")"].includes(part)) return part;
         
+        // Remove any decimal points for programmer mode
+        part = part.split('.')[0];
+        
         // Apply thousands separator based on the base
         switch (base) {
           case "BIN":

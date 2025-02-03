@@ -1,25 +1,25 @@
 <template>
   <div class="grid grid-cols-4 gap-2">
     <button
-      class="btn special-btn-ac c"
+      class="calc-btn calc-special-btn-ac calc-c"
       @click="handleClick('C')"
     >
       AC
     </button>
     <button
-      class="btn function-btn"
+      class="calc-btn calc-function-btn"
       @click="handleClick('CE')"
     >
       CE
     </button>
     <button
-      class="btn function-btn flex justify-center items-center"
+      class="calc-btn calc-function-btn flex justify-center items-center"
       @click="handleClick('backspace')"
     >
       <Delete class="h-6 w-6" />
     </button>
     <button
-      class="btn operator-btn"
+      class="calc-btn calc-operator-btn"
       @click="handleClick('÷')"
     >
       ÷
@@ -28,13 +28,13 @@
     <button
       v-for="num in ['7', '8', '9']"
       :key="num"
-      class="btn number-btn"
+      class="calc-btn calc-number-btn"
       @click="handleClick(num)"
     >
       {{ num }}
     </button>
     <button
-      class="btn operator-btn"
+      class="calc-btn calc-operator-btn"
       @click="handleClick('×')"
     >
       ×
@@ -43,13 +43,13 @@
     <button
       v-for="num in ['4', '5', '6']"
       :key="num"
-      class="btn number-btn"
+      class="calc-btn calc-number-btn"
       @click="handleClick(num)"
     >
       {{ num }}
     </button>
     <button
-      class="btn operator-btn"
+      class="calc-btn calc-operator-btn"
       @click="handleClick('-')"
     >
       −
@@ -58,38 +58,38 @@
     <button
       v-for="num in ['1', '2', '3']"
       :key="num"
-      class="btn number-btn"
+      class="calc-btn calc-number-btn"
       @click="handleClick(num)"
     >
       {{ num }}
     </button>
     <button
-      class="btn operator-btn"
+      class="calc-btn calc-operator-btn"
       @click="handleClick('+')"
     >
       +
     </button>
 
     <button
-      class="btn number-btn"
+      class="calc-btn calc-number-btn"
       @click="handleClick('±')"
     >
       ±
     </button>
     <button
-      class="btn number-btn"
+      class="calc-btn calc-number-btn"
       @click="handleClick('0')"
     >
       0
     </button>
     <button
-      class="btn number-btn"
+      class="calc-btn calc-number-btn"
       @click="handleClick('.')"
     >
       .
     </button>
     <button
-      class="btn operator-btn equals-btn"
+      class="calc-btn calc-operator-btn calc-equals-btn"
       @click="handleClick('=')"
     >
       =
@@ -111,12 +111,6 @@ const handleClick = (value) => {
 };
 </script>
 
-<style scoped>
-@import url('@/assets/css/buttons.css');
-
-.btn {
-  font-family: 'Geist Mono', monospace; 
-  @apply text-xl font-semibold rounded-lg transition-all duration-100 ease-in-out p-3
-         active:scale-95 active:opacity-80;
-}
+<style lang="css" scoped>
+@import url('../../assets/css/buttons.css');
 </style>

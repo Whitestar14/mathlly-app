@@ -38,7 +38,7 @@
           v-for="(group, category) in shortcutGroups"
           :key="category"
           :value="category"
-          class="mt-4 focus:outline-none tabs-content"
+          class="mt-4 focus:outline-none tabs-content overflow-y-auto max-h-64"
         >
           <div
             v-for="(shortcut, key) in group"

@@ -5,6 +5,11 @@
 }
 
 @font-face {
+  font-family: "Geist";
+  src: url(../fonts/GeistVF.woff2);
+}
+
+@font-face {
   font-family: "Reddit mono";
   src: url(../fonts/RedditMono.ttf);
 }
@@ -13,12 +18,20 @@
   font-family: "Inter";
   src: url(../fonts/Inter.ttf);
 }
+
+@font-face {
+  font-family: "Apple Sans";
+  src: url(../fonts/SFUIText-Regular.otf);
+}
+
 * {
   transition: background, opacity, color, background-color 0.3s ease;
 }
+
 body {
-  font-family: "Inter", "DM Sans", sans-serif;
-  font-weight: 400;
+  font-family: "Geist", "Inter", "DM Sans", sans-serif;
+  font-weight: 400; 
+  letter-spacing: 1.01;
   transition: all 0.3s ease;
 }
 

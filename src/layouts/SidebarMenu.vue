@@ -158,7 +158,12 @@ const props = defineProps({
     default: false,
   },
 });
+
 const emit = defineEmits(["update:isOpen"]);
+
+defineOptions({
+  name: "SidebarMenu"
+})
 
 const router = useRouter();
 const route = useRoute();

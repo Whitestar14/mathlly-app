@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    --border-input: theme('colors.gray.200');
-    --ring: theme('colors.indigo.500');
-    --ring-offset: theme('colors.white');
+    --border-input: theme("colors.gray.200");
+    --ring: theme("colors.indigo.500");
+    --ring-offset: theme("colors.white");
   }
   .dark {
-    --border-input: theme('colors.gray.700');
-    --ring: theme('colors.indigo.400');
-    --ring-offset: theme('colors.gray.900');
+    --border-input: theme("colors.gray.700");
+    --ring: theme("colors.indigo.400");
+    --ring-offset: theme("colors.gray.900");
   }
 }
 
@@ -43,37 +43,36 @@
   @apply text-primary underline-offset-4 hover:underline;
 }
 
+.btn-default-size {
+  @apply h-10 py-2 px-4;
+}
 
-  .btn-default-size {
-    @apply h-10 py-2 px-4;
+.btn-sm {
+  @apply h-9 px-3 rounded-md;
+}
+
+.btn-lg {
+  @apply h-11 px-8 rounded-md;
+}
+
+.btn-icon {
+  @apply h-10 w-10;
+}
+
+@layer utilities {
+  .bg-muted {
+    @apply bg-gray-300 dark:bg-gray-500 opacity-30;
   }
 
-  .btn-sm {
-    @apply h-9 px-3 rounded-md;
+  .bg-accent {
+    @apply bg-indigo-500 dark:bg-indigo-600;
   }
 
-  .btn-lg {
-    @apply h-11 px-8 rounded-md;
+  .bg-muted-30 {
+    @apply bg-muted opacity-30;
   }
 
-  .btn-icon {
-    @apply h-10 w-10;
+  .ring-offset-background {
+    --tw-ring-offset-color: theme("colors.background.DEFAULT");
   }
-
-  @layer utilities {
-    .bg-muted {
-      @apply bg-gray-300 dark:bg-gray-500 opacity-30;
-    }
-  
-    .bg-accent {
-      @apply bg-indigo-500 dark:bg-indigo-600;
-    }
-  
-    .bg-muted-30 {
-      @apply bg-muted opacity-30;
-    }
-  
-    .ring-offset-background {
-      --tw-ring-offset-color: theme('colors.background.DEFAULT');
-    }
-  }
+}

@@ -74,7 +74,8 @@ export class ProgrammerCalculator extends EngineCalculator {
       }
 
       const result = evaluate(sanitizedExpr);
-      return bignumber(result);
+      // Round the result to handle division
+      return bignumber(Math.floor(result));
     } catch (err) {
       console.error("Error in evaluateExpression:", err, { expr });
       return null;

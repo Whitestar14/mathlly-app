@@ -57,6 +57,7 @@ import { useTitle, useStorage } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { useCalculator } from "@/composables/useCalculator";
 import { useKeyboard } from "@/composables/useKeyboard";
+import { useInputValidation } from '@/composables/useValidation'
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
@@ -74,6 +75,8 @@ const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
 // Dynamic page title
 useTitle(computed(() => `${props.mode} Calculator | Mathlly`));
+
+const { isValidForBase } = useInputValidation()
 
 // Core calculator setup
 const {
@@ -129,22 +132,6 @@ const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
 // Calculator operation handlers
-
-// Add this validation helper function at the top level of your Calculator Page
-const isValidForBase = (value, base) => {
-  const validators = {
-    BIN: /^[0-1]$/,
-    OCT: /^[0-7]$/,
-    DEC: /^[0-9]$/,
-    HEX: /^[0-9a-fA-F]$/,
-  };
-
-  // Always allow these special buttons
-  const allowedKeys = ['AC', 'backspace', '=', '+', '-', '×', '÷', '(', ')'];
-  if (allowedKeys.includes(value)) return true; 
-
-  return validators[base]?.test(value) ?? false;
-};
 
 const handleButtonClick = (btn) => {
   if (input.value === "Error") {
@@ -325,5 +312,5 @@ const closeWelcomeModal = () => {
 </script>
 
 <style scoped>
-@import url("@/assets/css/animation.css");
+@import url("../../assets/css/animation.css");
 </style>
