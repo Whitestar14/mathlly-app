@@ -63,7 +63,7 @@
 <script setup>
 import db from "@/data/db";
 import { useRouter, RouterView } from "vue-router";
-import { useEventListener, useFullscreen } from "@vueuse/core";
+import { useFullscreen } from "@vueuse/core";
 import { onMounted, onUnmounted, provide, ref, computed, watch } from "vue";
 import { useDisplayStore } from "@/stores/display"; 
 import { useSettingsStore } from "@/stores/settings";
@@ -75,21 +75,23 @@ import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
 import { useKeyboardStore } from "./stores/keyboard";
+import { useSidebar } from '@/composables/useSidebar'
 
 const currentInput = ref("0"); 
 const isHistoryOpen = ref(false);
-const isSidebarOpen = ref(false);
 const deviceStore = useDeviceStore();
 const router = useRouter();
 const settings = useSettingsStore();
 const displayStore = useDisplayStore(); 
 const mode = computed(() => settings.mode);
+const { 
+  isOpen: isSidebarOpen, 
+  toggle: toggleSidebar, 
+  close: closeSidebar,
+  handleResize: handleSidebarResize
+} = useSidebar(deviceStore.isMobile)
 
 provide("currentInput", currentInput);
-
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value;
-};
 
 const updateSidebarOpen = (value) => {
   isSidebarOpen.value = value;
@@ -131,17 +133,19 @@ const deleteHistoryItem = async (id) => {
   updateHistory();
 };
 
-watch(() => deviceStore.isMobile, (newVal) => {
-  if (newVal) isHistoryOpen.value = false;
+watch(() => deviceStore.isMobile, (newIsMobile) => {
+  handleSidebarResize(newIsMobile)
+  if (newIsMobile) isHistoryOpen.value = false;
+});
+
+watch(router.currentRoute, () => {
+  if (deviceStore.isMobile) {
+    closeSidebar()
+  }
 });
 
 const updateHistory = () => {
   // This function can be used to trigger any necessary updates
-};
-
-const handleResize = () => {
-  deviceStore.updateDeviceInfo();
-  isSidebarOpen.value = !deviceStore.isMobile;
 };
 
 // Then use the composable
@@ -160,19 +164,18 @@ useKeyboard("global", {
   },
 });
 
-useEventListener(window, "resize", handleResize);
-
-
 onMounted(() => {
   deviceStore.initializeDeviceInfo();
   const init = async () => {
-  const minLoadTime = new Promise((resolve) => setTimeout(resolve, 800));
-  await Promise.all([settings.loadSettings(), minLoadTime]);
-  displayStore.updateState({ isLoading: false });
+    await Promise.all([
+      settings.loadSettings(),
+      new Promise(resolve => setTimeout(resolve, 800))
+    ])
+    displayStore.updateState({ isLoading: false })
+  }
   const keyboardStore = useKeyboardStore();
   keyboardStore.debug = false;
-};
-init();
+  init();
 });
 
 onUnmounted(() => {

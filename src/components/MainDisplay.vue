@@ -8,15 +8,10 @@
       }"
     >
       <div
-        ref="currentInput" 
-        :class="[
-          'main-display text-right font-bold mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide transition-all',
-          getFontSizeClass(input),
-          error ? 'text-red-500 dark:text-red-400' : 'text-gray-900 dark:text-white transition-colors'
-        ]"
+        ref="displayContainer" 
+        :class="displayClasses"
         aria-live="polite"
         aria-atomic="true"
-        @scroll="handleScroll"
         v-html="formattedInput"
       />
       <div
@@ -49,7 +44,7 @@
   <script setup>
   import { ref, computed, onMounted } from "vue";
   import { DisplayFormatter } from '@/services/calculator/DisplayFormatter';
-  import { useElementSize, useScroll } from '@vueuse/core';
+  import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core';
   
   const props = defineProps({
     input: { type: String, default: "" },
@@ -63,11 +58,11 @@
   });
   
   const emit = defineEmits(['scroll-update']);
-  const currentInput = ref(null);
-  const { width: containerWidth } = useElementSize(currentInput);
-  const { x: scrollLeft, arrivedState } = useScroll(currentInput, {
-    throttle: 0,
-    onScroll: checkScroll
+  const displayContainer = ref(null);
+  const { width: containerWidth } = useElementSize(displayContainer);
+  const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
+    throttle: 16, // ~60fps
+    onScroll: useThrottleFn(updateScrollState, 100)
   });
 
   const formattedInput = computed(() => {
@@ -88,6 +83,12 @@
     });
   });
   
+  const displayClasses = computed(() => [
+    'main-display text-right font-bold mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide transition-all',
+    getFontSizeClass(props.input),
+    props.error ? 'text-red-500 dark:text-red-400' : 'text-gray-900 dark:text-white transition-colors'
+  ]);
+
   const getFontSizeClass = (value) => {
     if (!value) return 'text-3xl';
     
@@ -102,42 +103,41 @@
     return props.activeBase === 'BIN' ? 'text-2xl' : 'text-3xl';
   };
 
-  function checkScroll() {
-    const el = currentInput.value;
-    if (!el) return;
+  function updateScrollState() {
+    if (!displayContainer.value) return;
   
     const canScrollLeft = scrollLeft.value > 0;
     const canScrollRight = !arrivedState.right && 
-      (el.scrollWidth - el.clientWidth - scrollLeft.value) > 2; // 2px margin to prevent false positives
+      (displayContainer.value.scrollWidth - displayContainer.value.clientWidth - scrollLeft.value) > 2;
   
     emit('scroll-update', { canScrollLeft, canScrollRight });
   }
   
   function scrollToEnd() {
-    if (currentInput.value) {
-      currentInput.value.scrollLeft = currentInput.value.scrollWidth;
+    if (displayContainer.value) {
+      displayContainer.value.scrollLeft = displayContainer.value.scrollWidth;
     }
   }
   
   function scrollToPrevious() {
-    if (currentInput.value) {
+    if (displayContainer.value) {
       const newScrollLeft = Math.max(0, scrollLeft.value - containerWidth.value / 2);
-      currentInput.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+      displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
     }
   }
   
   function scrollToNext() {
-    if (currentInput.value) {
+    if (displayContainer.value) {
       const newScrollLeft = Math.min(
-        currentInput.value.scrollWidth - containerWidth.value,
+        displayContainer.value.scrollWidth - containerWidth.value,
         scrollLeft.value + containerWidth.value / 2
       );
-      currentInput.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+      displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
     }
   }
   
   onMounted(() => {
-    checkScroll();
+    updateScrollState();
   });
   
   defineExpose({

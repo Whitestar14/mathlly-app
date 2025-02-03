@@ -46,7 +46,7 @@ import { computed, nextTick, ref, watch } from "vue";
 import { useToast } from "@/composables/useToast";
 import { useSettingsStore } from "@/stores/settings";
 import FeatureToast from "@/components/FeatureToast.vue";
-import { useClipboard, useEventListener } from "@vueuse/core";
+import { useClipboard, useEventListener, useDebounceFn } from "@vueuse/core";
 
 const props = defineProps({
   input: { type: String, default: "" },
@@ -67,24 +67,24 @@ const showLeftChevron = ref(false);
 const showRightChevron = ref(false);
 const activeChevron = ref(null);
 
-function handleScrollUpdate({ canScrollLeft, canScrollRight }) {
+const handleScrollUpdate = useDebounceFn(({ canScrollLeft, canScrollRight }) => {
   showLeftChevron.value = canScrollLeft;
   showRightChevron.value = canScrollRight;
-}
+}, 100);
 
-// Keyboard navigation
-useEventListener(window, "keydown", (e) => {
-  if (e.key === "ArrowLeft" && showLeftChevron.value) {
-    activeChevron.value = "left";
-    scrollToPrevious();
+// Keyboard navigation using useEventListener
+useEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' && showLeftChevron.value) {
+    activeChevron.value = 'left';
+    mainDisplay.value?.scrollToPrevious();
   }
-  if (e.key === "ArrowRight" && showRightChevron.value) {
-    activeChevron.value = "right";
-    scrollToNext();
+  if (e.key === 'ArrowRight' && showRightChevron.value) {
+    activeChevron.value = 'right';
+    mainDisplay.value?.scrollToNext();
   }
 });
 
-useEventListener(window, "keyup", () => {
+useEventListener('keyup', () => {
   activeChevron.value = null;
 });
 
@@ -118,7 +118,7 @@ const copyOptions = computed(() => ({
   placement: "top",
 }));
 
-const { copy } = useClipboard();
+const { copy } = useClipboard({ legacy: true });
 
 function copyToClipboard() {
   copy(copyContent.value);
