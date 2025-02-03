@@ -1,5 +1,15 @@
 export const updates = [
   {
+    version: 'v0.7.5',
+    date: 'February 3, 2025',
+    features: [
+      'Bugfixes and performance improvements',
+      'Enhanced sidebar functionality and refractor device store',
+      'Simplified code logic and performance bottlenecks',
+      'Restructured file system for better readability'
+    ]
+  },
+  {
     version: 'v0.7.4',
     date: 'February 3, 2025',
     features: [

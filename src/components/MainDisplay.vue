@@ -31,12 +31,12 @@
         {{ error }}
       </div>
       <div
-          class="text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {{ animatedResult }}
-        </div>
+        class="text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {{ animatedResult }}
+      </div>
     </div>
   </div>
 </template>
