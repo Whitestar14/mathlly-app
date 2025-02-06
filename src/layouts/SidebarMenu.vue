@@ -43,13 +43,13 @@
               :key="item.path"
             >
               <NavigationMenuLink
-                :active="currentRoute === item.path"
+                :active="currentPill === item.path"
                 as-child
               >
-                <button
+              <button
                   :class="[
                     'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors duration-200',
-                    currentRoute === item.path
+                    currentPill === item.path
                       ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300',
                     item.comingSoon ? 'opacity-60 cursor-not-allowed' : '',
@@ -84,7 +84,7 @@
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    :active="currentRoute === `/${item}`"
+                    :active="currentPill === `/${item}`"
                     as-child
                   >
                     <button
@@ -96,7 +96,7 @@
                       }"
                       :class="[
                         'flex w-full items-center justify-center gap-2 rounded-md p-2 text-sm transition-colors',
-                        currentRoute === `/${item}`
+                        currentPill === `/${item}`
                           ? 'bg-gray-100 text-indigo-600 dark:bg-gray-800 dark:text-indigo-400'
                           : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                       ]"
@@ -146,10 +146,10 @@ import {
   NavigationMenuList,
   NavigationMenuRoot,
 } from "radix-vue";
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Badge from '@/components/BaseBadge.vue'
-import { usePills } from '@/composables/usePills'
+import { usePills } from '@/composables/usePills';
+import Badge from '@/components/BaseBadge.vue';
 
 const props = defineProps({
   isOpen: {
@@ -170,7 +170,7 @@ defineOptions({
 
 const router = useRouter();
 const route = useRoute();
-const currentRoute = ref(route.path);
+
 const menuItems = [
   { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.05 },
   { name: "Functions", path: "/functions", icon: FunctionSquareIcon, indicatorOffset: 4.80, comingSoon: true },

@@ -7,7 +7,7 @@ export const useInputValidation = () => {
         DEC: /^[0-9]$/,
         HEX: /^[0-9a-fA-F]$/,
       };
-      const allowedKeys = ['AC', 'backspace', '=', '+', '-', '×', '÷', '(', ')'];
+      const allowedKeys = ['AC', 'backspace', '=', '+', '-', '×', '÷', '(', ')', '>>', '<<', '%', '±'];
       return allowedKeys.includes(value) || validators[base]?.test(value);
     };
   

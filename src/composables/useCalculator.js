@@ -20,7 +20,7 @@ export function useCalculator(mode, settings) {
     clearState
   } = useCalculatorState()
 
-  const calculator = ref(null);
+  let calculator = ref(null);
   
   const createCalculator = (mode) => {
     const CalculatorClass = calculatorTypes[mode];

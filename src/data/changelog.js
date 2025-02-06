@@ -1,4 +1,16 @@
-export const updates = [
+export const updates = [ 
+  {
+    version: 'v0.7.6',
+    date: 'February 6, 2025',
+    features: [
+      'Enhance calculator functionality with programmer calculations and input validation improvements',
+      'Massive crackdown on subtle bugs and expected app misbehavior',
+      'Improved app speed index and loading times by maintaining consistent modularization practices and design patterns',
+      'Centralized sidebar logic and added persistent preference features',
+      'Fixed bug where the `usePill` composable incorrectly highlighted the current page route in the sidebar',
+      'Phased out raw button declarations with consistent component-based styles in modals'
+    ]
+  },
   {
     version: 'v0.7.5',
     date: 'February 3, 2025',

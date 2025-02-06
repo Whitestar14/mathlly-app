@@ -61,18 +61,20 @@
           </div>
 
           <!-- GitHub ref icon -->
+          <a
+            href="https://github.com/Whitestar14/mathlly-app"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Github Page Link"
+            class="mr-4 inline-flex items-center justify-center"
+          >
           <button
             v-tippy="{ content: 'Star on GitHub', placement: 'bottom' }"
-            class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 duration-300 transition-opacity"
+            class="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 duration-300 transition-opacity"
           >
-            <a
-              href="https://github.com/Whitestar14/mathlly-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
               <GithubIcon class="h-6 w-6" />
-            </a>
-          </button>
+            </button>
+          </a>
           <!-- Keyboard shortcuts button -->
           <button
             v-if="!isMobile"
@@ -131,14 +133,15 @@ import {
 import { computed, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
-import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
 import { useKeyboard } from "@/composables/useKeyboard"
+import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
 defineProps({
   isSidebarOpen: {
     type: Boolean,
   },
   isMobile: {
     type: Boolean,
+    required: true,
   },
 });
 

@@ -26,6 +26,7 @@
           <!-- Close Button -->
           <Button
             variant="ghost"
+            size="icon"
             class="absolute right-4 top-4 dark:text-gray-100 p-1"
             @click="$emit('update:open', false)"
           >
