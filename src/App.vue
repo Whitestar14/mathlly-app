@@ -166,16 +166,15 @@ useKeyboard("global", {
 
 onMounted(() => {
   deviceStore.initializeDeviceInfo();
-  const init = async () => {
+  (async function() {
     await Promise.all([
       settings.loadSettings(),
       new Promise(resolve => setTimeout(resolve, 800))
     ])
     displayStore.updateState({ isLoading: false })
-  }
+  })();
   const keyboardStore = useKeyboardStore();
   keyboardStore.debug = false;
-  init();
 });
 
 onUnmounted(() => {
