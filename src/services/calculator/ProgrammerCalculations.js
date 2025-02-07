@@ -1,7 +1,7 @@
 import { evaluate, bignumber, isNegative } from "mathjs";
 
 export class ProgrammerCalculations {
-  static MAX_VALUE = 102410241024; // 63-bit signed integer max
+  static MAX_VALUE = 0x7FFFFFFFFFFFFFFFFFF // 63-bit signed integer max
 
   static bases = {
     BIN: 2,
@@ -13,27 +13,55 @@ export class ProgrammerCalculations {
   static evaluateExpression(expr, base) {
     if (!expr || expr.trim() === "") return bignumber(0);
 
+    // Check for division by zero before sanitization
+    if (expr.includes('÷ 0') || expr.includes('/ 0')) {
+      throw new Error("Division by zero is not allowed");
+    }
+
+    const sanitizedExpr = this.sanitizeExpression(expr, base);
+    
     try {
-      const sanitizedExpr = this.sanitizeExpression(expr, base);
       const result = evaluate(sanitizedExpr);
       
+      // Handle invalid results
+      if (isNaN(result) || !isFinite(result)) {
+        throw new Error("Invalid operation");
+      }
+      
+      // Check for overflow
       if (Math.abs(result) > this.MAX_VALUE) {
-        return null;
+        throw new Error("Overflow");
       }
       
       return bignumber(Math.floor(result));
     } catch (err) {
-      return null;
+      // Preserve specific error messages
+      if (err.message.includes("Division by zero") || 
+          err.message === "Invalid operation" ||
+          err.message === "Overflow") {
+        throw err;
+      }
+      throw new Error("Invalid expression");
     }
   }
 
   static sanitizeExpression(expr, base) {
+    // First pass: basic cleanup
     let sanitized = expr
       .replace(/×/g, "*")
       .replace(/÷/g, "/")
       .replace(/[+\-*/]\s*$/, "")
       .replace(/\s+/g, " ")
       .trim();
+
+    // Handle shift operators specially
+    sanitized = sanitized
+      .replace(/<<|>>/g, match => ` ${match} `)
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // Second pass: validate operations
+    if (!/^[0-9A-Fa-f\s+\-*/()<<>>]*$/.test(sanitized)) return null;
 
     if (base !== "DEC") {
       sanitized = this.convertToDecimal(sanitized, base);
@@ -43,13 +71,16 @@ export class ProgrammerCalculations {
   }
 
   static convertToDecimal(expr, fromBase) {
-    return expr
-      .split(/([+\-*/())]|\s+)/)
+    // Split expression keeping shift operators intact
+    const parts = expr.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-*/()]\s*)/);
+    return parts
       .map(part => {
         part = part.trim();
         if (!part) return "";
-        if (/^[0-9A-Fa-f]+$/.test(part)) {
-          return parseInt(part, this.bases[fromBase]).toString(10);
+        if (part === "<<" || part === ">>") return part;
+        if (this.validateForBase(part, fromBase)) {
+          const decimal = parseInt(part, this.bases[fromBase]);
+          return isNaN(decimal) ? part : decimal.toString(10);
         }
         return part;
       })
@@ -87,12 +118,33 @@ export class ProgrammerCalculations {
   }
 
   static validateForBase(value, base) {
+    if (!value || typeof value !== 'string') return false;
+    
     const patterns = {
-      BIN: /^[01]+$/,
-      OCT: /^[0-7]+$/,
-      DEC: /^[0-9]+$/,
-      HEX: /^[0-9A-Fa-f]+$/
+      BIN: /^-?[01]+$/,
+      OCT: /^-?[0-7]+$/,
+      DEC: /^-?[0-9]+$/,
+      HEX: /^-?[0-9A-Fa-f]+$/
     };
-    return patterns[base]?.test(value) ?? false;
+
+    const pattern = patterns[base];
+    if (!pattern) return false;
+
+    // Handle negative numbers
+    const testValue = value.startsWith('-') ? value.slice(1) : value;
+    return pattern.test(testValue);
+  }
+
+  static handleBitwiseOperation(value, operation) {
+    try {
+      const num = BigInt(value);
+      switch (operation) {
+        case '<<': return (num << 1n).toString();
+        case '>>': return (num >> 1n).toString();
+        default: return value;
+      }
+    } catch {
+      return value;
+    }
   }
 }

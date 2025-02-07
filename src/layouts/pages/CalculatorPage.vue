@@ -134,53 +134,36 @@ const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 // Calculator operation handlers
 
 const handleButtonClick = (btn) => {
-  if (input.value === "Error") {
-    handleClear();
-    return;
-  }
+  try {
+    const result = calculator.value.handleButtonClick(btn);
 
-  const result = calculator.value.handleButtonClick(btn);
-
-    // Add validation for Programmer mode
-    if (props.mode === "Programmer" && !isValidForBase(btn, activeBase.value)) {
-    return; // Silently ignore invalid inputs for the current base
-  }
-
-  if (btn === "=" && props.mode === "Programmer") {
-    if (result.result && result.displayValues) {
-      updateDisplayValues(result.displayValues);
-      updateState({
-        input: result.result,
-        error: result.error || "",
-      });
-      setAnimation(result.result);
-    }
-  } else {
+    // Allow continued input even with error message
     updateState({
       input: result.input,
-      error: result.error || "",
+      error: result.error || ""
     });
 
-    if (props.mode === "Programmer") {
-      nextTick(() => {
-        updateDisplayState();
-      });
-    }
-
-    if (btn === "=" && props.mode !== "Programmer") {
-      if (result.error) {
+    // Special cases handling
+    if (btn === "=" && props.mode === "Programmer") {
+      if (result.displayValues) {
+        updateDisplayValues(result.displayValues);
         setAnimation(result.result);
-      } else {
-        setAnimation(result.result);
-        addToHistory(result.expression, result.result);
       }
+    } else if (props.mode === "Programmer") {
+      nextTick(() => updateDisplayState());
     }
-  }
 
-  if (result.error) {
-    setTimeout(() => {
-      updateState({ error: "" });
-    }, 2000);
+    // History handling
+    if (btn === "=" && props.mode !== "Programmer" && result.result) {
+      addToHistory(result.expression, result.result);
+      setAnimation(result.result);
+    }
+  } catch (err) {
+    console.error('Calculator operation error:', err);
+    updateState({
+      input: "Error",
+      error: "Operation failed"
+    });
   }
 };
 

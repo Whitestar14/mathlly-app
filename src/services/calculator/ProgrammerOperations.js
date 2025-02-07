@@ -4,14 +4,6 @@ export class ProgrammerOperations {
   constructor(calculator) {
     this.calculator = calculator;
     this.parenthesesTracker = new ParenthesesTracker();
-    this.lastOperation = null; 
-  }
-
-  trackStateChange(operation, input) {
-    console.debug(`[ProgrammerOperations] ${operation}:`, {
-      input: input,
-      operation: operation
-    });
   }
 
   handleNumber(num) {
@@ -26,7 +18,6 @@ export class ProgrammerOperations {
       state.input += num;
     }
 
-    this.trackStateChange('number', state.input);
     return { input: state.input };
   }
 
@@ -39,19 +30,24 @@ export class ProgrammerOperations {
       return { input: state.input };
     }
 
+    // Process operator normally - division by zero is handled at evaluation time
+    return this.processOperator(op, currentInput);
+  }
+
+  processOperator(op, currentInput) {
+    // Handle shift operators
     if (op === "<<" || op === ">>") {
       return this.handleShiftOperator(op);
     }
 
-    // Basic operator handling
+    // Update input state
+    const state = this.calculator.states[this.calculator.activeBase];
     if (this.isLastCharOperator()) {
       state.input = currentInput.replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
-return { input: state.input }; // <-- return updated state
     } else if (!currentInput.endsWith("(")) {
       state.input = `${currentInput} ${op} `;
     }
 
-    this.trackStateChange('operator', state.input);
     return { input: state.input };
   }
 
@@ -87,7 +83,6 @@ return { input: state.input }; // <-- return updated state
       }
 
       state.input = newInput.trim() + " ";
-      this.trackStateChange('shift', state.input, true); // Force update
       return { input: state.input, error: null };
     } catch (err) {
       console.error('Error in handleShiftOperator:', err);
@@ -125,33 +120,20 @@ return { input: state.input }; // <-- return updated state
   }
 
   handleParenthesis(parenthesis) {
-    try {
-      const state = this.calculator.states[this.calculator.activeBase];
-      const currentInput = state.input.trim();
-      const position = currentInput.length;
+    const state = this.calculator.states[this.calculator.activeBase];
+    const currentInput = state.input.trim();
+    const position = currentInput.length;
 
-      let result;
-      if (parenthesis === "(") {
-        result = this.handleOpenParenthesis(currentInput, position);
-      } else if (parenthesis === ")" && this.canCloseParenthesis(currentInput)) {
-        result = this.handleCloseParenthesis(currentInput, position);
-      }
-
-      if (result) {
-        this.trackStateChange('parenthesis', state.input, true); // Force update
-      }
-
-      return {
-        input: state.input,
-        error: this.calculator.error
-      };
-    } catch (err) {
-      console.error('[ProgrammerOperations] Parenthesis handling error:', err);
-      return {
-        input: this.calculator.states[this.calculator.activeBase].input,
-        error: "Invalid parenthesis"
-      };
+    if (parenthesis === "(") {
+      this.handleOpenParenthesis(currentInput, position);
+    } else if (parenthesis === ")" && this.canCloseParenthesis(currentInput)) {
+      this.handleCloseParenthesis(currentInput, position);
     }
+
+    return {
+      input: state.input,
+      error: this.calculator.error
+    };
   }
 
   canCloseParenthesis(expr) {
@@ -199,12 +181,10 @@ return { input: state.input }; // <-- return updated state
     const beforeBackspace = currentInput;
 
     if (this.handleSpecialBackspace(currentInput)) {
-      this.trackStateChange('backspace', state.input, true); // Force update
       return;
     }
 
     this.handleDefaultBackspace(currentInput);
-    this.trackStateChange('backspace', state.input, true); // Force update
 
     // Validate result after backspace
     if (state.input === beforeBackspace) {
@@ -306,8 +286,6 @@ return { input: state.input }; // <-- return updated state
         }
         state.input = parts.join(" ").trim();
       }
-      
-      this.trackStateChange('toggleSign', state.input, true);
     }
     return { input: state.input };
   }
@@ -330,8 +308,6 @@ return { input: state.input }; // <-- return updated state
       } catch (err) {
         console.error('Error in handlePercent:', err);
       }
-      
-      this.trackStateChange('percent', state.input, true);
     }
     return { input: state.input };
   }

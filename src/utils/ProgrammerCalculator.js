@@ -32,7 +32,18 @@ export class ProgrammerCalculator extends EngineCalculator {
   }
 
   evaluateExpression(expr, base = this.activeBase) {
-    return ProgrammerCalculations.evaluateExpression(expr, base);
+    try {
+      return ProgrammerCalculations.evaluateExpression(expr, base);
+    } catch (err) {
+      // Preserve specific error messages
+      if (err.message.includes("Division by zero")) {
+        throw new Error("Division by zero is not allowed");
+      } else if (err.message === "Overflow") {
+        throw new Error("Result too large");
+      } else {
+        throw new Error("Invalid expression");
+      }
+    }
   }
 
   formatResult(result, base = this.activeBase) {
@@ -44,23 +55,30 @@ export class ProgrammerCalculator extends EngineCalculator {
   }
 
   handleButtonClick(btn) {
-    if (this.states[this.activeBase].input === "Error") {
-      this.handleClear();
+    // Allow error clearing operations
+    if (["backspace", "AC", "C", "CE"].includes(btn)) {
+      this.error = "";
+      return this.processButton(btn);
     }
 
+    // Check input length but allow continued input
     if (this.isInputTooLong(btn)) {
-      return this.handleInputLengthError();
+      this.error = "Maximum input length reached";
+      return {
+        input: this.states[this.activeBase].input,
+        error: this.error,
+        displayValues: this.states
+      };
     }
 
     try {
       const result = this.processButton(btn);
-      // Only update display values for equals or clear operations
-      if (btn === "=" || btn === "AC" || btn === "C") {
-        this.updateDisplayValues();
-      }
       return result;
     } catch (err) {
-      return this.handleError(err);
+      return {
+        input: "Error",
+        error: err.message || "Operation failed"
+      };
     }
   }
 
@@ -68,7 +86,8 @@ export class ProgrammerCalculator extends EngineCalculator {
     try {
       let result;
       const isFunctionKey = ["<<", ">>", "(", ")", "backspace", "AC", "C", "CE", "±", "%"].includes(btn);
-      
+      this.error = "";
+
       switch (btn) {
         case "=": return this.handleEquals();
         case "AC":
@@ -203,7 +222,7 @@ export class ProgrammerCalculator extends EngineCalculator {
     this.error = err.message;
     this.states[this.activeBase].input = "Error";
     return {
-      input: "Error",
+      input: this.states[this.activeBase].input,
       error: err.message,
       expression: this.currentExpression
     };
