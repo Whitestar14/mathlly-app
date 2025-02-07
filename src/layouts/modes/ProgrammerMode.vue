@@ -69,9 +69,9 @@
         </button>
         <button
           class="calc-btn calc-function-btn"
-          @click="handleClick('C')"
+          @click="handleClick('CE')"
         >
-          C
+          CE
         </button>
         <button
           class="calc-btn calc-function-btn"
@@ -258,11 +258,7 @@ const handleBaseChange = (base) => {
 };
 
 const handleClick = (value) => {
-  if (value === "C" || value === "CE") {
-    emit("clear");
-  } else {
     emit("button-click", value);
-  }
 };
 
 // Fix: Remove value parameter since it's not being used correctly

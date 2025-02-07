@@ -56,7 +56,7 @@ export class ProgrammerCalculator extends EngineCalculator {
 
   handleButtonClick(btn) {
     // Allow error clearing operations
-    if (["backspace", "AC", "C", "CE"].includes(btn)) {
+    if (["backspace", "AC", "CE"].includes(btn)) {
       this.error = "";
       return this.processButton(btn);
     }
@@ -85,13 +85,12 @@ export class ProgrammerCalculator extends EngineCalculator {
   processButton(btn) {
     try {
       let result;
-      const isFunctionKey = ["<<", ">>", "(", ")", "backspace", "AC", "C", "CE", "±", "%"].includes(btn);
+      const isFunctionKey = ["<<", ">>", "(", ")", "backspace", "AC", "CE", "±", "%"].includes(btn);
       this.error = "";
 
       switch (btn) {
         case "=": return this.handleEquals();
         case "AC":
-        case "C": this.handleClear(); break;
         case "CE": this.handleClearEntry(); break;
         case "backspace": this.operations.handleBackspace(); break;
         case "±": result = this.operations.handleToggleSign(); break;
@@ -239,6 +238,6 @@ export class ProgrammerCalculator extends EngineCalculator {
 
   isInputTooLong(btn) {
     return this.states[this.activeBase].input.length >= this.MAX_INPUT_LENGTH &&
-      !["=", "AC", "backspace", "C", "<<", ">>", "±"].includes(btn);
+      !["=", "AC", "backspace", "<<", ">>", "±"].includes(btn);
   }
 }
