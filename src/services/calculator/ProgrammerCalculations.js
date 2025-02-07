@@ -1,7 +1,7 @@
 import { evaluate, bignumber, isNegative } from "mathjs";
 
 export class ProgrammerCalculations {
-  static MAX_VALUE = 0x7FFFFFFFFFFFFFFFFFF // 63-bit signed integer max
+  static MAX_VALUE = bignumber('9223372036854775807'); // Using mathjs bignumber instead of literal
 
   static bases = {
     BIN: 2,
@@ -137,10 +137,10 @@ export class ProgrammerCalculations {
 
   static handleBitwiseOperation(value, operation) {
     try {
-      const num = BigInt(value);
+      const num = bignumber(value);
       switch (operation) {
-        case '<<': return (num << 1n).toString();
-        case '>>': return (num >> 1n).toString();
+        case '<<': return num.mul(2).toString(); // Left shift is multiply by 2
+        case '>>': return num.div(2).floor().toString(); // Right shift is divide by 2 and floor
         default: return value;
       }
     } catch {
