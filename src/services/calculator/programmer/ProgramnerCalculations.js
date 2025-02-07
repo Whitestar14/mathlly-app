@@ -1,4 +1,4 @@
-import { evaluate, bignumber, isNegative } from "mathjs";
+import { evaluate, bignumber, isNegative, isNaN } from "mathjs";
 
 export class ProgrammerCalculations {
   static MAX_VALUE = bignumber('9223372036854775807'); // Using mathjs bignumber instead of literal

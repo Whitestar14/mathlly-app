@@ -1,6 +1,6 @@
 import { EngineCalculator } from "./EngineCalculator";
-import { ProgrammerOperations } from "@/services/calculator/ProgrammerOperations";
-import { ProgrammerCalculations } from "@/services/calculator/ProgrammerCalculations";
+import { ProgrammerOperations } from "@/services/calculator/programmer/ProgrammerOperations";
+import { ProgrammerCalculations } from "@/services/calculator/programmer/ProgramnerCalculations";
 import {
   BinCalculator,
   DecCalculator,
@@ -36,13 +36,7 @@ export class ProgrammerCalculator extends EngineCalculator {
       return ProgrammerCalculations.evaluateExpression(expr, base);
     } catch (err) {
       // Preserve specific error messages
-      if (err.message.includes("Division by zero")) {
-        throw new Error("Division by zero is not allowed");
-      } else if (err.message === "Overflow") {
-        throw new Error("Result too large");
-      } else {
-        throw new Error("Invalid expression");
-      }
+      throw new Error("Invalid expression: " + err.message);
     }
   }
 
