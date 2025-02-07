@@ -1,11 +1,13 @@
 import { evaluate, format, fraction } from "mathjs";
 import { EngineCalculator } from "./EngineCalculator";
-import { DisplayFormatter } from "@/services/calculator/DisplayFormatter"
+import { DisplayFormatter } from "@/services/display/DisplayFormatter"
+import { bignumber } from "mathjs";
 export class StandardCalculator extends EngineCalculator {
   constructor(settings) {
     super(settings);
     // Increase MAX_INPUT_LENGTH for Standard mode
     this.MAX_INPUT_LENGTH = 100; // More generous limit for standard calculations
+    this.MAX_VALUE = bignumber('9223372036854775807');
     this.isExponentMode = false;
     this.hasExponent = false;
   }

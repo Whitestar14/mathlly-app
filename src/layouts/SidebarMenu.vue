@@ -172,7 +172,7 @@ const router = useRouter();
 const route = useRoute();
 
 const menuItems = [
-  { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.05 },
+  { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.05, isNew: true },
   { name: "Functions", path: "/functions", icon: FunctionSquareIcon, indicatorOffset: 4.80, comingSoon: true },
   { name: "Regex", path: "/regex", icon: RegexIcon, indicatorOffset: 7.55, comingSoon: true },
   { name: "Graphing", path: "/graphing", icon: LineChartIcon, indicatorOffset: 10.30, comingSoon: true },

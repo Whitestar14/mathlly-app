@@ -43,7 +43,7 @@
   
   <script setup>
   import { ref, computed, onMounted } from "vue";
-  import { DisplayFormatter } from '@/services/calculator/DisplayFormatter';
+  import { DisplayFormatter } from '@/services/display/DisplayFormatter';
   import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core';
   
   const props = defineProps({

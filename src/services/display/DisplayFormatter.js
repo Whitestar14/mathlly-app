@@ -69,13 +69,6 @@ export class DisplayFormatter {
     if (!value || value === 'NaN') return '0';
     
     let binString = value;
-    // Convert if it's a decimal number
-    if (/^\d+$/.test(value)) {
-      binString = parseInt(value).toString(2);
-    }
-    
-    // Ensure the value is a valid binary number
-    if (!/^[01]+$/.test(binString)) return '0';
 
     const padding = 4 - (binString.length % 4);
     if (padding < 4) {
