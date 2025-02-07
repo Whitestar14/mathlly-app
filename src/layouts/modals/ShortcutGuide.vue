@@ -96,6 +96,8 @@ const shortcutGroups = {
     "ctrl+l": { description: "Toggle Sidebar" },
     "ctrl+h": { description: "Toggle History" },
     "ctrl+s": { description: "Open Settings" },
+    "ctrl+space" : { description: "Open the Keyboard Shortcuts"},
+    "ctrl+shift+m": { description: "Toggle Theme" },
   },
   Calculator: {
     escape: { description: "Clear Input" },
