@@ -1,7 +1,7 @@
 import { ref } from 'vue'
-import { BasicCalculator } from '@/utils/BasicCalculator'
-import { StandardCalculator } from '@/utils/StandardCalculator'
-import { ProgrammerCalculator } from '@/utils/ProgrammerCalculator'
+import { BasicCalculator } from '@/services/logic/BasicCalculator'
+import { StandardCalculator } from '@/services/logic/StandardCalculator'
+import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator'
 import { useCalculatorState } from './useCalculatorState'
 
 const calculatorTypes = {
