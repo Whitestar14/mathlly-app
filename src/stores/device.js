@@ -1,31 +1,42 @@
-// stores/device.js
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { useEventListener } from '@vueuse/core'
 
-export const useDeviceStore = defineStore('device', {
-    state: () => ({
-        isMobile: false,
-        screenWidth: 0,
-        screenHeight: 0,
-        orientation: 'portrait', // or 'landscape'
-    }),
-    getters: {
-        isLandscape: (state) => state.orientation === 'landscape',
-    },
-    actions: {
-        updateDeviceInfo() {
-            this.screenWidth = window.innerWidth;
-            this.screenHeight = window.innerHeight;
-            this.isMobile = window.innerWidth < 768; // Your mobile breakpoint
-            this.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
-        },
-        initializeDeviceInfo() {
-            this.updateDeviceInfo(); // Get initial values
-            window.addEventListener('resize', this.updateDeviceInfo);
-            window.addEventListener('orientationchange', this.updateDeviceInfo)
-        },
-        destroyDeviceInfo() {
-            window.removeEventListener('resize', this.updateDeviceInfo);
-            window.removeEventListener('orientationchange', this.updateDeviceInfo)
-        }
-    },
-});
+export const useDeviceStore = defineStore('device', () => {
+  const isMobile = ref(false)
+  const isResizing = ref(false)
+  let resizeTimeout
+
+  const updateDeviceInfo = () => {
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout)
+    }
+    
+    if (!isResizing.value) {
+      isResizing.value = true
+    }
+
+    resizeTimeout = setTimeout(() => {
+      const newIsMobile = window.innerWidth < 768
+      isMobile.value = newIsMobile
+      isResizing.value = false
+    }, 100)
+  }
+
+  const initializeDeviceInfo = () => {
+    updateDeviceInfo()
+    useEventListener(window, 'resize', updateDeviceInfo)
+  }
+
+  const destroyDeviceInfo = () => {
+    clearTimeout(resizeTimeout)
+  }
+
+  return {
+    isMobile,
+    isResizing,
+    updateDeviceInfo,
+    initializeDeviceInfo,
+    destroyDeviceInfo
+  }
+})

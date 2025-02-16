@@ -42,7 +42,7 @@
           :key="letter"
           :disabled="!isButtonEnabled(letter)"
           :class="[
-            'btn letter-btn bg-gray-700',
+            'calc-btn calc-letter-btn bg-gray-700',
             !isButtonEnabled(letter) || isMaxLengthReached
               ? 'opacity-50 cursor-not-allowed'
               : '',
@@ -54,55 +54,55 @@
       </div>
       <div class="col-span-4 grid grid-cols-4 gap-[0.2em]">
         <button
-          class="btn function-btn"
+          class="calc-btn calc-function-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('<<')"
         >
           <ChevronsLeftIcon class="w-6 h-6 mx-auto" />
         </button>
         <button
-          class="btn function-btn"
+          class="calc-btn calc-function-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('>>')"
         >
           <ChevronsRightIcon class="w-6 h-6 mx-auto" />
         </button>
         <button
-          class="btn function-btn"
-          @click="handleClick('C')"
+          class="calc-btn calc-function-btn"
+          @click="handleClick('CE')"
         >
-          C
-        </button> 
+          CE
+        </button>
         <button
-          class="btn function-btn"
+          class="calc-btn calc-function-btn"
           @click="handleClick('backspace')"
         >
           <Delete class="w-6 h-6 mx-auto" />
         </button>
 
         <button
-          class="btn function-btn"
+          class="calc-btn calc-function-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('(')"
         >
           (
         </button>
         <button
-          class="btn function-btn"
+          class="calc-btn calc-function-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick(')')"
         >
           )
         </button>
         <button
-          class="btn function-btn"
+          class="calc-btn calc-function-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('%')"
         >
           %
         </button>
         <button
-          class="btn operator-btn"
+          class="calc-btn calc-operator-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('÷')"
         >
@@ -111,27 +111,27 @@
 
         <button
           :disabled="!isButtonEnabled('7') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('7')"
         >
           7
         </button>
         <button
           :disabled="!isButtonEnabled('8') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('8')"
         >
           8
         </button>
         <button
           :disabled="!isButtonEnabled('9') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('9')"
         >
           9
         </button>
         <button
-          class="btn operator-btn"
+          class="calc-btn calc-operator-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('×')"
         >
@@ -140,27 +140,27 @@
 
         <button
           :disabled="!isButtonEnabled('4') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('4')"
         >
           4
         </button>
         <button
           :disabled="!isButtonEnabled('5') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('5')"
         >
           5
         </button>
         <button
           :disabled="!isButtonEnabled('6') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('6')"
         >
           6
         </button>
         <button
-          class="btn operator-btn"
+          class="calc-btn calc-operator-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('-')"
         >
@@ -169,27 +169,27 @@
 
         <button
           :disabled="!isButtonEnabled('1') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('1')"
         >
           1
         </button>
         <button
           :disabled="!isButtonEnabled('2') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('2')"
         >
           2
         </button>
         <button
           :disabled="!isButtonEnabled('3') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('3')"
         >
           3
         </button>
         <button
-          class="btn operator-btn"
+          class="calc-btn calc-operator-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('+')"
         >
@@ -197,7 +197,7 @@
         </button>
 
         <button
-          class="btn function-btn"
+          class="calc-btn calc-function-btn"
           :disabled="isMaxLengthReached"
           @click="handleClick('±')"
         >
@@ -205,20 +205,20 @@
         </button>
         <button
           :disabled="!isButtonEnabled('0') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('0')"
         >
           0
         </button>
         <button
           :disabled="!isButtonEnabled('.') || isMaxLengthReached"
-          class="btn number-btn"
+          class="calc-btn calc-number-btn"
           @click="handleClick('.')"
         >
           .
         </button>
         <button
-          class="btn operator-btn"
+          class="calc-btn calc-operator-btn"
           @click="handleClick('=')"
         >
           =
@@ -258,11 +258,7 @@ const handleBaseChange = (base) => {
 };
 
 const handleClick = (value) => {
-  if (value === "C" || value === "CE") {
-    emit("clear");
-  } else {
     emit("button-click", value);
-  }
 };
 
 // Fix: Remove value parameter since it's not being used correctly
@@ -320,26 +316,7 @@ const formatDisplayValue = (value, base) => {
 };
 </script>
 
-<style scoped>
-@import url("@/assets/css/buttons.css");
+<style lang="css" scoped>
+@import url("../../assets/css/buttons.css");
 
-.btn {
-  @apply px-3 py-2;
-}
-
-.letter-btn:disabled,
-.number-btn:disabled {
-  @apply opacity-50 cursor-not-allowed scale-100 active:scale-100 active:opacity-50 hover:bg-gray-200 dark:hover:bg-gray-600;
-}
-
-.btn {
-  font-family: "Geist Mono", monospace;
-  @apply text-xl font-semibold rounded-lg transition-all duration-100 ease-in-out p-3
-         active:scale-95 active:opacity-80;
-}
-
-.btn:disabled {
-  @apply opacity-50 cursor-not-allowed scale-100 active:scale-100;
-  @apply hover:bg-gray-200 dark:hover:bg-gray-600;
-}
 </style>

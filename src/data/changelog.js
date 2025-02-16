@@ -1,4 +1,52 @@
-export const updates = [
+export const updates = [ 
+  {
+    version: 'v0.8.0-beta',
+    date: 'February 16, 2025',
+    features: [
+    '@deprecate: Subsitute the default calculator mode option from Basic to Standard Mode',
+    'Refractored and reorganized codebase for better separation of concerns',
+    'Improved speed index on performance and user accessibility',
+    'Implemented better and more predictable error handling methods across system modules',
+    'Reduced boilerplate and redundant code to avoid performance hangs and bottlenecks',
+    'Fixed the formatting bugs that prevented seamless data transactions in Programmer Mode',
+    'Fixed the Programmer mode BIN not being able to use the shift operators',
+    'Updated the shortcut modal with list of all available keybindings',
+    'Fixed the Programmer mode HEX function emitting the corresponding values, C had been clearing the input state in former implementation',
+    'Minor UI improvements and considerations made to the look of the app',
+    ]
+  },
+  {
+    version: 'v0.7.6',
+    date: 'February 6, 2025',
+    features: [
+      'Enhance calculator functionality with programmer calculations and input validation improvements',
+      'Massive crackdown on subtle bugs and expected app misbehavior',
+      'Improved app speed index and loading times by maintaining consistent modularization practices and design patterns',
+      'Centralized sidebar logic and added persistent preference features',
+      'Fixed bug where the `usePill` composable incorrectly highlighted the current page route in the sidebar',
+      'Phased out raw button declarations with consistent component-based styles in modals'
+    ]
+  },
+  {
+    version: 'v0.7.5',
+    date: 'February 3, 2025',
+    features: [
+      'Bugfixes and performance improvements',
+      'Enhanced sidebar functionality and refractor device store',
+      'Simplified code logic and performance bottlenecks',
+      'Restructured file system for better readability'
+    ]
+  },
+  {
+    version: 'v0.7.4',
+    date: 'February 3, 2025',
+    features: [
+      'Improved display formtting rule for Programmer Mode',
+      'Added more native keybindings and shortcuts to the app\'s key store',
+      'Enhanced calculator functionality and input validation',
+      'Refractored UI into reusable components for a slight increase on performace benchmarks',
+    ]
+  },
   {
     version: 'v0.7.3',
     date: 'February 1, 2025',

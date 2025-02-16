@@ -1,11 +1,9 @@
 import { ref } from 'vue'
-import { BasicCalculator } from '@/utils/BasicCalculator'
-import { StandardCalculator } from '@/utils/StandardCalculator'
-import { ProgrammerCalculator } from '@/utils/ProgrammerCalculator'
+import { StandardCalculator } from '@/services/logic/StandardCalculator'
+import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator'
 import { useCalculatorState } from './useCalculatorState'
 
 const calculatorTypes = {
-  'Basic': BasicCalculator,
   'Standard': StandardCalculator,
   'Programmer': ProgrammerCalculator
 };
@@ -20,13 +18,13 @@ export function useCalculator(mode, settings) {
     clearState
   } = useCalculatorState()
 
-  const calculator = ref(null);
+  let calculator = ref(null);
   
   const createCalculator = (mode) => {
     const CalculatorClass = calculatorTypes[mode];
     if (!CalculatorClass) {
       console.error(`Invalid calculator mode: ${mode}`);
-      return new BasicCalculator(settings);
+      return new StandardCalculator(settings);
     }
     return new CalculatorClass(settings);
   };

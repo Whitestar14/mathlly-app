@@ -43,13 +43,13 @@
               :key="item.path"
             >
               <NavigationMenuLink
-                :active="currentRoute === item.path"
+                :active="currentPill === item.path"
                 as-child
               >
-                <button
+              <button
                   :class="[
                     'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors duration-200',
-                    currentRoute === item.path
+                    currentPill === item.path
                       ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300',
                     item.comingSoon ? 'opacity-60 cursor-not-allowed' : '',
@@ -61,12 +61,14 @@
                     class="h-4 w-4 shrink-0"
                   />
                   <span>{{ item.name }}</span>
-                  <span
+                  <Badge
                     v-if="item.comingSoon"
-                    class="ml-auto text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                  >
-                    Coming Soon
-                  </span>
+                    type="soon"
+                  />
+                  <Badge
+                    v-if="item.isNew"
+                    type="new"
+                  />
                 </button>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -82,7 +84,7 @@
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    :active="currentRoute === `/${item}`"
+                    :active="currentPill === `/${item}`"
                     as-child
                   >
                     <button
@@ -94,17 +96,16 @@
                       }"
                       :class="[
                         'flex w-full items-center justify-center gap-2 rounded-md p-2 text-sm transition-colors',
-                        currentRoute === `/${item}`
+                        currentPill === `/${item}`
                           ? 'bg-gray-100 text-indigo-600 dark:bg-gray-800 dark:text-indigo-400'
                           : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                       ]"
                       @click="navigateTo(`/${item}`, menuItems.length)"
                     >
                       <component
-                        :is="
-                          item === 'settings'
-                            ? Settings2Icon
-                            : MessageSquareIcon
+                        :is="item === 'settings'
+                          ? Settings2Icon
+                          : MessageSquareIcon
                         "
                         class="h-5 w-5"
                       />
@@ -145,8 +146,10 @@ import {
   NavigationMenuList,
   NavigationMenuRoot,
 } from "radix-vue";
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { usePills } from '@/composables/usePills';
+import Badge from '@/components/BaseBadge.vue';
 
 const props = defineProps({
   isOpen: {
@@ -155,21 +158,21 @@ const props = defineProps({
   },
   isMobile: {
     type: Boolean,
-    default: false,
+    default: false, 
   },
 });
+
 const emit = defineEmits(["update:isOpen"]);
+
+defineOptions({
+  name: "SidebarMenu"
+})
 
 const router = useRouter();
 const route = useRoute();
-const currentRoute = ref(route.path);
-const indicatorPosition = ref(0);
-const showIndicator = ref(true);
 
-// The indicator only positions correctly when the absolute value (2.7em) and a common difference of (0.05em)
-//  is added to get the required value.
 const menuItems = [
-  { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.05 },
+  { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.05, isNew: true },
   { name: "Functions", path: "/functions", icon: FunctionSquareIcon, indicatorOffset: 4.80, comingSoon: true },
   { name: "Regex", path: "/regex", icon: RegexIcon, indicatorOffset: 7.55, comingSoon: true },
   { name: "Graphing", path: "/graphing", icon: LineChartIcon, indicatorOffset: 10.30, comingSoon: true },
@@ -177,25 +180,20 @@ const menuItems = [
   { name: "What's New", path: "/whats-new", icon: SparklesIcon, indicatorOffset: 15.80, },
   { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 18.55 },
 ];
+const { currentPill, indicatorPosition, showIndicator, selectPill, updatePillIndicator } = usePills(menuItems)
+
+// The indicator only positions correctly when the absolute value (2.7em) and a common difference of (0.05em)
+//  is added to get the required value.
 
 const closeSidebar = () => emit("update:isOpen", false);
 
 const navigateTo = (path, index) => {
-  router.push(path);
-  updateIndicatorPos(index);
+  router.push(path)
+  selectPill(path, index)
   if (props.isMobile) {
-    closeSidebar();
+    closeSidebar()
   }
-};
-
-const updateIndicatorPos = (index) => {
-  if (index < menuItems.length) {
-    indicatorPosition.value = menuItems[index].indicatorOffset;
-    showIndicator.value = true;
-  } else {
-    showIndicator.value = false;
-  }
-};
+}
 
 const sidebarClasses = computed(() => [
   "overflow-y-auto fixed inset-y-0 left-0 z-50 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-all",
@@ -205,12 +203,12 @@ const sidebarClasses = computed(() => [
 watch(
   () => route.path,
   (newPath) => {
-    currentRoute.value = newPath;
-    const index = menuItems.findIndex((item) => item.path === newPath);
-    updateIndicatorPos(index !== -1 ? index : menuItems.length);
+    currentPill.value = newPath
+    const index = menuItems.findIndex((item) => item.path === newPath)
+    updatePillIndicator(index !== -1 ? index : menuItems.length)
   },
   { immediate: true }
-);
+)
 </script>
 
 <style scoped>

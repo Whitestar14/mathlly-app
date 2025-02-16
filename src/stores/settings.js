@@ -8,7 +8,7 @@ const DEFAULT_SETTINGS = {
   useFractions: false,
   useThousandsSeparator: true,
   theme: 'system',
-  mode: 'Basic',
+  mode: 'Standard',
   borderless: false
 };
 

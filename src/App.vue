@@ -6,7 +6,7 @@
   >
     <sidebar-menu
       :is-open="isSidebarOpen"
-      :is-mobile="isMobile"
+      :is-mobile="deviceStore.isMobile"
       @update:isOpen="updateSidebarOpen"
       @openAbout="navigateToAbout"
       @openSettings="navigateToSettings"
@@ -14,11 +14,11 @@
 
     <div
       class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-      :class="[!isMobile && isSidebarOpen ? 'ml-64' : '']"
+      :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']"
     >
       <calculator-header
         :is-sidebar-open="isSidebarOpen"
-        :is-mobile="isMobile"
+        :is-mobile="deviceStore.isMobile"
         @toggle-sidebar="toggleSidebar"
       />
 
@@ -33,7 +33,7 @@
             v-else
             :mode="mode"
             :settings="settings"
-            :is-mobile="isMobile"
+            :is-mobile="deviceStore.isMobile"
             :is-history-open="isHistoryOpen"
             @settings-change="updateSettings"
             @update:mode="updateMode"
@@ -46,9 +46,9 @@
     </div>
 
     <history-panel
-      v-if="isMobile"
+      v-if="deviceStore.isMobile"
       :is-open="isHistoryOpen"
-      :is-mobile="isMobile"
+      :is-mobile="deviceStore.isMobile"
       :mode="mode"
       @select-history-item="selectHistoryItem"
       @delete-history-item="deleteHistoryItem"
@@ -63,31 +63,35 @@
 <script setup>
 import db from "@/data/db";
 import { useRouter, RouterView } from "vue-router";
-import { useEventListener, useFullscreen } from "@vueuse/core";
-import { onMounted, provide, ref, computed, watch } from "vue";
+import { useFullscreen } from "@vueuse/core";
+import { onMounted, onUnmounted, provide, ref, computed, watch } from "vue";
 import { useDisplayStore } from "@/stores/display"; 
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
+import { useDeviceStore } from '@/stores/device';
 import Toast from "@/components/FeatureToast.vue";
 import CalculatorLoader from "@/components/CalculatorLoader.vue";
 import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
+import { useKeyboardStore } from "./stores/keyboard";
+import { useSidebar } from '@/composables/useSidebar'
 
 const currentInput = ref("0"); 
 const isHistoryOpen = ref(false);
-const isSidebarOpen = ref(false);
-const isMobile = ref(window.innerWidth < 768);
+const deviceStore = useDeviceStore();
 const router = useRouter();
 const settings = useSettingsStore();
 const displayStore = useDisplayStore(); 
 const mode = computed(() => settings.mode);
+const { 
+  isOpen: isSidebarOpen, 
+  toggle: toggleSidebar, 
+  close: closeSidebar,
+  handleResize: handleSidebarResize
+} = useSidebar(deviceStore.isMobile)
 
 provide("currentInput", currentInput);
-
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value;
-};
 
 const updateSidebarOpen = (value) => {
   isSidebarOpen.value = value;
@@ -129,17 +133,19 @@ const deleteHistoryItem = async (id) => {
   updateHistory();
 };
 
-watch(isMobile, (newVal) => {
-  if (newVal) isHistoryOpen.value = false
-})
+watch(() => deviceStore.isMobile, (newIsMobile) => {
+  handleSidebarResize(newIsMobile)
+  if (newIsMobile) isHistoryOpen.value = false;
+});
+
+watch(router.currentRoute, () => {
+  if (deviceStore.isMobile) {
+    closeSidebar()
+  }
+});
 
 const updateHistory = () => {
   // This function can be used to trigger any necessary updates
-};
-
-const handleResize = () => {
-  isMobile.value = window.innerWidth < 768;
-  isSidebarOpen.value = !isMobile.value;
 };
 
 // Then use the composable
@@ -158,24 +164,24 @@ useKeyboard("global", {
   },
 });
 
-useEventListener(window, "resize", handleResize);
+onMounted(() => {
+  deviceStore.initializeDeviceInfo();
+  (async function() {
+    await Promise.all([
+      settings.loadSettings(),
+      new Promise(resolve => setTimeout(resolve, 800))
+    ])
+    displayStore.updateState({ isLoading: false })
+  })();
+  const keyboardStore = useKeyboardStore();
+  keyboardStore.debug = false;
+});
 
-onMounted(async () => {
-  handleResize();
-  const minLoadTime = new Promise((resolve) => setTimeout(resolve, 800));
-  await Promise.all([settings.loadSettings(), minLoadTime]);
-  displayStore.updateState({ isLoading: false }); // Update isLoading state in display store
+onUnmounted(() => {
+  deviceStore.destroyDeviceInfo();
 });
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+@import url("./assets/css/animation.css")
 </style>

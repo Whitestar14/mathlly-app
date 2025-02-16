@@ -17,7 +17,8 @@ export class DisplayFormatter {
   }
 
   static formatProgrammer(value, base, useThousandsSeparator) {
-    const parts = value.split(/([+\-×÷()\s])/g);
+    // Split preserving shift operators
+    const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()]\s*)/g);
     let highlightIndex = value.lastIndexOf('(');
     let matchingIndex = this.findMatchingParenthesis(value, highlightIndex);
     
@@ -32,9 +33,11 @@ export class DisplayFormatter {
         if (part === ')' && index === matchingIndex) {
           return '<span class="highlight-paren">)</span>';
         }
-        if (["+", "-", "×", "÷", "(", ")"].includes(part)) return part;
+        if (["+", "-", "×", "÷", "(", ")", "<<", ">>"].includes(part)) return part;
         
-        // Apply thousands separator based on the base
+        // Remove any decimal points for programmer mode
+        part = part.split('.')[0];
+        
         switch (base) {
           case "BIN":
             return this.formatBinaryNumber(part, useThousandsSeparator);
@@ -63,16 +66,15 @@ export class DisplayFormatter {
   }
   
   static formatBinaryNumber(value, useThousandsSeparator) {
-    let binString = /^[01]+$/.test(value) 
-      ? value 
-      : parseInt(value).toString(2);
-  
+    if (!value || value === 'NaN') return '0';
+    
+    let binString = value;
+
     const padding = 4 - (binString.length % 4);
     if (padding < 4) {
       binString = "0".repeat(padding) + binString;
     }
   
-    // Only group if thousands separator is enabled
     if (useThousandsSeparator) {
       const chunks = binString.match(/.{1,4}/g) || ["0"];
       return chunks.join(" ");

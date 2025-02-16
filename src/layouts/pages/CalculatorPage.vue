@@ -57,6 +57,7 @@ import { useTitle, useStorage } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { useCalculator } from "@/composables/useCalculator";
 import { useKeyboard } from "@/composables/useKeyboard";
+import { useInputValidation } from '@/composables/useValidation'
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
@@ -74,6 +75,8 @@ const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
 // Dynamic page title
 useTitle(computed(() => `${props.mode} Calculator | Mathlly`));
+
+const { isValidForBase } = useInputValidation()
 
 // Core calculator setup
 const {
@@ -130,70 +133,37 @@ const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
 // Calculator operation handlers
 
-// Add this validation helper function at the top level of your Calculator Page
-const isValidForBase = (value, base) => {
-  const validators = {
-    BIN: /^[0-1]$/,
-    OCT: /^[0-7]$/,
-    DEC: /^[0-9]$/,
-    HEX: /^[0-9a-fA-F]$/,
-  };
-
-  // Always allow these special buttons
-  const allowedKeys = ['AC', 'backspace', '=', '+', '-', '×', '÷', '(', ')'];
-  if (allowedKeys.includes(value)) return true; 
-
-  return validators[base]?.test(value) ?? false;
-};
-
 const handleButtonClick = (btn) => {
-  if (input.value === "Error") {
-    handleClear();
-    return;
-  }
+  try {
+    const result = calculator.value.handleButtonClick(btn);
 
-  const result = calculator.value.handleButtonClick(btn);
-
-    // Add validation for Programmer mode
-    if (props.mode === "Programmer" && !isValidForBase(btn, activeBase.value)) {
-    return; // Silently ignore invalid inputs for the current base
-  }
-
-  if (btn === "=" && props.mode === "Programmer") {
-    if (result.result && result.displayValues) {
-      updateDisplayValues(result.displayValues);
-      updateState({
-        input: result.result,
-        error: result.error || "",
-      });
-      setAnimation(result.result);
-    }
-  } else {
+    // Allow continued input even with error message
     updateState({
       input: result.input,
-      error: result.error || "",
+      error: result.error || ""
     });
 
-    if (props.mode === "Programmer") {
-      nextTick(() => {
-        updateDisplayState();
-      });
-    }
-
-    if (btn === "=" && props.mode !== "Programmer") {
-      if (result.error) {
+    // Special cases handling
+    if (btn === "=" && props.mode === "Programmer") {
+      if (result.displayValues) {
+        updateDisplayValues(result.displayValues);
         setAnimation(result.result);
-      } else {
-        setAnimation(result.result);
-        addToHistory(result.expression, result.result);
       }
+    } else if (props.mode === "Programmer") {
+      nextTick(() => updateDisplayState());
     }
-  }
 
-  if (result.error) {
-    setTimeout(() => {
-      updateState({ error: "" });
-    }, 2000);
+    // History handling
+    if (btn === "=" && props.mode !== "Programmer" && result.result) {
+      addToHistory(result.expression, result.result);
+      setAnimation(result.result);
+    }
+  } catch (err) {
+    console.error('Calculator operation error:', err);
+    updateState({
+      input: "Error",
+      error: "Operation failed"
+    });
   }
 };
 
@@ -325,5 +295,5 @@ const closeWelcomeModal = () => {
 </script>
 
 <style scoped>
-@import url("@/assets/css/animation.css");
+@import url("../../assets/css/animation.css");
 </style>
