@@ -158,7 +158,6 @@ const precisionOptions = [
 ];
 
 const modeOptions = [
-  { value: 'Basic', label: 'Basic' },
   { value: 'Standard', label: 'Standard' },
   { value: 'Programmer', label: 'Programmer' }
 ];

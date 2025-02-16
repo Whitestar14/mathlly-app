@@ -95,7 +95,7 @@
     const length = value.toString().length;
     const mode = props.mode;
   
-    if (mode === 'Standard' || mode === 'Basic') {
+    if (mode === 'Standard') {
       if (length > 70) return 'text-xl';
       if (length > 50) return 'text-2xl';
       return 'text-3xl';
