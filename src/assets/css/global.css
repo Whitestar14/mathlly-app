@@ -36,7 +36,6 @@
 body {
   font-family: "Geist", "Inter", "DM Sans", sans-serif;
   font-weight: 400; 
-  letter-spacing: 1.01;
   transition: all 0.3s ease;
 }
 
@@ -47,7 +46,8 @@ kbd,
 }
 
 .toast {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm w-full;
+  @apply bg-white dark:bg-gray-800 border border-gray-200 
+  dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm w-full;
 }
 
 .toast + .toast {

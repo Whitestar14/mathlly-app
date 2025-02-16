@@ -1,12 +1,12 @@
-import { EngineCalculator } from "./EngineCalculator";
-import { ProgrammerOperations } from "@/services/calculator/programmer/ProgrammerOperations";
-import { ProgrammerCalculations } from "@/services/calculator/programmer/ProgramnerCalculations";
+import { EngineCalculator } from "@/utils/misc/EngineCalculator";
+import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
+import { ProgrammerCalculations } from "@/utils/calculations/ProgramnerCalculations";
 import {
   BinCalculator,
   DecCalculator,
   HexCalculator,
   OctCalculator,
-} from "./BaseCalculator";
+} from "../../utils/misc/BaseCalculator";
 
 export class ProgrammerCalculator extends EngineCalculator {
   constructor(settings) {
@@ -57,12 +57,7 @@ export class ProgrammerCalculator extends EngineCalculator {
 
     // Check input length but allow continued input
     if (this.isInputTooLong(btn)) {
-      this.error = "Maximum input length reached";
-      return {
-        input: this.states[this.activeBase].input,
-        error: this.error,
-        displayValues: this.states
-      };
+      return this.handleInputLengthError();
     }
 
     try {
@@ -224,11 +219,11 @@ export class ProgrammerCalculator extends EngineCalculator {
 
   handleInputLengthError() {
     this.error = "Maximum input length reached";
-    return {
-      input: this.states[this.activeBase].input,
-      error: this.error,
-      displayValues: this.states
-    };
+      return {
+        input: this.states[this.activeBase].input,
+        error: this.error,
+        displayValues: this.states
+      };
   }
 
   isInputTooLong(btn) {
