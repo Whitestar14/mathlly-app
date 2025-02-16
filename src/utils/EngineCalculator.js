@@ -1,179 +1,90 @@
-import { evaluate, bignumber } from 'mathjs';
+import { Memory } from "./Memory";
 import { useSettingsStore } from '@/stores/settings';
-// Base class for calculator functionality
+
 export class EngineCalculator {
-  constructor() {
+  constructor(settings) {
+    // Fallback to settings store if not provided
+    this.settings = settings || useSettingsStore(); 
+    this.memory = new Memory();
     this.input = "0";
     this.error = "";
     this.currentExpression = "";
-    this.memoryValue = 0;
     this.activeBase = "DEC";
-    this.settings = useSettingsStore();
-    this.parenthesesStack = [];
     this.MAX_INPUT_LENGTH = 50;
   }
 
-  // Core evaluation method using Math.js
-  evaluateExpression(expr) {
-    try {
-      if (!expr || expr.trim() === "") return bignumber(0);
-
-      // Sanitize expression
-      let sanitizedExpr = expr
-        .replace(/×/g, "*")
-        .replace(/÷/g, "/")
-        .replace(/[+\-*/]\s*$/, "")  // Remove trailing operators
-        .replace(/\s+/g, " ")
-        .trim();
-
-      // Validate balanced parentheses
-      if (!this.hasBalancedParentheses(sanitizedExpr)) {
-        throw new Error("Unbalanced parentheses");
-      }
-
-      const result = evaluate(sanitizedExpr);
-      return bignumber(result);
-    } catch (err) {
-      console.error("Evaluation error:", err);
-      throw new Error("Invalid expression");
-    }
+  // Must be implemented by child classes. Expect an expression string.
+  evaluateExpression() {
+    throw new Error("evaluateExpression must be implemented in child class.");
   }
 
-  // Parentheses handling
-  hasBalancedParentheses(expr) {
-    const stack = [];
-    for (let char of expr) {
-      if (char === '(') {
-        stack.push(char);
-      } else if (char === ')') {
-        if (stack.length === 0) return false;
-        stack.pop();
-      }
-    }
-    return stack.length === 0;
+  // Must be implemented by child classes.
+  formatResult() {
+    throw new Error("formatResult must be implemented in child class.");
   }
 
+  // Must be implemented by child classes.
+  handleEquals() {
+    throw new Error("handleEquals must be implemented in child class.");
+  }
+
+  // Must be implemented by child classes.
+  handleOperator() {
+    throw new Error("handleOperator must be implemented in child class.");
+  }
+
+  // Must be implemented by child classes.
+  handleNumber() {
+    throw new Error("handleNumber must be implemented in child class.");
+  }
+
+  // Memory functions (shared by all calculators)
   handleMemoryClear() {
-    this.memoryValue = 0;
+    this.memory.clear();
     return { input: this.input, error: this.error };
   }
-  
+
   handleMemoryRecall() {
-    if (this.memoryValue !== null) {
-      this.input = this.formatResult(this.memoryValue);
+    const value = this.memory.recall();
+    if (value !== null) {
+      this.input = this.formatResult(value);
     }
     return { input: this.input, error: this.error };
   }
-  
+
   handleMemoryAdd() {
     try {
       const currentValue = this.evaluateExpression(this.input);
-      this.memoryValue = evaluate(`${this.memoryValue} + ${currentValue}`);
-      return { input: this.input, error: this.error };
-    } catch (err) {
-      this.error = "Memory operation failed";
-      return { input: this.input, error: this.error };
-    }
-  }
-  
-  handleMemorySubtract() {
-    try {
-      const currentValue = this.evaluateExpression(this.input);
-      this.memoryValue = evaluate(`${this.memoryValue} - ${currentValue}`);
-      return { input: this.input, error: this.error };
-    } catch (err) {
-      this.error = "Memory operation failed";
-      return { input: this.input, error: this.error };
-    }
-  }
-  
-  handleMemoryStore() {
-    try {
-      this.memoryValue = this.evaluateExpression(this.input);
-      return { input: this.input, error: this.error };
-    } catch (err) {
-      this.error = "Cannot store in memory";
-      return { input: this.input, error: this.error };
-    }
-  }  
-
-  // Utility methods
-  isLastCharOperator() {
-    return /[+\-×÷]\s*$/.test(this.input);
-  }
-
-  isLastCharNumber() {
-    return /[0-9A-Fa-f]$/.test(this.input);
-  }
-
-  handleParenthesis(type) {
-    if (type === '(') {
-      this.parenthesesStack.push(this.input.length);
-      this.input = this.input === "0" ? "(" : `${this.input}(`;
-    } else if (type === ')' && this.parenthesesStack.length > 0) {
-      this.parenthesesStack.pop();
-      this.input += ")";
-    }
-  }
-
-  handleUnaryOperation(operation) {
-    try {
-      const parts = this.input.split(/([+\-×÷])/);
-      const lastValue = parts[parts.length - 1].trim();
-      const value = this.evaluateExpression(lastValue);
-      const result = evaluate(operation(value));
-  
-      parts[parts.length - 1] = ` ${this.formatResult(result)}`;
-      this.input = parts.join("");
-      return { input: this.input, error: this.error };
-    } catch (err) {
-      this.input = "Error";
-      this.error = err.message;
-      return { input: this.input, error: this.error };
-    }
-  }
-  
-  handlePercentage() {
-    if (this.input !== "Error" && !this.isLastCharOperator()) {
-      try {
-        const result = parseFloat(this.input) / 100;
-        if (!isFinite(result)) {
-          throw new Error("Invalid percentage calculation");
-        }
-        this.input = this.formatResult(result);
-      } catch (err) {
-        this.error = err.message;
+      if (!this.memory.add(currentValue)) {
+        this.error = "Memory operation failed";
       }
+    } catch (err) {
+      this.error = "Memory operation failed";
     }
     return { input: this.input, error: this.error };
   }
-  
-  handleReciprocal() {
-    return this.handleUnaryOperation((value) => `1/${value}`);
-  }
-  
-  handleSquare() {
-    return this.handleUnaryOperation((value) => `${value}^2`);
-  }
-  
-  handleSquareRoot() {
-    return this.handleUnaryOperation((value) => `sqrt(${value})`);
+
+  handleMemorySubtract() {
+    try {
+      const currentValue = this.evaluateExpression(this.input);
+      if (!this.memory.subtract(currentValue)) {
+        this.error = "Memory operation failed";
+      }
+    } catch (err) {
+      this.error = "Memory operation failed";
+    }
+    return { input: this.input, error: this.error };
   }
 
-  // Abstract methods to be implemented by child classes
-  formatResult() {
-    throw new Error("formatResult must be implemented by child class");
-  }
-
-  handleEquals() {
-    throw new Error("handleEquals must be implemented by child class");
-  }
-
-  handleOperator() {
-    throw new Error("handleOperator must be implemented by child class");
-  }
-
-  handleNumber() {
-    throw new Error("handleNumber must be implemented by child class");
+  handleMemoryStore() {
+    try {
+      const value = this.evaluateExpression(this.input);
+      if (!this.memory.store(value)) {
+        this.error = "Cannot store in memory";
+      }
+    } catch (err) {
+      this.error = "Cannot store in memory";
+    }
+    return { input: this.input, error: this.error };
   }
 }
