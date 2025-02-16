@@ -29,12 +29,11 @@
 
 <script setup>
 import { computed, defineAsyncComponent } from 'vue';
-
 const props = defineProps({
   mode: {
     type: String,
     required: true,
-    validator: (value) => ['Basic', 'Standard', 'Programmer'].includes(value)
+    validator: (value) => ['Standard', 'Programmer'].includes(value)
   },
   displayValues: {
     type: Object,
@@ -57,20 +56,17 @@ const props = defineProps({
 const emit = defineEmits(['button-click', 'clear', 'base-change']);
 
 // Lazy load components with loading delay to prevent flash
-const BasicMode = defineAsyncComponent(() => import('@/layouts/modes/BasicMode.vue'));
 const StandardMode = defineAsyncComponent(() => import('@/layouts/modes/StandardMode.vue'));
 const ProgrammerMode = defineAsyncComponent(() => import('@/layouts/modes/ProgrammerMode.vue'));
 
 const currentModeComponent = computed(() => {
   switch (props.mode) {
-    case 'Basic':
-      return BasicMode;
     case 'Standard':
       return StandardMode;
     case 'Programmer':
       return ProgrammerMode;
     default:
-      return BasicMode;
+      return StandardMode;
   }
 });
 

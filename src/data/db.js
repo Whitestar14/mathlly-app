@@ -17,7 +17,7 @@ db.on("ready", async () => {
       useFractions: false,
       useThousandsSeparator: true,
       theme: 'system',
-      mode: 'Basic'
+      mode: 'Standard'
     });
   }
 });
