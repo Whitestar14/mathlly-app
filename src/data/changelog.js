@@ -1,5 +1,21 @@
 export const updates = [ 
   {
+    version: 'v0.8.0-beta',
+    date: 'February 16, 2025',
+    features: [
+    '@deprecate: Subsitute the default calculator mode option from Basic to Standard Mode',
+    'Refractored and reorganized codebase for better separation of concerns',
+    'Improved speed index on performance and user accessibility',
+    'Implemented better and more predictable error handling methods across system modules',
+    'Reduced boilerplate and redundant code to avoid performance hangs and bottlenecks',
+    'Fixed the formatting bugs that prevented seamless data transactions in Programmer Mode',
+    'Fixed the Programmer mode BIN not being able to use the shift operators',
+    'Updated the shortcut modal with list of all available keybindings',
+    'Fixed the Programmer mode HEX function emitting the corresponding values, C had been clearing the input state in former implementation',
+    'Minor UI improvements and considerations made to the look of the app',
+    ]
+  },
+  {
     version: 'v0.7.6',
     date: 'February 6, 2025',
     features: [
