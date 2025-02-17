@@ -302,11 +302,6 @@ const formatDisplayValue = (value, base) => {
     .replace(/^(0x|0o|0b)/, "")
     .toUpperCase();
 
-  // For binary, group in sets of 4 before truncating
-  if (base === "BIN") {
-    result = result.replace(/\B(?=(\d{4})+(?!\d))/g, " ");
-  }
-
   // Truncate if too long and add ellipsis
   if (result.length > MAX_PREVIEW_LENGTHS[base]) {
     return result.slice(0, MAX_PREVIEW_LENGTHS[base]) + "…";

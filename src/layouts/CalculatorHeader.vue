@@ -47,7 +47,7 @@
                 >
                   <SelectViewport class="p-1 rounded-lg">
                     <SelectItem
-                      v-for="option in ['Basic', 'Standard', 'Programmer']"
+                      v-for="option in modes"
                       :key="option"
                       :value="option"
                       class="px-3 py-2 text-sm text-gray-700 rounded-sm dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer outline-none"
@@ -68,10 +68,10 @@
             aria-label="Github Page Link"
             class="mr-4 inline-flex items-center justify-center"
           >
-          <button
-            v-tippy="{ content: 'Star on GitHub', placement: 'bottom' }"
-            class="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 duration-300 transition-opacity"
-          >
+            <button
+              v-tippy="{ content: 'Star on GitHub', placement: 'bottom' }"
+              class="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 duration-300 transition-opacity"
+            >
               <GithubIcon class="h-6 w-6" />
             </button>
           </a>
@@ -134,6 +134,7 @@ import { computed, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard"
+import { useDisplayStore } from "@/stores/display";
 import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
 defineProps({
   isSidebarOpen: {
@@ -149,7 +150,7 @@ defineEmits(["update:mode", "toggle-sidebar", "update:open"]);
 const settings = useSettingsStore();
 const route = useRoute();
 const currentRoute = ref(route.path);
-
+const { modes } = useDisplayStore();
 const isShortcutModalOpen = ref(false);
 
 const isDark = useDark();

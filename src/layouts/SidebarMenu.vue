@@ -46,7 +46,7 @@
                 :active="currentPill === item.path"
                 as-child
               >
-              <button
+                <button
                   :class="[
                     'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors duration-200',
                     currentPill === item.path

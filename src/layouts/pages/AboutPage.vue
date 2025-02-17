@@ -29,9 +29,9 @@
         class="mb-24"
         style="font-family: 'Geist mono'"
       >
-        <h2 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-tight mb-4">
+        <h2 class="text-4xl sm:text-6xl lg:text-8xl font-semibold tracking-tight mb-4">
           The toolset by developers,
-          <span class="block text-4xl sm:text-6xl md:text-7xl lg:text-8xl mb-4 text-gray-600 dark:text-gray-400">
+          <span class="block mb-4 text-gray-600 dark:text-gray-400">
             for developers
           </span>
         </h2>

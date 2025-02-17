@@ -1,22 +1,33 @@
 // services/DisplayFormatter.js
+import { useSettingsStore } from "@/stores/settings";
+
 export class DisplayFormatter {
   static format(value, options = {}) {
+    const settings = useSettingsStore();
     const {
       base = "DEC",
-      useThousandsSeparator = true,
       mode = "Standard",
+      useThousandsSeparator = settings.useThousandsSeparator,
+      formatBinary = settings.formatBinary,
+      formatHexadecimal = settings.formatHexadecimal,
+      formatOctal = settings.formatOctal,
     } = options;
 
     if (!value) return "0";
   
     if (mode === "Programmer") {
-      return this.formatProgrammer(value, base, useThousandsSeparator);
+      return this.formatProgrammer(value, base, {
+        useThousandsSeparator,
+        formatBinary,
+        formatHexadecimal,
+        formatOctal
+      });
     }
   
     return this.formatStandard(value, useThousandsSeparator);
   }
 
-  static formatProgrammer(value, base, useThousandsSeparator) {
+  static formatProgrammer(value, base, options) {
     // Split preserving shift operators
     const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()]\s*)/g);
     let highlightIndex = value.lastIndexOf('(');
@@ -40,13 +51,13 @@ export class DisplayFormatter {
         
         switch (base) {
           case "BIN":
-            return this.formatBinaryNumber(part, useThousandsSeparator);
+            return this.formatBinaryNumber(part, options.formatBinary);
           case "HEX":
-            return this.formatHexNumber(part, useThousandsSeparator);
+            return this.formatHexNumber(part, options.formatHexadecimal);
           case "OCT":
-            return this.formatOctNumber(part, useThousandsSeparator);
+            return this.formatOctNumber(part, options.formatOctal);
           default:
-            return this.formatDecimalNumber(part, useThousandsSeparator);
+            return this.formatDecimalNumber(part, options.useThousandsSeparator);
         }
       })
       .join(" ")
@@ -65,7 +76,7 @@ export class DisplayFormatter {
     return -1;
   }
   
-  static formatBinaryNumber(value, useThousandsSeparator) {
+  static formatBinaryNumber(value, useFormatting) {
     if (!value || value === 'NaN') return '0';
     
     let binString = value;
@@ -75,38 +86,35 @@ export class DisplayFormatter {
       binString = "0".repeat(padding) + binString;
     }
   
-    if (useThousandsSeparator) {
+    if (useFormatting) {
       const chunks = binString.match(/.{1,4}/g) || ["0"];
       return chunks.join(" ");
     }
     return binString;
   }
   
-  static formatHexNumber(value, useThousandsSeparator) {
+  static formatHexNumber(value, useFormatting) {
     const hexValue = value.toUpperCase();
-    if (!useThousandsSeparator) return hexValue;
+    if (!useFormatting) return hexValue;
     // Group hex digits in pairs
     return hexValue.replace(/\B(?=(\w{2})+(?!\w))/g, " ");
   }
   
-  static formatOctNumber(value, useThousandsSeparator) {
-    if (!useThousandsSeparator) return value;
+  static formatOctNumber(value, useFormatting) {
+    if (!useFormatting) return value;
     // Group octal digits in threes
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   }
 
-  static formatDecimalNumber(value, useThousandsSeparator) {
-    if (!useThousandsSeparator) return value;
+  static formatDecimalNumber(value, useFormatting) {
+    if (!useFormatting) return value;
     
     const parts = value.toString().split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");
   }
 
-  static formatStandard(value, useThousandsSeparator) {
-    if (!useThousandsSeparator) return value;
-    const parts = value.toString().split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
+  static formatStandard(value, useFormatting) {
+    return this.formatDecimalNumber(value, useFormatting);
   }
 }

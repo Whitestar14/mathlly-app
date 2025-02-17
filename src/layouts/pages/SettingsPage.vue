@@ -1,11 +1,11 @@
 <template>
   <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <header class="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+    <header
+      class="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div class="container mx-auto flex items-center h-16 px-4">
         <button
           class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          @click="goBack"
-        >
+          @click="goBack">
           <ArrowLeftIcon class="h-6 w-6" />
         </button>
         <h1 class="text-xl font-semibold">
@@ -25,28 +25,35 @@
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
             <div class="space-y-4">
               <div>
-                <label
-                  for="precision"
-                  class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-                >Precision</label>
-                <Select
-                  v-model="localSettings.precision"
-                  :options="precisionOptions"
-                />
+                <label for="precision"
+                  class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Precision</label>
+                <Select v-model="localSettings.precision" :options="precisionOptions" />
               </div>
               <div class="flex items-center justify-between py-2">
-                <label
-                  for="useFractions"
-                  class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >Use Fractions</label>
+                <label for="useFractions" class="text-sm font-medium text-gray-700 dark:text-gray-300">Use
+                  Fractions</label>
                 <Switch v-model="localSettings.useFractions" />
               </div>
-              <div class="flex items-center justify-between py-2">
-                <label
-                  for="useThousandsSeparator"
-                  class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >Use Thousands Separator</label>
-                <Switch v-model="localSettings.useThousandsSeparator" />
+
+              <div class="space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Number Formatting</h3>
+                <div class="flex items-center justify-between py-2">
+                  <label for="useThousandsSeparator" class="text-sm text-gray-600 dark:text-gray-400">Use Thousands
+                    Separator</label>
+                  <Switch v-model="localSettings.useThousandsSeparator" />
+                </div>
+                <div class="flex items-center justify-between py-2">
+                  <label class="text-sm text-gray-600 dark:text-gray-400">Binary Numbers</label>
+                  <Switch v-model="localSettings.formatBinary" />
+                </div>
+                <div class="flex items-center justify-between py-2">
+                  <label class="text-sm text-gray-600 dark:text-gray-400">Hexadecimal Numbers</label>
+                  <Switch v-model="localSettings.formatHexadecimal" />
+                </div>
+                <div class="flex items-center justify-between py-2">
+                  <label class="text-sm text-gray-600 dark:text-gray-400">Octal Numbers</label>
+                  <Switch v-model="localSettings.formatOctal" />
+                </div>
               </div>
             </div>
           </div>
@@ -60,14 +67,9 @@
           </div>
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div>
-              <label
-                for="mode"
-                class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-              >Default Mode</label>
-              <Select
-                v-model="localSettings.mode"
-                :options="modeOptions"
-              />
+              <label for="mode" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Default
+                Mode</label>
+              <Select v-model="localSettings.mode" :options="modeOptions" />
             </div>
           </div>
         </section>
@@ -80,20 +82,13 @@
           </div>
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
             <div>
-              <label
-                for="theme"
-                class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-              >Theme Preference</label>
-              <Select
-                v-model="localSettings.theme"
-                :options="themeOptions"
-              />
+              <label for="theme" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Theme
+                Preference</label>
+              <Select v-model="localSettings.theme" :options="themeOptions" />
             </div>
             <div class="flex items-center justify-between py-2">
-              <label
-                for="borderless"
-                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Borderless Mode</label>
+              <label for="borderless" class="text-sm font-medium text-gray-700 dark:text-gray-300">Borderless
+                Mode</label>
               <Switch v-model="localSettings.borderless" />
             </div>
           </div>
@@ -103,14 +98,12 @@
         <div class="flex justify-end space-x-4 pt-4">
           <button
             class="inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-            @click="goBack"
-          >
+            @click="goBack">
             Cancel
           </button>
           <button
             class="inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700"
-            @click="saveSettings"
-          >
+            @click="saveSettings">
             Save Changes
           </button>
         </div>
@@ -137,6 +130,9 @@ const localSettings = ref({
   precision: settingsStore.precision,
   useFractions: settingsStore.useFractions,
   useThousandsSeparator: settingsStore.useThousandsSeparator,
+  formatBinary: settingsStore.formatBinary,
+  formatHexadecimal: settingsStore.formatHexadecimal,
+  formatOctal: settingsStore.formatOctal,
   theme: settingsStore.theme,
   mode: settingsStore.mode,
   borderless: settingsStore.borderless
@@ -175,6 +171,10 @@ onMounted(async () => {
     precision: settingsStore.precision,
     useFractions: settingsStore.useFractions,
     useThousandsSeparator: settingsStore.useThousandsSeparator,
+    formatBinary: settingsStore.formatBinary,
+    formatHexadecimal: settingsStore.formatHexadecimal,
+    formatOctal: settingsStore.formatOctal,
+    formatDecimal: settingsStore.formatDecimal,
     theme: settingsStore.theme,
     mode: settingsStore.mode,
     borderless: settingsStore.borderless

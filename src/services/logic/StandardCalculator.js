@@ -1,7 +1,6 @@
 import { EngineCalculator } from "@/utils/misc/EngineCalculator";
 import { StandardOperations } from "@/utils/operations/StandardOperations";
 import { StandardCalculations } from "@/utils/calculations/StandardCalculations";
-
 export class StandardCalculator extends EngineCalculator {
   constructor(settings) {
     super(settings);
@@ -13,44 +12,44 @@ export class StandardCalculator extends EngineCalculator {
   }
 
   handleButtonClick(btn) {
-    if (this.input === "Error") {
-      this.handleClear();
-    }
+    try {
+      this.error = "";
 
-    if (typeof this.input !== "number" ||
-      Math.abs(this.input) >= this.MAX_VALUE ||
-      !Number.isFinite(this.input)) {
-        this.error = "Overflow";
+      if (this.input === "Error") {
+        this.handleClear();
       }
 
-    if (this.isInputTooLong(btn)) {
-      this.error = "Maximum input length reached";
-      return { input: this.input, error: this.error };
-    }
+      if (this.isInputTooLong(btn)) {
+        this.error = "Maximum input length reached";
+        return { input: this.input, error: this.error };
+      }
 
-    return this.processButton(btn);
+      const result = this.processButton(btn);
+      return result;
+    } catch (err) {
+      if (err.message === "Overflow")
+        return { input: "Error", error: "Overflow: Exceeding max limit bound" };
+    }
   }
 
   processButton(btn) {
-    this.error = "";
-    
     const operationMap = {
-      "MC": () => this.handleMemoryClear(),
-      "MR": () => this.handleMemoryRecall(),
+      MC: () => this.handleMemoryClear(),
+      MR: () => this.handleMemoryRecall(),
       "M+": () => this.handleMemoryAdd(),
       "M-": () => this.handleMemorySubtract(),
-      "MS": () => this.handleMemoryStore(),
+      MS: () => this.handleMemoryStore(),
       "=": () => this.handleEquals(),
-      "AC": () => this.handleClear(),
-      "C": () => this.handleClear(),
-      "CE": () => this.handleClearEntry(),
-      "backspace": () => this.operations.handleBackspace(),
+      AC: () => this.handleClear(),
+      C: () => this.handleClear(),
+      CE: () => this.handleClearEntry(),
+      backspace: () => this.operations.handleBackspace(),
       "1/x": () => this.operations.handleReciprocal(),
       "x²": () => this.operations.handleSquare(),
       "√": () => this.operations.handleSquareRoot(),
       "%": () => this.operations.handlePercentage(),
       "±": () => this.operations.handleToggleSign(),
-      "EXP": () => this.operations.handleExponent()
+      EXP: () => this.operations.handleExponent(),
     };
 
     if (operationMap[btn]) {
@@ -93,7 +92,7 @@ export class StandardCalculator extends EngineCalculator {
       return {
         expression: this.currentExpression,
         input: "Error",
-        error: this.error
+        error: this.error,
       };
     }
   }
@@ -120,7 +119,21 @@ export class StandardCalculator extends EngineCalculator {
   }
 
   isInputTooLong(btn) {
-    const excludedButtons = ["=", "AC", "backspace", "MC", "MR", "M+", "M-", "MS", "C", "CE"];
-    return this.input.length >= this.MAX_INPUT_LENGTH && !excludedButtons.includes(btn);
+    const excludedButtons = [
+      "=",
+      "AC",
+      "backspace",
+      "MC",
+      "MR",
+      "M+",
+      "M-",
+      "MS",
+      "C",
+      "CE",
+    ];
+    return (
+      this.input.length >= this.MAX_INPUT_LENGTH &&
+      !excludedButtons.includes(btn)
+    );
   }
 }

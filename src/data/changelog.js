@@ -1,5 +1,14 @@
 export const updates = [ 
   {
+    version: '0.9.0',
+    date: 'February 17, 2025',
+    features: [
+      'Polished standard calculator logic mechanism for handling Overflow errors',
+      'Centralized state management of available modes using Pinia',
+      'Added more formatting option toggles for bases in Programmer Mode'
+    ]
+  },
+  {
     version: 'v0.8.0-beta',
     date: 'February 16, 2025',
     features: [

@@ -21,7 +21,7 @@ export class StandardCalculations {
         .replace(/÷/g, "/")
         .replace(/[+\-*/]\s*$/, "")
         .replace(/\s+/g, " ")
-        .replace(/([0-9])([e])([-+]?)([0-9]+)/g, '$1 * 10^($3$4)')
+        .replace(/([0-9])([e])([-+]?)([0-9]+)/g, "$1 * 10^($3$4)")
         .trim();
 
       if (sanitizedExpr.includes("/0")) {
@@ -34,7 +34,6 @@ export class StandardCalculations {
         throw new Error("Invalid result");
       }
 
-
       return result;
     } catch (err) {
       throw new Error("Invalid expression: " + err.message);
@@ -43,36 +42,24 @@ export class StandardCalculations {
 
   formatResult(result) {
     if (result === undefined) return "";
-  
+
     try {
       if (this.settings.useFractions) {
-        let frac;
-        if (typeof result === 'number') {
-          frac = fraction(result);
-        } else if (typeof result === 'string') {
-          frac = fraction(result, { tolerance: 1e-12 });
-        } else if (result && result.isBigNumber) {
-          frac = fraction(result.toString(), { tolerance: 1e-12 });
-        } else {
-          throw new Error("Unexpected result type for fraction conversion");
-        }
-  
+        const frac = fraction(result);
         if (frac.d <= 10000) {
           return frac.d === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
         }
       }
-  
-      // Increase precision for larger numbers
-      const precision = Math.abs(result) > 1e10 ? 
-        Math.min(this.settings.precision + 4, 12) : 
-        this.settings.precision;
-  
-      // Format the number with dynamic precision
-      let formattedResult = format(result, {
+      const precision = Math.abs(result) > 1e10 ?
+        Math.min(this.settings.precision + 4, 12) :
+         this.settings.precision;
+
+      const formattedResult = format(result, {
         precision: precision,
-        notation: Math.abs(result) >= 1e21 || (Math.abs(result) < 1e-7 && result !== 0) 
-          ? 'exponential' 
-          : 'fixed'
+        notation:
+          Math.abs(result) >= 1e21 || (Math.abs(result) < 1e-7 && result !== 0)
+            ? "exponential"
+            : "fixed",
       });
   
       // Use DisplayFormatter for thousands separator

@@ -54,7 +54,6 @@
     animatedResult: { type: String, default: "" },
     activeBase: { type: String, default: "DEC" },
     mode: { type: String, default: "Standard" },
-    settings: { type: Object, required: true }, // Add settings as a prop
   });
   
   const emit = defineEmits(['scroll-update']);
@@ -69,7 +68,6 @@
     if (!props.input) return "0";
     return DisplayFormatter.format(props.input, {
       base: props.activeBase,
-      useThousandsSeparator: props.settings.useThousandsSeparator,
       mode: props.mode
     });
   });
@@ -78,7 +76,6 @@
     if (!props.preview) return "";
     return DisplayFormatter.format(props.preview, {
       base: props.activeBase,
-      useThousandsSeparator: props.settings.useThousandsSeparator,
       mode: props.mode
     });
   });

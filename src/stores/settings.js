@@ -7,6 +7,9 @@ const DEFAULT_SETTINGS = {
   precision: 4,
   useFractions: false,
   useThousandsSeparator: true,
+  formatBinary: true,
+  formatHexadecimal: true,
+  formatOctal: true,
   theme: 'system',
   mode: 'Standard',
   borderless: false
