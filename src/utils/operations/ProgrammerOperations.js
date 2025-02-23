@@ -81,19 +81,26 @@ export class ProgrammerOperations {
         return { input: state.input, error: null };
       }
 
+      // Don't add shift operator if last part is incomplete
+      const parts = currentInput.split(/\s+/);
+      const lastPart = parts[parts.length - 1];
+      if (!lastPart || /[+\-×÷]$/.test(lastPart)) {
+        return { input: state.input, error: null };
+      }
+
       let newInput;
-      // Handle different cases
       if (this.isLastCharClosingParenthesis()) {
-        // Allow shift after closing parenthesis
         newInput = `${currentInput} ${op} `;
       } else if (this.isLastCharOperator()) {
-        // Replace existing operator
-        newInput = currentInput.replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
+        // Only replace if it's another shift operator
+        if (/>>\s*$|<<\s*$/.test(currentInput)) {
+          newInput = currentInput.replace(/\s*(?:<<|>>)\s*$/, ` ${op} `);
+        } else {
+          return { input: state.input, error: null };
+        }
       } else if (this.isLastCharNumber()) {
-        // Add operator after number
         newInput = `${currentInput} ${op} `;
       } else {
-        // Invalid case
         return { input: state.input, error: "Invalid operation" };
       }
 
@@ -162,7 +169,11 @@ export class ProgrammerOperations {
     const contentAfterOpen = expr.slice(lastOpenIndex + 1).trim();
     if (!contentAfterOpen) return false;
 
-    // Validate last character
+    // Validate last character - now including shift operators
+    const lastContent = contentAfterOpen.trim();
+    if (lastContent.endsWith('<<') || lastContent.endsWith('>>')) return false;
+
+    // Check if content is a complete expression
     const lastChar = expr.trim().slice(-1);
     return /[0-9A-Fa-f)]/.test(lastChar);
   }

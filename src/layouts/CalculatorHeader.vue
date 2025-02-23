@@ -74,13 +74,13 @@
 </template>
 
 <script setup>
-import { useDark } from "@vueuse/core";
-import { Moon, PanelRightIcon, Command, Sun, GithubIcon } from "lucide-vue-next";
 import { computed, watch, ref } from "vue";
+import { Moon, PanelRightIcon, Command, Sun, GithubIcon } from "lucide-vue-next";
 import { useRoute } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
 import { useDisplayStore } from "@/stores/display";
+import { useTheme } from "@/composables/useTheme";
 import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
 import Select from "@/components/SelectBar.vue";
 
@@ -102,7 +102,8 @@ const currentRoute = ref(route.path);
 const { modes } = useDisplayStore();
 const isShortcutModalOpen = ref(false);
 
-const isDark = useDark();
+const { isDark, toggleTheme } = useTheme();
+
 const selectedMode = computed({
   get: () => settings.currentMode || settings.defaultMode,
   set: (newMode) => {
@@ -110,19 +111,6 @@ const selectedMode = computed({
       settings.setCurrentMode(newMode);
       emit('update:mode', newMode);
     }
-  }
-});
-
-// Sync theme changes between settings and VueUse dark mode
-const selectedTheme = computed(() => settings.theme);
-
-watch(selectedTheme, (newTheme) => {
-  if (newTheme === "dark") {
-    isDark.value = true;
-  } else if (newTheme === "light") {
-    isDark.value = false;
-  } else if (newTheme === "system") {
-    isDark.value = window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
 });
 
@@ -134,14 +122,6 @@ watch(
   { immediate: true }
 );
 
-const toggleTheme = async () => {
-  const newTheme = isDark.value ? "light" : "dark";
-  await settings.saveSettings({
-    ...settings.$state,
-    theme: newTheme,
-  });
-};
-
 const openShortcutModal = () => {
   isShortcutModalOpen.value = true;
 };
@@ -149,7 +129,7 @@ const openShortcutModal = () => {
 useKeyboard("global", {
   openShortcutModal: () => openShortcutModal(),
   toggleTheme: () => toggleTheme(),
-})
+});
 </script>
 
 <style scoped>

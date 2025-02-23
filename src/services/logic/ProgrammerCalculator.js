@@ -162,8 +162,16 @@ export class ProgrammerCalculator extends EngineCalculator {
 
   handleBaseChange(newBase) {
     try {
+      // Clean up incomplete expressions before evaluating
+      const currentInput = this.states[this.activeBase].input.trim();
+      const cleanedInput = currentInput.replace(/\s*(?:<<|>>|\+|-|×|÷)\s*$/, '');
+      
+      if (cleanedInput !== currentInput) {
+        this.states[this.activeBase].input = cleanedInput;
+      }
+
       const currentValue = this.evaluateExpression(
-        this.states[this.activeBase].input,
+        cleanedInput,
         this.activeBase
       );
 
