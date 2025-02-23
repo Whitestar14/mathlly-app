@@ -1,8 +1,11 @@
 <!-- App.vue -->
 <template>
   <div
-    class="min-h-screen flex bg-background dark:bg-gray-900 transition-colors duration-300"
-    :class="{ 'borders-transparent': settings.borderless }"
+    class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
+    :class="{
+      'borders-transparent': settings.borderless,
+      'animation-disabled': settings.animationDisabled
+    }"
   >
     <sidebar-menu
       :is-open="isSidebarOpen"
@@ -23,7 +26,7 @@
       />
 
       <router-view v-slot="{ Component }">
-        <Transition 
+        <Transition
           name="fade"
           mode="out-in"
         >
@@ -65,7 +68,7 @@ import db from "@/data/db";
 import { useRouter, RouterView } from "vue-router";
 import { useFullscreen } from "@vueuse/core";
 import { onMounted, onUnmounted, provide, ref, computed, watch } from "vue";
-import { useDisplayStore } from "@/stores/display"; 
+import { useDisplayStore } from "@/stores/display";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
 import { useDeviceStore } from '@/stores/device';
@@ -77,16 +80,17 @@ import SidebarMenu from "@/layouts/SidebarMenu.vue";
 import { useKeyboardStore } from "./stores/keyboard";
 import { useSidebar } from '@/composables/useSidebar'
 
-const currentInput = ref("0"); 
+const currentInput = ref("0");
 const isHistoryOpen = ref(false);
 const deviceStore = useDeviceStore();
 const router = useRouter();
-const settings = useSettingsStore();
-const displayStore = useDisplayStore(); 
-const mode = computed(() => settings.mode);
-const { 
-  isOpen: isSidebarOpen, 
-  toggle: toggleSidebar, 
+const settingsStore = useSettingsStore(); // Use the store properly
+const settings = settingsStore; // For compatibility with existing code
+const displayStore = useDisplayStore();
+const mode = computed(() => settingsStore.activeMode);
+const {
+  isOpen: isSidebarOpen,
+  toggle: toggleSidebar,
   close: closeSidebar,
   handleResize: handleSidebarResize
 } = useSidebar(deviceStore.isMobile)
@@ -100,12 +104,20 @@ const updateSidebarOpen = (value) => {
 const navigateToSettings = () => router.push("/settings");
 const navigateToAbout = () => router.push("/about");
 
-const updateSettings = async (newSettings) => {
-  await settings.saveSettings(newSettings);
+const updateMode = async (newMode) => {
+  // Only update current mode, don't change default
+  settingsStore.setCurrentMode(newMode);
 };
 
-const updateMode = async (newMode) => {
-  await settings.updateMode(newMode);
+const updateSettings = async (newSettings) => {
+  // When updating from settings, use the new setDefaultMode for mode changes
+  if (newSettings.mode !== settingsStore.mode) {
+    await settingsStore.setDefaultMode(newSettings.mode);
+  }
+  // Save other settings
+  const settingsToSave = { ...newSettings };
+  delete settingsToSave.mode; // Remove mode as it's already been handled
+  await settingsStore.saveSettings(settingsToSave);
 };
 
 const toggleHistory = () => {
@@ -133,11 +145,13 @@ const deleteHistoryItem = async (id) => {
   updateHistory();
 };
 
+// Update sidebar state when device type changes
 watch(() => deviceStore.isMobile, (newIsMobile) => {
   handleSidebarResize(newIsMobile)
   if (newIsMobile) isHistoryOpen.value = false;
 });
 
+// Close sidebar on mobile navigation
 watch(router.currentRoute, () => {
   if (deviceStore.isMobile) {
     closeSidebar()
@@ -148,7 +162,6 @@ const updateHistory = () => {
   // This function can be used to trigger any necessary updates
 };
 
-// Then use the composable
 useKeyboard("global", {
   toggleHistory: () => {
     toggleHistory();
@@ -166,12 +179,14 @@ useKeyboard("global", {
 
 onMounted(() => {
   deviceStore.initializeDeviceInfo();
-  (async function() {
+  (async function () {
     await Promise.all([
-      settings.loadSettings(),
+      settingsStore.loadSettings(),
       new Promise(resolve => setTimeout(resolve, 800))
-    ])
-    displayStore.updateState({ isLoading: false })
+    ]);
+    // Initialize current mode from default
+    settingsStore.setCurrentMode(settingsStore.defaultMode);
+    displayStore.updateState({ isLoading: false });
   })();
   const keyboardStore = useKeyboardStore();
   keyboardStore.debug = false;

@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { computed, watch, inject, nextTick } from "vue";
+import { computed, watch, inject, nextTick, onMounted, provide } from "vue";
 import { useTitle, useStorage } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { useCalculator } from "@/composables/useCalculator";
@@ -63,6 +63,7 @@ import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
 import CalculatorButtons from "@/layouts/CalculatorButtons.vue";
 import db from "@/data/db";
+import { useSettingsStore } from "@/stores/settings";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -90,6 +91,9 @@ const {
   clearState,
   updateDisplayState,
 } = useCalculator(props.mode, props.settings);
+
+// Provide calculator instance to child components
+provide('calculator', computed(() => calculator.value));
 
 // Computed properties from state
 const input = computed(() => state.value.input);
@@ -211,12 +215,23 @@ const { setContext, clearContext, setBase } = useKeyboard('calculator', {
   setBase: (base) => handleBaseChange(base),
 });
 
-// Mode change handling
+const settingsStore = useSettingsStore();
+
+// Initialize with default mode from settings
+onMounted(async () => {
+  await settingsStore.loadSettings();
+  // Set both current and active modes to default on initial load
+  settingsStore.setCurrentMode(settingsStore.defaultMode);
+  emit('update:mode', settingsStore.defaultMode);
+});
+
+// Mode change handling - don't affect default mode
 watch(
   () => props.mode,
   (newMode) => {
     clearState();
     calculator.value = createCalculator(newMode);
+    settingsStore.setCurrentMode(newMode);
 
     if (newMode === "Programmer") {
       setActiveBase("DEC");

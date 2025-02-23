@@ -1,6 +1,6 @@
 {
   "name": "mathlly",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,7 +15,7 @@
     "decimal.js": "^10.4.3",
     "dexie": "^4.0.8",
     "lucide-vue-next": "^0.469.0",
-    "mathjs": "^13.1.1",
+    "mathjs": "^14.2.1",
     "pinia": "^2.3.0",
     "radix-vue": "^1.9.12",
     "tippy.js": "^6.3.7",

@@ -10,13 +10,13 @@
         class="w-5 h-5 ml-2 -mr-1 text-gray-400"
         aria-hidden="true"
       >
-        <chevron-down-icon />
+        <chevron-down-icon class="h-5 w-5" />
       </select-icon>
     </select-trigger>
     <select-portal>
       <select-content class="overflow-hidden bg-white dark:bg-gray-700 rounded-md shadow-lg">
         <select-scroll-up-button class="flex items-center justify-center h-[25px] bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-default">
-          <chevron-up-icon />
+          <chevron-up-icon class="h-5 w-5" />
         </select-scroll-up-button>
         <select-viewport class="p-1">
           <select-group>
@@ -31,13 +31,13 @@
             >
               <select-item-text>{{ option.label }}</select-item-text>
               <select-item-indicator class="absolute left-2 inline-flex items-center">
-                <check-icon class="w-4 h-4" />
+                <check-icon class="h-5 w-5" />
               </select-item-indicator>
             </select-item>
           </select-group>
         </select-viewport>
         <select-scroll-down-button class="flex items-center justify-center h-[25px] bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-default">
-          <chevron-down-icon />
+          <chevron-down-icon class="h-5 w-5" />
         </select-scroll-down-button>
       </select-content>
     </select-portal>

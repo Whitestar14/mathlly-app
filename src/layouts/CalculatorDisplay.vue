@@ -155,19 +155,4 @@ function toggleHistory() {
   font-size: 1.5rem;
   letter-spacing: -0.5px;
 }
-
-:deep(.highlight-paren) {
-  @apply bg-indigo-200 dark:bg-indigo-800 px-0.5 rounded-sm;
-  animation: paren-highlight 0.5s ease-in-out;
-}
-
-@keyframes paren-highlight {
-  0%,
-  100% {
-    @apply bg-opacity-30;
-  }
-  50% {
-    @apply bg-opacity-100;
-  }
-}
 </style>

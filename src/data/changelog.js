@@ -1,11 +1,21 @@
 export const updates = [ 
   {
+    version: '0.10.0',
+    date: 'February 23, 2025',
+    features: [
+      'Implemented parentheses tracking and highlighting system',
+      'Updated styles for better visual consistency and accessibility',
+      'Enhanced sidebar functionality with improved navigation and state management',
+      'Optimized performance and reduced bundle size with tree shaking',
+    ]
+  },
+  {
     version: '0.9.0',
     date: 'February 17, 2025',
     features: [
       'Polished standard calculator logic mechanism for handling Overflow errors',
       'Centralized state management of available modes using Pinia',
-      'Added more formatting option toggles for bases in Programmer Mode'
+      'Added more formatting option toggles for bases in Programmer Mode',
     ]
   },
   {

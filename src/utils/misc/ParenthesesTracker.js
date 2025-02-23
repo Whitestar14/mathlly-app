@@ -55,4 +55,36 @@ export class ParenthesesTracker {
   getOpenCount() {
     return this.count;
   }
+
+  getGhostParentheses() {
+    return ")".repeat(this.count);
+  }
+
+  getMatchedPairs(expr) {
+    console.log('Getting matched pairs for:', expr);
+    const pairs = [];
+    const stack = [];
+    
+    for (let i = 0; i < expr.length; i++) {
+      if (expr[i] === '(') {
+        console.log('Found opening paren at:', i);
+        stack.push(i);
+      } else if (expr[i] === ')' && stack.length > 0) {
+        const openPos = stack.pop();
+        console.log('Found matching pair:', { open: openPos, close: i });
+        pairs.push({ open: openPos, close: i });
+      }
+    }
+
+    // Handle unclosed parentheses
+    if (stack.length > 0) {
+      console.log('Unclosed parentheses at positions:', stack);
+      stack.forEach(openPos => {
+        pairs.push({ open: openPos, ghost: true });
+      });
+    }
+
+    console.log('Final pairs:', pairs);
+    return pairs;
+  }
 }

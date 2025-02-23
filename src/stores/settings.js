@@ -12,13 +12,20 @@ const DEFAULT_SETTINGS = {
   formatOctal: true,
   theme: 'system',
   mode: 'Standard',
-  borderless: false
+  borderless: false,
+  animationDisabled: false,
 };
 
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
-    ...DEFAULT_SETTINGS
+    ...DEFAULT_SETTINGS,
+    currentMode: DEFAULT_SETTINGS.mode
   }),
+
+  getters: {
+    defaultMode: (state) => state.mode,
+    activeMode: (state) => state.currentMode || state.mode
+  },
 
   actions: {
     async loadSettings() {
@@ -26,14 +33,15 @@ export const useSettingsStore = defineStore('settings', {
         const settings = await db.settings.get(1);
         if (settings) {
           Object.assign(this, settings);
+          this.currentMode = settings.mode; // Initialize current mode with default
         } else {
-          // If no settings found, create default settings
           await this.saveSettings(DEFAULT_SETTINGS);
+          this.currentMode = DEFAULT_SETTINGS.mode;
         }
       } catch (error) {
         console.error('Error loading settings:', error);
-        // Fallback to default settings in case of error
         Object.assign(this, DEFAULT_SETTINGS);
+        this.currentMode = DEFAULT_SETTINGS.mode;
       }
     },
 
@@ -53,15 +61,19 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
 
-    async updateMode(newMode) {
-      try {
-        const currentSettings = { ...this.$state };
-        currentSettings.mode = newMode;
-        await this.saveSettings(currentSettings);
-      } catch (error) {
-        console.error('Error updating mode:', error);
-        throw error;
-      }
+    getPreferredMode() {
+      return this.mode || DEFAULT_SETTINGS.mode;
+    },
+
+    setCurrentMode(mode) {
+      this.currentMode = mode;
+    },
+
+    async setDefaultMode(mode) {
+      const currentSettings = { ...this.$state };
+      currentSettings.mode = mode;
+      // Don't update currentMode here
+      await this.saveSettings(currentSettings);
     }
   }
 });

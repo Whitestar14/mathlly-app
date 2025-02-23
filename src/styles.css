@@ -1,0 +1,9 @@
+.active-paren {
+  color: #1a73e8; /* Google blue */
+  font-weight: bold;
+}
+
+.placeholder-paren {
+  color: rgba(26,115,232,0.4); /* Transparent Google blue */
+  font-weight: normal;
+}

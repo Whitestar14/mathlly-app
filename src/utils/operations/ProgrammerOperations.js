@@ -25,12 +25,17 @@ export class ProgrammerOperations {
     const state = this.calculator.states[this.calculator.activeBase];
     const currentInput = state.input.trim();
 
-    // Don't allow operators at the start except minus
+    // Allow minus sign after operators or at start
+    if ((currentInput === "" || this.isLastCharOperator()) && op === "-") {
+      state.input = currentInput ? `${currentInput} ${op}` : op;
+      return { input: state.input };
+    }
+
+    // Don't allow other operators at the start
     if (currentInput === "" && op !== "-") {
       return { input: state.input };
     }
 
-    // Process operator normally - division by zero is handled at evaluation time
     return this.processOperator(op, currentInput);
   }
 
@@ -43,7 +48,17 @@ export class ProgrammerOperations {
     // Update input state
     const state = this.calculator.states[this.calculator.activeBase];
     if (this.isLastCharOperator()) {
-      state.input = currentInput.replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
+      // Only replace the last operator if it's not followed by a minus sign
+      const lastOperatorPattern = /\s*([+\-×÷<<>>])(\s*-?\d*)\s*$/;
+      const match = currentInput.match(lastOperatorPattern);
+      
+      if (match && !match[2]) {
+        // Replace operator only if there's no number after it
+        state.input = currentInput.replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
+      } else if (op === "-") {
+        // Allow minus after another operator
+        state.input = `${currentInput} ${op}`;
+      }
     } else if (!currentInput.endsWith("(")) {
       state.input = `${currentInput} ${op} `;
     }
@@ -245,8 +260,10 @@ export class ProgrammerOperations {
   // Helper methods
   isLastCharOperator() {
     const input = this.calculator.states[this.calculator.activeBase].input.trim();
-    return /[+\-×÷]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
-           /\s*[+\-×÷]\s*$/.test(input) || 
+    // Don't consider a minus sign followed by a number as an operator
+    return /[+×÷]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
+           /\s*[+×÷]\s*$/.test(input) || 
+           (/-$/.test(input) && !/-\d+$/.test(input)) ||
            input.endsWith(" << ") || 
            input.endsWith(" >> ");
   }
