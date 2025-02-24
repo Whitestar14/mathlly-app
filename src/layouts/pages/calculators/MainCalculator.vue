@@ -310,5 +310,5 @@ const closeWelcomeModal = () => {
 </script>
 
 <style scoped>
-@import url("../../assets/css/animation.css");
+@import url("@/assets/css/animation.css");
 </style>

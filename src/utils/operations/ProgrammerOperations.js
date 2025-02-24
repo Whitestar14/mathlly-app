@@ -250,24 +250,6 @@ export class ProgrammerOperations {
     }
   }
 
-  // Add validation helper
-  validateStateChange(before, after, operation) {
-    if (before === after) {
-      console.debug(`[ProgrammerOperations] ${operation} had no effect:`, {
-        before,
-        after
-      });
-      return false;
-    }
-    return true;
-  }
-
-  // Reset state tracking
-  resetStateTracking() {
-    this.lastOperation = null;
-    this.pendingUpdate = false;
-  }
-
   // Helper methods
   isLastCharOperator() {
     const input = this.calculator.states[this.calculator.activeBase].input.trim();
@@ -303,7 +285,7 @@ export class ProgrammerOperations {
 
     if (currentInput !== "0" && currentInput !== "Error") {
       // Handle expression parts for proper negation
-      const parts = currentInput.split(/([+\-×÷<<>>])/);
+      const parts = currentInput.split(/([+×÷<<>>])/);
       const lastPart = parts[parts.length - 1].trim();
       
       if (lastPart) {

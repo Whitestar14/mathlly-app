@@ -31,47 +31,55 @@
 
         <!-- Navigation Menu with refined styling -->
         <NavigationMenuRoot>
-          <NavigationMenuList class="flex-grow px-3 py-4 space-y-1">
-            <!-- Refined indicator -->
+          <NavigationMenuList class="flex-grow px-3 py-2 space-y-6"> <!-- Increased category spacing -->
+            <!-- Single indicator for the entire sidebar -->
             <div
-              class="absolute z-50 left-3 w-[2px] rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-300 ease-in-out"
-              :class="showIndicator ? '' : 'opacity-0'"
-              :style="{ top: `${indicatorPosition}em`, height: '15px' }"
+              v-show="showIndicator"
+              class="absolute z-50 left-3 w-[2px] rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
+              :style="indicatorStyle"
             />
-            <NavigationMenuItem
-              v-for="(item, index) in menuItems"
-              :key="item.path"
+            <div 
+              v-for="(category, categoryIndex) in categories" 
+              :key="category.title"
+              class="space-y-2" 
             >
-              <NavigationMenuLink
-                :active="currentPill === item.path"
-                as-child
-              >
-                <button
-                  :class="[
-                    'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors duration-200',
-                    currentPill === item.path
-                      ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
-                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300',
-                    item.comingSoon ? 'opacity-60 cursor-not-allowed' : '',
-                  ]"
-                  @click="!item.comingSoon && navigateTo(item.path, index)"
+              <h2 class="px-3 text-[11px] font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">
+                {{ category.title }}
+              </h2>
+              <div class="space-y-0.5"> <!-- Tightened menu items -->
+                <NavigationMenuItem
+                  v-for="item in category.items"
+                  :key="item.path"
                 >
-                  <component
-                    :is="item.icon"
-                    class="h-4 w-4 shrink-0"
-                  />
-                  <span>{{ item.name }}</span>
-                  <Badge
-                    v-if="item.comingSoon"
-                    type="soon"
-                  />
-                  <Badge
-                    v-if="item.isNew"
-                    type="new"
-                  />
-                </button>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
+                  <NavigationMenuLink 
+                    :active="currentPill === item.path" 
+                    as-child
+                  >
+                    <button
+                      ref="menuItems"
+                      :data-path="item.path"
+                      :class="[
+                        menuItemBaseClasses,
+                        currentPill === item.path
+                          ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
+                          : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-300',
+                        item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
+                      ]"
+                      @click="handleItemClick($event, item)"
+                    >
+                      <component 
+                        :is="item.icon" 
+                        class="h-4 w-4 shrink-0 transition-colors"
+                        :class="currentPill === item.path ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500/80 dark:text-gray-500/80'"
+                      />
+                      <span>{{ item.name }}</span>
+                      <Badge v-if="item.comingSoon" type="soon" class="opacity-75" />
+                      <Badge v-if="item.isNew" type="new" />
+                    </button>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </div>
+            </div>
           </NavigationMenuList>
         </NavigationMenuRoot>
 
@@ -100,7 +108,7 @@
                           ? 'bg-gray-100 text-indigo-600 dark:bg-gray-800 dark:text-indigo-400'
                           : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                       ]"
-                      @click="navigateTo(`/${item}`, menuItems.length)"
+                      @click="navigateTo(`/${item}`)" 
                     >
                       <component
                         :is="item === 'settings'
@@ -138,7 +146,8 @@ import {
   RegexIcon,
   LineChartIcon,
   ArrowRightLeftIcon,
-  PanelLeftIcon
+  PanelLeftIcon,
+  Binary
 } from "lucide-vue-next";
 import {
   NavigationMenuItem,
@@ -146,8 +155,7 @@ import {
   NavigationMenuList,
   NavigationMenuRoot,
 } from "radix-vue";
-import { computed, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { computed } from "vue";
 import { usePills } from '@/composables/usePills';
 import Badge from '@/components/BaseBadge.vue';
 
@@ -168,47 +176,65 @@ defineOptions({
   name: "SidebarMenu"
 })
 
-const router = useRouter();
-const route = useRoute();
-
-const menuItems = [
-  { name: "Calculator", path: "/", icon: Code2Icon, indicatorOffset: 2.05, isNew: true },
-  { name: "Functions", path: "/functions", icon: FunctionSquareIcon, indicatorOffset: 4.80, comingSoon: true },
-  { name: "Regex", path: "/regex", icon: RegexIcon, indicatorOffset: 7.55, comingSoon: true },
-  { name: "Graphing", path: "/graphing", icon: LineChartIcon, indicatorOffset: 10.30, comingSoon: true },
-  { name: "Converter", path: "/converter", icon: ArrowRightLeftIcon, indicatorOffset: 13.05, comingSoon: true },
-  { name: "What's New", path: "/whats-new", icon: SparklesIcon, indicatorOffset: 15.80, },
-  { name: "About", path: "/about", icon: InfoIcon, indicatorOffset: 18.55 },
+// Define categories with their items
+const categories = [
+  {
+    title: "Calculators",
+    items: [
+      { name: "Calculator", path: "/", icon: Code2Icon, isNew: false },
+      { name: "Functions", path: "/functions", icon: FunctionSquareIcon, comingSoon: true },
+      { name: "Regex", path: "/regex", icon: RegexIcon, comingSoon: true },
+      { name: "Graphing", path: "/graphing", icon: LineChartIcon, comingSoon: true },
+      { name: "Converter", path: "/converter", icon: ArrowRightLeftIcon, comingSoon: true },
+    ]
+  },
+  {
+    title: "Tools",
+    items: [
+      { name: "Base64", path: "/tools/base64", icon: Binary, isNew: true, description: "Encode and decode Base64 strings" },
+    ]
+  },
+  {
+    title: "Information",
+    items: [
+      { name: "What's New", path: "/whats-new", icon: SparklesIcon },
+      { name: "About", path: "/about", icon: InfoIcon },
+    ]
+  }
 ];
-const { currentPill, indicatorPosition, showIndicator, selectPill, updatePillIndicator } = usePills(menuItems)
 
-// The indicator only positions correctly when the absolute value (2.7em) and a common difference of (0.05em)
-//  is added to get the required value.
+const { currentPill, showIndicator, indicatorStyle, handleNavigation } = usePills({
+  onNavigate: (path) => {
+    if (props.isMobile) {
+      closeSidebar();
+    }
+  }
+});
+
+const navigateTo = (path) => {
+  handleNavigation(path);
+};
+
+const handleItemClick = (event, item) => {
+  if (item.comingSoon) return;
+  handleNavigation(item.path, event.currentTarget);
+};
 
 const closeSidebar = () => emit("update:isOpen", false);
-
-const navigateTo = (path, index) => {
-  router.push(path)
-  selectPill(path, index)
-  if (props.isMobile) {
-    closeSidebar()
-  }
-}
 
 const sidebarClasses = computed(() => [
   "overflow-y-auto fixed inset-y-0 left-0 z-50 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-all",
   props.isMobile ? "w-full" : "w-64 border-r",
 ]);
 
-watch(
-  () => route.path,
-  (newPath) => {
-    currentPill.value = newPath
-    const index = menuItems.findIndex((item) => item.path === newPath)
-    updatePillIndicator(index !== -1 ? index : menuItems.length)
-  },
-  { immediate: true }
-)
+// Extract base classes for menu items
+const menuItemBaseClasses = [
+  'w-full flex items-center gap-2.5', // Reduced gap
+  'px-3 py-2', // Reduced padding
+  'text-sm rounded-lg',
+  'transition-all duration-200'
+].join(' ');
+
 </script>
 
 <style scoped>
@@ -233,5 +259,34 @@ watch(
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0%);
+}
+
+/* Add these styles for smoother transitions */
+.absolute {
+  will-change: transform;
+}
+
+/* Ensure consistent button heights for better positioning */
+button {
+  height: 32px; /* Slightly reduced height */
+  backdrop-filter: blur(8px);
+}
+
+/* Smooth category transitions */
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+  position: relative;
+}
+
+/* Subtle divider between categories */
+.space-y-6 > * + *::before {
+  content: '';
+  position: absolute;
+  top: -0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  height: 1px;
+  @apply bg-gray-200 dark:bg-gray-700/50;
+  opacity: 0.5;
 }
 </style>

@@ -58,6 +58,23 @@ export class StandardOperations {
     return { input: this.calculator.input, error: "" };
   }
 
+  handleToggleSign() {
+    const currentInput = this.calculator.input;
+    
+    if (currentInput !== "0" && currentInput !== "Error") {
+      const parts = currentInput.split(/([+×÷])/);
+      const lastPart = parts[parts.length - 1].trim();
+
+      if (lastPart) {
+        if (lastPart.startsWith("-")) parts[parts.length - 1] = lastPart.slice(1);
+        else parts[parts.length - 1] = "- " + lastPart;
+
+        this.calculator.input = parts.join(" ").trim();
+      }
+    }
+    return { input: this.calculator.input, error: this.calculator.error };
+  }
+
   handleSquare() {
     return this.handleOperation((value) => {
       if (!Number.isFinite(value)) throw new Error("Overflow");
