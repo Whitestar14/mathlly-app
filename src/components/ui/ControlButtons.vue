@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center left-0 top-0 absolute z-40 opacity-30 transition-opacity hover:opacity-100 group">
+  <div class="flex items-center left-0 top-0 absolute z-10 opacity-30 transition-opacity hover:opacity-100 group">
     <div class="flex items-center m-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden">
       <button
         v-tippy="{ content: 'Open History Panel', placement: 'top' }"

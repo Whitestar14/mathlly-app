@@ -1,5 +1,5 @@
 <script setup>
-import { useBadge } from '../composables/useBadge'
+import { useBadge } from '@/composables/useBadge'
 
 const props = defineProps({
   type: {

@@ -13,11 +13,26 @@
         aria-live="polite"
         aria-atomic="true"
       >
-        <span v-for="(part, index) in formattedParts" :key="index">
-          <span v-if="part.type === 'text'" v-html="part.content"></span>
-          <span v-else-if="part.type === 'open'" class="paren-open">{{ part.content }}</span>
-          <span v-else-if="part.type === 'close'" class="paren-close">{{ part.content }}</span>
-          <span v-else-if="part.type === 'ghost'" class="paren-ghost text-gray-400">{{ part.content }}</span>
+        <span
+          v-for="(part, index) in formattedParts"
+          :key="index"
+        >
+          <span
+            v-if="part.type === 'text'"
+            v-html="part.content"
+          />
+          <span
+            v-else-if="part.type === 'open'"
+            class="paren-open"
+          >{{ part.content }}</span>
+          <span
+            v-else-if="part.type === 'close'"
+            class="paren-close"
+          >{{ part.content }}</span>
+          <span
+            v-else-if="part.type === 'ghost'"
+            class="paren-ghost text-gray-400"
+          >{{ part.content }}</span>
         </span>
       </div>
       <div
@@ -64,9 +79,10 @@ const props = defineProps({
   mode: { type: String, default: "Standard" }
 });
 
+const emit = defineEmits(['scroll-update']);
+
 const { parenthesesTracker } = useParenthesesTracking();
 
-const emit = defineEmits(['scroll-update']);
 const displayContainer = ref(null);
 const { width: containerWidth } = useElementSize(displayContainer);
 const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {

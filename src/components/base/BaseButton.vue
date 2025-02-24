@@ -28,9 +28,9 @@ const sizeClass = computed(() => props.size === 'default' ? 'btn-default-size' :
   <button
     :type="type"
     :disabled="disabled"
-    v-bind="$attrs"
-    class="btn"
     :class="[variantClass.valueOf(), sizeClass.valueOf()]"
+    class="btn"
+    v-bind="$attrs"
   >
     <slot />
   </button>

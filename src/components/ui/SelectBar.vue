@@ -4,7 +4,7 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   >
-    <select-trigger class="inline-flex items-center text-gray-700 dark:text-gray-300 justify-between w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    <select-trigger class="inline-flex items-center text-gray-700 dark:text-gray-300 justify-between w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-indigo-500 dark:focus:ring-indigo-300">
       <select-value :placeholder="placeholder" />
       <select-icon
         class="w-5 h-5 ml-2 -mr-1 text-gray-400"
@@ -14,15 +14,22 @@
       </select-icon>
     </select-trigger>
     <select-portal>
-      <select-content class="overflow-hidden bg-white dark:bg-gray-700 rounded-md shadow-lg">
+      <select-content
+        class="overflow-hidden bg-white dark:bg-gray-700 rounded-md shadow-lg"
+        :position="position"
+        :side-offset="5"
+        align-offset="5"
+      >
         <select-scroll-up-button class="flex items-center justify-center h-[25px] bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-default">
           <chevron-up-icon class="h-5 w-5" />
         </select-scroll-up-button>
         <select-viewport class="p-1">
           <select-group>
-            <select-label class="px-2 py-1.5 text-xs font-semibold text-gray-900 dark:text-gray-300">
-              {{ label }}
-            </select-label>
+            <div v-if="props.label !== ''">
+              <select-label class="px-2 py-1.5 text-xs font-semibold text-gray-900 dark:text-gray-300">
+                {{ label }}
+              </select-label>
+            </div>
             <select-item
               v-for="option in options"
               :key="option.value"
@@ -65,7 +72,11 @@ const props = defineProps({
   label: {
     type: String,
     default: 'Options'
-  }
+  },
+  position: {
+    type: String,
+    default: 'item-aligned'
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -80,3 +91,10 @@ watch(selectedValue, (newValue) => {
   emit('update:modelValue', newValue);
 });
 </script>
+
+<style>
+[data-radix-popper-content-wrapper] {
+  width: var(--radix-popper-anchor-width);
+  z-index: 20 !important;
+}
+</style>

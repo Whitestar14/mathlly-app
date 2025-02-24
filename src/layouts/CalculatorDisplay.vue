@@ -39,13 +39,13 @@
 </template>
 
 <script setup>
-import ChevronScroll from "@/components/ChevronScroll.vue";
-import ControlButtons from "@/components/ControlButtons.vue";
-import MainDisplay from "@/components/MainDisplay.vue";
+import ChevronScroll from "@/components/ui/ChevronScroll.vue";
+import ControlButtons from "@/components/ui/ControlButtons.vue";
+import MainDisplay from "@/components/ui/MainDisplay.vue";
 import { computed, nextTick, ref, watch } from "vue";
 import { useToast } from "@/composables/useToast";
 import { useSettingsStore } from "@/stores/settings";
-import FeatureToast from "@/components/FeatureToast.vue";
+import FeatureToast from "@/components/base/FeatureToast.vue";
 import { useClipboard, useEventListener, useDebounceFn } from "@vueuse/core";
 
 const props = defineProps({
@@ -134,8 +134,6 @@ function toggleHistory() {
 </script>
 
 <style scoped>
-@import url(../assets/css/animation.css);
-
 .main-display {
   mask-image: linear-gradient(to left, transparent, black 20px);
   -webkit-mask-image: linear-gradient(to left, transparent, black 20px);

@@ -10,9 +10,9 @@
       <li
         v-for="(feature, index) in features"
         :key="index"
-        class="flex items-start group/item"
+        class="flex items-center group/item"
       >
-        <CheckCircleIcon class="h-4 w-4 text-green-500 dark:text-green-400 mt-1 mr-3 shrink-0 opacity-75 group-hover/item:opacity-100 transition-opacity" />
+        <Dot class="h-3 w-3 text-indigo-500 dark:text-indigo-400 mt-1 mr-3 shrink-0 opacity-75 group-hover/item:opacity-100 transition-opacity" />
         <span class="text-sm text-gray-600 dark:text-gray-300">{{ feature }}</span>
       </li>
     </ul>
@@ -21,7 +21,7 @@
 
   
   <script setup>
-  import { CheckCircleIcon } from 'lucide-vue-next';
+  import { Circle as Dot } from 'lucide-vue-next';
   
   defineProps({
     version: {
