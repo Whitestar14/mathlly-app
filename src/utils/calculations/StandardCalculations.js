@@ -64,7 +64,7 @@ export class StandardCalculations {
       if (this.settings.useFractions) {
         const frac = fraction(result);
         if (frac.d <= 10000) {
-          return frac.d === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
+          return Number(frac.d) === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
         }
       }
 

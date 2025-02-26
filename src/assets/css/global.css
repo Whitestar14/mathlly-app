@@ -55,14 +55,6 @@ kbd,
 }
 
 /* Settings toggle classes */
-.borders-transparent {
-  --border-opacity: 0;
-}
-
-.borders-transparent * {
-  border-color: rgba(255, 255, 255, var(--border-opacity)) !important;
-}
-
 .animation-disabled * {
   animation: none !important;
   transition: all 0ms !important;

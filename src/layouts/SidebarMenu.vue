@@ -31,7 +31,8 @@
 
         <!-- Navigation Menu with refined styling -->
         <NavigationMenuRoot>
-          <NavigationMenuList class="flex-grow px-3 py-2 space-y-6"> <!-- Increased category spacing -->
+          <NavigationMenuList class="flex-grow px-3 py-2 space-y-6">
+            <!-- Increased category spacing -->
             <!-- Single indicator for the entire sidebar -->
             <div
               v-show="showIndicator"
@@ -39,14 +40,15 @@
               :style="indicatorStyle"
             />
             <div 
-              v-for="(category, categoryIndex) in categories" 
+              v-for="category in categories" 
               :key="category.title"
               class="space-y-2" 
             >
               <h2 class="px-3 text-[11px] font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">
                 {{ category.title }}
               </h2>
-              <div class="space-y-0.5"> <!-- Tightened menu items -->
+              <div class="space-y-0.5">
+                <!-- Tightened menu items -->
                 <NavigationMenuItem
                   v-for="item in category.items"
                   :key="item.path"
@@ -56,7 +58,6 @@
                     as-child
                   >
                     <button
-                      ref="menuItems"
                       :data-path="item.path"
                       :class="[
                         menuItemBaseClasses,
@@ -73,8 +74,15 @@
                         :class="currentPill === item.path ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500/80 dark:text-gray-500/80'"
                       />
                       <span>{{ item.name }}</span>
-                      <Badge v-if="item.comingSoon" type="soon" class="opacity-75" />
-                      <Badge v-if="item.isNew" type="new" />
+                      <Badge
+                        v-if="item.comingSoon"
+                        type="soon"
+                        class="opacity-75"
+                      />
+                      <Badge
+                        v-if="item.isNew"
+                        type="new"
+                      />
                     </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
@@ -157,7 +165,7 @@ import {
 } from "radix-vue";
 import { computed } from "vue";
 import { usePills } from '@/composables/usePills';
-import Badge from '@/components/BaseBadge.vue';
+import Badge from '@/components/base/BaseBadge.vue';
 
 const props = defineProps({
   isOpen: {
@@ -197,14 +205,14 @@ const categories = [
   {
     title: "Information",
     items: [
-      { name: "What's New", path: "/whats-new", icon: SparklesIcon },
-      { name: "About", path: "/about", icon: InfoIcon },
+      { name: "What's New", path: "/info/whats-new", icon: SparklesIcon },
+      { name: "About", path: "/info/about", icon: InfoIcon },
     ]
   }
 ];
 
 const { currentPill, showIndicator, indicatorStyle, handleNavigation } = usePills({
-  onNavigate: (path) => {
+  onNavigate: () => {
     if (props.isMobile) {
       closeSidebar();
     }
@@ -223,7 +231,7 @@ const handleItemClick = (event, item) => {
 const closeSidebar = () => emit("update:isOpen", false);
 
 const sidebarClasses = computed(() => [
-  "overflow-y-auto fixed inset-y-0 left-0 z-50 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-all",
+  "overflow-y-auto fixed inset-y-0 left-0 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-all",
   props.isMobile ? "w-full" : "w-64 border-r",
 ]);
 
@@ -243,7 +251,7 @@ const menuItemBaseClasses = [
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 50;
+  z-index: 20;
 }
 
 .slide-enter-active,

@@ -19,10 +19,15 @@
           <div />
           
           <!-- Mode Toggler using SelectBar -->
-          <div v-if="currentRoute === '/'" class="relative w-[70%] sm:w-36">
+          <div
+            v-if="currentRoute === '/'"
+            class="relative w-[70%] sm:w-36"
+          >
             <Select
               v-model="selectedMode"
               :options="modes.map(mode => ({ value: mode, label: mode }))"
+              label=""
+              position="popper"
               placeholder="Select mode"
             />
           </div>
@@ -69,7 +74,10 @@
         </div>
       </div>
     </div>
-    <ShortcutGuide :open="isShortcutModalOpen" @update:open="isShortcutModalOpen = $event" />
+    <ShortcutGuide
+      :open="isShortcutModalOpen"
+      @update:open="isShortcutModalOpen = $event"
+    />
   </header>
 </template>
 
@@ -82,9 +90,9 @@ import { useKeyboard } from "@/composables/useKeyboard";
 import { useDisplayStore } from "@/stores/display";
 import { useTheme } from "@/composables/useTheme";
 import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
-import Select from "@/components/SelectBar.vue";
+import Select from "@/components/ui/SelectBar.vue";
 
-const props = defineProps({
+defineProps({
   isSidebarOpen: {
     type: Boolean,
   },

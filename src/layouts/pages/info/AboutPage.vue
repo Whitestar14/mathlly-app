@@ -101,7 +101,7 @@
 <script setup>
 import { ArrowLeftIcon, CheckCircleIcon } from "lucide-vue-next";
 import { useRouter } from "vue-router";
-import FeatureCard from "@/components/FeatureCard.vue";
+import FeatureCard from "@/components/cards/FeatureCard.vue";
 import { useVersionStore } from '@/stores/version'
 
 const version = useVersionStore()

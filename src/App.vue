@@ -3,7 +3,6 @@
   <div
     class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
     :class="{
-      'borders-transparent': settings.borderless,
       'animation-disabled': settings.animationDisabled
     }"
   >
@@ -70,15 +69,15 @@ import { useFullscreen } from "@vueuse/core";
 import { onMounted, onUnmounted, provide, ref, computed, watch } from "vue";
 import { useDisplayStore } from "@/stores/display";
 import { useSettingsStore } from "@/stores/settings";
-import { useKeyboard } from "@/composables/useKeyboard";
+import { useKeyboardStore } from "@/stores/keyboard";
 import { useDeviceStore } from '@/stores/device';
-import Toast from "@/components/FeatureToast.vue";
-import CalculatorLoader from "@/components/CalculatorLoader.vue";
+import { useKeyboard } from "@/composables/useKeyboard";
+import { useSidebar } from '@/composables/useSidebar'
+import Toast from "@/components/base/FeatureToast.vue";
+import CalculatorLoader from "@/components/ui/CalculatorLoader.vue";
 import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
-import { useKeyboardStore } from "./stores/keyboard";
-import { useSidebar } from '@/composables/useSidebar'
 
 const currentInput = ref("0");
 const isHistoryOpen = ref(false);
@@ -116,7 +115,7 @@ const updateSettings = async (newSettings) => {
   }
   // Save other settings
   const settingsToSave = { ...newSettings };
-  delete settingsToSave.mode; // Remove mode as it's already been handled
+  delete settingsToSave.mode; 
   await settingsStore.saveSettings(settingsToSave);
 };
 
@@ -196,7 +195,3 @@ onUnmounted(() => {
   deviceStore.destroyDeviceInfo();
 });
 </script>
-
-<style scoped>
-@import url("./assets/css/animation.css")
-</style>

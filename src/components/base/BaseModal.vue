@@ -57,7 +57,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "radix-vue";
-import Button from "@/components/ui/BaseButton"
+import Button from "@/components/base/BaseButton"
 import { XIcon } from "lucide-vue-next";
 
 defineProps({

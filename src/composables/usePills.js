@@ -10,7 +10,7 @@ export function usePills(options = {}) {
 
   const currentPill = ref("");
   const indicatorPosition = ref(0);
-  const showIndicator = ref(true);
+  const showIndicator = ref(false);
   
   const route = useRoute();
   const router = useRouter();

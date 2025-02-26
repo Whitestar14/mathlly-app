@@ -98,7 +98,7 @@
         <section class="space-y-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold tracking-tight">
-              Theme & Preferences
+              Themes & Preferences
             </h2>
           </div>
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
@@ -118,14 +118,6 @@
                 class="text-sm font-medium text-gray-700 dark:text-gray-300"
               >Disable Animations</label>
               <Switch v-model="localSettings.animationDisabled" />
-            </div>
-            <div class="flex items-center justify-between py-2">
-              <label
-                for="borderless"
-                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Borderless
-                Mode</label>
-              <Switch v-model="localSettings.borderless" />
             </div>
           </div>
         </section>
@@ -156,8 +148,8 @@ import { ArrowLeftIcon } from "lucide-vue-next";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useSettingsStore } from '@/stores/settings';
-import Select from "@/components/SelectBar.vue";
-import Switch from "@/components/ToggleBar.vue";
+import Select from "@/components/ui/SelectBar.vue";
+import Switch from "@/components/ui/ToggleBar.vue";
 import { useTitle } from '@vueuse/core';
 const router = useRouter();
 useTitle(`${router.currentRoute.value.name} | Mathlly`);
@@ -173,7 +165,6 @@ const localSettings = ref({
   formatOctal: settingsStore.formatOctal,
   theme: settingsStore.theme,
   mode: settingsStore.mode,
-  borderless: settingsStore.borderless,
   animationDisabled: settingsStore.animationDisabled,
 });
 
@@ -215,7 +206,6 @@ onMounted(async () => {
     formatOctal: settingsStore.formatOctal,
     theme: settingsStore.theme,
     mode: settingsStore.mode,
-    borderless: settingsStore.borderless,
     animationDisabled: settingsStore.animationDisabled
   };
 });

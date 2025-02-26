@@ -28,7 +28,7 @@
 }
 
 .btn-outline {
-  @apply border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white;
+  @apply border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/30 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white;
 }
 
 .btn-secondary {
@@ -36,7 +36,7 @@
 }
 
 .btn-ghost {
-  @apply hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white dark:text-gray-300;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-700/30 hover:text-gray-900 dark:hover:text-white dark:text-gray-300;
 }
 
 .btn-link {

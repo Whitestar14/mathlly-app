@@ -3,7 +3,9 @@
     <div class="space-y-6 max-w-lg">
       <!-- Error Code -->
       <div class="relative">
-        <h1 class="text-9xl font-bold text-gray-200 dark:text-gray-700">404</h1>
+        <h1 class="text-9xl font-bold text-gray-200 dark:text-gray-700">
+          404
+        </h1>
         <div class="absolute inset-0 flex items-center justify-center">
           <kbd class="text-gray-600 font-medium px-3 py-2 text-xl dark:text-gray-400 bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
             {not<span class="text-indigo-400 font-black dark:text-indigo-600 mx-0.5">//</span>found}
@@ -24,15 +26,15 @@
       <!-- Actions -->
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
         <button
-          @click="router.back()"
           class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 min-w-[120px]"
+          @click="router.back()"
         >
           <ArrowLeft class="h-4 w-4" />
           Go Back
         </button>
         <button
-          @click="router.push('/')"
           class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors duration-200 min-w-[120px]"
+          @click="router.push('/')"
         >
           <Home class="h-4 w-4" />
           Home

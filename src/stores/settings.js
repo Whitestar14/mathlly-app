@@ -12,7 +12,6 @@ const DEFAULT_SETTINGS = {
   formatOctal: true,
   theme: 'system',
   mode: 'Standard',
-  borderless: false,
   animationDisabled: false,
 };
 

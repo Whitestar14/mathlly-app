@@ -73,13 +73,13 @@
   import { useVersionStore } from '@/stores/version'
   import { ArrowLeftIcon, ClockIcon } from 'lucide-vue-next';
   import { updates, upcomingFeatures } from '@/data/changelog';
-  import UpdateCard from '@/components/UpdateCard.vue';
-  
+  import UpdateCard from '@/components/cards/UpdateCard.vue';
+
   import { useTitle } from '@vueuse/core';
-const router = useRouter();
-useTitle(`${router.currentRoute.value.name} | Mathlly`);
+  const router = useRouter();
+  useTitle(`${router.currentRoute.value.name} | Mathlly`);
   const version = useVersionStore();
-  
+
   const goBack = () => {
     router.go(-1);
   };

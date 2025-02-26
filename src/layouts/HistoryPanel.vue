@@ -189,8 +189,8 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from 'radix-vue'
-import Button from '@/components/ui/BaseButton.vue'
-import BaseModal from '@/components/BaseModal.vue'
+import Button from '@/components/base/BaseButton.vue'
+import BaseModal from '@/components/base/BaseModal.vue'
 import { useToast } from '@/composables/useToast'
 import db from '@/data/db'
 

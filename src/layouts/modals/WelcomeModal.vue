@@ -66,7 +66,7 @@
 
 <script setup>
 import { ref } from "vue";
-import BaseModal from "@/components/BaseModal.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
 
 defineProps({
   isOpen: {

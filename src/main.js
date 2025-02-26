@@ -3,9 +3,10 @@ import { createPinia } from "pinia";
 import VueTippy from "vue-tippy";
 import router from "@/router";
 import App from "@/App.vue";
-import "./assets/css/tailwind.css";
-import "./assets/css/global.css";
-import "./assets/css/tooltip.css";
+import "@/assets/css/tailwind.css";
+import "@/assets/css/global.css";
+import "@/assets/css/tooltip.css";
+import "@/assets/css/animation.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/dist/border.css";
 import "tippy.js/animations/scale.css";
@@ -22,6 +23,7 @@ const props = {
   arrow: false,
   allowHTML: true,
   animation: "scale",
+  delay: [300, 0],
   onShow() {
     const device = useDeviceStore();
     device.initializeDeviceInfo();

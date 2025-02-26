@@ -5,33 +5,33 @@ const routes = [
   {
     path: "/",
     name: "Calculator",
-    component: () => import('@/layouts/pages/calculators/StandardCalculator.vue'),
+    component: () => import('@/layouts/pages/calculators/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' }
   },
-  {
-    path: "/functions",
-    name: "Functions",
-    component: () => import('@/layouts/pages/calculators/FunctionsCalculator.vue'),
-    meta: { transition: 'fade', group: 'calculators' }
-  },
-  {
-    path: "/regex",
-    name: "Regex",
-    component: () => import('@/layouts/pages/calculators/RegexCalculator.vue'),
-    meta: { transition: 'fade', group: 'calculators' }
-  },
-  {
-    path: "/graphing",
-    name: "Graphing",
-    component: () => import('@/layouts/pages/calculators/GraphingCalculator.vue'),
-    meta: { transition: 'fade', group: 'calculators' }
-  },
-  {
-    path: "/converter",
-    name: "Converter",
-    component: () => import('@/layouts/pages/calculators/UnitConverter.vue'),
-    meta: { transition: 'fade', group: 'calculators' }
-  },
+  // {
+  //   path: "/functions",
+  //   name: "Functions",
+  //   component: () => import('@/layouts/pages/calculators/FunctionsCalculator.vue'),
+  //   meta: { transition: 'fade', group: 'calculators' }
+  // },
+  // {
+  //   path: "/regex",
+  //   name: "Regex",
+  //   component: () => import('@/layouts/pages/calculators/RegexCalculator.vue'),
+  //   meta: { transition: 'fade', group: 'calculators' }
+  // },
+  // {
+  //   path: "/graphing",
+  //   name: "Graphing",
+  //   component: () => import('@/layouts/pages/calculators/GraphingCalculator.vue'),
+  //   meta: { transition: 'fade', group: 'calculators' }
+  // },
+  // {
+  //   path: "/converter",
+  //   name: "Converter",
+  //   component: () => import('@/layouts/pages/calculators/UnitConverter.vue'),
+  //   meta: { transition: 'fade', group: 'calculators' }
+  // },
 
   // Tools routes
   {
@@ -43,13 +43,13 @@ const routes = [
 
   // Information routes
   {
-    path: "/whats-new",
+    path: "/info/whats-new",
     name: "WhatsNew",
     component: () => import('@/layouts/pages/info/WhatsNewPage.vue'),
     meta: { transition: 'fade', group: 'information' }
   },
   {
-    path: "/about",
+    path: "/info/about",
     name: "About",
     component: () => import('@/layouts/pages/info/AboutPage.vue'),
     meta: { transition: 'fade', group: 'information' }
