@@ -72,7 +72,6 @@ const handleScrollUpdate = useDebounceFn(({ canScrollLeft, canScrollRight }) => 
   showRightChevron.value = canScrollRight;
 }, 100);
 
-// Keyboard navigation using useEventListener
 useEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' && showLeftChevron.value) {
     activeChevron.value = 'left';
@@ -105,7 +104,6 @@ watch(
   }
 );
 
-// Copy functionality
 const copyContent = computed(() => {
   if (props.animatedResult) {
     return `${props.input} = ${props.animatedResult}`;
@@ -115,7 +113,6 @@ const copyContent = computed(() => {
 
 const copyOptions = computed(() => ({
   content: "Copy to Clipboard",
-  placement: "top",
 }));
 
 const { copy } = useClipboard({ legacy: true });
