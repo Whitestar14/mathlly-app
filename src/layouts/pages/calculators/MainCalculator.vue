@@ -74,12 +74,12 @@ const props = defineProps({
 
 const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
 
-// Dynamic page title
-useTitle(computed(() => `${props.mode} Calculator | Mathlly`));
+
+useTitle(computed(() => `${props.mode} Calculator - Mathlly`));
 
 const { isValidForBase } = useInputValidation()
 
-// Core calculator setup
+
 const {
   calculator,
   createCalculator,
@@ -92,10 +92,10 @@ const {
   updateDisplayState,
 } = useCalculator(props.mode, props.settings);
 
-// Provide calculator instance to child components
+
 provide('calculator', computed(() => calculator.value));
 
-// Computed properties from state
+
 const input = computed(() => state.value.input);
 const error = computed(() => state.value.error);
 const isAnimating = computed(() => state.value.isAnimating);
@@ -104,7 +104,7 @@ const activeBase = computed(() => state.value.activeBase);
 const displayValues = computed(() => state.value.displayValues);
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH);
 
-// Preview computation for display
+
 const preview = computed(() => {
   if (props.mode === "Programmer") {
     try {
@@ -126,28 +126,28 @@ const preview = computed(() => {
   }
 });
 
-// History management
+
 const { historyPanelRef, addToHistory, clearHistory } = useHistory(() => {
   emit("update-history");
 });
 
-// Other setup
+
 const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
-// Calculator operation handlers
+
 
 const handleButtonClick = (btn) => {
   try {
     const result = calculator.value.handleButtonClick(btn);
 
-    // Allow continued input even with error message
+    
     updateState({
       input: result.input,
       error: result.error || ""
     });
 
-    // Special cases handling
+    
     if (btn === "=" && props.mode === "Programmer") {
       if (result.displayValues) {
         updateDisplayValues(result.displayValues);
@@ -157,7 +157,7 @@ const handleButtonClick = (btn) => {
       nextTick(() => updateDisplayState());
     }
 
-    // History handling
+    
     if (btn === "=" && props.mode !== "Programmer" && result.result) {
       addToHistory(result.expression, result.result);
       setAnimation(result.result);
@@ -203,7 +203,7 @@ const { setContext, clearContext, setBase } = useKeyboard('calculator', {
   calculate: () => handleButtonClick('='),
   backspace: () => handleButtonClick('backspace'),
   input: (value) => {
-    // Additional validation layer before handling input
+    
     if (props.mode === "Programmer") {
       if (isValidForBase(value, activeBase.value)) {
         handleButtonClick(value);
@@ -217,15 +217,15 @@ const { setContext, clearContext, setBase } = useKeyboard('calculator', {
 
 const settingsStore = useSettingsStore();
 
-// Initialize with default mode from settings
+
 onMounted(async () => {
   await settingsStore.loadSettings();
-  // Set both current and active modes to default on initial load
+  
   settingsStore.setCurrentMode(settingsStore.defaultMode);
   emit('update:mode', settingsStore.defaultMode);
 });
 
-// Mode change handling - don't affect default mode
+
 watch(
   () => props.mode,
   (newMode) => {
@@ -243,7 +243,7 @@ watch(
   { immediate: true }
 );
 
-// Input synchronization
+
 watch(
   currentInput,
   (newValue) => {
@@ -264,7 +264,7 @@ watch(
   { immediate: true }
 );
 
-// Programmer mode display value updates
+
 watch(
   () => input.value,
   (newInput) => {
@@ -283,7 +283,7 @@ watch(
   { deep: true }
 );
 
-// History operations
+
 const selectHistoryItem = (item) => {
   if (props.mode === "Programmer") return;
 

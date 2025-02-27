@@ -55,7 +55,6 @@ const props = defineProps({
 
 const emit = defineEmits(['button-click', 'clear', 'base-change']);
 
-// Lazy load components with loading delay to prevent flash
 const StandardMode = defineAsyncComponent(() => import('@/layouts/modes/StandardMode.vue'));
 const ProgrammerMode = defineAsyncComponent(() => import('@/layouts/modes/ProgrammerMode.vue'));
 

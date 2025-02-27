@@ -86,7 +86,7 @@ const { parenthesesTracker } = useParenthesesTracking();
 const displayContainer = ref(null);
 const { width: containerWidth } = useElementSize(displayContainer);
 const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
-  throttle: 16, // ~60fps
+  throttle: 16, 
   onScroll: useThrottleFn(updateScrollState, 100)
 });
 
@@ -101,7 +101,7 @@ const formattedPreview = computed(() => {
 const displayClasses = computed(() => [
   'main-display text-right font-bold mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide transition-all',
   getFontSizeClass(props.input),
-  props.error ? 'text-red-500 dark:text-red-400' : 'text-gray-900 dark:text-white transition-colors'
+  props.error ? 'text-red-500 dark:text-red-400' : 'text-gray-700 dark:text-gray-200 transition-colors'
 ]);
 
 const getFontSizeClass = (value) => {
@@ -126,7 +126,7 @@ const formattedParts = computed(() => {
   
   return ParenthesesHighlighter.formatWithParentheses(
     formatted, 
-    parenthesesTracker.value // Access the computed value
+    parenthesesTracker.value 
   );
 });
 

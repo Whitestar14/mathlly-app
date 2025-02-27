@@ -1,61 +1,58 @@
 /* global.css */
-@font-face {
-  font-family: "Geist Mono";
-  src: url(../fonts/GeistMonoVF.woff2);
-  font-display: swap;
-}
+@tailwind base;
 
-@font-face {
-  font-family: "Geist";
-  src: url(../fonts/GeistVF.woff2);
-  font-display: swap;
-}
+@layer base {
+  @font-face {
+    font-family: "Geist Mono";
+    src: url(../fonts/GeistMonoVF.woff2);
+    font-display: swap; 
+  }
 
-@font-face {
-  font-family: "Reddit mono";
-  src: url(../fonts/RedditMono.ttf);
-  font-display: swap;
-}
+  @font-face {
+    font-family: "Geist";
+    src: url(../fonts/GeistVF.woff2);
+    font-display: swap;
+  }
 
-@font-face {
-  font-family: "Inter";
-  src: url(../fonts/Inter.ttf);
-  font-display: swap;
-}
+  @font-face {
+    font-family: "Reddit Mono";
+    src: url(../fonts/RedditMono.ttf);
+    font-display: swap;
+  }
 
-@font-face {
-  font-family: "Apple Sans";
-  src: url(../fonts/SFUIText-Regular.otf);
-  font-display: swap;
-}
+  @font-face {
+    font-family: "Inter";
+    src: url(../fonts/Inter.ttf);
+    font-display: swap;
+  }
 
-* {
-  transition: background, opacity, color, background-color 0.3s ease;
-}
+  @font-face {
+    font-family: "Apple Sans";
+    src: url(../fonts/SFUIText-Regular.otf);
+    font-display: swap;
+  }
 
-body {
-  font-family: "Geist", "Inter", "DM Sans", sans-serif;
-  font-weight: 400; 
-  transition: all 0.3s ease;
-}
+  body {
+    @apply font-sans font-medium transition-all duration-300;
+  }
 
-kbd,
-.monospace,
-.main-display {
-  font-family: "Geist Mono", monospace;
-}
+  kbd,
+  .monospace,
+  .main-display {
+    @apply font-mono;
+  }
 
-.toast {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 
+  .toast {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 
   dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm w-full;
-}
+  }
 
-.toast + .toast {
-  @apply mt-2;
-}
+  .toast + .toast {
+    @apply mt-2;
+  }
 
-/* Settings toggle classes */
-.animation-disabled * {
-  animation: none !important;
-  transition: all 0ms !important;
+  /* Settings toggle classes */
+  .animation-disabled * {
+    @apply !animate-none !duration-0;
+  }
 }

@@ -10,9 +10,9 @@ export const useKeyboardStore = defineStore("keyboard", () => {
       },
       "ctrl+l": { action: "toggleSidebar", description: "Toggle Sidebar" },
       "ctrl+h": { action: "toggleHistory", description: "Toggle History" },
-      "ctrl+s": { action: "openSettings", description: "Open Settings" },
-      "ctrl+ ": { action: "openShortcutModal", description: "Open Shortcuts"},
-      "ctrl+shift+m": {action: "toggleTheme", description: "Toggle Theme"},
+      "ctrl+,": { action: "openSettings", description: "Open Settings" },
+      "ctrl+ ": { action: "openShortcutModal", description: "Open Shortcuts" },
+      "ctrl+shift+m": { action: "toggleTheme", description: "Toggle Theme" },
     },
     calculator: {
       escape: { action: "clear", description: "Clear Input" },
@@ -57,12 +57,18 @@ export const useKeyboardStore = defineStore("keyboard", () => {
       e: { action: "input", payload: "E", description: "Hex E" },
       f: { action: "input", payload: "F", description: "Hex F" },
     },
+    tools: {
+      "ctrl+enter": { action: "process", description: "Process Input" },
+      "ctrl+s": { action: "swap", description: "Swap Input and Output" },
+      "ctrl+v": { action: "paste", description: "Paste from Clipboard" }, // New shortcut
+      "ctrl+c": { action: "copy", description: "Copy Result" }, // New shortcut
+    },
   });
 
   const isEnabled = ref(true);
-  const contextStack = ref(['global']); // Use a stack to manage context hierarchy
+  const contextStack = ref(["global"]); // Use a stack to manage context hierarchy
   const debug = ref(true);
-  const currentBase = ref('DEC');
+  const currentBase = ref("DEC");
 
   // Base validation maps
   const BASE_VALIDATORS = {
@@ -71,11 +77,8 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     DEC: /^[0-9]$/,
     HEX: /^[0-9a-fA-F]$/,
   };
-  
-  const COMMON_KEYS = [
-    'backspace', 'enter', 'escape',
-    '+', '-', '×', '÷', '(',  ')',
-  ];
+
+  const COMMON_KEYS = ["backspace", "enter", "escape", "+", "-", "×", "÷", "(", ")"];
 
   // Compute active shortcuts based on context stack
   const activeShortcuts = computed(() => {
@@ -90,18 +93,18 @@ export const useKeyboardStore = defineStore("keyboard", () => {
   });
 
   function setContext(ctx) {
-    if (debug.value) console.log('Setting context:', ctx);
+    if (debug.value) console.log("Setting context:", ctx);
     // Remove existing instance of context if it exists
-    contextStack.value = contextStack.value.filter(c => c !== ctx);
+    contextStack.value = contextStack.value.filter((c) => c !== ctx);
     // Add new context to top of stack
     contextStack.value.push(ctx);
   }
 
   function clearContext(ctx) {
-    if (debug.value) console.log('Clearing context:', ctx);
-    contextStack.value = contextStack.value.filter(c => c !== ctx);
+    if (debug.value) console.log("Clearing context:", ctx);
+    contextStack.value = contextStack.value.filter((c) => c !== ctx);
     if (contextStack.value.length === 0) {
-      contextStack.value = ['global']; 
+      contextStack.value = ["global"];
     }
   }
 
@@ -118,7 +121,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     if (COMMON_KEYS.includes(normalizedKey)) return true;
 
     // If not in programmer mode, allow all numeric input
-    if (!contextStack.value.includes('programmer')) {
+    if (!contextStack.value.includes("programmer")) {
       return /^[0-9.]$/.test(normalizedKey);
     }
 
@@ -131,11 +134,11 @@ export const useKeyboardStore = defineStore("keyboard", () => {
   function normalizeKey(key) {
     // Handle special key mappings
     const keyMap = {
-      'enter': 'enter',
-      'backspace': 'backspace',
-      'escape': 'escape',
-      '*': '×',
-      '/': '÷'
+      enter: "enter",
+      backspace: "backspace",
+      escape: "escape",
+      "*": "×",
+      "/": "÷",
     };
     return keyMap[key] || key;
   }

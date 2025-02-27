@@ -18,7 +18,8 @@
               ? 'text-indigo-600 dark:text-indigo-300'
               : 'text-gray-600 dark:text-gray-400',
           ]"
-        >{{ base }}</span>
+          >{{ base }}</span
+        >
         <span
           :class="[
             'monospace',
@@ -26,9 +27,10 @@
               ? 'text-indigo-500 dark:text-indigo-300 font-semibold'
               : 'text-gray-800 dark:text-gray-300',
           ]"
-        >{{
-          formatDisplayValue(displayValues[base]?.display || 0, base)
-        }}</span>
+          >{{
+            formatDisplayValue(displayValues[base]?.display || 0, base)
+          }}</span
+        >
       </button>
     </div>
 
@@ -67,10 +69,7 @@
         >
           <ChevronsRightIcon class="w-6 h-6 mx-auto" />
         </button>
-        <button
-          class="calc-btn calc-function-btn"
-          @click="handleClick('CE')"
-        >
+        <button class="calc-btn calc-function-btn" @click="handleClick('CE')">
           CE
         </button>
         <button
@@ -217,10 +216,7 @@
         >
           .
         </button>
-        <button
-          class="calc-btn calc-operator-btn"
-          @click="handleClick('=')"
-        >
+        <button class="calc-btn calc-operator-btn" @click="handleClick('=')">
           =
         </button>
       </div>
@@ -258,20 +254,16 @@ const handleBaseChange = (base) => {
 };
 
 const handleClick = (value) => {
-    emit("button-click", value);
+  emit("button-click", value);
 };
 
-// Fix: Remove value parameter since it's not being used correctly
 const isMaxLengthReached = computed(() => props.inputLength >= props.maxLength);
 
-// Fix: Update isButtonEnabled to handle max length and allowed characters
 const isButtonEnabled = computed(() => (button) => {
-  // First check max length for number inputs
   if (isMaxLengthReached.value && /^[0-9A-F.]$/.test(button.toUpperCase())) {
     return false;
   }
 
-  // Then check base restrictions
   switch (props.activeBase) {
     case "HEX":
       return /^[0-9A-F]$/.test(button.toUpperCase());
@@ -290,19 +282,17 @@ const formatDisplayValue = (value, base) => {
   if (!value) return "0";
 
   const MAX_PREVIEW_LENGTHS = {
-    BIN: 12, // Reduced from 16 to show fewer digits in buttons
-    OCT: 8, // Reduced from 12
-    DEC: 8, // Reduced from 10
-    HEX: 6, // Reduced from 8
+    BIN: 12,
+    OCT: 8,
+    DEC: 8,
+    HEX: 6,
   };
 
-  // Process the value based on base
   let result = value
     .toString()
     .replace(/^(0x|0o|0b)/, "")
     .toUpperCase();
 
-  // Truncate if too long and add ellipsis
   if (result.length > MAX_PREVIEW_LENGTHS[base]) {
     return result.slice(0, MAX_PREVIEW_LENGTHS[base]) + "…";
   }
@@ -313,5 +303,4 @@ const formatDisplayValue = (value, base) => {
 
 <style lang="css" scoped>
 @import url("../../assets/css/buttons.css");
-
 </style>

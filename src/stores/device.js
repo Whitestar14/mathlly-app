@@ -1,42 +1,47 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { useEventListener } from '@vueuse/core'
+import { defineStore } from "pinia";
+import { ref, onUnmounted } from "vue";
+import { useEventListener } from "@vueuse/core";
 
-export const useDeviceStore = defineStore('device', () => {
-  const isMobile = ref(false)
-  const isResizing = ref(false)
-  let resizeTimeout
+export const useDeviceStore = defineStore("device", () => {
+  const isMobile = ref(false);
+  const isResizing = ref(false);
+  let resizeTimeout = null;
 
   const updateDeviceInfo = () => {
-    if (resizeTimeout) {
-      clearTimeout(resizeTimeout)
+    if (resizeTimeout !== null) {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = null;
     }
-    
+
     if (!isResizing.value) {
-      isResizing.value = true
+      isResizing.value = true;
     }
 
     resizeTimeout = setTimeout(() => {
-      const newIsMobile = window.innerWidth < 768
-      isMobile.value = newIsMobile
-      isResizing.value = false
-    }, 100)
-  }
+      const newIsMobile = window.innerWidth < 768;
+      isMobile.value = newIsMobile;
+      isResizing.value = false;
+    }, 100);
+  };
 
   const initializeDeviceInfo = () => {
-    updateDeviceInfo()
-    useEventListener(window, 'resize', updateDeviceInfo)
-  }
+    updateDeviceInfo();
+    useEventListener(window, "resize", updateDeviceInfo);
+  };
 
   const destroyDeviceInfo = () => {
-    clearTimeout(resizeTimeout)
-  }
+    if (resizeTimeout !== null) {
+      clearTimeout(resizeTimeout);
+    }
+  };
+
+  onUnmounted(destroyDeviceInfo);
 
   return {
     isMobile,
     isResizing,
     updateDeviceInfo,
     initializeDeviceInfo,
-    destroyDeviceInfo
-  }
-})
+    destroyDeviceInfo,
+  };
+});

@@ -20,17 +20,16 @@ const props = defineProps({
   }
 })
 
-const variantClass = computed(() => `btn-${props.variant}`)
+const variantClass = computed(() => props.variant === 'default' ? 'btn-default' : `btn-${props.variant}`)
 const sizeClass = computed(() => props.size === 'default' ? 'btn-default-size' : `btn-${props.size}`)
+const classes = {[variantClass.value]: true, [sizeClass.value]: true, 'btn': true};
 </script>
 
 <template>
   <button
     :type="type"
     :disabled="disabled"
-    :class="[variantClass.valueOf(), sizeClass.valueOf()]"
-    class="btn"
-    v-bind="$attrs"
+    :class="classes"
   >
     <slot />
   </button>

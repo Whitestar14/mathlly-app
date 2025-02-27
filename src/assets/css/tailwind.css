@@ -1,5 +1,50 @@
+/*
+  @tailwind base;
+
+  The base layer is where Tailwind injects its base styles. These are the default styles
+  that are applied to all elements, like resetting margins, setting default font families, etc.
+
+  It's generally recommended to leave this layer alone and only add your own global styles
+  if absolutely necessary. For example, you might add custom CSS variables or global resets
+  that Tailwind doesn't handle.
+
+  In this file, you're using @layer base to:
+  - Define custom CSS variables for colors (border-input, ring, ring-offset)
+  - Apply dark mode overrides for these variables.
+  - Customize the VueTippy tooltip styles with Tailwind utilities.
+*/
 @tailwind base;
+
+/*
+  @tailwind components;
+
+  The components layer is where you define reusable UI patterns that you often use in your project.
+  These are typically more complex than single utility classes and often combine multiple utilities.
+
+  For example, you might define a button component that includes styles for padding, background color,
+  text color, rounded corners, and hover effects.
+
+  In this file, you're using @layer components to:
+  - Define various button styles (primary, destructive, outline, secondary, ghost, link).
+  - Define button sizes (default, small, large, icon).
+  - Use @apply to combine multiple Tailwind utility classes into these component definitions.
+*/
 @tailwind components;
+
+/*
+  @tailwind utilities;
+
+  The utilities layer is where Tailwind generates all of its utility classes. These are the single-purpose
+  classes that you use to style your HTML elements directly.
+
+  You can also use this layer to add your own custom utility classes that you use frequently in your project.
+  This allows you to create your own design system on top of Tailwind's existing utility classes.
+
+  In this file, you're using @layer utilities to:
+  - Define custom background color utilities (bg-muted, bg-accent, bg-muted-30).
+  - Define a custom ring offset utility (ring-offset-background).
+  - Use @apply to combine Tailwind utility classes into these custom utility definitions.
+*/
 @tailwind utilities;
 
 @layer base {
@@ -13,50 +58,79 @@
     --ring: theme("colors.indigo.400");
     --ring-offset: theme("colors.gray.900");
   }
+
+  /* VueTippy custom tooltip styles */
+  .tippy-box[data-theme~="custom"] {
+    @apply bg-gray-100 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300/90 border border-solid border-gray-200 dark:border-gray-700/90 shadow-md;
+  }
 }
 
-.btn {
-  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
-}
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none 
+    focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+  }
 
-.btn-default {
-  @apply bg-primary text-primary-foreground hover:bg-primary-dark dark:hover:bg-primary-light;
-}
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary-dark dark:hover:bg-primary-light;
+  }
 
-.btn-destructive {
-  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
-}
+  .btn-destructive {
+    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+  }
 
-.btn-outline {
-  @apply border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/30 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white;
-}
+  .btn-outline {
+    @apply border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/30 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white;
+  }
 
-.btn-secondary {
-  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
-}
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+  }
 
-.btn-ghost {
-  @apply hover:bg-gray-100 dark:hover:bg-gray-700/30 hover:text-gray-900 dark:hover:text-white dark:text-gray-300;
-}
+  .btn-ghost {
+    @apply hover:bg-gray-100/70 dark:hover:bg-gray-700/70 hover:text-gray-900 dark:hover:text-gray-100 text-gray-600 dark:text-gray-300;
+  }
 
-.btn-link {
-  @apply text-primary underline-offset-4 hover:underline;
-}
+  .btn-link {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
 
-.btn-default-size {
-  @apply h-10 py-2 px-4;
-}
+  .btn-default-size {
+    @apply h-10 py-2 px-4;
+  }
 
-.btn-sm {
-  @apply h-9 px-3 rounded-md;
-}
+  .btn-sm {
+    @apply h-9 px-3 rounded-md;
+  }
 
-.btn-lg {
-  @apply h-11 px-8 rounded-md;
-}
+  .btn-lg {
+    @apply h-11 px-8 rounded-md;
+  }
 
-.btn-icon {
-  @apply h-10 w-10;
+  .btn-icon {
+    @apply size-9 rounded-md;
+  }
+
+  .loader-macro {
+    @apply fixed inset-0 flex justify-center items-center z-50;
+    @apply bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm;
+  }
+
+  .loader-macro-spinner {
+    @apply absolute inset-0 flex justify-center items-center;
+  }
+
+  .loader-mini {
+    @apply flex justify-center items-center min-w-10 min-h-10;
+  }
+
+  .loader-micro {
+    @apply flex justify-center items-center min-w-6 min-h-6;
+  }
+
+  .loader-spin-slow {
+    animation: loader-spin 120s linear infinite;
+  }
 }
 
 @layer utilities {
@@ -74,5 +148,27 @@
 
   .ring-offset-background {
     --tw-ring-offset-color: theme("colors.background.DEFAULT");
+  }
+
+  @keyframes loader-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loader-fade {
+    animation: loader-fade 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes loader-fade {
+    from {
+      opacity: 0.4;
+    }
+    to {
+      opacity: 0.8;
+    }
   }
 }

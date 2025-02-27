@@ -1,34 +1,32 @@
-<!-- App.vue -->
 <template>
+<div v-if="isLoadingApp">
+    <base-loader variant="macro" />
+  </div>
   <div
+    v-else
     class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
     :class="{
-      'animation-disabled': settings.animationDisabled
+      'animation-disabled': settings.animationDisabled,
     }"
   >
     <sidebar-menu
-      :is-open="isSidebarOpen"
+      :is-open="isOpen"
       :is-mobile="deviceStore.isMobile"
-      @update:isOpen="updateSidebarOpen"
-      @openAbout="navigateToAbout"
-      @openSettings="navigateToSettings"
+      @update:isOpen="close"
     />
 
     <div
       class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-      :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']"
+      :class="[!deviceStore.isMobile && isOpen ? 'ml-64' : '']"
     >
       <calculator-header
-        :is-sidebar-open="isSidebarOpen"
+        :is-open="isOpen"
         :is-mobile="deviceStore.isMobile"
-        @toggle-sidebar="toggleSidebar"
+        @toggle-sidebar="toggle"
       />
 
       <router-view v-slot="{ Component }">
-        <Transition
-          name="fade"
-          mode="out-in"
-        >
+        <Transition name="fade" mode="out-in">
           <calculator-loader v-if="displayStore.isLoading" />
           <component
             :is="Component"
@@ -70,52 +68,41 @@ import { onMounted, onUnmounted, provide, ref, computed, watch } from "vue";
 import { useDisplayStore } from "@/stores/display";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboardStore } from "@/stores/keyboard";
-import { useDeviceStore } from '@/stores/device';
+import { useDeviceStore } from "@/stores/device";
 import { useKeyboard } from "@/composables/useKeyboard";
-import { useSidebar } from '@/composables/useSidebar'
+import { useSidebar } from "@/composables/useSidebar";
 import Toast from "@/components/base/FeatureToast.vue";
 import CalculatorLoader from "@/components/ui/CalculatorLoader.vue";
-import CalculatorHeader from "@/layouts/CalculatorHeader.vue";
+import CalculatorHeader from "@/layouts/AppHeader.vue";
 import HistoryPanel from "@/layouts/HistoryPanel.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
+import { useLoader } from "@/composables/useLoader"; // Import useLoader
+import BaseLoader from "@/components/base/BaseLoader.vue"; // Import BaseLoader
 
 const currentInput = ref("0");
 const isHistoryOpen = ref(false);
 const deviceStore = useDeviceStore();
 const router = useRouter();
-const settingsStore = useSettingsStore(); // Use the store properly
-const settings = settingsStore; // For compatibility with existing code
+const settingsStore = useSettingsStore();
+const settings = settingsStore;
 const displayStore = useDisplayStore();
 const mode = computed(() => settingsStore.activeMode);
-const {
-  isOpen: isSidebarOpen,
-  toggle: toggleSidebar,
-  close: closeSidebar,
-  handleResize: handleSidebarResize
-} = useSidebar(deviceStore.isMobile)
+const { isOpen, toggle, close, handleResize } = useSidebar(
+  deviceStore.isMobile
+);
 
 provide("currentInput", currentInput);
 
-const updateSidebarOpen = (value) => {
-  isSidebarOpen.value = value;
-};
-
-const navigateToSettings = () => router.push("/settings");
-const navigateToAbout = () => router.push("/about");
-
 const updateMode = async (newMode) => {
-  // Only update current mode, don't change default
   settingsStore.setCurrentMode(newMode);
 };
 
 const updateSettings = async (newSettings) => {
-  // When updating from settings, use the new setDefaultMode for mode changes
   if (newSettings.mode !== settingsStore.mode) {
     await settingsStore.setDefaultMode(newSettings.mode);
   }
-  // Save other settings
   const settingsToSave = { ...newSettings };
-  delete settingsToSave.mode; 
+  delete settingsToSave.mode;
   await settingsStore.saveSettings(settingsToSave);
 };
 
@@ -144,29 +131,25 @@ const deleteHistoryItem = async (id) => {
   updateHistory();
 };
 
-// Update sidebar state when device type changes
 watch(() => deviceStore.isMobile, (newIsMobile) => {
-  handleSidebarResize(newIsMobile)
+  handleResize(newIsMobile);
   if (newIsMobile) isHistoryOpen.value = false;
 });
 
-// Close sidebar on mobile navigation
 watch(router.currentRoute, () => {
   if (deviceStore.isMobile) {
-    closeSidebar()
+    close();
   }
 });
 
-const updateHistory = () => {
-  // This function can be used to trigger any necessary updates
-};
+const updateHistory = () => {};
 
 useKeyboard("global", {
   toggleHistory: () => {
     toggleHistory();
   },
   toggleSidebar: () => {
-    toggleSidebar();
+    toggle();
   },
   openSettings: () => {
     router.push("/settings");
@@ -176,17 +159,24 @@ useKeyboard("global", {
   },
 });
 
-onMounted(() => {
+const isLoadingApp = ref(true);
+const { showLoader, hideLoader } = useLoader(); // use the loader composable
+
+onMounted(async () => {
   deviceStore.initializeDeviceInfo();
-  (async function () {
+  try {
+    showLoader('macro'); // show macro loader
     await Promise.all([
       settingsStore.loadSettings(),
-      new Promise(resolve => setTimeout(resolve, 800))
+      router.isReady(),
+      new Promise((resolve) => setTimeout(resolve, 800)),
     ]);
-    // Initialize current mode from default
     settingsStore.setCurrentMode(settingsStore.defaultMode);
     displayStore.updateState({ isLoading: false });
-  })();
+  } finally {
+    isLoadingApp.value = false;
+    hideLoader(); // hide the loader
+  }
   const keyboardStore = useKeyboardStore();
   keyboardStore.debug = false;
 });
@@ -195,3 +185,15 @@ onUnmounted(() => {
   deviceStore.destroyDeviceInfo();
 });
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 300ms ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

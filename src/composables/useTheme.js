@@ -27,9 +27,17 @@ export function useTheme() {
     });
   };
 
+  const setTheme = async (newTheme) => {
+    await settings.saveSettings({
+      ...settings.$state,
+      theme: newTheme,
+    });
+  }
+
   return {
     isDark,
     selectedTheme,
-    toggleTheme
+    toggleTheme,
+    setTheme
   };
 }

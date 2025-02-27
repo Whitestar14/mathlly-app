@@ -1,7 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <div
+    class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+  >
     <header
-      class="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
+      class="sticky top-0 z-[5] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
     >
       <div class="container mx-auto flex items-center h-16 px-4">
         <button
@@ -10,9 +12,7 @@
         >
           <ArrowLeftIcon class="h-6 w-6" />
         </button>
-        <h1 class="text-xl font-semibold">
-          Settings
-        </h1>
+        <h1 class="text-xl font-semibold">Settings</h1>
       </div>
     </header>
 
@@ -24,13 +24,16 @@
               Display Settings
             </h2>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6"
+          >
             <div class="space-y-4">
               <div>
                 <label
                   for="precision"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-                >Precision</label>
+                  >Precision</label
+                >
                 <Select
                   v-model="localSettings.precision"
                   :options="precisionOptions"
@@ -40,33 +43,43 @@
                 <label
                   for="useFractions"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >Use
-                  Fractions</label>
+                  >Use Fractions</label
+                >
                 <Switch v-model="localSettings.useFractions" />
               </div>
 
-              <div class="space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div
+                class="space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700"
+              >
+                <h3
+                  class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Number Formatting
                 </h3>
                 <div class="flex items-center justify-between py-2">
                   <label
                     for="useThousandsSeparator"
                     class="text-sm text-gray-600 dark:text-gray-400"
-                  >Use Thousands
-                    Separator</label>
+                    >Use Thousands Separator</label
+                  >
                   <Switch v-model="localSettings.useThousandsSeparator" />
                 </div>
                 <div class="flex items-center justify-between py-2">
-                  <label class="text-sm text-gray-600 dark:text-gray-400">Binary Numbers</label>
+                  <label class="text-sm text-gray-600 dark:text-gray-400"
+                    >Binary Numbers</label
+                  >
                   <Switch v-model="localSettings.formatBinary" />
                 </div>
                 <div class="flex items-center justify-between py-2">
-                  <label class="text-sm text-gray-600 dark:text-gray-400">Hexadecimal Numbers</label>
+                  <label class="text-sm text-gray-600 dark:text-gray-400"
+                    >Hexadecimal Numbers</label
+                  >
                   <Switch v-model="localSettings.formatHexadecimal" />
                 </div>
                 <div class="flex items-center justify-between py-2">
-                  <label class="text-sm text-gray-600 dark:text-gray-400">Octal Numbers</label>
+                  <label class="text-sm text-gray-600 dark:text-gray-400"
+                    >Octal Numbers</label
+                  >
                   <Switch v-model="localSettings.formatOctal" />
                 </div>
               </div>
@@ -80,17 +93,16 @@
               Calculator Mode
             </h2>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+          >
             <div>
               <label
                 for="mode"
                 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-              >Default
-                Mode</label>
-              <Select
-                v-model="localSettings.mode"
-                :options="modeOptions"
-              />
+                >Default Mode</label
+              >
+              <Select v-model="localSettings.mode" :options="modeOptions" />
             </div>
           </div>
         </section>
@@ -101,27 +113,27 @@
               Themes & Preferences
             </h2>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+          <div
+            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4"
+          >
             <div>
               <label
                 for="theme"
                 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-              >Theme</label>
-              <Select
-                v-model="localSettings.theme"
-                :options="themeOptions"
-              />
+                >Theme</label
+              >
+              <Select v-model="localSettings.theme" :options="themeOptions" />
             </div>
             <div class="flex items-center justify-between py-2">
               <label
                 for="borderless"
                 class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Disable Animations</label>
+                >Disable Animations</label
+              >
               <Switch v-model="localSettings.animationDisabled" />
             </div>
           </div>
         </section>
-
 
         <div class="flex justify-end space-x-4 pt-4">
           <button
@@ -142,20 +154,18 @@
   </div>
 </template>
 
-
 <script setup>
 import { ArrowLeftIcon } from "lucide-vue-next";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useSettingsStore } from '@/stores/settings';
+import { useSettingsStore } from "@/stores/settings";
 import Select from "@/components/ui/SelectBar.vue";
 import Switch from "@/components/ui/ToggleBar.vue";
-import { useTitle } from '@vueuse/core';
+import { useTitle } from "@vueuse/core";
 const router = useRouter();
 useTitle(`${router.currentRoute.value.name} | Mathlly`);
 const settingsStore = useSettingsStore();
 
-// Initialize local settings from store
 const localSettings = ref({
   precision: settingsStore.precision,
   useFractions: settingsStore.useFractions,
@@ -168,7 +178,6 @@ const localSettings = ref({
   animationDisabled: settingsStore.animationDisabled,
 });
 
-// Options for select inputs
 const precisionOptions = [
   { value: 0, label: "0" },
   { value: 1, label: "1" },
@@ -184,19 +193,19 @@ const precisionOptions = [
 ];
 
 const modeOptions = [
-  { value: 'Standard', label: 'Standard' },
-  { value: 'Programmer', label: 'Programmer' }
+  { value: "Standard", label: "Standard" },
+  { value: "Programmer", label: "Programmer" },
 ];
 
 const themeOptions = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'System' }
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "system", label: "System" },
 ];
 
 onMounted(async () => {
   await settingsStore.loadSettings();
-  // Update local settings after loading from store
+
   localSettings.value = {
     precision: settingsStore.precision,
     useFractions: settingsStore.useFractions,
@@ -206,7 +215,7 @@ onMounted(async () => {
     formatOctal: settingsStore.formatOctal,
     theme: settingsStore.theme,
     mode: settingsStore.mode,
-    animationDisabled: settingsStore.animationDisabled
+    animationDisabled: settingsStore.animationDisabled,
   };
 });
 
@@ -215,11 +224,10 @@ const goBack = () => {
 };
 
 const saveSettings = async () => {
-  // Using setDefaultMode instead of updateMode
   await settingsStore.setDefaultMode(localSettings.value.mode);
-  // Save other settings
+
   const settingsToSave = { ...localSettings.value };
-  delete settingsToSave.mode; // Remove mode as it's already been set
+  delete settingsToSave.mode;
   await settingsStore.saveSettings(settingsToSave);
   goBack();
 };
