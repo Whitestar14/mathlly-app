@@ -1,39 +1,31 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 
 export function useSidebar(isMobile) {
   const preferences = useLocalStorage('sidebar-preferences', {
     desktop: {
       isOpen: true,
-      wasManuallyClosed: false
     },
     mobile: {
       isOpen: false
     }
   })
 
-  // Respect manual closure state on initial load
-  const isOpen = ref(isMobile ? false : 
-    preferences.value.desktop.wasManuallyClosed ? false : preferences.value.desktop.isOpen
-  )
+  const isOpen = ref(isMobile ? false : preferences.value.desktop.isOpen)
 
   const toggle = () => {
     isOpen.value = !isOpen.value
-    updatePreferences(true)
+    updatePreferences()
   }
 
   const close = () => {
     isOpen.value = false
-    updatePreferences(true)
+    updatePreferences()
   }
 
-  const updatePreferences = (isManualAction = false) => {
+  const updatePreferences = () => {
     if (!isMobile) {
       preferences.value.desktop.isOpen = isOpen.value
-      if (isManualAction) {
-        // Update manual closure state
-        preferences.value.desktop.wasManuallyClosed = !isOpen.value
-      }
     }
   }
 
@@ -41,12 +33,13 @@ export function useSidebar(isMobile) {
     if (newIsMobile) {
       isOpen.value = false
     } else {
-      // Respect manual closure state when switching to desktop
-      isOpen.value = preferences.value.desktop.wasManuallyClosed ? 
-        false : 
-        preferences.value.desktop.isOpen
+        isOpen.value = preferences.value.desktop.isOpen
     }
   }
+
+  watch(isOpen, () => {
+    updatePreferences()
+  })
 
   return {
     isOpen,

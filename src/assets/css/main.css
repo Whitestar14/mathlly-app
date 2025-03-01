@@ -47,6 +47,10 @@
 */
 @tailwind utilities;
 
+/* CSS Stylesheet Imports */
+@import url(./buttons.css);
+
+  
 @layer base {
   :root {
     --border-input: theme("colors.gray.200");
@@ -57,6 +61,65 @@
     --border-input: theme("colors.gray.700");
     --ring: theme("colors.indigo.400");
     --ring-offset: theme("colors.gray.900");
+  }
+
+  /* Global definitions */
+  @font-face {
+    font-family: "Geist Mono";
+    src: url(../fonts/GeistMonoVF.woff2);
+    font-display: swap; 
+  }
+
+  @font-face {
+    font-family: "Geist";
+    src: url(../fonts/GeistVF.woff2);
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Reddit Mono";
+    src: url(../fonts/RedditMono.ttf);
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Inter";
+    src: url(../fonts/Inter.ttf);
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Apple Sans";
+    src: url(../fonts/SFUIText-Regular.otf);
+    font-display: swap;
+  }
+
+  body {
+    @apply font-sans font-medium transition-all duration-300;
+  }
+
+  kbd,
+  .monospace,
+  .main-display {
+    @apply font-mono;
+  }
+
+  .toast {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 
+  dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm w-full;
+  }
+
+  .toast + .toast {
+    @apply mt-2;
+  }
+
+  /* Settings toggle classes */
+  .animation-disabled * {
+    @apply !animate-none !duration-0;
+  }
+
+  textarea {
+    @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
   }
 
   /* VueTippy custom tooltip styles */
@@ -76,7 +139,7 @@
   }
 
   .btn-destructive {
-    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-gray-300 dark:text-gray-700 dark:hover:bg-gray-200;
   }
 
   .btn-outline {
@@ -96,7 +159,7 @@
   }
 
   .btn-default-size {
-    @apply h-10 py-2 px-4;
+    @apply h-9 py-1 px-3 rounded-md;
   }
 
   .btn-sm {
@@ -108,28 +171,7 @@
   }
 
   .btn-icon {
-    @apply size-9 rounded-md;
-  }
-
-  .loader-macro {
-    @apply fixed inset-0 flex justify-center items-center z-50;
-    @apply bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm;
-  }
-
-  .loader-macro-spinner {
-    @apply absolute inset-0 flex justify-center items-center;
-  }
-
-  .loader-mini {
-    @apply flex justify-center items-center min-w-10 min-h-10;
-  }
-
-  .loader-micro {
-    @apply flex justify-center items-center min-w-6 min-h-6;
-  }
-
-  .loader-spin-slow {
-    animation: loader-spin 120s linear infinite;
+    @apply size-8 rounded-md;
   }
 }
 
@@ -150,13 +192,6 @@
     --tw-ring-offset-color: theme("colors.background.DEFAULT");
   }
 
-  @keyframes loader-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   .loader-fade {
@@ -171,4 +206,3 @@
       opacity: 0.8;
     }
   }
-}

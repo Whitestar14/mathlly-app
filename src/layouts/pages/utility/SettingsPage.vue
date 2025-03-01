@@ -12,7 +12,9 @@
         >
           <ArrowLeftIcon class="h-6 w-6" />
         </button>
-        <h1 class="text-xl font-semibold">Settings</h1>
+        <h1 class="text-xl font-semibold">
+          Settings
+        </h1>
       </div>
     </header>
 
@@ -32,8 +34,7 @@
                 <label
                   for="precision"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-                  >Precision</label
-                >
+                >Precision</label>
                 <Select
                   v-model="localSettings.precision"
                   :options="precisionOptions"
@@ -43,8 +44,7 @@
                 <label
                   for="useFractions"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >Use Fractions</label
-                >
+                >Use Fractions</label>
                 <Switch v-model="localSettings.useFractions" />
               </div>
 
@@ -60,26 +60,19 @@
                   <label
                     for="useThousandsSeparator"
                     class="text-sm text-gray-600 dark:text-gray-400"
-                    >Use Thousands Separator</label
-                  >
+                  >Use Thousands Separator</label>
                   <Switch v-model="localSettings.useThousandsSeparator" />
                 </div>
                 <div class="flex items-center justify-between py-2">
-                  <label class="text-sm text-gray-600 dark:text-gray-400"
-                    >Binary Numbers</label
-                  >
+                  <label class="text-sm text-gray-600 dark:text-gray-400">Binary Numbers</label>
                   <Switch v-model="localSettings.formatBinary" />
                 </div>
                 <div class="flex items-center justify-between py-2">
-                  <label class="text-sm text-gray-600 dark:text-gray-400"
-                    >Hexadecimal Numbers</label
-                  >
+                  <label class="text-sm text-gray-600 dark:text-gray-400">Hexadecimal Numbers</label>
                   <Switch v-model="localSettings.formatHexadecimal" />
                 </div>
                 <div class="flex items-center justify-between py-2">
-                  <label class="text-sm text-gray-600 dark:text-gray-400"
-                    >Octal Numbers</label
-                  >
+                  <label class="text-sm text-gray-600 dark:text-gray-400">Octal Numbers</label>
                   <Switch v-model="localSettings.formatOctal" />
                 </div>
               </div>
@@ -100,9 +93,11 @@
               <label
                 for="mode"
                 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-                >Default Mode</label
-              >
-              <Select v-model="localSettings.mode" :options="modeOptions" />
+              >Default Mode</label>
+              <Select
+                v-model="localSettings.mode"
+                :options="modeOptions"
+              />
             </div>
           </div>
         </section>
@@ -120,16 +115,17 @@
               <label
                 for="theme"
                 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
-                >Theme</label
-              >
-              <Select v-model="localSettings.theme" :options="themeOptions" />
+              >Theme</label>
+              <Select
+                v-model="localSettings.theme"
+                :options="themeOptions"
+              />
             </div>
             <div class="flex items-center justify-between py-2">
               <label
                 for="borderless"
                 class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >Disable Animations</label
-              >
+              >Disable Animations</label>
               <Switch v-model="localSettings.animationDisabled" />
             </div>
           </div>

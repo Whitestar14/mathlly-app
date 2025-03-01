@@ -57,7 +57,6 @@ import {
 import { useRoute } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
-import { useDisplayStore } from "@/stores/display";
 import { useTheme } from "@/composables/useTheme";
 import MainMenu from "@/components/ui/MainMenu.vue"
 import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue";
@@ -79,7 +78,7 @@ const emit = defineEmits(["update:mode", "toggle-sidebar", "update:open"]);
 const settings = useSettingsStore();
 const route = useRoute();
 const currentRoute = ref(route.path);
-const { modes } = useDisplayStore();
+const modes = ['Standard', 'Scientific (soon)', 'Programmer'];
 const isShortcutModalOpen = ref(false);
 
 const { isDark, toggleTheme } = useTheme();

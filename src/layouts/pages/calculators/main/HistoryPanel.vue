@@ -21,7 +21,7 @@
       <div class="p-4 h-full flex flex-col">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
             History
           </h2>
           <Button
@@ -35,7 +35,7 @@
         </div>
 
         <div
-          class="h-[50svh] overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+          class="h-[50svh] overflow-hidden overflow-y-auto flex-grow scrollbar-thin"
         >
           <div
             v-if="mode === 'Programmer'"
@@ -77,12 +77,12 @@
                       <div class="text-sm text-gray-600 dark:text-gray-400">
                         {{ item.expression }}
                       </div>
-                      <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                      <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         {{ item.result }}
                       </div>
 
                       <Button
-                        v-tippy="{ content: 'Delete item', placement: 'top' }"
+                        v-tippy="{ content: 'Delete item' }"
                         variant="ghost"
                         size="icon"
                         class="absolute right-2 top-1/2 transform -translate-y-1/2"

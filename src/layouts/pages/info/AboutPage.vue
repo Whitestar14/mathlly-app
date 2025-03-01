@@ -12,7 +12,9 @@
         >
           <ArrowLeftIcon class="h-6 w-6" />
         </button>
-        <h1 class="text-xl font-semibold">About Mathlly</h1>
+        <h1 class="text-xl font-semibold">
+          About Mathlly
+        </h1>
       </div>
     </header>
 
@@ -31,7 +33,10 @@
         </span>
       </div>
 
-      <section class="mb-24" style="font-family: 'Geist mono'">
+      <section
+        class="mb-24"
+        style="font-family: 'Geist mono'"
+      >
         <h2
           class="text-4xl sm:text-6xl lg:text-8xl font-semibold tracking-tight mb-4"
         >
@@ -52,7 +57,9 @@
       </section>
 
       <section class="space-y-8">
-        <h3 class="text-2xl font-semibold tracking-tight">Key Features</h3>
+        <h3 class="text-2xl font-semibold tracking-tight">
+          Key Features
+        </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
             v-for="feature in features"
@@ -89,7 +96,9 @@
       </section>
 
       <section class="mt-16 space-y-6">
-        <h3 class="text-2xl font-semibold tracking-tight">Our Mission</h3>
+        <h3 class="text-2xl font-semibold tracking-tight">
+          Our Mission
+        </h3>
         <div
           class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
         >

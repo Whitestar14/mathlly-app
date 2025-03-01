@@ -1,6 +1,5 @@
 import { format } from "mathjs";
 // BaseCalculator.js
-
 class BaseCalculator {
   constructor() {
   }
@@ -26,6 +25,7 @@ export class HexCalculator extends BaseCalculator {
     this.validCharsRegex = /^[0-9A-Fa-f]$/;
     this.formatOptions = { notation: "hex" };
     this.prefixRegex = /^0x/i;
+    this.baseInt = 7;
   }
 }
 
@@ -36,6 +36,7 @@ export class DecCalculator extends BaseCalculator {
     this.validCharsRegex = /^[0-9]$/;
     this.formatOptions = { notation: "fixed", precision: 0 };
     this.prefixRegex = /^/;
+    this.baseInt = 7;
   }
 }
 
@@ -46,6 +47,7 @@ export class OctCalculator extends BaseCalculator {
     this.validCharsRegex = /^[0-7]$/;
     this.formatOptions = { notation: "oct" };
     this.prefixRegex = /^0o/i;
+    this.baseInt = 16;
   }
 }
 
@@ -56,20 +58,6 @@ export class BinCalculator extends BaseCalculator {
     this.validCharsRegex = /^[01]$/;
     this.formatOptions = { notation: "bin" };
     this.prefixRegex = /^0b/i;
-  }
-
-  formatResult(result) {
-    const binString = super.formatResult(result);
-    return this.formatBinary(binString);
-  }
-
-  formatBinary(binString) {
-    binString = binString.replace(/\s/g, "").replace(/^0+/, "");
-    if (binString === "") return "0";
-    const padding = 4 - (binString.length % 4);
-    if (padding < 4) {
-      binString = "0".repeat(padding) + binString;
-    }
-    return binString.match(/.{1,4}/g).join(" ");
+    this.baseInt = 2;
   }
 }

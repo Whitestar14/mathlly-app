@@ -301,7 +301,8 @@ export class ProgrammerOperations {
   }
 
   handlePercent() {
-    const state = this.calculator.states[this.calculator.activeBase];
+    const calculator = this.calculator;
+    const state = calculator.states[calculator.activeBase];
     const currentInput = state.input;
 
     if (currentInput !== "0" && currentInput !== "Error") {
@@ -310,13 +311,20 @@ export class ProgrammerOperations {
         const lastPart = parts[parts.length - 1].trim();
         
         if (lastPart) {
-          const value = parseInt(lastPart, this.calculator.bases[this.calculator.activeBase]);
-          const percentValue = Math.floor(value / 100);
-          parts[parts.length - 1] = percentValue.toString(this.calculator.bases[this.calculator.activeBase]);
-          state.input = parts.join(" ").trim();
+          // Convert from current base to decimal, calculate percent, then back to original base
+          const base = calculator.calculators[calculator.activeBase].baseInt;
+          const value = parseInt(lastPart, base);
+          
+          if (!isNaN(value)) {
+            const percentValue = Math.floor(value / 100);
+            const result = percentValue.toString(base).toUpperCase();
+            parts[parts.length - 1] = result;
+            state.input = parts.join(" ").trim();
+          }
         }
       } catch (err) {
-        console.error('Error in handlePercent:', err);
+        console.error('Error in handlePercent:', state, err);
+        state.input = "Error";
       }
     }
     return { input: state.input };

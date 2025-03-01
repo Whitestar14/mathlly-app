@@ -18,8 +18,7 @@
               ? 'text-indigo-600 dark:text-indigo-300'
               : 'text-gray-600 dark:text-gray-400',
           ]"
-          >{{ base }}</span
-        >
+        >{{ base }}</span>
         <span
           :class="[
             'monospace',
@@ -27,10 +26,9 @@
               ? 'text-indigo-500 dark:text-indigo-300 font-semibold'
               : 'text-gray-800 dark:text-gray-300',
           ]"
-          >{{
-            formatDisplayValue(displayValues[base]?.display || 0, base)
-          }}</span
-        >
+        >{{
+          formatDisplayValue(displayValues[base]?.display || 0, base)
+        }}</span>
       </button>
     </div>
 
@@ -44,7 +42,7 @@
           :key="letter"
           :disabled="!isButtonEnabled(letter)"
           :class="[
-            'calc-btn calc-letter-btn bg-gray-700',
+            'calc-btn calc-letter-btn',
             !isButtonEnabled(letter) || isMaxLengthReached
               ? 'opacity-50 cursor-not-allowed'
               : '',
@@ -69,7 +67,10 @@
         >
           <ChevronsRightIcon class="w-6 h-6 mx-auto" />
         </button>
-        <button class="calc-btn calc-function-btn" @click="handleClick('CE')">
+        <button
+          class="calc-btn calc-function-btn"
+          @click="handleClick('CE')"
+        >
           CE
         </button>
         <button
@@ -216,7 +217,10 @@
         >
           .
         </button>
-        <button class="calc-btn calc-operator-btn" @click="handleClick('=')">
+        <button
+          class="calc-btn calc-operator-btn"
+          @click="handleClick('=')"
+        >
           =
         </button>
       </div>
@@ -300,7 +304,3 @@ const formatDisplayValue = (value, base) => {
   return result;
 };
 </script>
-
-<style lang="css" scoped>
-@import url("../../assets/css/buttons.css");
-</style>

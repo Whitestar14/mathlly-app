@@ -137,15 +137,6 @@ function toggleHistory() {
   max-width: 100%;
 }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
 .main-display[data-base="BIN"] {
   font-size: 1.5rem;
   letter-spacing: -0.5px;

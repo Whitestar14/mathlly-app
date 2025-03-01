@@ -1,10 +1,9 @@
-<!-- Calculator Page.vue -->
 <template>
   <main class="flex-grow flex">
     <div
       class="flex-grow bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300"
     >
-      <div class="p-6 mx-auto">
+      <div class="p-3 mx-auto">
         <calculator-display
           :input="input"
           :preview="preview"
@@ -36,7 +35,6 @@
       :is-open="isHistoryOpen"
       :is-mobile="isMobile"
       :mode="mode"
-      class="w-1/4 min-w-[250px] max-w-[400px]"
       @select-history-item="selectHistoryItem"
       @delete-history-item="deleteHistoryItem"
       @clear-history="clearHistory"
@@ -58,10 +56,10 @@ import { useHistory } from "@/composables/useHistory";
 import { useCalculator } from "@/composables/useCalculator";
 import { useKeyboard } from "@/composables/useKeyboard";
 import { useInputValidation } from '@/composables/useValidation'
-import HistoryPanel from "@/layouts/HistoryPanel.vue";
+import HistoryPanel from "@/layouts/pages/calculators/main/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
-import CalculatorDisplay from "@/layouts/CalculatorDisplay.vue";
-import CalculatorButtons from "@/layouts/CalculatorButtons.vue";
+import CalculatorDisplay from "@/layouts/pages/calculators/main/CalculatorDisplay.vue";
+import CalculatorButtons from "@/layouts/pages/calculators/main/CalculatorButtons.vue";
 import db from "@/data/db";
 import { useSettingsStore } from "@/stores/settings";
 
@@ -308,7 +306,3 @@ const closeWelcomeModal = () => {
   localStorage.setItem("mathlly-welcome-shown", "true");
 };
 </script>
-
-<style scoped>
-@import url("@/assets/css/animation.css");
-</style>
