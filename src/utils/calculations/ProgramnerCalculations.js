@@ -50,6 +50,7 @@ export class ProgrammerCalculations {
     let sanitized = expr
       .replace(/×/g, "*")
       .replace(/÷/g, "/")
+      .replace(/%/g, " mod ") // Convert % to mathjs modulo operator
       .replace(/[+\-*/]\s*$/, "")
       .replace(/\s+/g, " ")
       .trim();
@@ -61,7 +62,7 @@ export class ProgrammerCalculations {
       .trim();
 
     // Second pass: validate operations
-    if (!/^[0-9A-Fa-f\s+\-*/()<<>>]*$/.test(sanitized)) return null;
+    if (!/^[0-9A-Fa-f\s+\-*/()<<>>\smod\s]*$/.test(sanitized)) return null;
 
     if (base !== "DEC") {
       sanitized = this.convertToDecimal(sanitized, base);
@@ -71,13 +72,13 @@ export class ProgrammerCalculations {
   }
 
   static convertToDecimal(expr, fromBase) {
-    // Split expression keeping shift operators intact
-    const parts = expr.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-*/()]\s*)/);
+    // Split expression keeping shift operators and modulo intact
+    const parts = expr.split(/(\s*<<\s*|\s*>>\s*|\s*mod\s*|\s*[+\-*/()]\s*)/);
     return parts
       .map(part => {
         part = part.trim();
         if (!part) return "";
-        if (part === "<<" || part === ">>") return part;
+        if (part === "<<" || part === ">>" || part === "mod") return part;
         if (this.validateForBase(part, fromBase)) {
           const decimal = parseInt(part, this.bases[fromBase]);
           return isNaN(decimal) ? part : decimal.toString(10);

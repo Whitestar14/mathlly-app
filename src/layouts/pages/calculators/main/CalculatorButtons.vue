@@ -55,8 +55,8 @@ const props = defineProps({
 
 const emit = defineEmits(['button-click', 'clear', 'base-change']);
 
-const StandardMode = defineAsyncComponent(() => import('@/layouts/modes/StandardMode.vue'));
-const ProgrammerMode = defineAsyncComponent(() => import('@/layouts/modes/ProgrammerMode.vue'));
+const StandardMode = defineAsyncComponent(() => import('./modes/StandardMode.vue'));
+const ProgrammerMode = defineAsyncComponent(() => import('./modes/ProgrammerMode.vue'));
 
 const currentModeComponent = computed(() => {
   switch (props.mode) {
