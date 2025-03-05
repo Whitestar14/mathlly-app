@@ -49,12 +49,12 @@ export class ProgrammerOperations {
     const state = this.calculator.states[this.calculator.activeBase];
     if (this.isLastCharOperator()) {
       // Only replace the last operator if it's not followed by a minus sign
-      const lastOperatorPattern = /\s*([+\-×÷<<>>])(\s*-?\d*)\s*$/;
+      const lastOperatorPattern = /\s*([+\-×÷%<<>>])(\s*-?\d*)\s*$/;
       const match = currentInput.match(lastOperatorPattern);
       
       if (match && !match[2]) {
         // Replace operator only if there's no number after it
-        state.input = currentInput.replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
+        state.input = currentInput.replace(/\s*[+\-×÷%<<>>]\s*$/, ` ${op} `);
       } else if (op === "-") {
         // Allow minus after another operator
         state.input = `${currentInput} ${op}`;
@@ -254,8 +254,8 @@ export class ProgrammerOperations {
   isLastCharOperator() {
     const input = this.calculator.states[this.calculator.activeBase].input.trim();
     // Don't consider a minus sign followed by a number as an operator
-    return /[+×÷]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
-           /\s*[+×÷]\s*$/.test(input) || 
+    return /[+×÷%]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
+           /\s*[+×÷%]\s*$/.test(input) || 
            (/-$/.test(input) && !/-\d+$/.test(input)) ||
            input.endsWith(" << ") || 
            input.endsWith(" >> ");
@@ -295,36 +295,6 @@ export class ProgrammerOperations {
           parts[parts.length - 1] = "-" + lastPart;
         }
         state.input = parts.join(" ").trim();
-      }
-    }
-    return { input: state.input };
-  }
-
-  handlePercent() {
-    const calculator = this.calculator;
-    const state = calculator.states[calculator.activeBase];
-    const currentInput = state.input;
-
-    if (currentInput !== "0" && currentInput !== "Error") {
-      try {
-        const parts = currentInput.split(/([+\-×÷<<>>])/);
-        const lastPart = parts[parts.length - 1].trim();
-        
-        if (lastPart) {
-          // Convert from current base to decimal, calculate percent, then back to original base
-          const base = calculator.calculators[calculator.activeBase].baseInt;
-          const value = parseInt(lastPart, base);
-          
-          if (!isNaN(value)) {
-            const percentValue = Math.floor(value / 100);
-            const result = percentValue.toString(base).toUpperCase();
-            parts[parts.length - 1] = result;
-            state.input = parts.join(" ").trim();
-          }
-        }
-      } catch (err) {
-        console.error('Error in handlePercent:', state, err);
-        state.input = "Error";
       }
     }
     return { input: state.input };

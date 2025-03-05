@@ -83,7 +83,7 @@ export class ProgrammerCalculator extends EngineCalculator {
         case "CE": this.handleClearEntry(); break;
         case "backspace": this.operations.handleBackspace(); break;
         case "±": result = this.operations.handleToggleSign(); break;
-        case "%": result = this.operations.handlePercent(); break;
+        case "%": return this.operations.handleOperator("%"); // Changed to handle modulo as operator
         case "(":
         case ")":
           result = this.operations.handleParenthesis(btn);
