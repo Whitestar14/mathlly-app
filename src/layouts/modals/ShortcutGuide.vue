@@ -17,29 +17,31 @@
     </template>
 
     <div class="mt-4">
-      <div class="flex border-b border-gray-200 dark:border-gray-700">
+      <div class="flex border-b border-gray-200 dark:border-gray-700 relative">
+        <div
+          v-show="showIndicator || currentPill"
+          class="absolute will-change-transform bottom-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 transition-all duration-200"
+          :style="indicatorStyle"
+        />
         <button
           v-for="category in Object.keys(shortcutGroups)"
           :key="category"
+          ref="tabElements"
+          :data-path="category"
           class="px-4 py-3 text-sm font-medium transition-colors relative"
           :class="[
-            activeCategory === category 
-              ? 'text-indigo-600 dark:text-indigo-400' 
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
+            currentPill === category
+              ? 'text-indigo-600 dark:text-indigo-400'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
           ]"
-          @click="activeCategory = category"
+          @click="handleTabChange(category, $event.target)"
         >
           {{ category }}
-          <div
-            class="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 transition-transform"
-            :class="activeCategory === category ? 'scale-x-100' : 'scale-x-0'"
-          />
         </button>
       </div>
 
       <div class="relative overflow-hidden">
         <TransitionGroup
-          mode="out-in"
           enter-active-class="transition-all duration-200 ease-out"
           enter-from-class="opacity-0 translate-x-4"
           enter-to-class="opacity-100 translate-x-0"
@@ -49,7 +51,7 @@
         >
           <div
             v-for="(group, category) in shortcutGroups"
-            v-show="activeCategory === category"
+            v-show="currentPill === category"
             :key="category"
             class="p-4 space-y-2"
           >
@@ -95,24 +97,24 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, nextTick } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
+import { usePills } from "@/composables/usePills";
 
-defineProps({
+const props = defineProps({
   open: Boolean,
 });
 
 defineEmits(["update:open"]);
 
-const activeCategory = ref('Global');
-
+const tabElements = ref([]);
 const shortcutGroups = {
   Global: {
     "ctrl+shift+f": { description: "Toggle Fullscreen" },
     "ctrl+l": { description: "Toggle Sidebar" },
     "ctrl+h": { description: "Toggle History" },
-    "ctrl+s": { description: "Open Settings" },
-    "ctrl+space" : { description: "Open the Keyboard Shortcuts"},
+    "ctrl+,(comma)": { description: "Open Settings" },
+    "ctrl+space": { description: "Open the Keyboard Shortcuts" },
     "ctrl+shift+m": { description: "Toggle Theme" },
   },
   Calculator: {
@@ -133,6 +135,28 @@ const shortcutGroups = {
     "ctrl+s": { description: "Swap Input/Output" },
   },
 };
+const { currentPill, showIndicator, indicatorStyle, handleNavigation } =
+  usePills({
+    position: "bottom",
+    updateRoute: false,
+    defaultPill: "Global",
+  });
+
+const handleTabChange = (category, tabElement) => {
+  handleNavigation(category, tabElement); 
+};
+
+watch(
+  () => props.open,
+  (newIsOpen) => {
+    if (newIsOpen) {
+      nextTick(() => {
+        handleTabChange("Global", tabElements.value[0]);
+      });
+    }
+  },
+  { immediate: false } 
+);
 </script>
 
 <style scoped>
@@ -140,7 +164,7 @@ const shortcutGroups = {
   @apply px-2 py-1 min-w-[1.8rem] text-center rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono shadow-sm;
 }
 
-/* Add tab transition styles */
+/* Tab transition styles - keep these */
 .scale-x-100 {
   transform: scaleX(1);
   transition: transform 0.2s ease;
@@ -151,8 +175,21 @@ const shortcutGroups = {
   transition: transform 0.2s ease;
 }
 
-/* Add smoother transitions for content */
+/* Smoother transitions for content - keep these */
 .transition-all {
   will-change: transform, opacity;
+}
+
+.relative.overflow-hidden {
+  /* Target the container */
+  overflow: hidden;
+  /* Hide vertical and horizontal overflow */
+  height: 250px;
+  overflow-y: auto;
+  /* Example fixed height - adjust as needed */
+  /* You can also use max-height and overflow-y: auto if you want scrollable tabs
+      max-height: 300px;
+
+  */
 }
 </style>

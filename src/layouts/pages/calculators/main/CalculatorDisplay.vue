@@ -17,7 +17,7 @@
 
     <ControlButtons
       :copy-options="copyOptions"
-      @toggle-history="toggleHistory"
+      @toggle-history="$emit('toggle-history')"
       @copy-to-clipboard="copyToClipboard"
     />
 
@@ -58,7 +58,7 @@ const props = defineProps({
   mode: { type: String, default: "Standard" },
 });
 
-const emit = defineEmits(["toggle-history"]);
+defineEmits(["toggle-history"]);
 const { toast } = useToast();
 const settings = useSettingsStore();
 
@@ -123,10 +123,6 @@ function copyToClipboard() {
     title: "Copied!",
     description: "Content copied to clipboard.",
   });
-}
-
-function toggleHistory() {
-  emit("toggle-history");
 }
 </script>
 

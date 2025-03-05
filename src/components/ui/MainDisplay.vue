@@ -193,4 +193,25 @@ defineExpose({
 [data-nest-level="1"] { padding-left: 0.25rem; }
 [data-nest-level="2"] { padding-left: 0.5rem; }
 [data-nest-level="3"] { padding-left: 0.75rem; }
+
+.-translate-y-full {
+  transform: translate3d(0, -100%, 0);
+}
+
+.translate-y-0 {
+  transform: translate3d(0, 0, 0);
+}
+.ease-custom {
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 </style>

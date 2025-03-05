@@ -13,7 +13,7 @@
           :active-base="activeBase"
           :settings="settings"
           :mode="mode"
-          @toggle-history="$emit('toggle-history')"
+          @toggle-history="toggleHistory"
         />
 
         <calculator-buttons
@@ -30,14 +30,18 @@
     </div>
 
     <history-panel
-      v-if="!isMobile"
       ref="historyPanelRef"
+      :history-items="historyItems"
       :is-open="isHistoryOpen"
       :is-mobile="isMobile"
       :mode="mode"
-      @select-history-item="selectHistoryItem"
-      @delete-history-item="deleteHistoryItem"
-      @clear-history="clearHistory"
+      :selected-item-id="selectedItemId"
+      @select-item="handleHistoryItemSelect"
+      @delete-item="deleteHistoryItem"
+      @copy-item="copyHistoryItem"
+      @copy-json="copyAsJson"
+      @clear="clearHistory"
+      @close="closeHistory"
     />
 
     <!-- Welcome Modal -->
@@ -60,23 +64,19 @@ import HistoryPanel from "@/layouts/pages/calculators/main/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/pages/calculators/main/CalculatorDisplay.vue";
 import CalculatorButtons from "@/layouts/pages/calculators/main/CalculatorButtons.vue";
-import db from "@/data/db";
 import { useSettingsStore } from "@/stores/settings";
 
 const props = defineProps({
   mode: { type: String, required: true },
   settings: { type: Object, required: true },
   isMobile: { type: Boolean, required: true },
-  isHistoryOpen: { type: Boolean, required: true },
 });
 
-const emit = defineEmits(["update:mode", "toggle-history", "update-history"]);
-
+const emit = defineEmits(["update:mode"]);
 
 useTitle(computed(() => `${props.mode} Calculator - Mathlly`));
 
 const { isValidForBase } = useInputValidation()
-
 
 const {
   calculator,
@@ -90,9 +90,7 @@ const {
   updateDisplayState,
 } = useCalculator(props.mode, props.settings);
 
-
 provide('calculator', computed(() => calculator.value));
-
 
 const input = computed(() => state.value.input);
 const error = computed(() => state.value.error);
@@ -101,7 +99,6 @@ const animatedResult = computed(() => state.value.animatedResult);
 const activeBase = computed(() => state.value.activeBase);
 const displayValues = computed(() => state.value.displayValues);
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH);
-
 
 const preview = computed(() => {
   if (props.mode === "Programmer") {
@@ -124,27 +121,41 @@ const preview = computed(() => {
   }
 });
 
-
-const { historyPanelRef, addToHistory, clearHistory } = useHistory(() => {
-  emit("update-history");
-});
-
+const {
+  historyItems,
+  isHistoryOpen,
+  selectedItemId,
+  showClearConfirmation,
+  toggleHistory,
+  closeHistory,
+  addToHistory,
+  clearHistory,
+  deleteHistoryItem,
+  copyHistoryItem,
+  copyAsJson,
+  selectHistoryItem
+} = useHistory();
 
 const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
-
+watch(
+  () => props.isMobile,
+  (newIsMobile) => {
+    if (newIsMobile) {
+      closeHistory();
+    }
+  }
+);
 
 const handleButtonClick = (btn) => {
   try {
     const result = calculator.value.handleButtonClick(btn);
 
-    
     updateState({
       input: result.input,
       error: result.error || ""
     });
-
     
     if (btn === "=" && props.mode === "Programmer") {
       if (result.displayValues) {
@@ -154,7 +165,6 @@ const handleButtonClick = (btn) => {
     } else if (props.mode === "Programmer") {
       nextTick(() => updateDisplayState());
     }
-
     
     if (btn === "=" && props.mode !== "Programmer" && result.result) {
       addToHistory(result.expression, result.result);
@@ -211,10 +221,10 @@ const { setContext, clearContext, setBase } = useKeyboard('calculator', {
     }
   },
   setBase: (base) => handleBaseChange(base),
+  toggleHistory,
 });
 
 const settingsStore = useSettingsStore();
-
 
 onMounted(async () => {
   await settingsStore.loadSettings();
@@ -222,7 +232,6 @@ onMounted(async () => {
   settingsStore.setCurrentMode(settingsStore.defaultMode);
   emit('update:mode', settingsStore.defaultMode);
 });
-
 
 watch(
   () => props.mode,
@@ -240,7 +249,6 @@ watch(
   },
   { immediate: true }
 );
-
 
 watch(
   currentInput,
@@ -262,7 +270,6 @@ watch(
   { immediate: true }
 );
 
-
 watch(
   () => input.value,
   (newInput) => {
@@ -281,24 +288,17 @@ watch(
   { deep: true }
 );
 
-
-const selectHistoryItem = (item) => {
-  if (props.mode === "Programmer") return;
-
-  calculator.value.input = item.expression;
-  calculator.value.currentExpression = "";
-
-  updateState({
-    input: item.expression,
-    error: "",
-  });
-
-  currentInput.value = item.expression;
-};
-
-const deleteHistoryItem = async (id) => {
-  await db.history.delete(id);
-  emit("update-history");
+const handleHistoryItemSelect = (item) => {
+  const selectedItem = selectHistoryItem(item, props.mode === "Programmer");
+  if (selectedItem) {
+    updateState({
+      input: selectedItem.expression,
+      error: "",
+    });
+    calculator.value.input = selectedItem.expression;
+    calculator.value.currentExpression = "";
+    currentInput.value = selectedItem.expression;
+  }
 };
 
 const closeWelcomeModal = () => {

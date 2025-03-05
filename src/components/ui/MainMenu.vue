@@ -2,11 +2,12 @@
   <div v-if="isMobile">
     <PopoverRoot>
       <PopoverTrigger>
-        <button
-          class="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-100/70 dark:hover:bg-gray-700/70 transition-colors text-gray-600 dark:text-gray-300"
+        <Button
+          variant="ghost"
+          size="icon"
         >
           <MoreVertical class="h-5 w-5" />
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverPortal>
         <PopoverContent
@@ -18,8 +19,14 @@
             class="rounded-t-md flex w-full items-center px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
             @click="$emit('toggle-theme')"
           >
-            <Sun v-if="isDark" class="h-4 w-4 mr-2 text-gray-500" />
-            <Moon v-else class="h-4 w-4 mr-2 text-gray-500" />
+            <Sun
+              v-if="isDark"
+              class="h-4 w-4 mr-2 text-gray-500"
+            />
+            <Moon
+              v-else
+              class="h-4 w-4 mr-2 text-gray-500"
+            />
             <span>{{ isDark ? "Light Mode" : "Dark Mode" }}</span>
           </button>
 
@@ -49,7 +56,8 @@
           variant="ghost"
           size="icon"
         >
-          <GithubIcon class="h-6 w-6" />
+          <GithubIcon class="h-5 w-5" />
+          <span class="sr-only">Star on GitHub</span>
         </Button>
       </a>
 
@@ -59,7 +67,8 @@
         size="icon"
         @click="$emit('open-shortcut-modal')"
       >
-        <Command class="h-6 w-6" />
+        <Command class="h-5 w-5" />
+        <span class="sr-only">Keyboard Shortcuts</span>
       </Button>
 
       <Separator
@@ -92,19 +101,19 @@
               class="rounded-t-md flex w-full items-center px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
               @click="setTheme('light')"
             >
-              <Sun class="h-4 w-4 mr-2 text-gray-500" />Light
+              <Sun class="h-4 w-4 mr-2 text-gray-500" /><span>Light</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               class="flex w-full items-center px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
               @click="setTheme('dark')"
             >
-              <Moon class="h-4 w-4 mr-2 text-gray-500" />Dark
+              <Moon class="h-4 w-4 mr-2 text-gray-500" /><span>Dark</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               class="rounded-b-md flex w-full items-center px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
               @click="setTheme('system')"
             >
-              <AppWindowMac class="h-4 w-4 mr-2 text-gray-500" />System
+              <AppWindowMac class="h-4 w-4 mr-2 text-gray-500" /><span>System</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenuPortal>
