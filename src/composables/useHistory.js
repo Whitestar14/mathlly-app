@@ -5,6 +5,7 @@ import db from "@/data/db";
 export function useHistory() {
   const historyPanelRef = ref(null);
   const historyItems = ref([]);
+  const isHistoryOpen = ref(false);
 
   const addToHistory = useDebounceFn((expression, result) => {
     const timestamp = Date.now();
@@ -21,10 +22,25 @@ export function useHistory() {
     await db.history.clear();
   };
 
+  const toggleHistory = () => {
+    isHistoryOpen.value = !isHistoryOpen.value;
+  };
+  
+  const closeHistory = () => {
+    isHistoryOpen.value = false;
+  };
+
+  const deleteHistoryItem = async (id) => {
+    await db.history.delete(id);
+  };
+
   return {
     historyItems,
     historyPanelRef,
+    toggleHistory,
+    closeHistory,
     addToHistory,
     clearHistory,
+    deleteHistoryItem
   };
 }
