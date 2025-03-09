@@ -1,5 +1,18 @@
 export const updates = [ 
   {
+    version: '0.11.1',
+    date: 'February 28, 2025',
+    features: [
+      'Cleaned up main.js for better initialization flow',
+      'Updated CSS body styling for improved visual consistency',
+      'Disabled debug mode in keyboard store for production',
+      'Refined AppHeader calculator mode options',
+      'Simplified router history management',
+      'Enhanced history functionality with improved state handling',
+      'Added HistoryItem component for better code reusability'
+    ]
+  },
+  {
     version: '0.11.0',
     date: 'February 27, 2025',
     features: [

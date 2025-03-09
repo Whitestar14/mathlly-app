@@ -49,7 +49,8 @@
 
         <ContextMenuItem
           class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-300 outline-none"
-          @click="$emit('copy-json', item)">
+          @click="$emit('copy-json', item)"
+        >
           <CodeIcon class="mr-2 h-4 w-4" />
           <span>Copy as JSON</span>
         </ContextMenuItem>
@@ -58,7 +59,8 @@
 
         <ContextMenuItem
           class="flex items-center text-sm w-full px-2 py-1.5 rounded-sm hover:bg-red-100 dark:hover:bg-red-900/30 cursor-pointer text-red-600 dark:text-red-400 outline-none"
-          @click="$emit('delete', item.id)">
+          @click="$emit('delete', item.id)"
+        >
           <TrashIcon class="mr-2 h-4 w-4" />
           <span>Delete Item</span>
         </ContextMenuItem>

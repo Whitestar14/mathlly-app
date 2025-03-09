@@ -33,7 +33,7 @@
       :is-mobile="isMobile"
       :mode="mode"
       @select-item="selectHistoryItem"
-      @close="panelStore.closeHistory"
+      @close="closeHistory"
     />
 
     <!-- Welcome Modal -->
@@ -64,7 +64,7 @@ import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/pages/calculators/main/CalculatorDisplay.vue";
 import CalculatorButtons from "@/layouts/pages/calculators/main/CalculatorButtons.vue";
 import { useSettingsStore } from "@/stores/settings";
-import { usePanelStore } from "@/stores/panels";
+import { usePanel } from "@/composables/useSidebar";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -129,17 +129,13 @@ const { addToHistory } = useHistory();
 const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
-const panelStore = usePanelStore();
-
-const toggleHistory = () => {
-  panelStore.toggleHistory();
-};
+const { toggle: toggleHistory, close: closeHistory } = usePanel('history-panel', props.isMobile);
 
 watch(
   () => props.isMobile,
   (newIsMobile) => {
     if (newIsMobile) {
-      panelStore.closeHistory();
+      closeHistory();
     }
   }
 );

@@ -49,24 +49,53 @@ import { useFullscreen } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
-import { useSidebar } from "@/composables/useSidebar";
+import { usePanel } from "@/composables/useSidebar";
 import Toast from "@/components/base/FeatureToast.vue";
 import BaseLoader from "@/components/base/BaseLoader.vue";
 import AppHeader from "@/layouts/AppHeader.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
 
-const currentInput = ref("0");
 const router = useRouter();
-const deviceStore = useDeviceStore();
-const settingsStore = useSettingsStore();
-const settings = settingsStore;
-const mode = computed(() => settingsStore.activeMode);
+
+// Make setup async
+const setup = async () => {
+  const currentInput = ref("0");
+  const deviceStore = useDeviceStore();
+  const settingsStore = useSettingsStore();
+  
+  // Force initial loading state
+  await new Promise(resolve => setTimeout(resolve, 800));
+  await Promise.all([
+    settingsStore.loadSettings(),
+    router.isReady(),
+  ]);
+
+  deviceStore.initializeDeviceInfo();
+  settingsStore.setCurrentMode(settingsStore.defaultMode);
+
+  return {
+    currentInput,
+    deviceStore,
+    settingsStore,
+    settings: settingsStore,
+    mode: computed(() => settingsStore.activeMode),
+  };
+};
+
+const {
+  currentInput,
+  deviceStore,
+  settingsStore,
+  settings,
+  mode
+} = await setup();
+
 const {
   isOpen: isSidebarOpen,
   toggle,
   close,
   handleResize,
-} = useSidebar(deviceStore.isMobile);
+} = usePanel('sidebar', deviceStore.isMobile);
 
 provide("currentInput", currentInput);
 

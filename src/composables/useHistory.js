@@ -2,11 +2,7 @@ import { ref } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import db from "@/data/db";
 
-const historyItems = ref([
-  { id: 1, title: "Item 1" },
-  { id: 2, title: "Item 2" },
-  { id: 3, title: "Item 3" },
-]);
+const historyItems = ref([]);
 
 export function useHistory() {
   const MAX_HISTORY_ITEMS = 100;

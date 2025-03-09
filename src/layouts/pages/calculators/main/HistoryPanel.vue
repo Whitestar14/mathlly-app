@@ -10,7 +10,7 @@
           v-if="isMobile && isOpen"
           class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           aria-hidden="true"
-          @click="$emit('close')"
+          @click="close"
         />
       </Transition>
 
@@ -47,7 +47,7 @@
                   v-if="isMobile"
                   variant="ghost"
                   size="icon"
-                  @click="$emit('close')"
+                  @click="close"
                 >
                   <XIcon class="h-4 w-4" />
                 </Button>
@@ -140,9 +140,9 @@
         <!-- Toggle button (desktop only) -->
         <button
           v-if="!isMobile"
-          class=" bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 group absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all pointer-events-auto"
+          class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 group absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all pointer-events-auto"
           :class="[ !isOpen && 'left-1/2 bottom-0']"
-          @click="$emit('toggle-history')"
+          @click="toggle"
           v-tippy="{ content: isOpen ? 'Hide History' : 'Show History' }"
         >
           <ChevronRightIcon
@@ -198,18 +198,19 @@ import { useHistory } from "@/composables/useHistory";
 import { useToast } from "@/composables/useToast";
 import { useClipboard } from "@vueuse/core";
 import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from "radix-vue";
-import { usePanelStore } from "@/stores/panels";
+import { usePanel } from "@/composables/useSidebar";
 
 const HistoryItem = defineAsyncComponent(() => import('@/components/ui/HistoryItem.vue'));
+
 const props = defineProps({
   isMobile: Boolean,
   mode: { type: String, default: "Standard" },
 });
 
-const emit = defineEmits(["close", "select-item"]);
-const panelStore = usePanelStore();
+const emit = defineEmits(["select-item"]);
 
-const isOpen = computed(() => panelStore.historyOpen);
+// Use panel composable
+const { isOpen, toggle, close } = usePanel('history-panel', props.isMobile);
 
 const { historyItems, deleteItem, clearAll, loadHistory } = useHistory();
 const selectedItemId = ref(null);
@@ -220,17 +221,14 @@ const showClearButton = computed(
   () => historyItems.value.length > 0 && !isProgrammerMode.value
 );
 
-// Load saved state on mount
+// Load history on mount and panel open
 onMounted(() => {
-  if (!props.isMobile && !isOpen.value) {
-    panelStore.setHistoryOpen(true);
-  }
   if (!props.isMobile || isOpen.value) {
     loadHistory();
   }
 });
 
-// Unified watcher for all history loading conditions
+// Watch for panel open/close
 watch(
   [() => isOpen.value, () => props.mode, () => props.isMobile],
   ([isOpen, isMobile]) => {
@@ -259,7 +257,7 @@ const handleSelectItem = (item) => {
   });
 
   if (props.isMobile) {
-    emit("close");
+    close();
   }
 };
 
