@@ -8,30 +8,6 @@ const routes = [
     component: () => import('@/layouts/pages/calculators/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' }
   },
-  // {
-  //   path: "/functions",
-  //   name: "Functions",
-  //   component: () => import('@/layouts/pages/calculators/FunctionsCalculator.vue'),
-  //   meta: { transition: 'fade', group: 'calculators' }
-  // },
-  // {
-  //   path: "/regex",
-  //   name: "Regex",
-  //   component: () => import('@/layouts/pages/calculators/RegexCalculator.vue'),
-  //   meta: { transition: 'fade', group: 'calculators' }
-  // },
-  // {
-  //   path: "/graphing",
-  //   name: "Graphing",
-  //   component: () => import('@/layouts/pages/calculators/GraphingCalculator.vue'),
-  //   meta: { transition: 'fade', group: 'calculators' }
-  // },
-  // {
-  //   path: "/converter",
-  //   name: "Converter",
-  //   component: () => import('@/layouts/pages/calculators/UnitConverter.vue'),
-  //   meta: { transition: 'fade', group: 'calculators' }
-  // },
 
   // Tools routes
   {
@@ -79,7 +55,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes,
 });
 

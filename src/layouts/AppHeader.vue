@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 h-[64.75px]">
+  <header class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 h-[64.75px]">
     <div class="container mx-auto flex justify-between items-center">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">
@@ -10,7 +10,7 @@
           size="icon"
           @click="$emit('toggle-sidebar')"
         >
-          <PanelRightIcon class="h-6 w-6" />
+          <PanelRightIcon class="h-5 w-5" />
         </Button>
       </div>
 
@@ -78,7 +78,7 @@ const emit = defineEmits(["update:mode", "toggle-sidebar", "update:open"]);
 const settings = useSettingsStore();
 const route = useRoute();
 const currentRoute = ref(route.path);
-const modes = ['Standard', 'Scientific (soon)', 'Programmer'];
+const modes = ['Standard', 'Scientific', 'Programmer'];
 const isShortcutModalOpen = ref(false);
 
 const { isDark, toggleTheme } = useTheme();

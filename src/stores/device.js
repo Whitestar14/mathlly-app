@@ -18,8 +18,7 @@ export const useDeviceStore = defineStore("device", () => {
     }
 
     resizeTimeout = setTimeout(() => {
-      const newIsMobile = window.innerWidth < 768;
-      isMobile.value = newIsMobile;
+      isMobile.value = window.innerWidth < 768;
       isResizing.value = false;
     }, 100);
   };

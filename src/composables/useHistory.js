@@ -1,46 +1,62 @@
-import { ref, nextTick } from "vue";
+import { ref } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import db from "@/data/db";
 
+const historyItems = ref([]);
+
 export function useHistory() {
-  const historyPanelRef = ref(null);
-  const historyItems = ref([]);
-  const isHistoryOpen = ref(false);
+  const MAX_HISTORY_ITEMS = 100;
 
-  const addToHistory = useDebounceFn((expression, result) => {
-    const timestamp = Date.now();
-    db.history.add({ expression, result, timestamp });
-
-    if (historyPanelRef.value) {
-      nextTick(() => {
-        historyPanelRef.value.updateHistory();
-      });
+  const loadHistory = async () => {
+    try {
+      const items = await db.history
+        .orderBy("timestamp")
+        .reverse()
+        .limit(MAX_HISTORY_ITEMS)
+        .toArray();
+      
+      historyItems.value = items;
+    } catch (error) {
+      console.error('Error loading history:', error);
     }
-  }, 500);
-
-  const clearHistory = async () => {
-    await db.history.clear();
   };
 
-  const toggleHistory = () => {
-    isHistoryOpen.value = !isHistoryOpen.value;
-  };
-  
-  const closeHistory = () => {
-    isHistoryOpen.value = false;
-  };
+  const addToHistory = useDebounceFn(async (expression, result) => {
+    try {
+      const lastItem = historyItems.value[0];
+      if (lastItem?.expression === expression && lastItem?.result === result) {
+        return;
+      }
 
-  const deleteHistoryItem = async (id) => {
+      const timestamp = Date.now();
+      const id = await db.history.add({ expression, result, timestamp });
+      
+      // Optimistic update
+      historyItems.value = [{ id, expression, result, timestamp }, ...historyItems.value];
+      
+      // Ensure consistency without triggering animation
+      setTimeout(() => loadHistory(), 500);
+    } catch (error) {
+      console.error('Error adding to history:', error);
+    } 
+  }, 300);
+
+  // Simplified database operations
+  const deleteItem = async (id) => {
     await db.history.delete(id);
+    await loadHistory();
+  };
+
+  const clearAll = async () => {
+    await db.history.clear();
+    historyItems.value = [];
   };
 
   return {
     historyItems,
-    historyPanelRef,
-    toggleHistory,
-    closeHistory,
     addToHistory,
-    clearHistory,
-    deleteHistoryItem
+    deleteItem,
+    clearAll,
+    loadHistory
   };
 }

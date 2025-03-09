@@ -1,10 +1,10 @@
 import { ref, watch } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 
-export function useSidebar(isMobile) {
-  const preferences = useLocalStorage('sidebar-preferences', {
+export function usePanel(storageKey, isMobile, defaultDesktopState = true) {
+  const preferences = useLocalStorage(`${storageKey}-preferences`, {
     desktop: {
-      isOpen: true,
+      isOpen: defaultDesktopState,
     },
     mobile: {
       isOpen: false
@@ -33,7 +33,7 @@ export function useSidebar(isMobile) {
     if (newIsMobile) {
       isOpen.value = false
     } else {
-        isOpen.value = preferences.value.desktop.isOpen
+      isOpen.value = preferences.value.desktop.isOpen
     }
   }
 

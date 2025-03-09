@@ -1,95 +1,101 @@
 <template>
-<div v-if="isLoadingApp">
-    <base-loader variant="macro" />
-  </div>
-  <div
-    v-else
-    class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
-    :class="{
-      'animation-disabled': settings.animationDisabled,
-    }"
-  >
-    <sidebar-menu
-      :is-open="isOpen"
-      :is-mobile="deviceStore.isMobile"
-      @update:isOpen="close"
-    />
+  <Suspense>
+    <template #default>
+      <div
+        class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
+        :class="{
+          'animation-disabled': settings.animationDisabled,
+        }"
+      >
+        <sidebar-menu
+          :is-open="isSidebarOpen"
+          :is-mobile="deviceStore.isMobile"
+          @update:isOpen="close"
+        />
 
-    <div
-      class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-      :class="[!deviceStore.isMobile && isOpen ? 'ml-64' : '']"
-    >
-      <calculator-header
-        :is-open="isOpen"
-        :is-mobile="deviceStore.isMobile"
-        @toggle-sidebar="toggle"
-      />
-
-      <router-view v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <calculator-loader v-if="displayStore.isLoading" />
-          <component
-            :is="Component"
-            v-else
-            :mode="mode"
-            :settings="settings"
+        <div
+          class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
+          :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']"
+        >
+          <app-header
+            :is-open="isSidebarOpen"
             :is-mobile="deviceStore.isMobile"
-            :is-history-open="isHistoryOpen"
-            @settings-change="updateSettings"
-            @update:mode="updateMode"
-            @select-history-item="selectHistoryItem"
-            @update-history="updateHistory"
-            @toggle-history="toggleHistory"
+            @toggle-sidebar="toggle"
           />
-        </Transition>
-      </router-view>
-    </div>
-
-    <history-panel
-      v-if="deviceStore.isMobile"
-      :is-open="isHistoryOpen"
-      :is-mobile="deviceStore.isMobile"
-      :mode="mode"
-      @select-history-item="selectHistoryItem"
-      @delete-history-item="deleteHistoryItem"
-      @clear-history="clearHistory"
-      @close="closeHistory"
-    />
-
-    <Toast />
-  </div>
+          <router-view v-slot="{ Component }">
+            <Transition name="fade" mode="out-in">
+              <component
+                :is="Component"
+                :mode="mode"
+                :settings="settings"
+                :is-mobile="deviceStore.isMobile"
+                @settings-change="updateSettings"
+                @update:mode="updateMode"
+              />
+            </Transition>
+          </router-view>
+        </div>
+        <toast />
+      </div>
+    </template>
+    <template #fallback><base-loader /></template>
+  </Suspense>
 </template>
 
 <script setup>
-import db from "@/data/db";
-import { useRouter, RouterView } from "vue-router";
+import { onUnmounted, onMounted, provide, ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useFullscreen } from "@vueuse/core";
-import { onMounted, onUnmounted, provide, ref, computed, watch } from "vue";
-import { useDisplayStore } from "@/stores/display";
-import { useSettingsStore } from "@/stores/settings";
-import { useKeyboardStore } from "@/stores/keyboard";
 import { useDeviceStore } from "@/stores/device";
+import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
-import { useSidebar } from "@/composables/useSidebar";
+import { usePanel } from "@/composables/useSidebar";
 import Toast from "@/components/base/FeatureToast.vue";
-import CalculatorLoader from "@/components/ui/CalculatorLoader.vue";
-import CalculatorHeader from "@/layouts/AppHeader.vue";
-import HistoryPanel from "@/layouts/HistoryPanel.vue";
+import BaseLoader from "@/components/base/BaseLoader.vue";
+import AppHeader from "@/layouts/AppHeader.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
-import { useLoader } from "@/composables/useLoader"; // Import useLoader
-import BaseLoader from "@/components/base/BaseLoader.vue"; // Import BaseLoader
 
-const currentInput = ref("0");
-const isHistoryOpen = ref(false);
-const deviceStore = useDeviceStore();
 const router = useRouter();
-const settingsStore = useSettingsStore();
-const settings = settingsStore;
-const displayStore = useDisplayStore();
-const mode = computed(() => settingsStore.activeMode);
-const { isOpen, toggle, close, handleResize } = useSidebar(
-  deviceStore.isMobile
-);
+
+// Make setup async
+const setup = async () => {
+  const currentInput = ref("0");
+  const deviceStore = useDeviceStore();
+  const settingsStore = useSettingsStore();
+  
+  // Force initial loading state
+  await new Promise(resolve => setTimeout(resolve, 800));
+  await Promise.all([
+    settingsStore.loadSettings(),
+    router.isReady(),
+  ]);
+
+  deviceStore.initializeDeviceInfo();
+  settingsStore.setCurrentMode(settingsStore.defaultMode);
+
+  return {
+    currentInput,
+    deviceStore,
+    settingsStore,
+    settings: settingsStore,
+    mode: computed(() => settingsStore.activeMode),
+  };
+};
+
+const {
+  currentInput,
+  deviceStore,
+  settingsStore,
+  settings,
+  mode
+} = await setup();
+
+const {
+  isOpen: isSidebarOpen,
+  toggle,
+  close,
+  handleResize,
+} = usePanel('sidebar', deviceStore.isMobile);
 
 provide("currentInput", currentInput);
 
@@ -106,35 +112,12 @@ const updateSettings = async (newSettings) => {
   await settingsStore.saveSettings(settingsToSave);
 };
 
-const toggleHistory = () => {
-  isHistoryOpen.value = !isHistoryOpen.value;
-};
-
-const closeHistory = () => {
-  isHistoryOpen.value = false;
-};
-
-const clearHistory = async () => {
-  await db.history.clear();
-};
-
-const selectHistoryItem = (item) => {
-  try {
-    currentInput.value = item.expression;
-  } catch (err) {
-    console.error("Error:", err);
+watch(
+  () => deviceStore.isMobile,
+  (newIsMobile) => {
+    handleResize(newIsMobile);
   }
-};
-
-const deleteHistoryItem = async (id) => {
-  await db.history.delete(id);
-  updateHistory();
-};
-
-watch(() => deviceStore.isMobile, (newIsMobile) => {
-  handleResize(newIsMobile);
-  if (newIsMobile) isHistoryOpen.value = false;
-});
+);
 
 watch(router.currentRoute, () => {
   if (deviceStore.isMobile) {
@@ -142,12 +125,7 @@ watch(router.currentRoute, () => {
   }
 });
 
-const updateHistory = () => {};
-
 useKeyboard("global", {
-  toggleHistory: () => {
-    toggleHistory();
-  },
   toggleSidebar: () => {
     toggle();
   },
@@ -159,27 +137,22 @@ useKeyboard("global", {
   },
 });
 
-const isLoadingApp = ref(true);
-const { showLoader, hideLoader } = useLoader(); // use the loader composable
-
-onMounted(async () => {
+const initializeApp = async () => {
   deviceStore.initializeDeviceInfo();
   try {
-    showLoader('macro'); // show macro loader
     await Promise.all([
       settingsStore.loadSettings(),
       router.isReady(),
       new Promise((resolve) => setTimeout(resolve, 800)),
     ]);
     settingsStore.setCurrentMode(settingsStore.defaultMode);
-    displayStore.updateState({ isLoading: false });
-  } finally {
-    isLoadingApp.value = false;
-    hideLoader(); // hide the loader
+  } catch (error) {
+    console.error("AsyncLoader caught an error:", error);
+    return false;
   }
-  const keyboardStore = useKeyboardStore();
-  keyboardStore.debug = false;
-});
+};
+
+onMounted(initializeApp);
 
 onUnmounted(() => {
   deviceStore.destroyDeviceInfo();
