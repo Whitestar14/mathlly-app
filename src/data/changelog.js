@@ -1,5 +1,28 @@
 export const updates = [ 
   {
+    version: '0.11.0',
+    date: 'February 27, 2025',
+    features: [
+      '@milestone: Introduced a Tools Section in the sidebar with a Base64Tools page',
+      '@feature: Installed `anime.js` to manage appwide animations',
+      '@deprecate: Removed the experimental `borderless` mode in SettingsPage',
+      'Switched the native percentage function key to a modulo key in Programmer Mode',
+      'Refractored route links to corresponding pages',
+      'Made the history panel collapsible on desktop and improved the consolidation of the mobile and desktop management',
+      'Improved app speed index, memory efficiency and network performance',
+      'Added more keybindings to the ShortcutGuide on desktops',
+      'Fixed bug in Standard Mode that provided inaccurate fraction representations',
+      'Implemented the usePills composable in app-wide scope for design consistency',
+      'Polished components and made edits to specific color schemes',
+      'Removed redundant code in Programmer logic',
+      'Added missing handleToggle function in Standard Mode',
+      'Added a "NotFound" 404 Page for handling invalid routes',
+      'Introduced pill management system for better encapsulation and extensibility',
+      'Added a theme management system for seamless data routing and user accessibility',
+      'Fixed bug that was invoked by base switching with invalid expression by improving sanitation algorithm',
+    ]
+  },
+  {
     version: '0.10.0',
     date: 'February 23, 2025',
     features: [

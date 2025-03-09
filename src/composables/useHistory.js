@@ -1,10 +1,15 @@
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import db from "@/data/db";
 
+const historyItems = ref([
+  { id: 1, title: "Item 1" },
+  { id: 2, title: "Item 2" },
+  { id: 3, title: "Item 3" },
+]);
+
 export function useHistory() {
   const MAX_HISTORY_ITEMS = 100;
-  const historyItems = ref([]);
 
   const loadHistory = async () => {
     try {
@@ -17,28 +22,28 @@ export function useHistory() {
       historyItems.value = items;
     } catch (error) {
       console.error('Error loading history:', error);
-  }
-}
-
-const addToHistory = useDebounceFn(async (expression, result) => {
-  try {
-    // Prevent adding identical consecutive entries
-    const lastItem = historyItems.value[0];
-    if (lastItem && 
-        lastItem.expression === expression && 
-        lastItem.result === result) {
-      return;
     }
+  };
 
-    const timestamp = Date.now();
-    await db.history.add({ expression, result, timestamp });
-    
-    // Fetch updated history to ensure consistency
-    await loadHistory();
-  } catch (error) {
-    console.error('Error adding to history:', error);
-  }
-}, 100);
+  const addToHistory = useDebounceFn(async (expression, result) => {
+    try {
+      const lastItem = historyItems.value[0];
+      if (lastItem?.expression === expression && lastItem?.result === result) {
+        return;
+      }
+
+      const timestamp = Date.now();
+      const id = await db.history.add({ expression, result, timestamp });
+      
+      // Optimistic update
+      historyItems.value = [{ id, expression, result, timestamp }, ...historyItems.value];
+      
+      // Ensure consistency without triggering animation
+      setTimeout(() => loadHistory(), 500);
+    } catch (error) {
+      console.error('Error adding to history:', error);
+    } 
+  }, 300);
 
   // Simplified database operations
   const deleteItem = async (id) => {

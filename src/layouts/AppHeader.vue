@@ -78,7 +78,7 @@ const emit = defineEmits(["update:mode", "toggle-sidebar", "update:open"]);
 const settings = useSettingsStore();
 const route = useRoute();
 const currentRoute = ref(route.path);
-const modes = ['Standard', 'Scientific (soon)', 'Programmer'];
+const modes = ['Standard', 'Scientific', 'Programmer'];
 const isShortcutModalOpen = ref(false);
 
 const { isDark, toggleTheme } = useTheme();

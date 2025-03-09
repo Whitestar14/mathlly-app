@@ -30,18 +30,10 @@
     </div>
 
     <history-panel
-      ref="historyPanelRef"
-      :history-items="historyItems"
-      :is-open="isHistoryOpen"
       :is-mobile="isMobile"
       :mode="mode"
-      :selected-item-id="selectedItemId"
-      @select-item="handleHistoryItemSelect"
-      @delete-item="deleteHistoryItem"
-      @copy-item="copyHistoryItem"
-      @copy-json="copyAsJson"
-      @clear="clearHistory"
-      @close="closeHistory"
+      @select-item="selectHistoryItem"
+      @close="panelStore.closeHistory"
     />
 
     <!-- Welcome Modal -->
@@ -54,17 +46,25 @@
 </template>
 
 <script setup>
-import { computed, watch, inject, nextTick, onMounted, provide } from "vue";
+import {
+  computed,
+  watch,
+  inject,
+  nextTick,
+  onMounted,
+  provide
+} from "vue";
 import { useTitle, useStorage } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { useCalculator } from "@/composables/useCalculator";
 import { useKeyboard } from "@/composables/useKeyboard";
-import { useInputValidation } from '@/composables/useValidation'
+import { useInputValidation } from "@/composables/useValidation";
 import HistoryPanel from "@/layouts/pages/calculators/main/HistoryPanel.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/pages/calculators/main/CalculatorDisplay.vue";
 import CalculatorButtons from "@/layouts/pages/calculators/main/CalculatorButtons.vue";
 import { useSettingsStore } from "@/stores/settings";
+import { usePanelStore } from "@/stores/panels";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -76,7 +76,7 @@ const emit = defineEmits(["update:mode"]);
 
 useTitle(computed(() => `${props.mode} Calculator - Mathlly`));
 
-const { isValidForBase } = useInputValidation()
+const { isValidForBase } = useInputValidation();
 
 const {
   calculator,
@@ -90,7 +90,10 @@ const {
   updateDisplayState,
 } = useCalculator(props.mode, props.settings);
 
-provide('calculator', computed(() => calculator.value));
+provide(
+  "calculator",
+  computed(() => calculator.value)
+);
 
 const input = computed(() => state.value.input);
 const error = computed(() => state.value.error);
@@ -121,29 +124,22 @@ const preview = computed(() => {
   }
 });
 
-const {
-  historyItems,
-  isHistoryOpen,
-  selectedItemId,
-  showClearConfirmation,
-  toggleHistory,
-  closeHistory,
-  addToHistory,
-  clearHistory,
-  deleteHistoryItem,
-  copyHistoryItem,
-  copyAsJson,
-  selectHistoryItem
-} = useHistory();
+const { addToHistory } = useHistory();
 
 const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
+
+const panelStore = usePanelStore();
+
+const toggleHistory = () => {
+  panelStore.toggleHistory();
+};
 
 watch(
   () => props.isMobile,
   (newIsMobile) => {
     if (newIsMobile) {
-      closeHistory();
+      panelStore.closeHistory();
     }
   }
 );
@@ -154,9 +150,9 @@ const handleButtonClick = (btn) => {
 
     updateState({
       input: result.input,
-      error: result.error || ""
+      error: result.error || "",
     });
-    
+
     if (btn === "=" && props.mode === "Programmer") {
       if (result.displayValues) {
         updateDisplayValues(result.displayValues);
@@ -165,16 +161,16 @@ const handleButtonClick = (btn) => {
     } else if (props.mode === "Programmer") {
       nextTick(() => updateDisplayState());
     }
-    
+
     if (btn === "=" && props.mode !== "Programmer" && result.result) {
       addToHistory(result.expression, result.result);
       setAnimation(result.result);
     }
   } catch (err) {
-    console.error('Calculator operation error:', err);
+    console.error("Calculator operation error:", err);
     updateState({
       input: "Error",
-      error: "Operation failed"
+      error: "Operation failed",
     });
   }
 };
@@ -200,18 +196,17 @@ const handleBaseChange = (newBase) => {
       updateState({
         input: result.input,
         error: result.error || "",
-        displayValues: result.displayValues
+        displayValues: result.displayValues,
       });
     });
   }
 };
 
-const { setContext, clearContext, setBase } = useKeyboard('calculator', {
-  clear: () => handleButtonClick('AC'),
-  calculate: () => handleButtonClick('='),
-  backspace: () => handleButtonClick('backspace'),
+const { setContext, clearContext, setBase } = useKeyboard("calculator", {
+  clear: () => handleButtonClick("AC"),
+  calculate: () => handleButtonClick("="),
+  backspace: () => handleButtonClick("backspace"),
   input: (value) => {
-    
     if (props.mode === "Programmer") {
       if (isValidForBase(value, activeBase.value)) {
         handleButtonClick(value);
@@ -228,9 +223,9 @@ const settingsStore = useSettingsStore();
 
 onMounted(async () => {
   await settingsStore.loadSettings();
-  
+
   settingsStore.setCurrentMode(settingsStore.defaultMode);
-  emit('update:mode', settingsStore.defaultMode);
+  emit("update:mode", settingsStore.defaultMode);
 });
 
 watch(
@@ -288,17 +283,13 @@ watch(
   { deep: true }
 );
 
-const handleHistoryItemSelect = (item) => {
-  const selectedItem = selectHistoryItem(item, props.mode === "Programmer");
-  if (selectedItem) {
-    updateState({
-      input: selectedItem.expression,
-      error: "",
-    });
-    calculator.value.input = selectedItem.expression;
-    calculator.value.currentExpression = "";
-    currentInput.value = selectedItem.expression;
-  }
+const selectHistoryItem = ({ expression }) => {
+  if (props.mode === "Programmer") return;
+
+  updateState({ input: expression, error: "" });
+  calculator.value.input = expression;
+  calculator.value.currentExpression = "";
+  currentInput.value = expression;
 };
 
 const closeWelcomeModal = () => {

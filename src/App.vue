@@ -1,72 +1,52 @@
 <template>
   <Suspense>
     <template #default>
-      <AsyncLoader>
+      <div
+        class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
+        :class="{
+          'animation-disabled': settings.animationDisabled,
+        }"
+      >
+        <sidebar-menu
+          :is-open="isSidebarOpen"
+          :is-mobile="deviceStore.isMobile"
+          @update:isOpen="close"
+        />
+
         <div
-          class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
-          :class="{
-            'animation-disabled': settings.animationDisabled,
-          }"
+          class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
+          :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']"
         >
-          <sidebar-menu
+          <app-header
             :is-open="isSidebarOpen"
             :is-mobile="deviceStore.isMobile"
-            @update:isOpen="close"
+            @toggle-sidebar="toggle"
           />
-
-          <div
-            class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-            :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']"
-          >
-            <app-header
-              :is-open="isSidebarOpen"
-              :is-mobile="deviceStore.isMobile"
-              @toggle-sidebar="toggle"
-            />
-
-            <Suspense>
-              <template #default>
-                <router-view v-slot="{ Component }">
-                  <Transition
-                    name="fade"
-                    mode="out-in"
-                  >
-                    <component
-                      :is="Component"
-                      :mode="mode"
-                      :settings="settings"
-                      :is-mobile="deviceStore.isMobile"
-                      @settings-change="updateSettings"
-                      @update:mode="updateMode"
-                    />
-                  </Transition>
-                </router-view>
-              </template>
-              <template #fallback>
-                <base-loader variant="mini" />
-              </template>
-            </Suspense>
-          </div>
-          <toast />
+          <router-view v-slot="{ Component }">
+            <Transition name="fade" mode="out-in">
+              <component
+                :is="Component"
+                :mode="mode"
+                :settings="settings"
+                :is-mobile="deviceStore.isMobile"
+                @settings-change="updateSettings"
+                @update:mode="updateMode"
+              />
+            </Transition>
+          </router-view>
         </div>
-      </AsyncLoader>
+        <toast />
+      </div>
     </template>
-    <template #fallback>
-      <base-loader
-        variant="macro"
-        message="Now Loading..."
-      />
-    </template>
+    <template #fallback><base-loader /></template>
   </Suspense>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, provide, ref, computed, watch } from "vue";
-import AsyncLoader from './components/AsyncLoader.vue';
-import { useRouter, RouterView } from "vue-router";
+import { onUnmounted, onMounted, provide, ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useFullscreen } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
-import { useKeyboardStore } from "@/stores/keyboard";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
 import { useSidebar } from "@/composables/useSidebar";
@@ -128,7 +108,7 @@ useKeyboard("global", {
   },
 });
 
-onMounted(async () => {
+const initializeApp = async () => {
   deviceStore.initializeDeviceInfo();
   try {
     await Promise.all([
@@ -137,11 +117,13 @@ onMounted(async () => {
       new Promise((resolve) => setTimeout(resolve, 800)),
     ]);
     settingsStore.setCurrentMode(settingsStore.defaultMode);
-  } finally {
-    const keyboardStore = useKeyboardStore();
-    keyboardStore.debug = false;
+  } catch (error) {
+    console.error("AsyncLoader caught an error:", error);
+    return false;
   }
-});
+};
+
+onMounted(initializeApp);
 
 onUnmounted(() => {
   deviceStore.destroyDeviceInfo();

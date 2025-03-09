@@ -67,7 +67,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
 
   const isEnabled = ref(true);
   const contextStack = ref(["global"]); // Use a stack to manage context hierarchy
-  const debug = ref(true);
+  const debug = ref(false);
   const currentBase = ref("DEC");
 
   // Base validation maps

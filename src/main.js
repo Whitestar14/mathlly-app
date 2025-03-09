@@ -29,4 +29,3 @@ const props = {
 
 app.use(VueTippy, { defaultProps: props });
 app.mount("#app");
-

@@ -95,7 +95,7 @@
   }
 
   body {
-    @apply font-sans font-medium transition-all duration-300;
+    @apply font-sans font-medium;
   }
 
   kbd,
