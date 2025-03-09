@@ -3,25 +3,26 @@ import { createPinia } from "pinia";
 import VueTippy from "vue-tippy";
 import router from "@/router";
 import App from "@/App.vue";
+import BaseLoader from "@/components/base/BaseLoader.vue";
+import { useDeviceStore } from "@/stores/device";
 import "./assets/css/main.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/dist/border.css";
 import "tippy.js/animations/scale.css";
-import BaseLoader from "@/components/base/BaseLoader.vue";
-import { useDeviceStore } from "@/stores/device";
 
 const app = createApp({
   render() {
     return h(Suspense, {
       fallback: h(BaseLoader, {
         variant: "macro",
-        message: "Loading Application..."
+        message: "Initializing Mathlly..."
       })
     }, {
       default: () => h(App)
     });
   }
 });
+
 const pinia = createPinia(); 
 
 app.use(pinia).use(router);

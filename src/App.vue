@@ -1,45 +1,40 @@
 <template>
-  <Suspense>
-    <template #default>
-      <div
-        class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
-        :class="{
-          'animation-disabled': settings.animationDisabled,
-        }"
-      >
-        <sidebar-menu
-          :is-open="isSidebarOpen"
-          :is-mobile="deviceStore.isMobile"
-          @update:isOpen="close"
-        />
+  <div
+    class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
+    :class="{
+      'animation-disabled': settings.animationDisabled,
+    }"
+  >
+    <sidebar-menu
+      :is-open="isSidebarOpen"
+      :is-mobile="deviceStore.isMobile"
+      @update:isOpen="close"
+    />
 
-        <div
-          class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-          :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']"
-        >
-          <app-header
-            :is-open="isSidebarOpen"
+    <div
+      class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
+      :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']"
+    >
+      <app-header
+        :is-open="isSidebarOpen"
+        :is-mobile="deviceStore.isMobile"
+        @toggle-sidebar="toggle"
+      />
+      <router-view v-slot="{ Component }">
+        <Transition name="fade" mode="out-in">
+          <component
+            :is="Component"
+            :mode="mode"
+            :settings="settings"
             :is-mobile="deviceStore.isMobile"
-            @toggle-sidebar="toggle"
+            @settings-change="updateSettings"
+            @update:mode="updateMode"
           />
-          <router-view v-slot="{ Component }">
-            <Transition name="fade" mode="out-in">
-              <component
-                :is="Component"
-                :mode="mode"
-                :settings="settings"
-                :is-mobile="deviceStore.isMobile"
-                @settings-change="updateSettings"
-                @update:mode="updateMode"
-              />
-            </Transition>
-          </router-view>
-        </div>
-        <toast />
-      </div>
-    </template>
-    <template #fallback><base-loader /></template>
-  </Suspense>
+        </Transition>
+      </router-view>
+    </div>
+    <toast />
+  </div>
 </template>
 
 <script setup>
@@ -51,7 +46,6 @@ import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
 import { usePanel } from "@/composables/useSidebar";
 import Toast from "@/components/base/FeatureToast.vue";
-import BaseLoader from "@/components/base/BaseLoader.vue";
 import AppHeader from "@/layouts/AppHeader.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
 

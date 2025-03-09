@@ -1,7 +1,17 @@
 export const updates = [ 
   {
+    version: '0.11.2',
+    date: 'March 9, 2025',
+    features: [
+      'Simplified main app entry structure',
+      'Enhanced and simplified baseLoader animation during initial suspense',
+      'Removed duplicate initialization logic to prevent race conditions',
+      'Renamed useSidebar to usePanel for a more generic implementation'
+    ]
+  },
+  {
     version: '0.11.1',
-    date: 'February 28, 2025',
+    date: 'March 9, 2025',
     features: [
       'Cleaned up main.js for better initialization flow',
       'Updated CSS body styling for improved visual consistency',
