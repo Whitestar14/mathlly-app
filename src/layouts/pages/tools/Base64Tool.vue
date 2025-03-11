@@ -2,7 +2,7 @@
   <div class="container mx-auto p-6">
     <div class="max-w-6xl mx-auto space-y-6">
       <div class="space-y-1">
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+        <h1 class="text-2xl font-medium text-gray-900 dark:text-gray-100">
           Base64 Encoder/Decoder
         </h1>
         <p class="text-sm text-gray-600 dark:text-gray-400">

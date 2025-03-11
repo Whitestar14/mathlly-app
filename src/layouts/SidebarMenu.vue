@@ -5,16 +5,15 @@
       class="sidebar-container"
       :class="sidebarClasses"
     >
-      <div class="flex flex-col h-full">
+      <div class="flex flex-col font-medium h-full">
         <div
-          class="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-between p-4 pb-5 border-b border-gray-200 dark:border-gray-700 h-[64.75px]"
+          class="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-between border-b border-gray-200 dark:border-gray-700 min-h-14 max-h-14"
         >
-          <div class="w-full h-full relative">
-            <div class="flex items-center max-h-8 space-x-2 justify-between">
+          <div class="size-full px-2 py-1 relative">
+            <div class="flex items-center justify-between md:justify-around">
               <Logo />
               <Button
                 v-tippy="{ content: 'Close Sidebar', placement: 'bottom' }"
-                class="mr-4"
                 variant="ghost"
                 size="icon"
                 :class="{ 'hidden': !isOpen }"
@@ -56,8 +55,8 @@
                       :class="[
                         menuItemBaseClasses,
                         currentPill === item.path
-                          ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
-                          : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-300',
+                          ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-semibold'
+                          : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300',
                         item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
                       ]"
                       @click="handleItemClick($event, item)"

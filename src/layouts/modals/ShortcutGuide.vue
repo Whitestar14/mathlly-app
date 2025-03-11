@@ -6,7 +6,7 @@
     <template #title>
       <div class="flex items-center">
         <div>
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 class="text-xl font-medium text-gray-900 dark:text-white">
             Keyboard Shortcuts
           </h2>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -71,7 +71,7 @@
                     :key="index"
                   >
                     <kbd
-                      class="px-2 py-1 text-xs font-semibold bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
+                      class="px-2 py-1 text-xs font-medium bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
                     >
                       {{ part }}
                     </kbd>
@@ -83,7 +83,7 @@
                 </template>
                 <kbd
                   v-else
-                  class="px-2 py-1 text-xs font-semibold bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
+                  class="px-2 py-1 text-xs font-medium bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
                 >
                   {{ key }}
                 </kbd>

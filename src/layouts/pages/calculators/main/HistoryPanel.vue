@@ -40,7 +40,7 @@
             class="flex-shrink-0 p-3 border-b border-gray-200 dark:border-gray-700"
           >
             <div class="flex justify-between items-center">
-            <h2 class="text-base font-semibold text-gray-800 dark:text-gray-200">
+            <h2 class="text-base font-medium text-gray-800 dark:text-gray-200">
                   History
                 </h2>
                 <Button

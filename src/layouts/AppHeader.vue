@@ -1,5 +1,5 @@
 <template>
-  <header class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 h-[64.75px]">
+  <header class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 h-14">
     <div class="container mx-auto flex justify-between items-center">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">

@@ -1,5 +1,15 @@
 export const updates = [ 
   {
+    version: '0.11.3',
+    date: 'March 11, 2025',
+    features: [
+      'Adjust font-weight and optimize for ledgibility',
+      'Enhanced styling consistency and following conventional techniques',
+      'Enhanced sidebar and appheader title heights on mobile',
+      'Added seamless transition animation for toast notifications'
+    ]
+  },
+  {
     version: '0.11.2',
     date: 'March 9, 2025',
     features: [

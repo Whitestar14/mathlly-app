@@ -3,16 +3,17 @@
     class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
   >
     <header
-      class="sticky top-0 z-[5] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
+      class="sticky -top-px z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
     >
-      <div class="container mx-auto flex items-center h-16 px-4">
-        <button
-          class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      <div class="container mx-auto flex items-center gap-2 h-14 px-4">
+        <Button
+          variant="ghost"
+          size="icon"
           @click="goBack"
         >
-          <ArrowLeftIcon class="h-6 w-6" />
-        </button>
-        <h1 class="text-xl font-semibold">
+          <ArrowLeftIcon class="h-5 w-5" />
+        </Button>
+        <h1 class="text-xl font-medium">
           About Mathlly
         </h1>
       </div>
@@ -38,7 +39,7 @@
         style="font-family: 'Geist mono'"
       >
         <h2
-          class="text-4xl sm:text-6xl lg:text-8xl font-semibold tracking-tight mb-4"
+          class="text-4xl sm:text-6xl lg:text-8xl font-medium tracking-tight mb-4"
         >
           The toolset by developers,
           <span class="block mb-4 text-gray-600 dark:text-gray-400">
@@ -57,7 +58,7 @@
       </section>
 
       <section class="space-y-8">
-        <h3 class="text-2xl font-semibold tracking-tight">
+        <h3 class="text-2xl font-medium tracking-tight">
           Key Features
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -72,7 +73,7 @@
       </section>
 
       <section class="mt-16 space-y-6">
-        <h3 class="text-2xl font-semibold tracking-tight">
+        <h3 class="text-2xl font-medium tracking-tight">
           Why Choose Mathlly?
         </h3>
         <div
@@ -96,7 +97,7 @@
       </section>
 
       <section class="mt-16 space-y-6">
-        <h3 class="text-2xl font-semibold tracking-tight">
+        <h3 class="text-2xl font-medium tracking-tight">
           Our Mission
         </h3>
         <div
@@ -127,8 +128,9 @@
 <script setup>
 import { ArrowLeftIcon, CheckCircleIcon } from "lucide-vue-next";
 import { useRouter } from "vue-router";
-import FeatureCard from "@/components/cards/FeatureCard.vue";
 import { useVersionStore } from "@/stores/version";
+import FeatureCard from "@/components/cards/FeatureCard.vue";
+import Button from "@/components/base/BaseButton.vue";
 
 const version = useVersionStore();
 

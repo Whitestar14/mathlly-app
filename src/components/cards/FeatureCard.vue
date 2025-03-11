@@ -5,7 +5,7 @@
       class="h-10 w-10 text-indigo-500 dark:text-indigo-400 mb-4 opacity-75 group-hover:opacity-100 transition-opacity"
     />
     <h4
-      class="text-lg font-semibold tracking-tight mb-2"
+      class="text-lg font-medium tracking-tight mb-2"
       style="font-family:'Geist mono'"
     >
       {{ title }}

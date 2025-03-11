@@ -23,7 +23,7 @@
           :class="[
             'monospace',
             activeBase === base
-              ? 'text-indigo-500 dark:text-indigo-300 font-semibold'
+              ? 'text-indigo-500 dark:text-indigo-300 font-medium'
               : 'text-gray-800 dark:text-gray-300',
           ]"
         >{{

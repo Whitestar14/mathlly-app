@@ -11,7 +11,7 @@
       >
         <div class="flex justify-between items-start">
           <div>
-            <h3 class="font-semibold text-gray-900 dark:text-gray-100">
+            <h3 class="font-medium text-gray-900 dark:text-gray-100">
               {{ toast.title }}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -39,28 +39,21 @@ const { toasts } = useToast();
 
 <style scoped>
 /* Transition Styles */
+.toast-transition-move,
 .toast-transition-enter-active,
 .toast-transition-leave-active {
-  transition: all 0.3s ease; /* Adjust timing as needed */
+  transition: all 0.3s ease;
 }
 
+.toast-transition-leave-to,
 .toast-transition-enter-from {
   opacity: 0;
-  transform: translateY(20px); /* Slide up from bottom */
+  transform: translateY(20px);
 }
 
+.toast-transition-leave-from,
 .toast-transition-enter-to {
   opacity: 1;
   transform: translateY(0);
 }
-
-.toast-transition-leave-from {
-  opacity: 1;
-}
-
-.toast-transition-leave-to {
-  opacity: 0;
-  transform: translateY(20px); /* Slide down on exit */
-}
-
 </style>

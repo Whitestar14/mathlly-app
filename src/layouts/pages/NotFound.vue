@@ -15,7 +15,7 @@
 
       <!-- Message -->
       <div class="space-y-2">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
           Page not found
         </h2>
         <p class="text-gray-600 dark:text-gray-400">

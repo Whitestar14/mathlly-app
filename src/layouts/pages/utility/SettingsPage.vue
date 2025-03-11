@@ -3,16 +3,17 @@
     class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
   >
     <header
-      class="sticky top-0 z-[5] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
+      class="sticky -top-px z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
     >
-      <div class="container mx-auto flex items-center h-16 px-4">
-        <button
-          class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+    <div class="container mx-auto flex items-center gap-2 h-14 px-4">
+        <Button
+          variant="ghost"
+          size="icon"
           @click="goBack"
         >
-          <ArrowLeftIcon class="h-6 w-6" />
-        </button>
-        <h1 class="text-xl font-semibold">
+          <ArrowLeftIcon class="h-5 w-5" />
+        </Button>
+        <h1 class="text-xl font-medium">
           Settings
         </h1>
       </div>
@@ -22,7 +23,7 @@
       <div class="max-w-2xl mx-auto space-y-8">
         <section class="space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold tracking-tight">
+            <h2 class="text-lg font-medium tracking-tight">
               Display Settings
             </h2>
           </div>
@@ -82,7 +83,7 @@
 
         <section class="space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold tracking-tight">
+            <h2 class="text-lg font-medium tracking-tight">
               Calculator Mode
             </h2>
           </div>
@@ -104,7 +105,7 @@
 
         <section class="space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold tracking-tight">
+            <h2 class="text-lg font-medium tracking-tight">
               Themes & Preferences
             </h2>
           </div>
@@ -152,12 +153,14 @@
 
 <script setup>
 import { ArrowLeftIcon } from "lucide-vue-next";
+import { useTitle } from "@vueuse/core";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import Select from "@/components/ui/SelectBar.vue";
 import Switch from "@/components/ui/ToggleBar.vue";
-import { useTitle } from "@vueuse/core";
+import Button from "@/components/base/BaseButton.vue";
+
 const router = useRouter();
 useTitle(`${router.currentRoute.value.name} | Mathlly`);
 const settingsStore = useSettingsStore();

@@ -1,14 +1,15 @@
 <template>
   <div class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <header class="sticky top-0 z-[5] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
-      <div class="container mx-auto flex items-center h-16 px-4">
-        <button
-          class="mr-4 h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+    <header class="sticky -top-px z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="container mx-auto flex items-center gap-2 h-14 px-4">
+        <Button
+          variant="ghost"
+          size="icon"
           @click="goBack"
         >
-          <ArrowLeftIcon class="h-6 w-6" />
-        </button>
-        <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          <ArrowLeftIcon class="h-5 w-5" />
+        </Button>
+        <h1 class="text-xl font-medium">
           Feedback
         </h1>
       </div>
@@ -17,7 +18,7 @@
     <main class="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
       <div class="space-y-8">
         <section class="space-y-6">
-          <h2 class="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+          <h2 class="text-lg font-medium tracking-tight text-gray-900 dark:text-gray-100">
             Submit Feedback
           </h2>
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
@@ -64,7 +65,7 @@
         </section>
 
         <section class="space-y-6">
-          <h2 class="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+          <h2 class="text-lg font-medium tracking-tight text-gray-900 dark:text-gray-100">
             Submission Guidelines
           </h2>
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
@@ -95,6 +96,8 @@
 import { CheckCircleIcon, ArrowLeftIcon } from 'lucide-vue-next';
 import { useTitle } from '@vueuse/core';
 import { useRouter } from "vue-router";
+import Button from "@/components/base/BaseButton.vue";
+
 const router = useRouter();
 useTitle(`${router.currentRoute.value.name} | Mathlly`);
 
