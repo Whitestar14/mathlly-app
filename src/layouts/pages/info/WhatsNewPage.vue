@@ -19,8 +19,7 @@
       <div class="inline-flex items-center rounded-full border border-indigo-200 dark:border-gray-800 bg-indigo-50 dark:bg-gray-800/50 px-3 py-1 text-sm font-medium mb-8">
         <span class="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400 mr-2" />
         <span
-          class="text-indigo-600 dark:text-indigo-400"
-          style="font-family: 'Geist mono'"
+          class="text-indigo-600 dark:text-indigo-400 font-['Geist_Mono']"
         >
           v{{ version.versionInfo.full }}
         </span>

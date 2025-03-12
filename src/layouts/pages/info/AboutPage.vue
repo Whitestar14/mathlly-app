@@ -27,16 +27,14 @@
           class="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400 mr-2"
         />
         <span
-          class="text-indigo-600 dark:text-indigo-400"
-          style="font-family: 'Geist mono'"
+          class="text-indigo-600 dark:text-indigo-400 font-['Geist_Mono']"
         >
           v{{ version.versionInfo.full }}
         </span>
       </div>
 
       <section
-        class="mb-24"
-        style="font-family: 'Geist mono'"
+        class="mb-24 font-mono"
       >
         <h2
           class="text-4xl sm:text-6xl lg:text-8xl font-medium tracking-tight mb-4"
@@ -48,8 +46,7 @@
         </h2>
 
         <p
-          class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400"
-          style="font-family: 'Inter'"
+          class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400 font-sans"
         >
           Mathlly is more than just a calculator. It's a comprehensive suite of
           mathematical tools crafted to streamline your workflow and boost your
