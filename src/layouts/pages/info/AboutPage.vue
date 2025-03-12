@@ -136,7 +136,7 @@ const version = useVersionStore();
 
 import { useTitle } from "@vueuse/core";
 const router = useRouter();
-useTitle(`${router.currentRoute.value.name} - Mathlly`);
+useTitle("About - Mathlly");
 
 const goBack = () => {
   router.go(-1);

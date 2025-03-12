@@ -1,4 +1,12 @@
-export const updates = [ 
+export const updates = [
+  {
+    version: '0.11.4',
+    date: 'March 12, 2025',
+    features: [
+      'Enhanced user accessibility and experience by increasing chevron touch targets',
+      'Removed redundant code in views and pages'
+    ]
+  },
   {
     version: '0.11.3',
     date: 'March 11, 2025',
@@ -78,16 +86,16 @@ export const updates = [
     version: 'v0.8.0-beta',
     date: 'February 16, 2025',
     features: [
-    '@deprecate: Subsitute the default calculator mode option from Basic to Standard Mode',
-    'Refractored and reorganized codebase for better separation of concerns',
-    'Improved speed index on performance and user accessibility',
-    'Implemented better and more predictable error handling methods across system modules',
-    'Reduced boilerplate and redundant code to avoid performance hangs and bottlenecks',
-    'Fixed the formatting bugs that prevented seamless data transactions in Programmer Mode',
-    'Fixed the Programmer mode BIN not being able to use the shift operators',
-    'Updated the shortcut modal with list of all available keybindings',
-    'Fixed the Programmer mode HEX function emitting the corresponding values, C had been clearing the input state in former implementation',
-    'Minor UI improvements and considerations made to the look of the app',
+      '@deprecate: Subsitute the default calculator mode option from Basic to Standard Mode',
+      'Refractored and reorganized codebase for better separation of concerns',
+      'Improved speed index on performance and user accessibility',
+      'Implemented better and more predictable error handling methods across system modules',
+      'Reduced boilerplate and redundant code to avoid performance hangs and bottlenecks',
+      'Fixed the formatting bugs that prevented seamless data transactions in Programmer Mode',
+      'Fixed the Programmer mode BIN not being able to use the shift operators',
+      'Updated the shortcut modal with list of all available keybindings',
+      'Fixed the Programmer mode HEX function emitting the corresponding values, C had been clearing the input state in former implementation',
+      'Minor UI improvements and considerations made to the look of the app',
     ]
   },
   {
@@ -134,7 +142,7 @@ export const updates = [
       'Improved error prevention for invalid number inputs',
       'Enhanced calculator mode transitions with keyboard shortcuts'
     ]
-    },
+  },
   {
     version: 'v0.7.2',
     date: 'January 31, 2025',
@@ -224,7 +232,7 @@ export const updates = [
       'Enhanced project maintainability with cleaner folder structure',
       'Streamlined component organization for better scalability'
     ]
-  },  
+  },
   {
     version: 'v0.4.0',
     date: 'January 5, 2025',
@@ -242,7 +250,7 @@ export const updates = [
   },
   {
     version: 'v0.3.0-beta',
-    date: 'January 3, 2025', 
+    date: 'January 3, 2025',
     features: [
       'Fixed longtime issue with unexpected History Panel behavior on mobile',
       'Implemented dynamic version display and enhanced routing with What\'s New page',
@@ -250,62 +258,61 @@ export const updates = [
       'Switched to the pnpm package manager for performant and effective symlinking on low-end devices'
     ]
   },
-    {
-      version: 'v0.3.0',
-      date: 'January 1, 2025',
-      features: [
-        'Introduced Programmer Calculator with HEX, DEC, OCT, and BIN calculations',
-        'Added real-time base conversion display with specialized input validation',
-        'Implemented History Panel with local storage and sync capabilities',
-        'Enhanced UI with smooth dark mode transitions and mobile responsiveness',
-        'Added keyboard shortcuts and welcome modal for improved user experience',
-        'Integrated tooltips system (automatically disabled on mobile)',
-        'Implemented Vue 3 composition API with improved performance',
-        'Added Webpack bundle analyzer for optimization'
-      ]
-    },
-    {
-      version: 'v0.2.1',
-      date: 'December 26, 2024',
-      features: [
-        'Added history synchronization across calculator modes',
-        'Improved scientific notation support in all modes',
-        'Enhanced calculation performance for complex operations',
-        'Fixed decimal precision handling and edge cases',
-        'Implemented DexieJS for robust local storage'
-      ]
-    },
-    {
-      version: 'v0.2.0',
-      date: 'November 14, 2024',
-      features: [
-        'Introduced Standard Calculator mode with advanced operations',
-        'Added fraction display support with toggle option',
-        'Implemented thousands separator configuration',
-        'Enhanced error handling and user feedback',
-        'Added basic settings panel for calculator customization'
-      ]
-    },
-    {
-      version: 'v0.1.0',
-      date: 'October 27, 2024',
-      features: [
-        'Initial release with Basic Calculator functionality',
-        'Core arithmetic operations with precise evaluation',
-        'Clean and intuitive user interface',
-        'Dark/Light theme support',
-        'Basic expression evaluation engine'
-      ]
-    }
-  ];
-  
-  export const upcomingFeatures = [
-    'IDE integration for seamless development workflow',
-    'Advanced graphing capabilities with interactive plots',
-    'Custom function definitions and storage',
-    'Mobile apps for iOS and Android platforms',
-    'Cloud sync for settings and history',
-    'Lazy loading resources and assets for improved performance',
-    'MathJax integration to display fractions in LaTeX format on the web page'
-  ];
-  
+  {
+    version: 'v0.3.0',
+    date: 'January 1, 2025',
+    features: [
+      'Introduced Programmer Calculator with HEX, DEC, OCT, and BIN calculations',
+      'Added real-time base conversion display with specialized input validation',
+      'Implemented History Panel with local storage and sync capabilities',
+      'Enhanced UI with smooth dark mode transitions and mobile responsiveness',
+      'Added keyboard shortcuts and welcome modal for improved user experience',
+      'Integrated tooltips system (automatically disabled on mobile)',
+      'Implemented Vue 3 composition API with improved performance',
+      'Added Webpack bundle analyzer for optimization'
+    ]
+  },
+  {
+    version: 'v0.2.1',
+    date: 'December 26, 2024',
+    features: [
+      'Added history synchronization across calculator modes',
+      'Improved scientific notation support in all modes',
+      'Enhanced calculation performance for complex operations',
+      'Fixed decimal precision handling and edge cases',
+      'Implemented DexieJS for robust local storage'
+    ]
+  },
+  {
+    version: 'v0.2.0',
+    date: 'November 14, 2024',
+    features: [
+      'Introduced Standard Calculator mode with advanced operations',
+      'Added fraction display support with toggle option',
+      'Implemented thousands separator configuration',
+      'Enhanced error handling and user feedback',
+      'Added basic settings panel for calculator customization'
+    ]
+  },
+  {
+    version: 'v0.1.0',
+    date: 'October 27, 2024',
+    features: [
+      'Initial release with Basic Calculator functionality',
+      'Core arithmetic operations with precise evaluation',
+      'Clean and intuitive user interface',
+      'Dark/Light theme support',
+      'Basic expression evaluation engine'
+    ]
+  }
+]
+
+export const upcomingFeatures = [
+  'IDE integration for seamless development workflow',
+  'Advanced graphing capabilities with interactive plots',
+  'Custom function definitions and storage',
+  'Mobile apps for iOS and Android platforms',
+  'Cloud sync for settings and history',
+  'Lazy loading resources and assets for improved performance',
+  'MathJax integration to display fractions in LaTeX format on the web page'
+];

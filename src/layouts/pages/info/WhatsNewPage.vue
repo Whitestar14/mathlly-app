@@ -79,7 +79,7 @@
 
   import { useTitle } from '@vueuse/core';
   const router = useRouter();
-  useTitle(`${router.currentRoute.value.name} - Mathlly`);
+  useTitle("What's New - Mathlly");
   const version = useVersionStore();
 
   const goBack = () => {

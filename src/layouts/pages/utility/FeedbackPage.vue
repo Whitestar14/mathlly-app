@@ -99,7 +99,7 @@ import { useRouter } from "vue-router";
 import Button from "@/components/base/BaseButton.vue";
 
 const router = useRouter();
-useTitle(`${router.currentRoute.value.name} | Mathlly`);
+useTitle("Feedback - Mathlly");
 
 const goBack = () => {
   router.go(-1);

@@ -162,7 +162,7 @@ import Switch from "@/components/ui/ToggleBar.vue";
 import Button from "@/components/base/BaseButton.vue";
 
 const router = useRouter();
-useTitle(`${router.currentRoute.value.name} | Mathlly`);
+useTitle("Settings - Mathlly");
 const settingsStore = useSettingsStore();
 
 const localSettings = ref({
