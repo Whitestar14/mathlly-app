@@ -16,8 +16,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        mono: ["Geist Mono", "Consolas", "monospace"],
+        sans: ["Inter", "Geist", "sans-serif"],
+        mono: ["Reddit Mono", "Geist Mono", "Consolas", "monospace"],
       },
       colors: {
         primary: {

@@ -50,7 +50,6 @@
 /* CSS Stylesheet Imports */
 @import url(./buttons.css);
 
-  
 @layer base {
   :root {
     --border-input: theme("colors.gray.200");
@@ -67,7 +66,7 @@
   @font-face {
     font-family: "Geist Mono";
     src: url(../fonts/GeistMonoVF.woff2);
-    font-display: swap; 
+    font-display: swap;
   }
 
   @font-face {
@@ -95,13 +94,39 @@
   }
 
   body {
-    @apply font-sans font-medium;
+    @apply font-sans font-normal;
+  }
+  /* Scrollbar styles */
+  body,
+  html {
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    -ms-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    @apply hover:bg-gray-100/50;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply rounded-lg bg-gray-100/50 dark:bg-gray-800/50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-lg bg-transparent;
   }
 
   kbd,
   .monospace,
   .main-display {
     @apply font-mono;
+  }
+
+  kbd {
+    @apply w-fit bg-gray-200/90 text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
   }
 
   .toast {
@@ -191,18 +216,17 @@
   .ring-offset-background {
     --tw-ring-offset-color: theme("colors.background.DEFAULT");
   }
+}
 
-  }
+.loader-fade {
+  animation: loader-fade 1s ease-in-out infinite alternate;
+}
 
-  .loader-fade {
-    animation: loader-fade 1s ease-in-out infinite alternate;
+@keyframes loader-fade {
+  from {
+    opacity: 0.4;
   }
-
-  @keyframes loader-fade {
-    from {
-      opacity: 0.4;
-    }
-    to {
-      opacity: 0.8;
-    }
+  to {
+    opacity: 0.8;
   }
+}
