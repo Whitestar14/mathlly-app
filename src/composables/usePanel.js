@@ -1,5 +1,5 @@
-import { ref, watch } from 'vue'
-import { useLocalStorage } from '@vueuse/core'
+import { ref, watch } from "vue"
+import { useLocalStorage } from "@vueuse/core"
 
 export function usePanel(storageKey, isMobile, defaultDesktopState = true) {
   const preferences = useLocalStorage(`${storageKey}-preferences`, {
@@ -7,8 +7,8 @@ export function usePanel(storageKey, isMobile, defaultDesktopState = true) {
       isOpen: defaultDesktopState,
     },
     mobile: {
-      isOpen: false
-    }
+      isOpen: false,
+    },
   })
 
   const isOpen = ref(isMobile ? false : preferences.value.desktop.isOpen)
@@ -37,6 +37,15 @@ export function usePanel(storageKey, isMobile, defaultDesktopState = true) {
     }
   }
 
+  watch(
+    () => isOpen.value,
+    (newVal) => {
+      if (!isMobile) {
+        localStorage.setItem(`${storageKey}-state`, newVal.toString())
+      }
+    }
+  )
+
   watch(isOpen, () => {
     updatePreferences()
   })
@@ -45,6 +54,6 @@ export function usePanel(storageKey, isMobile, defaultDesktopState = true) {
     isOpen,
     toggle,
     close,
-    handleResize
+    handleResize,
   }
 }

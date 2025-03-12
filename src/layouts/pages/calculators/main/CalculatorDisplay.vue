@@ -10,7 +10,6 @@
     <ChevronScroll
       :show-left-chevron="showLeftChevron"
       :show-right-chevron="showRightChevron"
-      :active-chevron="activeChevron"
       @scroll-to-previous="scrollToPrevious"
       @scroll-to-next="scrollToNext"
     />
@@ -30,7 +29,6 @@
       :animated-result="animatedResult"
       :active-base="activeBase"
       :mode="mode"
-      :settings="settings"
       @scroll-update="handleScrollUpdate"
     />
 
@@ -42,10 +40,9 @@
 import ChevronScroll from "@/components/ui/ChevronScroll.vue";
 import ControlButtons from "@/components/ui/ControlButtons.vue";
 import MainDisplay from "@/components/ui/MainDisplay.vue";
+import FeatureToast from "@/components/base/FeatureToast.vue";
 import { computed, nextTick, ref, watch } from "vue";
 import { useToast } from "@/composables/useToast";
-import { useSettingsStore } from "@/stores/settings";
-import FeatureToast from "@/components/base/FeatureToast.vue";
 import { useClipboard, useEventListener, useDebounceFn } from "@vueuse/core";
 
 const props = defineProps({
@@ -60,12 +57,10 @@ const props = defineProps({
 
 defineEmits(["toggle-history"]);
 const { toast } = useToast();
-const settings = useSettingsStore();
 
 const mainDisplay = ref(null);
 const showLeftChevron = ref(false);
 const showRightChevron = ref(false);
-const activeChevron = ref(null);
 
 const handleScrollUpdate = useDebounceFn(({ canScrollLeft, canScrollRight }) => {
   showLeftChevron.value = canScrollLeft;
@@ -74,17 +69,11 @@ const handleScrollUpdate = useDebounceFn(({ canScrollLeft, canScrollRight }) => 
 
 useEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' && showLeftChevron.value) {
-    activeChevron.value = 'left';
-    mainDisplay.value?.scrollToPrevious();
+    scrollToPrevious()
   }
   if (e.key === 'ArrowRight' && showRightChevron.value) {
-    activeChevron.value = 'right';
-    mainDisplay.value?.scrollToNext();
+    scrollToNext()
   }
-});
-
-useEventListener('keyup', () => {
-  activeChevron.value = null;
 });
 
 function scrollToPrevious() {
@@ -125,16 +114,3 @@ function copyToClipboard() {
   });
 }
 </script>
-
-<style scoped>
-.main-display {
-  mask-image: linear-gradient(to left, transparent, black 20px);
-  -webkit-mask-image: linear-gradient(to left, transparent, black 20px);
-  max-width: 100%;
-}
-
-.main-display[data-base="BIN"] {
-  font-size: 1.5rem;
-  letter-spacing: -0.5px;
-}
-</style>
