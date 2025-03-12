@@ -9,9 +9,8 @@
           :preview="preview"
           :error="error"
           :is-animating="isAnimating"
-          :animated-preview="animatedResult"
+          :animated-result="animatedResult"
           :active-base="activeBase"
-          :settings="settings"
           :mode="mode"
           @toggle-history="toggleHistory"
         />
@@ -30,10 +29,12 @@
     </div>
 
     <history-panel
-      :is-mobile="isMobile"
       :mode="mode"
+      :is-mobile="isMobile"
+      :is-open="isHistoryOpen"
+      @toggle-history="toggleHistory"
+      @close-history="closeHistory"
       @select-item="selectHistoryItem"
-      @close="closeHistory"
     />
 
     <!-- Welcome Modal -->
@@ -46,16 +47,10 @@
 </template>
 
 <script setup>
-import {
-  computed,
-  watch,
-  inject,
-  nextTick,
-  onMounted,
-  provide
-} from "vue";
+import { computed, watch, inject, nextTick, onMounted, provide } from "vue";
 import { useTitle, useStorage } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
+import { usePanel } from "@/composables/usePanel";
 import { useCalculator } from "@/composables/useCalculator";
 import { useKeyboard } from "@/composables/useKeyboard";
 import { useInputValidation } from "@/composables/useValidation";
@@ -64,7 +59,6 @@ import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 import CalculatorDisplay from "@/layouts/pages/calculators/main/CalculatorDisplay.vue";
 import CalculatorButtons from "@/layouts/pages/calculators/main/CalculatorButtons.vue";
 import { useSettingsStore } from "@/stores/settings";
-import { usePanel } from "@/composables/useSidebar";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -129,15 +123,15 @@ const { addToHistory } = useHistory();
 const currentInput = inject("currentInput");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
-const { toggle: toggleHistory, close: closeHistory } = usePanel('history-panel', props.isMobile);
-
+const { isOpen: isHistoryOpen, toggle: toggleHistory, close: closeHistory } = usePanel('history-panel', props.isMobile);
 watch(
   () => props.isMobile,
   (newIsMobile) => {
     if (newIsMobile) {
       closeHistory();
     }
-  }
+  },
+  { immediate: true }
 );
 
 const handleButtonClick = (btn) => {
@@ -212,7 +206,6 @@ const { setContext, clearContext, setBase } = useKeyboard("calculator", {
     }
   },
   setBase: (base) => handleBaseChange(base),
-  toggleHistory,
 });
 
 const settingsStore = useSettingsStore();

@@ -38,13 +38,13 @@
 </template>
 
 <script setup>
-import { onUnmounted, onMounted, provide, ref, computed, watch } from "vue";
+import { onUnmounted, provide, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useFullscreen } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
 import { useSettingsStore } from "@/stores/settings";
 import { useKeyboard } from "@/composables/useKeyboard";
-import { usePanel } from "@/composables/useSidebar";
+import { usePanel } from "@/composables/usePanel";
 import Toast from "@/components/base/FeatureToast.vue";
 import AppHeader from "@/layouts/AppHeader.vue";
 import SidebarMenu from "@/layouts/SidebarMenu.vue";
@@ -57,9 +57,11 @@ const setup = async () => {
   const deviceStore = useDeviceStore();
   const settingsStore = useSettingsStore();
   
-  // Force initial loading state
-  await new Promise(resolve => setTimeout(resolve, 800));
+  // Ensure minimum loading time of 1.2 seconds
+  const minLoadTime = new Promise(resolve => setTimeout(resolve, 1200));
+  
   await Promise.all([
+    minLoadTime,
     settingsStore.loadSettings(),
     router.isReady(),
   ]);
@@ -130,23 +132,6 @@ useKeyboard("global", {
     useFullscreen(document.documentElement).toggle();
   },
 });
-
-const initializeApp = async () => {
-  deviceStore.initializeDeviceInfo();
-  try {
-    await Promise.all([
-      settingsStore.loadSettings(),
-      router.isReady(),
-      new Promise((resolve) => setTimeout(resolve, 800)),
-    ]);
-    settingsStore.setCurrentMode(settingsStore.defaultMode);
-  } catch (error) {
-    console.error("AsyncLoader caught an error:", error);
-    return false;
-  }
-};
-
-onMounted(initializeApp);
 
 onUnmounted(() => {
   deviceStore.destroyDeviceInfo();
