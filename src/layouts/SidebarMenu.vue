@@ -5,7 +5,7 @@
       class="sidebar-container"
       :class="sidebarClasses"
     >
-      <div class="flex flex-col font-medium h-full">
+      <div class="flex flex-col h-full">
         <div
           class="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-between border-b border-gray-200 dark:border-gray-700 min-h-14 max-h-14"
         >
@@ -53,9 +53,9 @@
                     <button
                       :data-path="item.path"
                       :class="[
-                        menuItemBaseClasses,
+                        menuItemClasses,
                         currentPill === item.path
-                          ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-semibold'
+                          ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
                           : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300',
                         item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
                       ]"
@@ -121,7 +121,7 @@
                         "
                         class="h-5 w-5"
                       />
-                      <span class="block md:sr-only capitalize">{{
+                      <span class="block md:hidden capitalize">{{
                         item
                       }}</span>
                     </button>
@@ -131,7 +131,7 @@
             </NavigationMenuRoot>
           </div>
           <p class="text-xs text-center text-gray-500 dark:text-gray-400">
-            Mathlly - Stud.io
+            Mathlly - The Mathlly Team
           </p>
         </div>
       </div>
@@ -261,7 +261,7 @@ const sidebarClasses = computed(() => [
   props.isMobile ? "w-full" : "w-64 border-r",
 ]);
 
-const menuItemBaseClasses = [
+const menuItemClasses = [
   "w-full flex items-center gap-2.5",
   "px-3 py-1.5",
   "text-sm rounded-md",

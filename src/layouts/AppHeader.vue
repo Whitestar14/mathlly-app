@@ -22,7 +22,7 @@
           <!-- Mode Toggler using SelectBar -->
           <div
             v-if="currentRoute === '/'"
-            class="relative w-[80%] sm:w-36"
+            class="relative w-full min-w-36"
           >
             <Select
               v-model="selectedMode"
