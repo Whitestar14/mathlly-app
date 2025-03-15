@@ -29,7 +29,7 @@ export class DisplayFormatter {
 
   static formatProgrammer(value, base, options) {
     // Split preserving shift operators
-    const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()]\s*)/g);
+    const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()%]\s*)/g);
     let highlightIndex = value.lastIndexOf('(');
     let matchingIndex = this.findMatchingParenthesis(value, highlightIndex);
     
@@ -44,7 +44,7 @@ export class DisplayFormatter {
         if (part === ')' && index === matchingIndex) {
           return '<span class="highlight-paren">)</span>';
         }
-        if (["+", "-", "×", "÷", "(", ")", "<<", ">>"].includes(part)) return part;
+        if (["+", "-", "×", "÷", "(", ")", "<<", ">>", "%"].includes(part)) return part;
         
         // Remove any decimal points for programmer mode
         part = part.split('.')[0];
