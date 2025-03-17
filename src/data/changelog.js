@@ -1,5 +1,24 @@
 export const updates = [
   {
+    version: '0.11.5',
+    date: 'March 15, 2025',
+    features: [
+      'Updated dependencies and dev-dependencies and install necessary loaders',
+      'Added meta properties to index file for better seo and accessibility',
+      'Improved app background and text color to reduce color harshness in dark-mode',
+      'Removed redundant code in services and utility files',
+      'Completed the encapsulation of calculator logic in the MainCalculator.vue entry',
+      'Polished UI animation of toast navigation',
+      'Migrated BaseDisplay into a component injected in CalculatorDisplay for encapsulation',
+      'Updated database to correspond changes with settings.js file',
+      'Fixed the default mode not being respected on app load',
+      'Simplified naming convention of properties and functions in sidebar and utilities',
+      'Adhered to idiomatic vue3 conventions by ensuring consistency and app encapsulation',
+      'Made the app smoother and more performant by leveraging flexbox over transforms',
+      'Swapped the percentage function key for the modulo button in Programmer Mode',
+    ]
+  },
+  {
     version: '0.11.4',
     date: 'March 12, 2025',
     features: [
