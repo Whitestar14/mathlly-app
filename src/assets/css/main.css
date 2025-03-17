@@ -155,12 +155,12 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none 
+    @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium duration-200 transition-colors focus-visible:outline-none 
     focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
   }
 
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary-dark dark:hover:bg-primary-light;
+    @apply bg-primary dark:bg-primary-dark text-primary-foreground hover:bg-primary-dark dark:hover:bg-primary-light;
   }
 
   .btn-destructive {
@@ -184,7 +184,7 @@
   }
 
   .btn-default-size {
-    @apply h-9 py-1 px-3 rounded-md;
+    @apply h-9 py-1 px-3 min-w-[120px] rounded-md;
   }
 
   .btn-sm {
