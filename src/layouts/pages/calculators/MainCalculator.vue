@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { computed, watch, inject, nextTick, onMounted, provide } from "vue";
+import { computed, watch, ref, nextTick, onMounted, provide } from "vue";
 import { useTitle, useStorage } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { usePanel } from "@/composables/usePanel";
@@ -65,8 +65,6 @@ const props = defineProps({
   settings: { type: Object, required: true },
   isMobile: { type: Boolean, required: true },
 });
-
-const emit = defineEmits(["update:mode"]);
 
 useTitle(computed(() => `${props.mode} Calculator - Mathlly`));
 
@@ -120,7 +118,7 @@ const preview = computed(() => {
 
 const { addToHistory } = useHistory();
 
-const currentInput = inject("currentInput");
+const currentInput = ref("0");
 const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
 
 const { isOpen: isHistoryOpen, toggle: toggleHistory, close: closeHistory } = usePanel('history-panel', props.isMobile);
