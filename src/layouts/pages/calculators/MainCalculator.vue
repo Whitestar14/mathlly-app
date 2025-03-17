@@ -1,7 +1,7 @@
 <template>
   <main class="flex-grow flex">
     <div
-      class="flex-grow bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300"
+      class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300"
     >
       <div class="p-3 mx-auto">
         <calculator-display
@@ -12,18 +12,18 @@
           :animated-result="animatedResult"
           :active-base="activeBase"
           :mode="mode"
+          :display-values="displayValues"
           @toggle-history="toggleHistory"
+          @base-change="handleBaseChange"
         />
 
         <calculator-buttons
           :mode="mode"
-          :display-values="displayValues"
-          :active-base="activeBase"
           :input-length="input.length"
           :max-length="maxInputLength"
+          :active-base="activeBase"
           @button-click="handleButtonClick"
           @clear="handleClear"
-          @base-change="handleBaseChange"
         />
       </div>
     </div>
@@ -47,8 +47,8 @@
 </template>
 
 <script setup>
-import { computed, watch, inject, nextTick, onMounted, provide } from "vue";
-import { useTitle, useStorage } from "@vueuse/core";
+import { computed, watch, ref, nextTick, onMounted, provide } from "vue";
+import { useTitle } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { usePanel } from "@/composables/usePanel";
 import { useCalculator } from "@/composables/useCalculator";
@@ -65,8 +65,6 @@ const props = defineProps({
   settings: { type: Object, required: true },
   isMobile: { type: Boolean, required: true },
 });
-
-const emit = defineEmits(["update:mode"]);
 
 useTitle(computed(() => `${props.mode} Calculator - Mathlly`));
 
@@ -120,8 +118,8 @@ const preview = computed(() => {
 
 const { addToHistory } = useHistory();
 
-const currentInput = inject("currentInput");
-const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
+const currentInput = ref("0");
+const showWelcomeModal = ref(localStorage.getItem("mathlly-welcome-shown") !== "true");
 
 const { isOpen: isHistoryOpen, toggle: toggleHistory, close: closeHistory } = usePanel('history-panel', props.isMobile);
 watch(
@@ -212,17 +210,14 @@ const settingsStore = useSettingsStore();
 
 onMounted(async () => {
   await settingsStore.loadSettings();
-
-  settingsStore.setCurrentMode(settingsStore.defaultMode);
-  emit("update:mode", settingsStore.defaultMode);
 });
 
 watch(
   () => props.mode,
   (newMode) => {
+    if (!newMode) return; // Skip if mode is not set
     clearState();
     calculator.value = createCalculator(newMode);
-    settingsStore.setCurrentMode(newMode);
 
     if (newMode === "Programmer") {
       setActiveBase("DEC");
@@ -283,6 +278,5 @@ const selectHistoryItem = ({ expression }) => {
 
 const closeWelcomeModal = () => {
   showWelcomeModal.value = false;
-  localStorage.setItem("mathlly-welcome-shown", "true");
 };
 </script>

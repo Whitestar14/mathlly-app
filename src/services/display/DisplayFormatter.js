@@ -29,7 +29,7 @@ export class DisplayFormatter {
 
   static formatProgrammer(value, base, options) {
     // Split preserving shift operators
-    const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()]\s*)/g);
+    const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()%]\s*)/g);
     let highlightIndex = value.lastIndexOf('(');
     let matchingIndex = this.findMatchingParenthesis(value, highlightIndex);
     
@@ -44,7 +44,7 @@ export class DisplayFormatter {
         if (part === ')' && index === matchingIndex) {
           return '<span class="highlight-paren">)</span>';
         }
-        if (["+", "-", "×", "÷", "(", ")", "<<", ">>"].includes(part)) return part;
+        if (["+", "-", "×", "÷", "(", ")", "<<", ">>", "%"].includes(part)) return part;
         
         // Remove any decimal points for programmer mode
         part = part.split('.')[0];
@@ -116,5 +116,27 @@ export class DisplayFormatter {
 
   static formatStandard(value, useFormatting) {
     return this.formatDecimalNumber(value, useFormatting);
+  }
+
+  static formatDisplayValue(value, base) {
+    if (!value) return "0";
+  
+    const MAX_PREVIEW_LENGTHS = {
+      BIN: 12,
+      OCT: 8,
+      DEC: 8,
+      HEX: 6,
+    };
+  
+    let result = value
+      .toString()
+      .replace(/^(0x|0o|0b)/, "")
+      .toUpperCase();
+  
+    if (result.length > MAX_PREVIEW_LENGTHS[base]) {
+      return result.slice(0, MAX_PREVIEW_LENGTHS[base]) + "…";
+    }
+  
+    return result;
   }
 }

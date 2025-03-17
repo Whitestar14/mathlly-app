@@ -7,6 +7,7 @@
         : 'transition-colors duration-300 bg-gray-100 dark:bg-gray-700',
     ]"
   >
+
     <ChevronScroll
       :show-left-chevron="showLeftChevron"
       :show-right-chevron="showRightChevron"
@@ -31,8 +32,16 @@
       :mode="mode"
       @scroll-update="handleScrollUpdate"
     />
-
+ 
     <FeatureToast />
+  </div>
+  <div>
+    <BaseDisplay 
+      v-if="mode === 'Programmer'"
+      :display-values="displayValues"
+      :active-base="activeBase"
+      @base-change="$emit('base-change', $event)"
+    />
   </div>
 </template>
 
@@ -41,6 +50,7 @@ import ChevronScroll from "@/components/ui/ChevronScroll.vue";
 import ControlButtons from "@/components/ui/ControlButtons.vue";
 import MainDisplay from "@/components/ui/MainDisplay.vue";
 import FeatureToast from "@/components/base/FeatureToast.vue";
+import BaseDisplay from "@/components/ui/BaseDisplay.vue";
 import { computed, nextTick, ref, watch } from "vue";
 import { useToast } from "@/composables/useToast";
 import { useClipboard, useEventListener, useDebounceFn } from "@vueuse/core";
@@ -53,9 +63,10 @@ const props = defineProps({
   animatedResult: { type: String, default: "" },
   activeBase: { type: String, default: "DEC" },
   mode: { type: String, default: "Standard" },
+  displayValues: { type: Object, default: () => ({}) },
 });
 
-defineEmits(["toggle-history"]);
+defineEmits(["toggle-history", "base-change"]);
 const { toast } = useToast();
 
 const mainDisplay = ref(null);

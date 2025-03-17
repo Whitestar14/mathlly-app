@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { onUnmounted, provide, ref, computed, watch } from "vue";
+import { onUnmounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useFullscreen } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
@@ -53,7 +53,6 @@ const router = useRouter();
 
 // Make setup async
 const setup = async () => {
-  const currentInput = ref("0");
   const deviceStore = useDeviceStore();
   const settingsStore = useSettingsStore();
   
@@ -67,19 +66,17 @@ const setup = async () => {
   ]);
 
   deviceStore.initializeDeviceInfo();
-  settingsStore.setCurrentMode(settingsStore.defaultMode);
 
   return {
-    currentInput,
     deviceStore,
     settingsStore,
     settings: settingsStore,
+    // Use activeMode which returns currentMode || defaultMode
     mode: computed(() => settingsStore.activeMode),
   };
 };
 
 const {
-  currentInput,
   deviceStore,
   settingsStore,
   settings,
@@ -92,8 +89,6 @@ const {
   close,
   handleResize,
 } = usePanel('sidebar', deviceStore.isMobile);
-
-provide("currentInput", currentInput);
 
 const updateMode = async (newMode) => {
   settingsStore.setCurrentMode(newMode);

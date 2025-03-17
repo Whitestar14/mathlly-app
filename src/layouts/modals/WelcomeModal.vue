@@ -89,7 +89,6 @@ const handleClose = () => {
   if (dontShowAgain.value) {
     localStorage.setItem("mathlly-welcome-shown", "true");
   }
-  emit("update:isOpen", false);
   emit("close");
 };
 </script>

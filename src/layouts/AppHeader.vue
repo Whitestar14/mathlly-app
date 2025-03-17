@@ -22,7 +22,7 @@
           <!-- Mode Toggler using SelectBar -->
           <div
             v-if="currentRoute === '/'"
-            class="relative w-[80%] sm:w-36"
+            class="relative w-full min-w-36"
           >
             <Select
               v-model="selectedMode"
@@ -84,12 +84,11 @@ const isShortcutModalOpen = ref(false);
 const { isDark, toggleTheme } = useTheme();
 
 const selectedMode = computed({
-  get: () => settings.currentMode || settings.defaultMode,
+  get: () => settings.activeMode,
   set: (newMode) => {
-    if (newMode !== settings.currentMode) {
-      settings.setCurrentMode(newMode);
-      emit("update:mode", newMode);
-    }
+    // Only update current mode, not default mode
+    settings.setCurrentMode(newMode);
+    emit("update:mode", newMode);
   },
 });
 

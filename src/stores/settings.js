@@ -18,12 +18,13 @@ const DEFAULT_SETTINGS = {
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     ...DEFAULT_SETTINGS,
-    currentMode: DEFAULT_SETTINGS.mode
+    currentMode: null
   }),
 
   getters: {
     defaultMode: (state) => state.mode,
-    activeMode: (state) => state.currentMode || state.mode
+    // Modified to prioritize currentMode only if explicitly set
+    activeMode: (state) => state.currentMode === null ? state.mode : state.currentMode
   },
 
   actions: {
@@ -32,25 +33,36 @@ export const useSettingsStore = defineStore('settings', {
         const settings = await db.settings.get(1);
         if (settings) {
           Object.assign(this, settings);
-          this.currentMode = settings.mode; // Initialize current mode with default
         } else {
           await this.saveSettings(DEFAULT_SETTINGS);
-          this.currentMode = DEFAULT_SETTINGS.mode;
         }
+        // Initialize currentMode as null to use default mode
+        this.currentMode = null;
       } catch (error) {
         console.error('Error loading settings:', error);
         Object.assign(this, DEFAULT_SETTINGS);
-        this.currentMode = DEFAULT_SETTINGS.mode;
+        this.currentMode = null;
       }
     },
 
     async saveSettings(newSettings) {
       try {
-        // Ensure ID is set
-        const settingsToSave = { ...newSettings, id: 1 };
+        // Create a new settings object that preserves the ID
+        const currentSettings = await db.settings.get(1);
+        const settingsToSave = {
+          id: 1,
+          ...DEFAULT_SETTINGS,  // Ensure all default fields exist
+          ...(currentSettings || {}),  // Preserve existing settings
+          ...newSettings,  // Apply new settings
+        };
         
-        // Use put instead of add to update existing record
-        await db.settings.put(settingsToSave);
+        // If no existing settings, add new record
+        if (!currentSettings) {
+          await db.settings.add(settingsToSave);
+        } else {
+          // Update existing record
+          await db.settings.update(1, settingsToSave);
+        }
         
         // Update store state
         Object.assign(this, settingsToSave);
@@ -60,18 +72,16 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
 
-    getPreferredMode() {
-      return this.mode || DEFAULT_SETTINGS.mode;
-    },
-
     setCurrentMode(mode) {
-      this.currentMode = mode;
+      // Only set currentMode if it differs from default mode
+      this.currentMode = mode !== this.mode ? mode : null;
     },
 
     async setDefaultMode(mode) {
       const currentSettings = { ...this.$state };
       currentSettings.mode = mode;
-      // Don't update currentMode here
+      // Reset currentMode when default mode changes
+      this.currentMode = null;
       await this.saveSettings(currentSettings);
     }
   }

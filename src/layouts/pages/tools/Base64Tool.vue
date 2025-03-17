@@ -204,7 +204,7 @@ const pasteFromClipboard = async () => {
   }
 };
 
-const { setContext } = useKeyboard("tools", {
+useKeyboard("tools", {
   process: handleProcess,
   swap: handleSwap,
   paste: pasteFromClipboard,
@@ -219,6 +219,5 @@ onMounted(() => {
       console.warn("tabElements.value is not yet populated in onMounted!");
     }
   });
-  setContext("tools");
 });
 </script>

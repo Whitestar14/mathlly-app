@@ -5,7 +5,6 @@
     <template #default>
       <component 
         :is="currentModeComponent" 
-        :display-values="displayValues" 
         :active-base="activeBase"
         :input-length="inputLength"
         :max-length="maxLength"
@@ -34,10 +33,6 @@ const props = defineProps({
     type: String,
     required: true,
     validator: (value) => ['Standard', 'Programmer'].includes(value)
-  },
-  displayValues: {
-    type: Object,
-    required: true
   },
   activeBase: {
     type: String,

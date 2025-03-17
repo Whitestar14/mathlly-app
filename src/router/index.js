@@ -20,7 +20,7 @@ const routes = [
   // Information routes
   {
     path: "/info/whats-new",
-    name: "WhatsNew",
+    name: "What's New",
     component: () => import('@/layouts/pages/info/WhatsNewPage.vue'),
     meta: { transition: 'fade', group: 'information' }
   },

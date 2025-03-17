@@ -7,8 +7,8 @@
 
   .calc-letter-btn,
   .calc-number-btn {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 
-         dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500;
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300 
+         dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500;
   }
 
   .calc-function-btn {
