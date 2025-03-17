@@ -184,7 +184,7 @@
   }
 
   .btn-default-size {
-    @apply h-9 py-1 px-3 min-w-[120px] rounded-md;
+    @apply h-9 py-1 px-4 rounded-md;
   }
 
   .btn-sm {
