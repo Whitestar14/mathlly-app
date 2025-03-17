@@ -25,12 +25,14 @@
             ? 'text-indigo-500 dark:text-indigo-300 font-medium'
             : 'text-gray-800 dark:text-gray-300',
         ]"
-      >{{ formatDisplayValue(displayValues[base]?.display || 0, base) }}</span>
+      >{{ DisplayFormatter.formatDisplayValue(displayValues[base]?.display, base) }}</span>
     </button>
   </div>
 </template>
 
 <script setup>
+import { DisplayFormatter } from "@/services/display/DisplayFormatter"
+
 defineProps({
   displayValues: {
     type: Object,
@@ -43,26 +45,4 @@ defineProps({
 });
 
 defineEmits(['base-change']);
-
-const formatDisplayValue = (value, base) => {
-  if (!value) return "0";
-
-  const MAX_PREVIEW_LENGTHS = {
-    BIN: 12,
-    OCT: 8,
-    DEC: 8,
-    HEX: 6,
-  };
-
-  let result = value
-    .toString()
-    .replace(/^(0x|0o|0b)/, "")
-    .toUpperCase();
-
-  if (result.length > MAX_PREVIEW_LENGTHS[base]) {
-    return result.slice(0, MAX_PREVIEW_LENGTHS[base]) + "…";
-  }
-
-  return result;
-};
 </script>

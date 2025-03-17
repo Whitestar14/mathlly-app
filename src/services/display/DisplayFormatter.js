@@ -117,4 +117,26 @@ export class DisplayFormatter {
   static formatStandard(value, useFormatting) {
     return this.formatDecimalNumber(value, useFormatting);
   }
+
+  static formatDisplayValue(value, base) {
+    if (!value) return "0";
+  
+    const MAX_PREVIEW_LENGTHS = {
+      BIN: 12,
+      OCT: 8,
+      DEC: 8,
+      HEX: 6,
+    };
+  
+    let result = value
+      .toString()
+      .replace(/^(0x|0o|0b)/, "")
+      .toUpperCase();
+  
+    if (result.length > MAX_PREVIEW_LENGTHS[base]) {
+      return result.slice(0, MAX_PREVIEW_LENGTHS[base]) + "…";
+    }
+  
+    return result;
+  }
 }
