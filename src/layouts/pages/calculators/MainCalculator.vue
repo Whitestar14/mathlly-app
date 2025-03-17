@@ -12,18 +12,18 @@
           :animated-result="animatedResult"
           :active-base="activeBase"
           :mode="mode"
+          :display-values="displayValues"
           @toggle-history="toggleHistory"
+          @base-change="handleBaseChange"
         />
 
         <calculator-buttons
           :mode="mode"
-          :display-values="displayValues"
-          :active-base="activeBase"
           :input-length="input.length"
           :max-length="maxInputLength"
+          :active-base="activeBase"
           @button-click="handleButtonClick"
           @clear="handleClear"
-          @base-change="handleBaseChange"
         />
       </div>
     </div>
@@ -48,7 +48,7 @@
 
 <script setup>
 import { computed, watch, ref, nextTick, onMounted, provide } from "vue";
-import { useTitle, useStorage } from "@vueuse/core";
+import { useTitle } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { usePanel } from "@/composables/usePanel";
 import { useCalculator } from "@/composables/useCalculator";
@@ -119,7 +119,7 @@ const preview = computed(() => {
 const { addToHistory } = useHistory();
 
 const currentInput = ref("0");
-const showWelcomeModal = useStorage("mathlly-welcome-shown", true);
+const showWelcomeModal = ref(localStorage.getItem("mathlly-welcome-shown") !== "true");
 
 const { isOpen: isHistoryOpen, toggle: toggleHistory, close: closeHistory } = usePanel('history-panel', props.isMobile);
 watch(
@@ -278,6 +278,5 @@ const selectHistoryItem = ({ expression }) => {
 
 const closeWelcomeModal = () => {
   showWelcomeModal.value = false;
-  localStorage.setItem("mathlly-welcome-shown", "true");
 };
 </script>
