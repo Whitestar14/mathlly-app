@@ -253,12 +253,12 @@ export class ProgrammerOperations {
   // Helper methods
   isLastCharOperator() {
     const input = this.calculator.states[this.calculator.activeBase].input.trim();
-    // Don't consider a minus sign followed by a number as an operator
-    return /[+×÷%]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
-           /\s*[+×÷%]\s*$/.test(input) || 
+    return /[+\-×÷%]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
+           /\s*[+\-×÷%]\s*$/.test(input) || 
            (/-$/.test(input) && !/-\d+$/.test(input)) ||
            input.endsWith(" << ") || 
-           input.endsWith(" >> ");
+           input.endsWith(" >> ") || 
+           input.endsWith(" % ");
   }
 
   isLastCharNumber() {
@@ -297,6 +297,35 @@ export class ProgrammerOperations {
         state.input = parts.join(" ").trim();
       }
     }
+    return { input: state.input };
+  }
+
+  handleModuloSign() {
+    const state = this.calculator.states[this.calculator.activeBase];
+    const currentInput = state.input.trim();
+    
+    // Don't add modulo if input is empty or error
+    if (!currentInput || currentInput === "0" || currentInput === "Error") {
+      return { input: state.input };
+    }
+
+    // Don't add operator if input ends with opening parenthesis
+    if (currentInput.endsWith("(")) {
+      return { input: state.input };
+    }
+
+    // Allow modulo after closing parenthesis or numbers
+    if (this.isLastCharClosingParenthesis() || this.isLastCharNumber()) {
+      state.input = `${currentInput} % `;
+      return { input: state.input };
+    }
+
+    // Replace last operator if it exists
+    if (this.isLastCharOperator()) {
+      state.input = currentInput.replace(/\s*[+\-×÷%<<>>]\s*$/, " % ");
+      return { input: state.input };
+    }
+
     return { input: state.input };
   }
 }

@@ -78,7 +78,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     HEX: /^[0-9a-fA-F]$/,
   };
 
-  const COMMON_KEYS = ["backspace", "enter", "escape", "+", "-", "×", "÷", "(", ")"];
+  const COMMON_KEYS = ["backspace", "enter", "escape", "+", "-", "×", "÷", "(", ")", "%"];
 
   // Compute active shortcuts based on context stack
   const activeShortcuts = computed(() => {
