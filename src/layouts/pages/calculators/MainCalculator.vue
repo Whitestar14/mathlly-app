@@ -1,7 +1,7 @@
 <template>
   <main class="flex-grow flex">
     <div
-      class="flex-grow bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300"
+      class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300"
     >
       <div class="p-3 mx-auto">
         <calculator-display

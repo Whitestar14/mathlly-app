@@ -1,7 +1,7 @@
 <template>
   <Transition name="panel">
-    <div class="relative transition-[width] duration-300"
-      :class="[isMobile ? '' : [isOpen ? 'min-w-[18.5rem] max-w-xs w-1/4' : 'w-10']]">
+    <div class="relative transition-[width] duration-300 flex-initial"
+      :class="[!isMobile && ['border-gray-200 dark:border-gray-700 border-l', isOpen ? 'min-w-[18.5rem] max-w-xs w-1/4' : 'w-10']]">
 
       <!-- Backdrop for mobile -->
       <Transition name="fade">
@@ -14,12 +14,12 @@
         'bg-white dark:bg-gray-800 transition-all duration-300',
         isMobile
           ? [
-            'fixed inset-x-0 bottom-0 z-50 rounded-t-lg shadow-lg',
+            'fixed inset-x-0 bottom-0 z-50 rounded-t-xl shadow-lg',
             'max-h-[80vh] h-[600px]',
             isOpen ? 'translate-y-0' : 'translate-y-full',
           ]
           : [
-            'absolute inset-y-0 right-0 border-l border-gray-200 dark:border-gray-700',
+            'absolute inset-y-0 right-0',
             'w-full overflow-hidden',
             !isOpen && 'pointer-events-none',
           ],
