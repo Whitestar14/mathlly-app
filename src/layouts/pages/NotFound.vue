@@ -24,9 +24,10 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 *:min-w-[120px]">
         <Button
           variant="ghost"
+          class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
           @click="router.back()"
         >
           <ArrowLeft class="h-4 w-4" />
