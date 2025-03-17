@@ -13,9 +13,10 @@ import "tippy.js/animations/scale.css";
 const app = createApp({
   render() {
     return h(Suspense, {
+      timeout: 0, // Disable auto-fallthrough
       fallback: h(BaseLoader, {
         variant: "macro",
-        message: "Initializing Mathlly..."
+        message: "Initializing Mathlly...",
       })
     }, {
       default: () => h(App)

@@ -212,17 +212,14 @@ const settingsStore = useSettingsStore();
 
 onMounted(async () => {
   await settingsStore.loadSettings();
-
-  settingsStore.setCurrentMode(settingsStore.defaultMode);
-  emit("update:mode", settingsStore.defaultMode);
 });
 
 watch(
   () => props.mode,
   (newMode) => {
+    if (!newMode) return; // Skip if mode is not set
     clearState();
     calculator.value = createCalculator(newMode);
-    settingsStore.setCurrentMode(newMode);
 
     if (newMode === "Programmer") {
       setActiveBase("DEC");

@@ -67,13 +67,13 @@ const setup = async () => {
   ]);
 
   deviceStore.initializeDeviceInfo();
-  settingsStore.setCurrentMode(settingsStore.defaultMode);
 
   return {
     currentInput,
     deviceStore,
     settingsStore,
     settings: settingsStore,
+    // Use activeMode which returns currentMode || defaultMode
     mode: computed(() => settingsStore.activeMode),
   };
 };

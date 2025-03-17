@@ -84,12 +84,11 @@ const isShortcutModalOpen = ref(false);
 const { isDark, toggleTheme } = useTheme();
 
 const selectedMode = computed({
-  get: () => settings.currentMode || settings.defaultMode,
+  get: () => settings.activeMode,
   set: (newMode) => {
-    if (newMode !== settings.currentMode) {
-      settings.setCurrentMode(newMode);
-      emit("update:mode", newMode);
-    }
+    // Only update current mode, not default mode
+    settings.setCurrentMode(newMode);
+    emit("update:mode", newMode);
   },
 });
 
