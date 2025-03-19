@@ -66,8 +66,6 @@ const props = defineProps({
   isMobile: { type: Boolean, required: true },
 });
 
-useTitle(computed(() => `${props.mode} Calculator - Mathlly`));
-
 const { isValidForBase } = useInputValidation();
 
 const {
@@ -82,10 +80,8 @@ const {
   updateDisplayState,
 } = useCalculator(props.mode, props.settings);
 
-provide(
-  "calculator",
-  computed(() => calculator.value)
-);
+provide("calculator", computed(() => calculator.value));
+useTitle(computed(() => `${props.mode} Mode - Mathlly`));
 
 const input = computed(() => state.value.input);
 const error = computed(() => state.value.error);

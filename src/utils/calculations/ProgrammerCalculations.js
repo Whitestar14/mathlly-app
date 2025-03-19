@@ -1,7 +1,7 @@
 import { evaluate, bignumber, isNegative, isNaN } from "mathjs";
 
 export class ProgrammerCalculations {
-  static MAX_VALUE = bignumber('9223372036854775807'); // Using mathjs bignumber instead of literal
+  static MAX_VALUE = Infinity;
 
   static bases = {
     BIN: 2,

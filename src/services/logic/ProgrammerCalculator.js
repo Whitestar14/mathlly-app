@@ -1,6 +1,6 @@
 import { EngineCalculator } from "@/utils/misc/EngineCalculator";
 import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
-import { ProgrammerCalculations } from "@/utils/calculations/ProgramnerCalculations";
+import { ProgrammerCalculations } from "@/utils/calculations/ProgrammerCalculations";
 import {
   BinCalculator,
   DecCalculator,
