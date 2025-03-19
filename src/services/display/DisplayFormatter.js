@@ -20,7 +20,7 @@ export class DisplayFormatter {
         useThousandsSeparator,
         formatBinary,
         formatHexadecimal,
-        formatOctal
+        formatOctal,
       });
     }
   
@@ -30,25 +30,25 @@ export class DisplayFormatter {
   static formatProgrammer(value, base, options) {
     // Split preserving shift operators
     const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()%]\s*)/g);
-    let highlightIndex = value.lastIndexOf('(');
+    let highlightIndex = value.lastIndexOf("(");
     let matchingIndex = this.findMatchingParenthesis(value, highlightIndex);
     
     return parts
       .map((part, index) => {
         part = part.trim();
         if (!part) return "";
-        
-        if (part === '(' && index === highlightIndex) {
-          return '<span class="highlight-paren">(</span>';
+
+        if (part === "(" && index === highlightIndex) {
+          return '<span>(</span>';
         }
-        if (part === ')' && index === matchingIndex) {
-          return '<span class="highlight-paren">)</span>';
+        if (part === ")" && index === matchingIndex) {
+          return '<span>)</span>';
         }
         if (["+", "-", "×", "÷", "(", ")", "<<", ">>", "%"].includes(part)) return part;
         
         // Remove any decimal points for programmer mode
-        part = part.split('.')[0];
-        
+        part = part.split(".")[0];
+
         switch (base) {
           case "BIN":
             return this.formatBinaryNumber(part, options.formatBinary);
@@ -69,16 +69,16 @@ export class DisplayFormatter {
     if (openIndex === -1) return -1;
     let count = 1;
     for (let i = openIndex + 1; i < expr.length; i++) {
-      if (expr[i] === '(') count++;
-      if (expr[i] === ')') count--;
+      if (expr[i] === "(") count++;
+      if (expr[i] === ")") count--;
       if (count === 0) return i;
     }
     return -1;
   }
   
   static formatBinaryNumber(value, useFormatting) {
-    if (!value || value === 'NaN') return '0';
-    
+    if (!value || value === "NaN") return "0";
+
     let binString = value;
 
     const padding = 4 - (binString.length % 4);
