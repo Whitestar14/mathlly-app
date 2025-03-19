@@ -25,70 +25,72 @@
           </div>
         </div>
 
-        <NavigationMenuRoot>
-          <NavigationMenuList class="flex-grow px-3 py-2 space-y-6 z-0">
-            <div
-              v-show="showIndicator"
-              class="absolute will-change-auto z-50 left-3 rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
-              :style="indicatorStyle"
-            />
-            <div
-              v-for="category in categories"
-              :key="category.title"
-              class="space-y-2"
-            >
-              <h2 class="px-3 text-[11px] font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">
-                {{ category.title }}
-              </h2>
-              <div class="space-y-0.5">
-                <NavigationMenuItem
-                  v-for="item in category.items"
-                  :key="item.path"
-                  class="space-y-0.5 z-0"
-                >
-                  <NavigationMenuLink
-                    :active="currentPill === item.path"
-                    as-child
+        <div class="flex-1 overflow-y-auto">
+          <NavigationMenuRoot>
+            <NavigationMenuList class="px-3 py-2 space-y-6 z-0">
+              <div
+                v-show="showIndicator"
+                class="absolute will-change-auto z-50 left-3 rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
+                :style="indicatorStyle"
+              />
+              <div
+                v-for="category in categories"
+                :key="category.title"
+                class="space-y-2"
+              >
+                <h2 class="px-3 text-[11px] font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">
+                  {{ category.title }}
+                </h2>
+                <div class="space-y-0.5">
+                  <NavigationMenuItem
+                    v-for="item in category.items"
+                    :key="item.path"
+                    class="space-y-0.5 z-0"
                   >
-                    <button
-                      :data-path="item.path"
-                      :class="[
-                        menuItemClasses,
-                        currentPill === item.path
-                          ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
-                          : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300',
-                        item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
-                      ]"
-                      @click="handleItemClick($event, item)"
+                    <NavigationMenuLink
+                      :active="currentPill === item.path"
+                      as-child
                     >
-                      <component
-                        :is="item.icon"
-                        class="h-4 w-4 shrink-0 transition-colors"
-                        :class="currentPill === item.path
-                          ? 'text-indigo-600 dark:text-indigo-400'
-                          : 'text-gray-500/80 dark:text-gray-500/80'
-                        "
-                      />
-                      <span>{{ item.name }}</span>
-                      <Badge
-                        v-if="item.comingSoon"
-                        type="soon"
-                        class="opacity-75"
-                      />
-                      <Badge
-                        v-if="item.isNew"
-                        type="new"
-                        class="opacity-75"
-                      />
-                    </button>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
+                      <button
+                        :data-path="item.path"
+                        :class="[
+                          menuItemClasses,
+                          currentPill === item.path
+                            ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
+                            : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300',
+                          item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
+                        ]"
+                        @click="handleItemClick($event, item)"
+                      >
+                        <component
+                          :is="item.icon"
+                          class="h-4 w-4 shrink-0 transition-colors"
+                          :class="currentPill === item.path
+                            ? 'text-indigo-600 dark:text-indigo-400'
+                            : 'text-gray-500/80 dark:text-gray-500/80'
+                          "
+                        />
+                        <span>{{ item.name }}</span>
+                        <Badge
+                          v-if="item.comingSoon"
+                          type="soon"
+                          class="opacity-75"
+                        />
+                        <Badge
+                          v-if="item.isNew"
+                          type="new"
+                          class="opacity-75"
+                        />
+                      </button>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                </div>
               </div>
-            </div>
-          </NavigationMenuList>
-        </NavigationMenuRoot>
+            </NavigationMenuList>
+          </NavigationMenuRoot>
+        </div>
 
-        <div class="mt-auto p-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="sticky bottom-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <div class="grid grid-cols-2 gap-2 mb-2">
             <NavigationMenuRoot
               v-for="item in ['settings', 'feedback']"
@@ -141,6 +143,7 @@
 
 <script setup>
 import {
+  HomeIcon,
   Code2Icon,
   InfoIcon,
   MessageSquareIcon,
@@ -183,9 +186,15 @@ defineOptions({
 
 const categories = ref([
   {
+    title: "Navigation",
+    items: [
+      { name: "Home", path: "/", icon: HomeIcon, isNew: false },
+    ]
+  },
+  {
     title: "Calculators",
     items: [
-      { name: "Calculator", path: "/", icon: Code2Icon, isNew: false },
+      { name: "Calculator", path: "/calculator", icon: Code2Icon, isNew: false },
       { name: "Functions",
         path: "/functions",
         icon: FunctionSquareIcon,
@@ -236,7 +245,7 @@ const {
 } = usePills({
   position: "left",
   updateRoute: true,
-  defaultPill: "/",
+  defaultPill: "/calculator",
   hideIndicatorPaths: ["/settings", "/feedback", "/:pathMatch(.*)*"],
   onNavigate: () => {
     if (props.isMobile) {

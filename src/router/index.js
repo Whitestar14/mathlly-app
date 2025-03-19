@@ -1,9 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
-  // Calculator routes
+  // Home route
   {
     path: "/",
+    name: "Home",
+    component: () => import('@/layouts/pages/HomePage.vue'),
+    meta: { transition: 'fade' }
+  },
+
+  // Calculator routes
+  {
+    path: "/calculator",
     name: "Calculator",
     component: () => import('@/layouts/pages/calculators/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' }
