@@ -3,9 +3,9 @@
     class="min-h-screen bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
   >
     <header
-      class="sticky -top-px z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
+      class="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
     >
-      <div class="container mx-auto flex items-center gap-2 h-14 px-4">
+      <div class="container mx-auto flex items-center gap-2 h-[calc(3.5rem_-_1px)] px-4">
         <Button
           variant="ghost"
           size="icon"

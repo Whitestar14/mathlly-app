@@ -1,6 +1,6 @@
 <template>
   <Transition name="panel">
-    <div class="relative transition-[width] duration-300 flex-initial"
+    <div class="relative transition-[width] duration-300 flex-initial z-10"
       :class="[!isMobile && ['border-gray-200 dark:border-gray-700 border-l', isOpen ? 'min-w-[18.5rem] max-w-xs w-1/4' : 'w-10']]">
 
       <!-- Backdrop for mobile -->
@@ -20,7 +20,7 @@
           ]
           : [
             'absolute inset-y-0 right-0',
-            'w-full overflow-hidden',
+            'w-full',
             !isOpen && 'pointer-events-none',
           ],
       ]">
@@ -159,8 +159,8 @@ const HistoryItem = defineAsyncComponent(() =>
 )
 
 const props = defineProps({
-  isOpen: Boolean,
-  isMobile: Boolean,
+  isOpen: { type: Boolean, default: false },
+  isMobile: { type: Boolean, default: false },
   mode: { type: String, default: "Standard" },
 })
 

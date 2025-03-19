@@ -22,7 +22,7 @@
             Submit Feedback
           </h2>
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
-            <div class="flex justify-between items-center group">
+            <div class="flex flex-col gap-2 justify-between space-y-2 sm:flex-row sm:items-center group">
               <div>
                 <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Report an Issue
@@ -42,7 +42,7 @@
             </div>
 
             <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-              <div class="flex justify-between items-center group">
+              <div class="flex flex-col gap-2 justify-between space-y-2 sm:flex-row sm:items-center group">
                 <div>
                   <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Feature Request
