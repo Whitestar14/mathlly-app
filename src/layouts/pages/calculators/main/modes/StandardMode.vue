@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-full gap-1">
     <div class="grid grid-cols-5 gap-1 mb-1">
       <button
         v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
@@ -12,54 +12,54 @@
     </div>
     <div class="grid grid-cols-4 gap-1 flex-grow">
       <button
-        class="calc-btn calc-function-btn"
+        class="calc-btn calc-function-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('%')"
       >
         %
       </button>
       <button
-        class="calc-btn calc-function-btn"
+        class="calc-btn calc-function-btn calc-btn-grid"
         @click="handleClick('CE')"
       >
         CE
       </button>
       <button
-        class="calc-btn calc-function-btn"
+        class="calc-btn calc-function-btn calc-btn-grid"
         @click="handleClick('C')"
       >
         C
       </button>
       <button
-        class="calc-btn calc-function-btn"
+        class="calc-btn calc-function-btn calc-btn-grid"
         @click="handleClick('backspace')"
       >
         <Delete class="w-6 h-6 mx-auto" />
       </button>
 
       <button
-        class="calc-btn calc-function-btn"
+        class="calc-btn calc-function-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('1/x')"
       >
         1/x
       </button>
       <button
-        class="calc-btn calc-function-btn"
+        class="calc-btn calc-function-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('x²')"
       >
         x²
       </button>
       <button
-        class="calc-btn calc-function-btn"
+        class="calc-btn calc-function-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('√')"
       >
         √
       </button>
       <button
-        class="calc-btn calc-operator-btn"
+        class="calc-btn calc-operator-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('÷')"
       >
@@ -67,28 +67,28 @@
       </button>
 
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('7')"
       >
         7
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('8')"
       >
         8
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('9')"
       >
         9
       </button>
       <button
-        class="calc-btn calc-operator-btn"
+        class="calc-btn calc-operator-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('×')"
       >
@@ -96,28 +96,28 @@
       </button>
 
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('4')"
       >
         4
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('5')"
       >
         5
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('6')"
       >
         6
       </button>
       <button
-        class="calc-btn calc-operator-btn"
+        class="calc-btn calc-operator-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('-')"
       >
@@ -125,28 +125,28 @@
       </button>
 
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('1')"
       >
         1
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('2')"
       >
         2
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('3')"
       >
         3
       </button>
       <button
-        class="calc-btn calc-operator-btn"
+        class="calc-btn calc-operator-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('+')"
       >
@@ -154,28 +154,28 @@
       </button>
 
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('±')"
       >
         ±
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('0')"
       >
         0
       </button>
       <button
-        class="calc-btn calc-number-btn"
+        class="calc-btn calc-number-btn calc-btn-grid"
         :disabled="isMaxLengthReached"
         @click="handleClick('.')"
       >
         .
       </button>
       <button
-        class="calc-btn calc-operator-btn"
+        class="calc-btn calc-operator-btn calc-btn-grid"
         @click="handleClick('=')"
       >
         =

@@ -68,7 +68,6 @@ export const useKeyboardStore = defineStore("keyboard", () => {
   const isEnabled = ref(true);
   const contextStack = ref(["global"]); // Use a stack to manage context hierarchy
   const debug = ref(false);
-  const currentBase = ref("DEC");
 
   // Base validation maps
   const BASE_VALIDATORS = {
@@ -108,10 +107,6 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     }
   }
 
-  function setBase(base) {
-    currentBase.value = base;
-  }
-
   // Enhanced input validation
   function isValidInput(key) {
     // Normalize the key to handle special cases
@@ -126,7 +121,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     }
 
     // For programmer mode, validate against current base
-    const validator = BASE_VALIDATORS[currentBase.value];
+    const validator = BASE_VALIDATORS[currentContext.value];
     // Ensure validation happens against the normalized key
     return validator?.test(normalizedKey) ?? false;
   }
@@ -149,11 +144,9 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     contextStack,
     currentContext,
     activeShortcuts,
-    currentBase,
     debug,
     setContext,
     clearContext,
-    setBase,
     isValidInput,
     normalizeKey,
   };

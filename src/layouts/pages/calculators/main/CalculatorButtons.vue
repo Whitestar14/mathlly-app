@@ -1,10 +1,11 @@
 <!-- CalculatorButtons.vue -->
 <template>
-  <Suspense>
+  <Suspense class="h-full">
     <!-- Main Content -->
     <template #default>
       <component 
         :is="currentModeComponent" 
+        class="h-full"
         :active-base="activeBase"
         :input-length="inputLength"
         :max-length="maxLength"
@@ -15,7 +16,7 @@
     </template>
     <!-- Loading State -->
     <template #fallback>
-      <div class="grid grid-cols-4 gap-2">
+      <div class="h-full grid grid-cols-4 gap-2">
         <div 
           v-for="n in 20" 
           :key="n" 
