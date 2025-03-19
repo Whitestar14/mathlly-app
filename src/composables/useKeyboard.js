@@ -57,6 +57,5 @@ export function useKeyboard(initialContext = 'global', handlers) {
   return {
     setContext: keyboardStore.setContext,
     clearContext: keyboardStore.clearContext,
-    setBase: keyboardStore.setBase,
   };
 }

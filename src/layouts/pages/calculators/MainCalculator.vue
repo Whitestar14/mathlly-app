@@ -1,10 +1,9 @@
 <template>
-  <main class="flex-grow flex">
-    <div
-      class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300"
-    >
-      <div class="p-3 mx-auto">
+  <main class="flex-grow flex h-full">
+    <div class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300">
+      <div class="flex flex-col h-full p-4 gap-2 mx-auto">
         <calculator-display
+          class="flex-none"
           :input="input"
           :preview="preview"
           :error="error"
@@ -18,6 +17,7 @@
         />
 
         <calculator-buttons
+          class="flex-auto"
           :mode="mode"
           :input-length="input.length"
           :max-length="maxInputLength"
@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { computed, watch, ref, nextTick, onMounted, provide } from "vue";
+import { computed, watch, ref, nextTick, onMounted, provide, onUnmounted } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useHistory } from "@/composables/useHistory";
 import { usePanel } from "@/composables/usePanel";
@@ -122,14 +122,15 @@ const currentInput = ref("0");
 const showWelcomeModal = ref(localStorage.getItem("mathlly-welcome-shown") !== "true");
 
 const { isOpen: isHistoryOpen, toggle: toggleHistory, close: closeHistory } = usePanel('history-panel', props.isMobile);
+
 watch(
   () => props.isMobile,
-  (newIsMobile) => {
-    if (newIsMobile) {
+  (newIsMobile, oldIsMobile) => {
+    // Only close if changing from desktop to mobile
+    if (newIsMobile && !oldIsMobile) {
       closeHistory();
     }
-  },
-  { immediate: true }
+  }
 );
 
 const handleButtonClick = (btn) => {
@@ -180,7 +181,6 @@ const handleBaseChange = (newBase) => {
     const result = calculator.value.handleBaseChange(newBase);
     nextTick(() => {
       setActiveBase(newBase);
-      setBase(newBase);
       updateState({
         input: result.input,
         error: result.error || "",
@@ -190,7 +190,7 @@ const handleBaseChange = (newBase) => {
   }
 };
 
-const { setContext, clearContext, setBase } = useKeyboard("calculator", {
+const { setContext, clearContext } = useKeyboard("calculator", {
   clear: () => handleButtonClick("AC"),
   calculate: () => handleButtonClick("="),
   backspace: () => handleButtonClick("backspace"),
@@ -203,7 +203,46 @@ const { setContext, clearContext, setBase } = useKeyboard("calculator", {
       handleButtonClick(value);
     }
   },
-  setBase: (base) => handleBaseChange(base),
+  // Replace setBase with a direct call to handleBaseChange
+  setBase: (base) => {
+    if (props.mode === "Programmer") {
+      handleBaseChange(base);
+    }
+  },
+});
+
+// Add keyboard shortcuts for base changes
+const handleKeyboardShortcuts = (e) => {
+  if (props.mode !== "Programmer") return;
+  
+  const shortcuts = {
+    "ctrl+1": () => handleBaseChange("DEC"),
+    "ctrl+2": () => handleBaseChange("HEX"),
+    "ctrl+3": () => handleBaseChange("OCT"),
+    "ctrl+4": () => handleBaseChange("BIN"),
+  };
+
+  const combo = [
+    e.ctrlKey && "ctrl",
+    e.shiftKey && "shift",
+    e.altKey && "alt",
+    e.key,
+  ]
+    .filter(Boolean)
+    .join("+");
+
+  if (shortcuts[combo]) {
+    e.preventDefault();
+    shortcuts[combo]();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener("keydown", handleKeyboardShortcuts);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyboardShortcuts);
 });
 
 const settingsStore = useSettingsStore();

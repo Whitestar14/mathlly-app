@@ -9,7 +9,7 @@ export class ParenthesesManager {
     let currentIndex = 0;
     let nestLevel = 0;
     
-    const isOperator = (char) => /[+\-×÷]/.test(char);
+    const isOperator = (char) => /[+\-×÷%]/.test(char);
     
     for (let i = 0; i < expr.length; i++) {
       if (expr[i] === '(') {
@@ -19,17 +19,18 @@ export class ParenthesesManager {
           if (beforeText) parts.push({ type: 'text', content: beforeText });
         }
         
-        // Add opening parenthesis
-        parts.push({ type: 'open', content: '(', level: nestLevel++ });
+        // Add opening parenthesis with space only after it
+        parts.push({ type: 'open', content: '(' });
         currentIndex = i + 1;
+        nestLevel++;
       } else if (expr[i] === ')') {
-        // Handle text before closing parenthesis
+        // Handle text before closing parenthesis, ensuring space before ')'
         if (i > currentIndex) {
           const content = expr.slice(currentIndex, i).trim();
-          if (content) parts.push({ type: 'text', content: ` ${content} ` });
+          if (content) parts.push({ type: 'text', content: `${content}` });
         }
         
-        // Add closing parenthesis
+        // Add closing parenthesis without extra spaces
         parts.push({ type: 'close', content: ')', level: --nestLevel });
         currentIndex = i + 1;
       } else if (isOperator(expr[i])) {
@@ -58,16 +59,24 @@ export class ParenthesesManager {
   }
 
   cleanupParts(parts) {
-    return parts.reduce((acc, part) => {
-      // Skip empty text parts
+    // Clean up double spaces and ensure proper spacing
+    return parts.reduce((acc, part, index) => {
       if (part.type === 'text' && !part.content.trim()) {
+        // Only keep spaces after opening parenthesis or before closing
+        const prevPart = acc[acc.length - 1];
+        const nextPart = parts[index + 1];
+        
+        if ((prevPart?.type === 'open') || 
+            (nextPart?.type === 'close')) {
+          acc.push(part);
+        }
         return acc;
       }
       
       // Handle spacing around operators
-      if (part.type === 'text' && /^[+\-×÷]/.test(part.content.trim())) {
+      if (part.type === 'text' && /^[+\-×÷%]/.test(part.content.trim())) {
         const lastPart = acc[acc.length - 1];
-        if (lastPart && lastPart.type === 'text') {
+        if (lastPart?.type === 'text') {
           lastPart.content = lastPart.content.trimEnd();
         }
       }
