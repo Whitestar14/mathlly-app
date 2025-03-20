@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col !font-mono">
+  <div class="flex flex-col flex-none">
     <div class="p-4 rounded-lg mb-2 transition-all duration-300 h-32 relative flex items-end" :class="[
       error
         ? 'bg-destructive/10 dark:bg-destructive/20'

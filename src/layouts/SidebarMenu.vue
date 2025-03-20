@@ -7,7 +7,7 @@
     >
       <div class="flex flex-col h-full">
         <div
-          class="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-between border-b border-gray-200 dark:border-gray-700 min-h-14 max-h-14"
+          class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 h-14"
         >
           <div class="size-full px-2 py-1 relative">
             <div class="flex items-center justify-between md:justify-around">

@@ -1,9 +1,8 @@
 <template>
-  <main class="flex-grow flex h-full">
+  <main class="flex-grow flex">
     <div class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300">
       <div class="flex flex-col h-full p-4 gap-2 mx-auto">
         <calculator-display
-          class="flex-none"
           :input="input"
           :preview="preview"
           :error="error"
@@ -17,7 +16,6 @@
         />
 
         <calculator-buttons
-          class="flex-auto"
           :mode="mode"
           :input-length="input.length"
           :max-length="maxInputLength"
@@ -26,16 +24,16 @@
           @clear="handleClear"
         />
       </div>
-    </div>
 
+    </div>
     <history-panel
-      :mode="mode"
-      :is-mobile="isMobile"
-      :is-open="isHistoryOpen"
-      @toggle-history="toggleHistory"
-      @close-history="closeHistory"
-      @select-item="selectHistoryItem"
-    />
+    :mode="mode"
+    :is-mobile="isMobile"
+    :is-open="isHistoryOpen"
+    @toggle-history="toggleHistory"
+    @close-history="closeHistory"
+    @select-item="selectHistoryItem"
+  />
 
     <!-- Welcome Modal -->
     <welcome-modal

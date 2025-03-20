@@ -5,7 +5,7 @@
     <template #default>
       <component 
         :is="currentModeComponent" 
-        class="h-full"
+        class="flex-auto"
         :active-base="activeBase"
         :input-length="inputLength"
         :max-length="maxLength"

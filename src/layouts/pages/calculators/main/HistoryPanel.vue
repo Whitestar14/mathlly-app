@@ -20,7 +20,7 @@
           ]
           : [
             'absolute inset-y-0 right-0',
-            'w-full',
+            'w-full overflow-hidden',
             !isOpen && 'pointer-events-none',
           ],
       ]">
