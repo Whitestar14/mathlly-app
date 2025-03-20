@@ -1,36 +1,30 @@
 <template>
-  <Transition
-    enter-active-class="duration-300 ease-out"
-    enter-from-class="opacity-0 scale-95"
-    enter-to-class="opacity-100 scale-100"
-    leave-active-class="duration-200 ease-in"
-    leave-from-class="opacity-100 scale-100"
-    leave-to-class="opacity-0 scale-95"
-  >
-    <div v-if="isActive" :class="containerClasses" class="relative h-full">
+    <div v-if="isActive" :class="containerClasses" class="relative h-full font-mono">
       <!-- Macro Loader -->
       <template v-if="variant === 'macro'">
         <div class="relative flex flex-col items-center justify-center gap-8">
           <div class="relative z-10 flex items-center justify-center">
-            <div class="relative text-5xl font-mono">
+            <div class="relative text-6xl inline-flex">
               <span ref="bracketLeft" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">{</span>
-              <span class="inline-flex">
-                <span ref="letterM" class="text-gray-800 dark:text-gray-100 opacity-0">m</span>
-                <span ref="letterA" class="text-gray-800 dark:text-gray-100 opacity-0">a</span>
-                <span ref="letterT" class="text-gray-800 dark:text-gray-100 opacity-0">t</span>
-                <span ref="letterH" class="text-gray-800 dark:text-gray-100 opacity-0">h</span>
+
+              <span class="inline-flex *:text-gray-800 *:dark:text-gray-100 *:opacity-0">
+                <span ref="letterM">m</span>
+                <span ref="letterA">a</span>
+                <span ref="letterT">t</span>
+                <span ref="letterH">h</span>
               </span>
-              <span class="relative inline-flex items-center justify-center w-[1.2em]">
-                <span ref="slashTop" class="top-0 left-1/2 -translate-x-1/2 text-indigo-500 dark:text-indigo-400 font-black opacity-0 origin-bottom">/</span>
-                <span ref="slashBottom" class="bottom-0 left-1/2 -translate-x-1/2 text-indigo-500 dark:text-indigo-400 font-black opacity-0 origin-top">/</span>
+              <span class="relative inline-flex items-center justify-center w-[1.2em] *:left-1/2 *:-translate-x-1/2 *:text-indigo-500 *:dark:text-indigo-400 *:font-black *:opacity-0">
+                <span ref="slashTop" class="top-0 origin-bottom">/</span>
+                <span ref="slashBottom" class="bottom-0 origin-top">/</span>
               </span>
-              <span ref="textY" class="text-gray-800 dark:text-gray-100 opacity-0">y</span>
+              <span ref="letterY" class="text-gray-800 dark:text-gray-100 opacity-0">y</span>
+
               <span ref="bracketRight" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">}</span>
             </div>
           </div>
 
           <div v-if="message" class="relative z-10 text-center">
-            <div class="font-mono text-sm text-gray-600 dark:text-gray-300">
+            <div class=" text-sm text-gray-600 dark:text-gray-300">
               {{ message }}
             </div>
           </div>
@@ -42,7 +36,7 @@
         <div class="relative flex items-center justify-center">
           <div
             :class="[
-              'font-mono font-medium animate-spin-mini',
+              'font-medium animate-spin-mini',
               variant === 'micro' ? 'text-sm' : 'text-base'
             ]"
           >
@@ -57,7 +51,6 @@
         </span>
       </template>
     </div>
-  </Transition>
 </template>
 
 <script setup>
@@ -90,19 +83,30 @@ const containerClasses = computed(() => [
 // Animation refs
 const slashTop = ref(null);
 const slashBottom = ref(null);
-const textY = ref(null);
 const bracketLeft = ref(null);
 const bracketRight = ref(null);
 const letterM = ref(null);
 const letterA = ref(null);
 const letterT = ref(null);
 const letterH = ref(null);
+const letterY = ref(null);
+
 
 // Animation timeline
 let timeline;
 
 function initializeAnimation() {
   if (!slashTop.value || !slashBottom.value) return;
+
+  // Continuous animations
+  const secondPhase = anime({
+      targets: [bracketLeft.value, bracketRight.value],
+      opacity: [0.5, 1],
+      duration: 1000,
+      loop: true,
+      direction: 'alternate',
+      easing: 'easeInOutSine',
+    });
   
   timeline = anime.timeline({
     easing: 'easeOutExpo',
@@ -124,20 +128,12 @@ function initializeAnimation() {
 
   // Individual letters stagger animation
   .add({
-    targets: [letterM.value, letterA.value, letterT.value, letterH.value],
+    targets: [letterM.value, letterA.value, letterT.value, letterH.value, letterY.value],
     opacity: [0, 1],
     translateY: [10, 0],
     delay: anime.stagger(100),
-    duration: 300,
+    duration: 400,
   }, '-=200')
-  
-  // Y text fade in
-  .add({
-    targets: textY.value,
-    opacity: [0, 1],
-    translateY: [10, 0],
-    duration: 300,
-  }, '-=100')
 
   // Brackets animation
   .add({
@@ -145,17 +141,8 @@ function initializeAnimation() {
     opacity: [0, 1],
     translateX: (el, i) => [(i === 0 ? -20 : 20), 0],
     duration: 400,
+    complete: secondPhase.play()
   }, '-=200')
-
-  // Continuous animations
-  .add({
-    targets: [bracketLeft.value, bracketRight.value],
-    opacity: [0.4, 1],
-    duration: 1000,
-    loop: true,
-    direction: 'alternate',
-    easing: 'easeInOutSine',
-  });
 }
 
 onMounted(() => {
@@ -167,16 +154,8 @@ onMounted(() => {
 
 <style scoped>
 /* Only keeping necessary custom animations */
-@keyframes spin-mini {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(90deg); }
-  50% { transform: rotate(180deg); }
-  75% { transform: rotate(270deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .animate-spin-mini {
-  animation: spin-mini 1.5s linear infinite;
+  @apply animate-spin-2000;
 }
 
 .loader-macro {
