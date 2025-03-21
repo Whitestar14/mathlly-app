@@ -1,62 +1,71 @@
 <template>
   <div class="flex-grow h-full relative overflow-hidden">
-    <div
-      class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
-      :class="{
-        '-translate-y-full opacity-0': isAnimating,
-        'translate-y-0 opacity-100': !isAnimating,
-      }"
-    >
+    <div class="absolute w-full h-full">
+      <!-- Result container -->
       <div
-        ref="displayContainer" 
-        :class="displayClasses"
-        aria-live="polite"
-        aria-atomic="true"
+        class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
+        :class="{
+          'translate-y-0 opacity-100': isAnimating,
+          'translate-y-result opacity-0': !isAnimating,
+        }"
       >
-        <span
-          v-for="(part, index) in formattedParts"
-          :key="index"
+        <div class="text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          {{ animatedResult }}
+        </div>
+      </div>
+
+      <!-- Input container -->
+      <div
+        class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
+        :class="{
+          'translate-y-input opacity-0': isAnimating,
+          'translate-y-0 opacity-100': !isAnimating,
+        }"
+      >
+        <div
+          ref="displayContainer" 
+          :class="displayClasses"
+          aria-live="polite"
+          aria-atomic="true"
         >
           <span
-            v-if="part.type === 'text'"
-            v-html="part.content"
-          />
-          <span
-            v-else-if="part.type === 'open'"
-            class="paren-open"
-          >{{ part.content }}</span>
-          <span
-            v-else-if="part.type === 'close'"
-            class="paren-close"
-          >{{ part.content }}</span>
-          <span
-            v-else-if="part.type === 'ghost'"
-            class="paren-ghost text-gray-400"
-          >{{ part.content }}</span>
-        </span>
-      </div>
-      <div
-        v-if="preview && !error"
-        class="text-right text-xl text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {{ formattedPreview }}
-      </div>
-      <div
-        v-if="error"
-        class="text-right text-xl text-red-500 overflow-x-auto whitespace-nowrap scrollbar-hide"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        {{ error }}
-      </div>
-      <div
-        class="text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {{ animatedResult }}
+            v-for="(part, index) in formattedParts"
+            :key="index"
+          >
+            <span
+              v-if="part.type === 'text'"
+              v-text="DisplayFormatter.formatDisplayContent(part.content)"
+            />
+            <span
+              v-else-if="part.type === 'open'"
+              class="paren-open"
+            >{{ part.content }}</span>
+            <span
+              v-else-if="part.type === 'close'"
+              class="paren-close"
+            >{{ part.content }}</span>
+            <span
+              v-else-if="part.type === 'ghost'"
+              class="paren-ghost text-gray-400"
+            >{{ part.content }}</span>
+          </span>
+        </div>
+        <div
+          v-if="preview && !error"
+          class="text-right text-xl text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {{ formattedPreview }}
+        </div>
+        <div
+          v-if="error"
+          class="text-right text-xl text-red-500 overflow-x-auto whitespace-nowrap scrollbar-hide"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          {{ error }}
+        </div>
       </div>
     </div>
   </div>
@@ -201,8 +210,13 @@ defineExpose({
 .translate-y-0 {
   transform: translate3d(0, 0, 0);
 }
+
+.translate-y-full {
+  transform: translate3d(0, 100%, 0);
+}
+
 .ease-custom {
-  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -212,5 +226,13 @@ defineExpose({
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.translate-y-result {
+  transform: translate3d(0, 100%, 0);
+}
+
+.translate-y-input {
+  transform: translate3d(0, -50%, 0);
 }
 </style>

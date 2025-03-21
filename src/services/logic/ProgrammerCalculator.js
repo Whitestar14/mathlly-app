@@ -1,6 +1,6 @@
 import { EngineCalculator } from "@/utils/misc/EngineCalculator";
 import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
-import { ProgrammerCalculations } from "@/utils/calculations/ProgramnerCalculations";
+import { ProgrammerCalculations } from "@/utils/calculations/ProgrammerCalculations";
 import {
   BinCalculator,
   DecCalculator,
@@ -235,6 +235,6 @@ export class ProgrammerCalculator extends EngineCalculator {
 
   isInputTooLong(btn) {
     return this.states[this.activeBase].input.length >= this.MAX_INPUT_LENGTH &&
-      !["=", "AC", "backspace", "<<", ">>", "±"].includes(btn);
+      !["=", "AC", "backspace", "<<", ">>", "±", "%"].includes(btn);
   }
 }

@@ -36,34 +36,13 @@ export class ProgrammerOperations {
       return { input: state.input };
     }
 
-    return this.processOperator(op, currentInput);
-  }
-
-  processOperator(op, currentInput) {
-    // Handle shift operators
+    // Handle shift operators specially
     if (op === "<<" || op === ">>") {
       return this.handleShiftOperator(op);
     }
 
-    // Update input state
-    const state = this.calculator.states[this.calculator.activeBase];
-    if (this.isLastCharOperator()) {
-      // Only replace the last operator if it's not followed by a minus sign
-      const lastOperatorPattern = /\s*([+\-×÷%<<>>])(\s*-?\d*)\s*$/;
-      const match = currentInput.match(lastOperatorPattern);
-      
-      if (match && !match[2]) {
-        // Replace operator only if there's no number after it
-        state.input = currentInput.replace(/\s*[+\-×÷%<<>>]\s*$/, ` ${op} `);
-      } else if (op === "-") {
-        // Allow minus after another operator
-        state.input = `${currentInput} ${op}`;
-      }
-    } else if (!currentInput.endsWith("(")) {
-      state.input = `${currentInput} ${op} `;
-    }
-
-    return { input: state.input };
+    // Use handleBasicOperator for all other arithmetic operators
+    return this.handleBasicOperator(op);
   }
 
   handleShiftOperator(op) {
@@ -127,7 +106,7 @@ export class ProgrammerOperations {
 
     // Replace last operator if it exists
     if (this.isLastCharOperator()) {
-      state.input = currentInput.replace(/\s*[+\-×÷<<>>]\s*$/, ` ${op} `);
+      state.input = currentInput.replace(/\s*[+\-×÷<<>>%]\s*$/, ` ${op} `);
       return { input: state.input };
     }
 
@@ -229,7 +208,7 @@ export class ProgrammerOperations {
     }
 
     // Handle other operators
-    const operatorMatch = currentInput.match(/(.*?)(\s*[+\-×÷]\s*)$/);
+    const operatorMatch = currentInput.match(/(.*?)(\s*[+\-×÷%]\s*)$/);
     if (operatorMatch) {
       const [, beforeOperator] = operatorMatch;
       if (beforeOperator.match(/(\d|\w)$/)) {
@@ -285,7 +264,7 @@ export class ProgrammerOperations {
 
     if (currentInput !== "0" && currentInput !== "Error") {
       // Handle expression parts for proper negation
-      const parts = currentInput.split(/([+×÷<<>>])/);
+      const parts = currentInput.split(/([+×÷<<>>%])/);
       const lastPart = parts[parts.length - 1].trim();
       
       if (lastPart) {
