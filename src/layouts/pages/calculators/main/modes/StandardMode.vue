@@ -1,10 +1,10 @@
 <template>
-  <div class="flex flex-col h-full gap-1">
+  <div class="flex flex-col">
     <div class="grid grid-cols-5 gap-1 mb-1">
       <button
         v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
         :key="op"
-        class="calc-btn calc-memory-btn"
+        class="calc-btn calc-memory-btn calc-btn-grid"
         @click="handleClick(op)"
       >
         {{ op }}
