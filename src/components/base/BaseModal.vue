@@ -17,7 +17,7 @@
       leave-to-class="opacity-0 scale-95"
     >
       <DialogContent
-        class="fixed inset-0 flex items-center justify-center p-4 z-[100]"
+        class="fixed inset-0 flex items-center justify-center p-4 z-50"
         aria-describedby="modal"
       >
         <div

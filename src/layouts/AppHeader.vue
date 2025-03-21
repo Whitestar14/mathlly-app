@@ -21,7 +21,7 @@
 
           <!-- Mode Toggler using SelectBar -->
           <div
-            v-if="currentRoute === '/'"
+            v-if="currentRoute === '/calculator'"
             class="relative w-full min-w-36"
           >
             <Select
