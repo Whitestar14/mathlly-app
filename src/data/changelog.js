@@ -1,5 +1,21 @@
 export const updates = [
   {
+    version: '0.11.6',
+    date: 'March 21, 2025',
+    features: [
+      '@milestone: Added a default home page root to the application',
+      'Installed the vueuse-motion plugin for more fine-tuned control over animations',
+      'Updated app dependencies and dev-dependencies to lts',
+      'Perfected application lazy-loading and fallback with Suspense API',
+      'Composed views to base component "BasePage" to reduce redundancy',
+      'Fixed HistoryPanel communication issues between desktop and mobile modes',
+      'Maintained separation of concerns between the Main Calculator component and the keyboard store',
+      'Styled calculator buttons to take up maximum available space on all devices',
+      'Reapproached the SidebarMenu to utilize flexbox for a seamless reactivity and responsive ux',
+      'Remove redunant code in calculator logic and utility files'
+    ]
+  },
+  {
     version: '0.11.5',
     date: 'March 15, 2025',
     features: [
