@@ -2,21 +2,21 @@ import { evaluate, bignumber } from "mathjs";
 
 export class Memory {
   constructor() {
-    this.value = 0;
+    this.memory = 0;
   }
 
   clear() {
-    this.value = 0;
-    return this.value;
+    this.memory = 0;
+    return this.memory;
   }
 
   recall() {
-    return this.value;
+    return this.memory;
   }
 
   add(value) {
     try {
-      this.value = evaluate(`${this.value} + ${value}`);
+      this.memory = evaluate(`${this.memory} + ${value}`);
       return true;
     } catch {
       return false;
@@ -25,7 +25,7 @@ export class Memory {
 
   subtract(value) {
     try {
-      this.value = evaluate(`${this.value} - ${value}`);
+      this.memory = evaluate(`${this.memory} - ${value}`);
       return true;
     } catch {
       return false;
@@ -34,7 +34,7 @@ export class Memory {
 
   store(value) {
     try {
-      this.value = bignumber(value);
+      this.memory = bignumber(value);
       return true;
     } catch {
       return false;

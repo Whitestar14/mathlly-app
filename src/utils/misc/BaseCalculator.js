@@ -25,7 +25,6 @@ export class HexCalculator extends BaseCalculator {
     this.validCharsRegex = /^[0-9A-Fa-f]$/;
     this.formatOptions = { notation: "hex" };
     this.prefixRegex = /^0x/i;
-    this.baseInt = 7;
   }
 }
 
@@ -36,7 +35,6 @@ export class DecCalculator extends BaseCalculator {
     this.validCharsRegex = /^[0-9]$/;
     this.formatOptions = { notation: "fixed", precision: 0 };
     this.prefixRegex = /^/;
-    this.baseInt = 7;
   }
 }
 
@@ -47,7 +45,6 @@ export class OctCalculator extends BaseCalculator {
     this.validCharsRegex = /^[0-7]$/;
     this.formatOptions = { notation: "oct" };
     this.prefixRegex = /^0o/i;
-    this.baseInt = 16;
   }
 }
 
@@ -58,6 +55,5 @@ export class BinCalculator extends BaseCalculator {
     this.validCharsRegex = /^[01]$/;
     this.formatOptions = { notation: "bin" };
     this.prefixRegex = /^0b/i;
-    this.baseInt = 2;
   }
 }

@@ -1,5 +1,4 @@
 import { evaluate, format, bignumber, fraction } from "mathjs";
-import { DisplayFormatter } from "@/services/display/DisplayFormatter";
 
 export class StandardCalculations {
   constructor(settings) {
@@ -95,11 +94,7 @@ export class StandardCalculations {
         return trimmedDecimal ? `${parts[0]}.${trimmedDecimal}` : parts[0];
       }
 
-      // Use DisplayFormatter for thousands separator
-      return DisplayFormatter.formatStandard(
-        formattedDecimal,
-        this.settings.useThousandsSeparator
-      );
+      return formattedDecimal;
     } catch (err) {
       console.error("Formatting error:", err);
       return result.toString();

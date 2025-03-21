@@ -34,7 +34,7 @@
           >
             <span
               v-if="part.type === 'text'"
-              v-text="formatDisplayContent(part.content)"
+              v-text="DisplayFormatter.formatDisplayContent(part.content)"
             />
             <span
               v-else-if="part.type === 'open'"
@@ -77,7 +77,6 @@ import { DisplayFormatter } from '@/services/display/DisplayFormatter';
 import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core';
 import { ParenthesesHighlighter } from '@/utils/display/ParenthesesHighlighter';
 import { useParenthesesTracking } from '@/composables/useParenthesesTracking';
-import { formatDisplayContent } from '@/utils/display/safeHtml';
 
 const props = defineProps({
   input: { type: String, default: "" },
