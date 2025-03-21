@@ -4,23 +4,22 @@
     <!-- Main Content -->
     <template #default>
       <component 
-        :is="currentModeComponent" 
+        :is="modeComponent" 
         class="flex-auto"
         :active-base="activeBase"
         :input-length="inputLength"
         :max-length="maxLength"
         @button-click="handleButtonClick"
         @clear="handleClear"
-        @base-change="handleBaseChange"
       />
     </template>
     <!-- Loading State -->
     <template #fallback>
-      <div class="h-full grid grid-cols-4 gap-2">
+      <div class="h-full flex-auto grid grid-cols-4 gap-1">
         <div 
-          v-for="n in 20" 
+          v-for="n in 24" 
           :key="n" 
-          class="h-14 bg-gray-200 dark:bg-gray-700 rounded-lg"
+          class="min-h-[3rem] max-h-[4.5rem] bg-gray-200 dark:bg-gray-700 rounded-lg"
         />
       </div>
     </template>
@@ -54,7 +53,7 @@ const emit = defineEmits(['button-click', 'clear', 'base-change']);
 const StandardMode = defineAsyncComponent(() => import('./modes/StandardMode.vue'));
 const ProgrammerMode = defineAsyncComponent(() => import('./modes/ProgrammerMode.vue'));
 
-const currentModeComponent = computed(() => {
+const modeComponent = computed(() => {
   switch (props.mode) {
     case 'Standard':
       return StandardMode;
@@ -71,9 +70,5 @@ const handleButtonClick = (value) => {
 
 const handleClear = () => {
   emit('clear');
-};
-
-const handleBaseChange = (base) => {
-  emit('base-change', base);
 };
 </script>

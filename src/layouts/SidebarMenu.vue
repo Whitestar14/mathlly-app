@@ -3,11 +3,11 @@
     <div
       v-show="isOpen"
       class="sidebar-container"
-      :class="sidebarClasses"
+      :class="isMobile ? 'w-full' : 'w-64 border-r'"
     >
       <div class="flex flex-col h-full">
         <div
-          class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 h-14"
+          class="flex flex-none items-center justify-between border-b border-gray-200 dark:border-gray-700 h-14"
         >
           <div class="size-full px-2 py-1 relative">
             <div class="flex items-center justify-between md:justify-around">
@@ -27,7 +27,7 @@
 
         <div class="flex-1 overflow-y-auto">
           <NavigationMenuRoot>
-            <NavigationMenuList class="px-3 py-2 space-y-6 z-0">
+            <NavigationMenuList class="px-3 py-2 space-y-6">
               <div
                 v-show="showIndicator"
                 class="absolute will-change-auto z-50 left-3 rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
@@ -90,7 +90,7 @@
           </NavigationMenuRoot>
         </div>
 
-        <div class="sticky bottom-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div class="flex-none flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <div class="grid grid-cols-2 gap-2 mb-2">
             <NavigationMenuRoot
               v-for="item in ['settings', 'feedback']"
@@ -162,7 +162,7 @@ import {
   NavigationMenuList,
   NavigationMenuRoot,
 } from "radix-vue";
-import { watch, computed, ref, nextTick } from "vue"
+import { watch, ref, nextTick } from "vue"
 import { usePills } from "@/composables/usePills";
 import Badge from "@/components/base/BaseBadge.vue";
 import Logo from '@/components/base/BaseLogo.vue';
@@ -265,11 +265,6 @@ const handleFooterItemClick = (event, path) => {
 
 const closeSidebar = () => emit("update:isOpen", false)
 
-const sidebarClasses = computed(() => [
-  "overflow-y-auto inset-y-0 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-all",
-  props.isMobile ? "w-full" : "w-64 border-r",
-]);
-
 const menuItemClasses = [
   "w-full flex items-center gap-2.5",
   "px-3 py-1.5",
@@ -297,12 +292,8 @@ watch(
 
 <style scoped>
 .sidebar-container {
-  position: fixed;
-  will-change: transform;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 20;
+  @apply fixed top-0 bottom-0 left-0 z-20 inset-y-0
+  bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-all;
 }
 
 .slide-enter-active,
@@ -318,11 +309,5 @@ watch(
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0%);
-}
-
-/* Smooth category transitions */
-.space-y-6>*+* {
-  margin-top: 1.5rem;
-  position: relative;
 }
 </style>

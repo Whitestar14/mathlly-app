@@ -180,7 +180,7 @@
   }
 
   .btn-link {
-    @apply text-primary underline-offset-4 hover:underline;
+    @apply text-primary dark:text-primary-dark underline-offset-4 hover:underline;
   }
 
   .btn-default-size {

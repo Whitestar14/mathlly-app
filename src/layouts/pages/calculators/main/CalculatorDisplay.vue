@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col flex-none">
-    <div class="p-4 rounded-lg mb-2 transition-all duration-300 h-32 relative flex items-end" :class="[
+  <div class="flex flex-col flex-none" :class="mode === 'Programmer' ? 'h-[40%]' : 'h-1/4'">
+    <div class="p-4 rounded-lg mb-2 transition-all duration-300 flex-1 relative flex items-end" :class="[
       error
         ? 'bg-destructive/10 dark:bg-destructive/20'
         : 'transition-colors duration-300 bg-gray-100 dark:bg-gray-700',
