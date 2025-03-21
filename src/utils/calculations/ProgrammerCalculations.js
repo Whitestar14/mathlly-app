@@ -135,17 +135,4 @@ export class ProgrammerCalculations {
     const testValue = value.startsWith('-') ? value.slice(1) : value;
     return pattern.test(testValue);
   }
-
-  static handleBitwiseOperation(value, operation) {
-    try {
-      const num = bignumber(value);
-      switch (operation) {
-        case '<<': return num.mul(2).toString(); // Left shift is multiply by 2
-        case '>>': return num.div(2).floor().toString(); // Right shift is divide by 2 and floor
-        default: return value;
-      }
-    } catch {
-      return value;
-    }
-  }
 }

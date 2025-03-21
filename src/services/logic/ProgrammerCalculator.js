@@ -235,6 +235,6 @@ export class ProgrammerCalculator extends EngineCalculator {
 
   isInputTooLong(btn) {
     return this.states[this.activeBase].input.length >= this.MAX_INPUT_LENGTH &&
-      !["=", "AC", "backspace", "<<", ">>", "±"].includes(btn);
+      !["=", "AC", "backspace", "<<", ">>", "±", "%"].includes(btn);
   }
 }
