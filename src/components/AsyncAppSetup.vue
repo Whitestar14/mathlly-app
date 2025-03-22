@@ -8,12 +8,18 @@
       :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menu-open="isMenuOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menu="toggleMenu" @close-menu="closeMenu" />
-      <router-view v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" :mode="mode" :settings="settings" :is-mobile="deviceStore.isMobile"
-            @settings-change="updateSettings" @update:mode="updateMode" />
-        </Transition>
-      </router-view>
+      <Suspense>
+        <template #default>
+        <RouterViewTransition 
+          :mode="mode" 
+          :settings="settings" 
+          :is-mobile="deviceStore.isMobile"
+          @settings-change="updateSettings" 
+          @update:mode="updateMode" 
+        />
+        </template>
+        <template #fallback><BaseLoader variant="mini" /></template>
+      </Suspense>
     </div>
 
     <!-- Main Menu Panel -->
@@ -32,6 +38,8 @@ import { usePanel } from "@/composables/usePanel"
 import AppHeader from "@/layouts/AppHeader.vue"
 import SidebarMenu from "@/layouts/SidebarMenu.vue"
 import MainMenu from "@/components/ui/MainMenu.vue"
+import BaseLoader from "@/components/base/BaseLoader.vue"
+import RouterViewTransition from "@/components/RouterViewTransition.vue"
 
 const router = useRouter()
 const deviceStore = useDeviceStore()

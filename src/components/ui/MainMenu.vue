@@ -1,6 +1,6 @@
 <template>
   <BasePanel :is-open="isOpen" :is-mobile="isMobile" @close="close" @toggle="toggle" title="Menu" height="500px"
-    max-height="60vh" closedWidth="0px" mainClass="dark:bg-gray-900">
+    max-height="60vh" closedWidth="0px" mainClass="dark:bg-gray-900 max-h-[100vh]">
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
       <ScrollAreaRoot class="h-full w-full">
