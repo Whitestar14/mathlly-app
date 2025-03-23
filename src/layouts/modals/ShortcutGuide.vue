@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from "vue";
+import { ref, watch } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { usePills } from "@/composables/usePills";
 
@@ -110,10 +110,10 @@ defineEmits(["update:open"]);
 const tabElements = ref([]);
 const shortcutGroups = {
   Global: {
-    "ctrl+shift+f": { description: "Toggle Fullscreen" },
+    "ctrl+alt+f": { description: "Toggle Fullscreen" },
     "ctrl+l": { description: "Toggle Sidebar" },
     "ctrl+h": { description: "Toggle History" },
-    "ctrl+,(comma)": { description: "Open Settings" },
+    "ctrl+,(comma)": { description: "Toggle Menubar" },
     "ctrl+space": { description: "Open the Keyboard Shortcuts" },
     "ctrl+shift+m": { description: "Toggle Theme" },
   },
@@ -135,11 +135,10 @@ const shortcutGroups = {
     "ctrl+s": { description: "Swap Input/Output" },
   },
 };
-const { currentPill, showIndicator, indicatorStyle, handleNavigation } =
+const { currentPill, showIndicator, indicatorStyle, initializePills, handleNavigation } =
   usePills({
     position: "bottom",
     updateRoute: false,
-    defaultPill: "Global",
   });
 
 const handleTabChange = (category, tabElement) => {
@@ -148,11 +147,9 @@ const handleTabChange = (category, tabElement) => {
 
 watch(
   () => props.open,
-  (newIsOpen) => {
+  async (newIsOpen) => {
     if (newIsOpen) {
-      nextTick(() => {
-        handleTabChange("Global", tabElements.value[0]);
-      });
+      await initializePills("Global", tabElements);
     }
   },
   { immediate: false } 

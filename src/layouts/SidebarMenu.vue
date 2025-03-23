@@ -162,7 +162,7 @@ import {
   NavigationMenuList,
   NavigationMenuRoot,
 } from "radix-vue";
-import { watch, ref, nextTick } from "vue"
+import { watch, ref } from "vue"
 import { usePills } from "@/composables/usePills";
 import Badge from "@/components/base/BaseBadge.vue";
 import Logo from '@/components/base/BaseLogo.vue';
@@ -239,13 +239,12 @@ const categories = ref([
 const {
   currentPill,
   showIndicator,
-  updatePillIndicator,
+  initializePills,
   indicatorStyle,
   handleNavigation,
 } = usePills({
   position: "left",
   updateRoute: true,
-  defaultPill: "/calculator",
   hideIndicatorPaths: ["/settings", "/feedback", "/:pathMatch(.*)*"],
   onNavigate: () => {
     if (props.isMobile) {
@@ -274,20 +273,15 @@ const menuItemClasses = [
 
 watch(
   () => props.isOpen,
-  (newIsOpen) => {
+  async (newIsOpen) => {
     if (newIsOpen) {
-      nextTick(() => {
-        const initialPillElement = document.querySelector(
-          `[data-path="${currentPill.value}"]`
-        )
-        updatePillIndicator(initialPillElement, true)
-      })
+      await initializePills();
     } else {
-      showIndicator.value = false
+      showIndicator.value = false;
     }
   },
   { immediate: false }
-)
+);
 </script>
 
 <style scoped>

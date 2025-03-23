@@ -4,15 +4,14 @@
       <div class="flex flex-col h-full p-4 gap-2 mx-auto">
         <calculator-display :input="input" :preview="preview" :error="error" :is-animating="isAnimating"
           :animated-result="animatedResult" :active-base="activeBase" :mode="mode" :display-values="displayValues"
-          @toggle-history="toggleHistory" @base-change="handleBaseChange" />
+          @open-history="toggleHistory" @base-change="handleBaseChange" />
 
         <calculator-buttons :mode="mode" :input-length="input.length" :max-length="maxInputLength"
           :active-base="activeBase" @button-click="handleButtonClick" @clear="handleClear" />
       </div>
 
     </div>
-    <history-panel :mode="mode" :is-mobile="isMobile" :is-open="isHistoryOpen" @toggle-history="toggleHistory"
-      @close-history="closeHistory" @select-item="selectHistoryItem" />
+    <history-panel :mode="mode" :is-mobile="isMobile" :is-open="isHistoryOpen" @update:is-open="toggleHistory" @select-item="selectHistoryItem" />
 
     <!-- Welcome Modal -->
     <welcome-modal :is-open="showWelcomeModal" @update:is-open="showWelcomeModal = $event" @close="closeWelcomeModal" />
@@ -88,7 +87,7 @@ const preview = computed(() => {
 const currentInput = ref("0")
 const showWelcomeModal = ref(localStorage.getItem("mathlly-welcome-shown") !== "true")
 const { addToHistory } = useHistory()
-const { isOpen: isHistoryOpen, toggle: toggleHistory, close: closeHistory, handleResize } = usePanel('history-panel', props.isMobile)
+const { isOpen: isHistoryOpen, toggle: toggleHistory, handleResize } = usePanel('history-panel', props.isMobile)
 
 watch(
   () => props.isMobile,
@@ -173,6 +172,7 @@ const { setContext, clearContext } = useKeyboard("calculator", {
       handleBaseChange(base)
     }
   },
+  toggleHistory,
 })
 
 // Add keyboard shortcuts for base changes

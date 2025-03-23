@@ -147,11 +147,25 @@
     @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
   }
 
+}
+
   /* VueTippy custom tooltip styles */
   .tippy-box[data-theme~="custom"] {
-    @apply bg-gray-100 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300/90 border border-solid border-gray-200 dark:border-gray-700/90 shadow-md;
+    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-700 text-gray-300 p-1 rounded-lg;
   }
-}
+
+  .tippy-box[data-theme~="custom"][data-placement^='top'] > .tippy-arrow::before {
+     @apply border-t-gray-800 dark:border-t-gray-100;
+  }
+  .tippy-box[data-theme~="custom"][data-placement^='bottom'] > .tippy-arrow::before {
+     @apply border-b-gray-800 dark:border-b-gray-100;
+  }
+  .tippy-box[data-theme~="custom"][data-placement^='left'] > .tippy-arrow::before {
+     @apply border-l-gray-800 dark:border-l-gray-100;
+  }
+  .tippy-box[data-theme~="custom"][data-placement^='right'] > .tippy-arrow::before {
+     @apply border-r-gray-800 dark:border-r-gray-100;
+  }
 
 @layer components {
   .btn {

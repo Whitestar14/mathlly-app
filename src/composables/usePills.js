@@ -10,12 +10,10 @@ export function usePills(options = {}) {
     position = "left",
     indicatorWidth = 2,
     updateRoute = true,
-    defaultPill = "",
     hideIndicatorPaths = [],
   } = options;
 
-  const currentPill = ref(defaultPill);
-
+  const currentPill = ref("");
   const indicatorPosition = ref(0);
   const showIndicator = ref(false);
 
@@ -151,6 +149,36 @@ export function usePills(options = {}) {
     return style;
   });
 
+  const initializePills = async (initialPillId = null, containerRef = null) => {
+    await nextTick();
+    
+    // Use provided pill ID or default to the current pill
+    const pillId = initialPillId || currentPill.value;
+    
+    // Find the element either in the provided container or in the document
+    let pillElement = null;
+    
+    if (containerRef && containerRef.value) {
+      // If a container ref is provided, search within it
+      pillElement = Array.from(containerRef.value).find(
+        el => el.dataset.path === pillId
+      );
+    } else {
+      // Otherwise search in the document
+      pillElement = document.querySelector(`[data-path="${pillId}"]`);
+    }
+    
+    if (pillElement) {
+      // Initialize the pill and update the indicator
+      selectPill(pillId);
+      updatePillIndicator(pillElement, true);
+      return true;
+    } else {
+      console.warn(`Element with data-path="${pillId}" not found`);
+      return false;
+    }
+  };
+
   return {
     currentPill,
     indicatorPosition,
@@ -159,5 +187,6 @@ export function usePills(options = {}) {
     selectPill,
     handleNavigation,
     indicatorStyle,
+    initializePills
   };
 }

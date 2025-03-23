@@ -139,9 +139,10 @@ const { toast } = useToast();
 const {
   currentPill,
   showIndicator,
+  initializePills,
   indicatorStyle,
   handleNavigation,
-} = usePills({ position: "bottom", updateRoute: false, defaultPill: "encode" });
+} = usePills({ position: "bottom", updateRoute: false });
 
 
 const currentTab = computed({
@@ -211,13 +212,7 @@ useKeyboard("tools", {
   copy: handleCopy,
 });
 
-onMounted(() => {
-  nextTick(() => {
-    if (tabElements.value && tabElements.value.length > 0) {
-      handleTabChange("encode", tabElements.value[0]);
-    } else {
-      console.warn("tabElements.value is not yet populated in onMounted!");
-    }
-  });
+onMounted(async () => {
+  await initializePills("encode", tabElements);
 });
 </script>

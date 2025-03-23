@@ -30,40 +30,35 @@ export class DisplayFormatter {
   static formatProgrammer(value, base, options) {
     // Split preserving shift operators
     const parts = value.split(/(\s*<<\s*|\s*>>\s*|\s*[+\-×÷()%]\s*)/g);
-    let highlightIndex = value.lastIndexOf("(");
-    let matchingIndex = this.findMatchingParenthesis(value, highlightIndex);
 
-    return parts
-      .map((part, index) => {
-        part = part.trim();
-        if (!part) return "";
+    const formattedParts = parts
+    .map((part) => {
+      part = part.trim();
+      if (!part) return "";
 
-        if (part === "(" && index === highlightIndex) {
-          return '<span>(</span>';
-        }
-        if (part === ")" && index === matchingIndex) {
-          return '<span>)</span>';
-        }
-        if (["+", "-", "×", "÷", "(", ")", "<<", ">>", "%"].includes(part)) return part;
+      // Instead of returning HTML tags, return the part as is
+      if (["+", "-", "×", "÷", "(", ")", "<<", ">>", "%"].includes(part)) return part;
 
-        // Remove any decimal points for programmer mode
-        part = part.split(".")[0];
+         // Remove any decimal points for programmer mode
+      part = part.split(".")[0];
 
-        switch (base) {
-          case "BIN":
-            return this.formatBinaryNumber(part, options.formatBinary);
-          case "HEX":
-            return this.formatHexNumber(part, options.formatHexadecimal);
-          case "OCT":
-            return this.formatOctNumber(part, options.formatOctal);
-          default:
-            return this.formatDecimalNumber(part, options.useThousandsSeparator);
-        }
-      })
-      .join(" ")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
+      switch (base) {
+        case "BIN":
+          return this.formatBinaryNumber(part, options.formatBinary);
+        case "HEX":
+          return this.formatHexNumber(part, options.formatHexadecimal);
+        case "OCT":
+          return this.formatOctNumber(part, options.formatOctal);
+        default:
+          return this.formatDecimalNumber(part, options.useThousandsSeparator);
+      }
+    })
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+    
+  return formattedParts;
+}
 
   static findMatchingParenthesis(expr, openIndex) {
     if (openIndex === -1) return -1;
@@ -141,48 +136,38 @@ export class DisplayFormatter {
   }
 
   static formatDisplayContent = (content) => {
-    const safeContent = escapeHtml(content);
-    return (
-      safeContent
-        // Basic operators
-        .replace(/&times;/g, "×")
-        .replace(/&divide;/g, "÷")
-        .replace(/&minus;/g, "−")
-        .replace(/&plusmn;/g, "±")
-        .replace(/&sum;/g, "∑")
-        .replace(/&prod;/g, "∏")
-        // Comparison
-        .replace(/&lt;=/g, "≤")
-        .replace(/&gt;=/g, "≥")
-        .replace(/&ne;/g, "≠")
-        .replace(/&equiv;/g, "≡")
-        // Greek letters (commonly used in math)
-        .replace(/&alpha;/g, "α")
-        .replace(/&beta;/g, "β")
-        .replace(/&delta;/g, "δ")
-        .replace(/&Delta;/g, "Δ")
-        .replace(/&pi;/g, "π")
-        .replace(/&sigma;/g, "σ")
-        // Set notation
-        .replace(/&isin;/g, "∈")
-        .replace(/&notin;/g, "∉")
-        .replace(/&cup;/g, "∪")
-        .replace(/&cap;/g, "∩")
-        // Other math symbols
-        .replace(/&radic;/g, "√")
-        .replace(/&infin;/g, "∞")
-        .replace(/&int;/g, "∫")
-        .replace(/&part;/g, "∂")
-    );
+    if (!content) return '';
+    
+    return content
+      // Basic operators
+      .replace(/&times;/g, "×")
+      .replace(/&divide;/g, "÷")
+      .replace(/&minus;/g, "−")
+      .replace(/&plusmn;/g, "±")
+      .replace(/&sum;/g, "∑")
+      .replace(/&prod;/g, "∏")
+      // Comparison
+      .replace(/&lt;=/g, "≤")
+      .replace(/&gt;=/g, "≥")
+      .replace(/&ne;/g, "≠")
+      .replace(/&equiv;/g, "≡")
+      // Greek letters (commonly used in math)
+      .replace(/&alpha;/g, "α")
+      .replace(/&beta;/g, "β")
+      .replace(/&delta;/g, "δ")
+      .replace(/&Delta;/g, "Δ")
+      .replace(/&pi;/g, "π")
+      .replace(/&sigma;/g, "σ")
+      // Set notation
+      .replace(/&isin;/g, "∈")
+      .replace(/&notin;/g, "∉")
+      .replace(/&cup;/g, "∪")
+      .replace(/&cap;/g, "∩")
+      // Other math symbols
+      .replace(/&radic;/g, "√")
+      .replace(/&infin;/g, "∞")
+      .replace(/&int;/g, "∫")
+      .replace(/&part;/g, "∂");
   };
+  
 }
-
-const  // TODO: the unsafe list complicates inputted expressions wrapping the parentheses in span tags with &gt; and &lt; producing morphed evaluations such as (88 &lt;span&gt;)&lt;/span&gt;
-escapeHtml = (unsafe) => {
-   return unsafe
-     .replace(/&/g, "&amp;")
-     .replace(/</g, "&lt;")
-     .replace(/>/g, "&gt;")
-     .replace(/"/g, "&quot;")
-     .replace(/'/g, "&#039;");
- };
