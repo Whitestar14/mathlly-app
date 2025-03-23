@@ -1,6 +1,5 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" @close="close" @toggle="toggle" title="Menu" height="500px"
-    max-height="60vh" closedWidth="0px" mainClass="dark:bg-gray-900 max-h-[100vh]">
+  <BasePanel :is-open="isOpen" :is-mobile="isMobile" @update:isOpen="closeMenu" :show-toggle="false" title="Menu" mainClass="dark:bg-gray-900">
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
       <ScrollAreaRoot class="h-full w-full">
@@ -31,36 +30,24 @@
         <ToggleGroupRoot type="single" v-model="selectedTheme" class="inline-flex items-center gap-1 p-1 mx-3 bg-gray-100/50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
           <ToggleGroupItem
             value="light"
-            class="flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-gray-100 dark:data-[state=on]:bg-gray-800 data-[state=on]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-800/50"
-            :class="selectedTheme === 'light'
-              ? 'bg-gray-100 dark:bg-gray-800 text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-700 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300'">
+            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
             <Sun class="h-4 w-4" />
             <span class="sr-only">Light</span>
           </ToggleGroupItem>
           <ToggleGroupItem
             value="dark"
-            class="flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-700 data-[state=on]:shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700/70"
-            :class="selectedTheme === 'dark'
-              ? 'bg-indigo-50 dark:bg-gray-700/50 text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/30'">
+            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
             <Moon class="h-4 w-4" />
             <span class="sr-only">Dark</span>
           </ToggleGroupItem>
           <ToggleGroupItem
             value="system"
-            class="flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-700 data-[state=on]:shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700/70"
-            :class="selectedTheme === 'system'
-              ? 'bg-indigo-50 dark:bg-gray-700/50 text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/30'">
+            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
             <AppWindowMac class="h-4 w-4" />
             <span class="sr-only">System</span>
           </ToggleGroupItem>
         </ToggleGroupRoot>
       </div>
-    </template>
-    <template #toggle-button>
-      <div></div>
     </template>
   </BasePanel>
 </template>
@@ -94,9 +81,8 @@ defineProps({
   },
 })
 
-const emit = defineEmits(["toggle", "close"])
-const close = () => emit('close')
-const toggle = () => emit('toggle')
+const emit = defineEmits(["update:isOpen"])
+const closeMenu = () => emit('update:isOpen', false);
 
 const { selectedTheme, isDark } = useTheme()
 

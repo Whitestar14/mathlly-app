@@ -1,5 +1,5 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" @toggle="toggle" @close="close" title="History">
+  <BasePanel :is-open="isOpen" :is-mobile="isMobile" title="History" @update:is-open="toggleHistory">
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
       <ScrollAreaRoot class="h-full w-full">
@@ -96,7 +96,6 @@ import BaseModal from "@/components/base/BaseModal.vue"
 import BasePanel from "@/components/base/BasePanel.vue"
 import { useHistory } from "@/composables/useHistory"
 import { useToast } from "@/composables/useToast"
-import { useKeyboard } from "@/composables/useKeyboard"
 import { useClipboard } from "@vueuse/core"
 import {
   ScrollAreaRoot,
@@ -118,8 +117,6 @@ const props = defineProps({
 
 const emit = defineEmits([
   "select-item",
-  "toggle-history",
-  "close-history",
   "update:isOpen",
 ])
 
@@ -134,8 +131,7 @@ const showClearButton = computed(
 const { toast } = useToast()
 const { copy } = useClipboard()
 
-const toggle = () => emit("toggle-history")
-const close = () => emit("close-history")
+const toggleHistory = () => emit("update:isOpen")
 
 // Lifecycle hooks
 onMounted(() => {
@@ -213,11 +209,6 @@ const copyAsJson = (item) => {
     description: "The calculation has been copied in JSON format",
   })
 }
-
-// useKeyboard composable
-useKeyboard("global", {
-  toggleHistory: toggle,
-})
 
 // Transition handlers
 const onBeforeEnter = (el) => {

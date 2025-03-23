@@ -6,8 +6,8 @@
 
     <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
       :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']">
-      <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menu-open="isMenuOpen"
-        @toggle-sidebar="toggleSidebar" @toggle-menu="toggleMenu" @close-menu="closeMenu" />
+      <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
+        @toggle-sidebar="toggleSidebar" @toggle-menu="toggleMenubar" />
       <Suspense>
         <template #default>
         <RouterViewTransition 
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Main Menu Panel -->
-    <MainMenu :is-open="isMenuOpen" :is-mobile="deviceStore.isMobile" @toggle="toggleMenu" @close="closeMenu" />
+    <MainMenu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
   </div>
 </template>
 
@@ -67,10 +67,10 @@ const {
 } = usePanel('sidebar', deviceStore.isMobile)
 
 const {
-  isOpen: isMenuOpen,
-  toggle: toggleMenu,
-  close: closeMenu,
-  handleResize: handleMenuResize,
+  isOpen: isMenubarOpen,
+  toggle: toggleMenubar,
+  close: closeMenubar,
+  handleResize: handleMenubarResize,
 } = usePanel('menu', deviceStore.isMobile, false)
 
 const updateMode = async (newMode) => {
@@ -90,14 +90,14 @@ watch(
   () => deviceStore.isMobile,
   (newIsMobile) => {
     handleSidebarResize(newIsMobile)
-    handleMenuResize(newIsMobile)
+    handleMenubarResize(newIsMobile)
   }
 )
 
 watch(router.currentRoute, () => {
   if (deviceStore.isMobile) {
     closeSidebar()
-    closeMenu()
+    closeMenubar()
   }
 })
 
@@ -105,8 +105,8 @@ useKeyboard("global", {
   toggleSidebar: () => {
     toggleSidebar()
   },
-  openSettings: () => {
-    router.push("/settings")
+  toggleMenubar: () => {
+    toggleMenubar()
   },
   toggleFullscreen: () => {
     useFullscreen(document.documentElement).toggle()

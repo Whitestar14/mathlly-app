@@ -13,7 +13,7 @@
         ]"
         :style="{ width: isOpen ? width : closedWidth }">
             <div class="panel-content" :class="[
-                'absolute inset-y-0 right-0 bg-white dark:bg-gray-800 transition-opacity duration-300 flex flex-col h-full w-full',
+                'absolute inset-y-0 right-0 bg-white dark:bg-gray-800 transition-opacity duration-300 max-h-[100vh]',
                 isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
                 mainClass
             ]">
@@ -39,8 +39,8 @@
             </div>
 
             <!-- Toggle button (desktop only) -->
-            <slot name="toggle-button">
-                <Button v-show="!isMobile" v-tippy="{
+            <div v-if="showToggle">
+                <Button v-tippy="{
                     content: isOpen ? 'Hide Panel' : 'Show Panel',
                     placement: 'left',
                 }" variant="outline" size="icon" :class="[
@@ -50,16 +50,15 @@
                     <ChevronRightIcon class="h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-300"
                         :class="{ 'rotate-180': isOpen }" />
                 </Button>
-            </slot>
+            </div>
         </div>
         </Transition>
 
         <!-- Mobile Panel -->
         <Transition name="slide-up">
             <div v-if="isMobile && isOpen"
-                class="fixed inset-x-0 bottom-0 z-50 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800"
-                :style="{ maxHeight: maxHeight, height: height }">
-                <div class="panel-content flex flex-col h-full">
+                class="fixed inset-x-0 bottom-0 z-50 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]">
+                <div class="panel-content h-full">
                     <!-- Header -->
                     <div class="flex-shrink-0 h-14 px-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                         <h2 class="text-base font-medium text-gray-800 dark:text-gray-200">
@@ -87,21 +86,24 @@
 import { ChevronRightIcon, XIcon } from "lucide-vue-next"
 import Button from "@/components/base/BaseButton.vue"
 
-defineProps({
+const props = defineProps({
     isOpen: { type: Boolean, default: false },
     isMobile: { type: Boolean, default: false },
+    showToggle: { type: Boolean, default: true},
     title: { type: String, default: "" },
     mainClass: { type: String, default: "" },
     width: { type: String, default: "18.5rem" },
-    height: { type: String, default: "600px" },
-    maxHeight: { type: String, default: "80vh" },
     closedWidth: { type: String, default: "2.5rem" }
 })
 
-const emit = defineEmits(["toggle", "close"])
+const emit = defineEmits(["update:isOpen"])
 
-const onToggle = () => emit("toggle")
-const onClose = () => emit("close")
+const onOpen = () => emit("update:isOpen", true);
+const onClose = () => emit("update:isOpen", false)
+
+const onToggle = () => {
+    props.isOpen === true ? onClose() : onOpen();
+}
 </script>
 
 <style scoped>
