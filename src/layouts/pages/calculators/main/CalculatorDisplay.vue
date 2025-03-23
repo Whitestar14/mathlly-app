@@ -9,7 +9,7 @@
       <ChevronScroll :show-left-chevron="showLeftChevron" :show-right-chevron="showRightChevron"
         @scroll-to-previous="scrollToPrevious" @scroll-to-next="scrollToNext" />
 
-      <ControlButtons :copy-options="copyOptions" @toggle-history="$emit('toggle-history')"
+      <ControlButtons @open-history="$emit('open-history')"
         @copy-to-clipboard="copyToClipboard" />
 
       <MainDisplay ref="mainDisplay" :input="input" :preview="preview" :error="error" :is-animating="isAnimating"
@@ -20,7 +20,7 @@
       <BaseDisplay v-show="mode === 'Programmer'" :display-values="displayValues" :active-base="activeBase"
       @base-change="$emit('base-change', $event)" />
     </div>
-    <FeatureToast />
+    <Toast />
   </div>
 </template>
 
@@ -28,7 +28,7 @@
 import ChevronScroll from "@/components/ui/ChevronScroll.vue"
 import ControlButtons from "@/components/ui/ControlButtons.vue"
 import MainDisplay from "@/components/ui/MainDisplay.vue"
-import FeatureToast from "@/components/base/FeatureToast.vue"
+import Toast from "@/components/base/BaseToast.vue"
 import BaseDisplay from "@/components/ui/BaseDisplay.vue"
 import { computed, nextTick, ref, watch } from "vue"
 import { useToast } from "@/composables/useToast"
@@ -45,7 +45,7 @@ const props = defineProps({
   displayValues: { type: Object, default: () => ({}) },
 })
 
-defineEmits(["toggle-history", "base-change"])
+defineEmits(["open-history", "base-change"])
 const { toast } = useToast()
 
 const mainDisplay = ref(null)
@@ -89,10 +89,6 @@ const copyContent = computed(() => {
   }
   return props.input
 })
-
-const copyOptions = computed(() => ({
-  content: "Copy to Clipboard",
-}))
 
 const { copy } = useClipboard({ legacy: true })
 

@@ -9,17 +9,17 @@
         variant="ghost"
         size="icon"
         class="rounded-none hover:bg-gray-50 group-hover:bg-opacity-100 md:hidden"
-        @click="toggleHistory"
+        @click="openHistory"
       >
         <HistoryIcon size="20" />
       </Button>
-      <div
+      <Separator
         class="h-6 bg-gray-300 dark:bg-gray-600 w-px md:hidden group-has-[.rounded-none:hover]:h-8 transition-[height]"
       />
       <Button
         variant="ghost"
         size="icon"
-        v-tippy="copyOptions"
+        v-tippy="{content: 'Copy to Clipboard', placement: 'right'}"
         class="rounded-none hover:bg-gray-50 group-hover:bg-opacity-100"
         @click="copyToClipboard"
       >
@@ -30,14 +30,12 @@
 </template>
 
 <script setup>
+import { Separator } from "radix-vue";
 import { Copy, HistoryIcon } from "lucide-vue-next";
 import Button from "@/components/base/BaseButton.vue";
-defineProps({
-  copyOptions: { type: Object, default: () => ({}) },
-});
 
-const emit = defineEmits(["toggle-history", "copy-to-clipboard"]);
+const emit = defineEmits(["open-history", "copy-to-clipboard"]);
 
-const toggleHistory = () => emit("toggle-history");
+const openHistory = () => emit("open-history");
 const copyToClipboard = () => emit("copy-to-clipboard");
 </script>

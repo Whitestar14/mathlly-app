@@ -19,18 +19,18 @@ export class ParenthesesManager {
           if (beforeText) parts.push({ type: 'text', content: beforeText });
         }
         
-        // Add opening parenthesis with space only after it
+        // Add opening parenthesis
         parts.push({ type: 'open', content: '(' });
         currentIndex = i + 1;
         nestLevel++;
       } else if (expr[i] === ')') {
-        // Handle text before closing parenthesis, ensuring space before ')'
+        // Handle text before closing parenthesis
         if (i > currentIndex) {
           const content = expr.slice(currentIndex, i).trim();
-          if (content) parts.push({ type: 'text', content: `${content}` });
+          if (content) parts.push({ type: 'text', content: content });
         }
         
-        // Add closing parenthesis without extra spaces
+        // Add closing parenthesis
         parts.push({ type: 'close', content: ')', level: --nestLevel });
         currentIndex = i + 1;
       } else if (isOperator(expr[i])) {
@@ -43,20 +43,21 @@ export class ParenthesesManager {
         currentIndex = i + 1;
       }
     }
-
+  
     // Add remaining text
     if (currentIndex < expr.length) {
       const remaining = expr.slice(currentIndex).trim();
       if (remaining) parts.push({ type: 'text', content: remaining });
     }
-
+  
     // Add ghost parentheses
     while (nestLevel > 0) {
       parts.push({ type: 'ghost', content: ')', level: --nestLevel });
     }
-
+  
     return this.cleanupParts(parts);
   }
+  
 
   cleanupParts(parts) {
     // Clean up double spaces and ensure proper spacing

@@ -6,9 +6,18 @@ export function useTheme() {
   const settings = useSettingsStore();
   const isDark = useDark();
 
-  const selectedTheme = computed(() => settings.theme);
+  // Define computed with getter and setter.
+  const selectedTheme = computed({
+    get: () => settings.theme,
+    set: async (newTheme) => {
+      await settings.saveSettings({
+        ...settings.$state,
+        theme: newTheme,
+      });
+    }
+  });
 
-  // Sync theme changes between settings and VueUse dark mode
+  // Sync theme changes between settings and VueUse dark mode.
   watch(selectedTheme, (newTheme) => {
     if (newTheme === "dark") {
       isDark.value = true;
@@ -32,7 +41,7 @@ export function useTheme() {
       ...settings.$state,
       theme: newTheme,
     });
-  }
+  };
 
   return {
     isDark,

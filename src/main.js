@@ -7,7 +7,6 @@ import { useDeviceStore } from "@/stores/device";
 import { MotionPlugin } from '@vueuse/motion'
 import "./assets/css/main.css";
 import "tippy.js/dist/tippy.css";
-import "tippy.js/dist/border.css";
 import "tippy.js/animations/scale.css";
 
 const app = createApp(App);
@@ -18,10 +17,9 @@ app.use(MotionPlugin).use(pinia).use(router);
 const props = {
   placement: "top",
   theme: "custom",
-  arrow: false,
-  allowHTML: true,
+  arrow: true,
   animation: "scale",
-  delay: [300, 0],
+  delay: [200, 0],
   onShow() {
     const device = useDeviceStore();
     return !device.isMobile;
