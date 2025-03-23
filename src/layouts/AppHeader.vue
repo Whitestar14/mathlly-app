@@ -27,7 +27,7 @@
                 <span class="sr-only">Keyboard Shortcuts</span>
             </Button>
 
-            <Button v-tippy="{content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left'}" variant="ghost" size="icon" @click="$emit('toggle-menu')">
+            <Button v-tippy="{ content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left' }" variant="ghost" size="icon" @click="$emit('toggle-menubar')">
               <PanelRightIcon class="h-5 w-5 rotate-180" />
           </Button>
       </div>

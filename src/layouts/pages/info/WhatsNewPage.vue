@@ -1,9 +1,5 @@
 <template>
-  <BasePage title="What's New" :showFooter="true">
-    <div class="inline-flex items-center rounded-full border border-indigo-200 dark:border-gray-800 bg-indigo-50 dark:bg-gray-800/50 px-3 py-1 text-sm font-medium mb-8">
-      <span class="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400 mr-2" />
-      <span class="text-indigo-600 dark:text-indigo-400 font-['Geist_Mono']">v{{ version.versionInfo.full }}</span>
-    </div>
+  <BasePage title="What's New" :showFooter="true" :showVersion="true">
 
     <section class="space-y-8">
       <h2 class="text-2xl font-medium tracking-tight">
@@ -41,14 +37,9 @@
 </template>
 
 <script setup>
-import { useTitle } from '@vueuse/core';
-import { useVersionStore } from '@/stores/version'
 import { ClockIcon } from 'lucide-vue-next';
 import { updates, upcomingFeatures } from '@/data/changelog';
 import UpdateCard from '@/components/cards/UpdateCard.vue';
 import BasePage from '@/components/base/BasePage.vue';
-
-useTitle("What's New - Mathlly");
-const version = useVersionStore();
 </script>
 

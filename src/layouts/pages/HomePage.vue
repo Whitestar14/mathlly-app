@@ -1,5 +1,5 @@
 <template>
-  <BasePage :showHeader="true" :showFooter="true" title="Home" mainClass="w-full mx-auto text-sm">
+  <BasePage :showHeader="true" :showFooter="true" :showVersion="true" title="Home" mainClass="w-full mx-auto text-sm">
     <!-- Hero Section with Animated Background -->
     <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div ref="particlesContainer" class="absolute inset-0 pointer-events-none opacity-20"></div>

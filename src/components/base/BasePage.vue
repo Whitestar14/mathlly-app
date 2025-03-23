@@ -34,11 +34,12 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { useTitle } from '@vueuse/core';
 import { useVersionStore } from '@/stores/version';
 import { ArrowLeftIcon } from 'lucide-vue-next';
 import Button from '@/components/base/BaseButton.vue';
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     default: ''
@@ -68,6 +69,7 @@ defineProps({
 const router = useRouter();
 const version = useVersionStore();
 
+useTitle(`${ props.title } - Mathlly`)
 const goBack = () => {
   router.go(-1);
 };
