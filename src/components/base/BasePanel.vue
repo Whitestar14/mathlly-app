@@ -12,10 +12,8 @@
             'transition-all duration-300 ease-in-out border-l border-gray-200 dark:border-gray-700',
         ]"
         :style="{ width: isOpen ? width : closedWidth }">
-            <div class="panel-content" :class="[
-                'absolute inset-y-0 right-0 bg-white dark:bg-gray-800 transition-opacity duration-300 max-h-[100vh]',
-                isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
-                mainClass
+            <div class="panel-content absolute inset-y-0 right-0 bg-white dark:bg-gray-800 transition-opacity duration-300 max-h-[100vh]" :class="[
+                isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none', mainClass
             ]">
                 <div class="flex flex-col h-full">
                     <!-- Header -->
@@ -58,9 +56,9 @@
         <Transition name="slide-up">
             <div v-if="isMobile && isOpen"
                 class="fixed inset-x-0 bottom-0 z-50 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]">
-                <div class="panel-content h-full">
-                    <!-- Header -->
-                    <div class="flex-shrink-0 h-14 px-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="panel-content h-full" :class="mainClass">
+                     <!-- Header -->
+                     <div class="flex-shrink-0 h-14 px-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                         <h2 class="text-base font-medium text-gray-800 dark:text-gray-200">
                             {{ title }}
                         </h2>

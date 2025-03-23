@@ -7,7 +7,7 @@
     <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
       :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
-        @toggle-sidebar="toggleSidebar" @toggle-menu="toggleMenubar" />
+        @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
       <Suspense>
         <template #default>
         <RouterViewTransition 
