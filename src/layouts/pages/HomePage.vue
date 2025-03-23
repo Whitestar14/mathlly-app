@@ -1,25 +1,25 @@
 <template>
-  <BasePage :showHeader="true" :showFooter="true">
+  <BasePage :showHeader="true" :showFooter="true" title="Home" mainClass="w-full mx-auto text-sm">
     <!-- Hero Section with Animated Background -->
     <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div ref="particlesContainer" class="absolute inset-0 pointer-events-none opacity-20"></div>
       <div class="container mx-auto px-4 py-16 md:py-24">
         <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          <div class="w-full md:w-1/2 text-center md:text-left space-y-6">
+          <div class="w-full md:w-2/3 flex justify-center flex-col text-center md:text-left space-y-6">
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-mono font-bold tracking-tight">
               Mathematical precision
               <span class="block text-indigo-600 dark:text-indigo-400 mt-2">for modern development</span>
             </h1>
-            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-lg">
+            <p class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
               A comprehensive suite of mathematical tools designed to streamline your development workflow
             </p>
-            <div class="flex flex-wrap gap-4 mt-8">
+            <div class="flex justify-center md:justify-start flex-wrap gap-4 mt-8">
               <Button variant="primary" size="lg" class="w-full sm:w-auto">Get Started</Button>
               <Button variant="outline" size="lg" class="w-full sm:w-auto">View Demo</Button>
             </div>
           </div>
-          <div class="w-full md:w-1/2 flex justify-center mt-8 md:mt-0">
-            <Logo size="xl" class="transform scale-125 transition-all duration-500 hover:scale-150" />
+          <div class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
+            <Logo size="lg" class="transform scale-125 transition-all duration-500 hover:scale-150" />
           </div>
         </div>
       </div>
@@ -108,9 +108,9 @@
             <h2 class="text-2xl md:text-3xl font-medium">Why Choose Mathlly?</h2>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm h-full">
               <ul class="space-y-4">
-                <li v-for="(reason, index) in reasons" :key="index" class="flex items-start group">
-                  <div class="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-full mr-4 shrink-0">
-                    <CheckCircleIcon class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <li v-for="(reason, index) in reasons" :key="index" class="flex items-center group">
+                  <div class="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full mr-4 shrink-0">
+                    <CheckCircleIcon class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <span class="text-gray-700 dark:text-gray-300">{{ reason }}</span>
                 </li>
@@ -121,7 +121,7 @@
           <!-- Mission Section -->
           <div class="space-y-6">
             <h2 class="text-2xl md:text-3xl font-medium">Our Mission</h2>
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm h-full flex flex-col justify-center">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm h-full">
               <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
                 At Mathlly, we're committed to empowering developers with powerful, intuitive, and efficient mathematical tools. 
                 Our goal is to streamline complex calculations, making your coding journey smoother and more productive.
@@ -146,7 +146,7 @@
           <Button 
             variant="secondary" 
             size="lg" 
-            class="bg-white text-indigo-600 hover:bg-indigo-50 shadow-md hover:shadow-lg transition-all duration-300"
+            class="bg-white text-indigo-600 hover:bg-indigo-40 shadow-md hover:shadow-lg transition-all duration-300"
           >
             Try Mathlly Now
           </Button>
@@ -315,7 +315,7 @@ const initParticles = () => {
   const instance = anime({
     targets: '.particle',
     translateX: () => anime.random(-windowWidth.value/2, windowWidth.value/2),
-    translateY: () => anime.random(-500, 500),
+    translateY: () => anime.random(-400, 500),
     scale: () => anime.random(1, windowWidth.value < 640 ? 2 : 3),
     opacity: () => anime.random(0.1, 0.5),
     easing: 'linear',

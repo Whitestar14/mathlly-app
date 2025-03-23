@@ -4,13 +4,13 @@ import { ref, computed } from "vue";
 export const useKeyboardStore = defineStore("keyboard", () => {
   const shortcuts = ref({
     global: {
-      "ctrl+shift+f": {
+      "ctrl+alt+f": {
         action: "toggleFullscreen",
         description: "Toggle Fullscreen",
       },
       "ctrl+l": { action: "toggleSidebar", description: "Toggle Sidebar" },
       "ctrl+h": { action: "toggleHistory", description: "Toggle History" },
-      "ctrl+,": { action: "openSettings", description: "Open Settings" },
+      "ctrl+,": { action: "toggleMenubar", description: "Toggle Menubar" },
       "ctrl+ ": { action: "openShortcutModal", description: "Open Shortcuts" },
       "ctrl+shift+m": { action: "toggleTheme", description: "Toggle Theme" },
     },

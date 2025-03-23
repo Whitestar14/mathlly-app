@@ -4,7 +4,7 @@
     <div class="container mx-auto flex justify-between items-center gap-2">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">
-        <Button v-tippy="{ content: 'Open Sidebar', placement: 'bottom' }" :class="{ 'hidden': isSidebarOpen }" variant="ghost"
+        <Button v-tippy="{ content: 'Open Sidebar', placement: 'right' }" :class="{ 'hidden': isSidebarOpen }" variant="ghost"
           size="icon" @click="$emit('toggle-sidebar')">
           <PanelRightIcon class="h-5 w-5" />
         </Button>
@@ -12,7 +12,7 @@
 
       <!-- Mode Toggle and Theme Switch -->
       <div class="flex-grow flex justify-center sm:justify-end items-center">
-        <div class="w-full sm:w-auto flex justify-between sm:justify-end items-center space-x-4">
+        <div class="w-full sm:w-auto flex justify-end items-center space-x-4">
 
           <!-- Mode Toggler using SelectBar -->
           <div v-if="currentRoute === '/calculator'" class="relative w-full min-w-36">
@@ -20,15 +20,15 @@
               position="popper" placeholder="Select mode" />
           </div>
 
-          <div class="flex space-x-2 items-center justify-between">
+          <div class="flex items-center justify-between gap-2">
             <!-- Keyboard Shortcuts -->
-            <Button v-tippy="{content: 'Keyboard Shortcuts'}" variant="ghost" size="icon" @click="openShortcutModal">
+            <Button v-show="!isMobile" v-tippy="{content: 'Keyboard Shortcuts'}" variant="ghost" size="icon" @click="openShortcutModal">
                 <Command class="h-5 w-5" />
                 <span class="sr-only">Keyboard Shortcuts</span>
             </Button>
 
-            <Button v-tippy="{content: isMenuOpen ? 'Close Menu': 'Open Menu'}" variant="ghost" size="icon" @click="$emit('toggle-menu')">
-            <MenuIcon class="w-5 h-5" />
+            <Button v-tippy="{content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left'}" variant="ghost" size="icon" @click="$emit('toggle-menu')">
+              <PanelRightIcon class="h-5 w-5 rotate-180" />
           </Button>
       </div>
         </div>
@@ -41,9 +41,8 @@
 <script setup>
 import { computed, watch, ref } from "vue"
 import {
-  PanelRightIcon,
   Command,
-  MenuIcon
+  PanelRightIcon
 } from "lucide-vue-next"
 import { useRoute } from "vue-router"
 import { useSettingsStore } from "@/stores/settings"
@@ -61,13 +60,13 @@ defineProps({
     type: Boolean,
     default: true,
   },
-  isMenuOpen: {
+  isMenubarOpen: {
     type: Boolean,
     default: false,
   },
 })
 
-const emit = defineEmits(["update:mode", "toggle-sidebar", "update:open", "toggle-menu", "close-menu"])
+const emit = defineEmits(["update:mode", "toggle-sidebar", "toggle-menubar"])
 
 const settings = useSettingsStore()
 const route = useRoute()

@@ -9,7 +9,7 @@
       <ChevronScroll :show-left-chevron="showLeftChevron" :show-right-chevron="showRightChevron"
         @scroll-to-previous="scrollToPrevious" @scroll-to-next="scrollToNext" />
 
-      <ControlButtons :copy-options="copyOptions" @toggle-history="$emit('toggle-history')"
+      <ControlButtons @open-history="$emit('open-history')"
         @copy-to-clipboard="copyToClipboard" />
 
       <MainDisplay ref="mainDisplay" :input="input" :preview="preview" :error="error" :is-animating="isAnimating"
@@ -45,7 +45,7 @@ const props = defineProps({
   displayValues: { type: Object, default: () => ({}) },
 })
 
-defineEmits(["toggle-history", "base-change"])
+defineEmits(["open-history", "base-change"])
 const { toast } = useToast()
 
 const mainDisplay = ref(null)
@@ -89,10 +89,6 @@ const copyContent = computed(() => {
   }
   return props.input
 })
-
-const copyOptions = computed(() => ({
-  content: "Copy to Clipboard",
-}))
 
 const { copy } = useClipboard({ legacy: true })
 

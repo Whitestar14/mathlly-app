@@ -171,13 +171,3 @@ export class DisplayFormatter {
   };
   
 }
-
-const  // TODO: the unsafe list complicates inputted expressions wrapping the parentheses in span tags with &gt; and &lt; producing morphed evaluations such as (88 &lt;span&gt;)&lt;/span&gt;
-escapeHtml = (unsafe) => {
-   return unsafe
-     .replace(/&/g, "&amp;")
-     .replace(/</g, "&lt;")
-     .replace(/>/g, "&gt;")
-     .replace(/"/g, "&quot;")
-     .replace(/'/g, "&#039;");
- };
