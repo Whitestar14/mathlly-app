@@ -1,5 +1,18 @@
 export const updates = [
   {
+    version: '0.11.7',
+    date: 'March 23, 2025',
+    features: [
+    "@milestone: fixed all observable and discoverable issues with the parentheses manager",
+    "Introduced a basePanel component housing common code to avoid redundancy",
+    "Repurposed the main menu as a sidebar using the usePanel and BasePanel composable for consistency and ease of use",
+    "Refractored codebase to use the revamped usePills utility reducing boilerplate code",
+    "Redesigned composables such as useTheme to allow setting and getting methods",
+    "Polished the tooltips to prevent contrast issues and improve accessibility",
+    "Made general changes to background, border, and typography for a better user experience"
+    ]
+  },
+  {
     version: '0.11.6',
     date: 'March 21, 2025',
     features: [
