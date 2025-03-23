@@ -45,7 +45,7 @@ const router = useRouter()
 const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
 
-// Ensure minimum loading time of 1.2 seconds
+// Ensure minimum loading time of 2 seconds
 const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000))
 
 await Promise.all([
@@ -117,15 +117,3 @@ onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 300ms ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
