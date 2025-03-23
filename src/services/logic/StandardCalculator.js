@@ -1,4 +1,4 @@
-import { EngineCalculator } from "@/utils/misc/EngineCalculator";
+import { EngineCalculator } from "@/utils/misc/CalculatorCore";
 import { StandardOperations } from "@/utils/operations/StandardOperations";
 import { StandardCalculations } from "@/utils/calculations/StandardCalculations";
 export class StandardCalculator extends EngineCalculator {
