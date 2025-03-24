@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 
-export function useBadge(type = 'soon') {
+export function useBadge(type = 'soon', customText = '') {
   const badges = {
     soon: {
       text: 'Coming Soon',
@@ -8,7 +8,11 @@ export function useBadge(type = 'soon') {
     },
     new: {
       text: 'New',
-      classes: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
+      classes: 'bg-indigo-50 dark:bg-gray-800/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-gray-800'
+    },
+    version: {
+      text: customText || 'Version',
+      classes: 'bg-indigo-50 dark:bg-gray-800/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-gray-800'
     }
   }
 

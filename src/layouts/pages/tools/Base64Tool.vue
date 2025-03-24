@@ -142,7 +142,7 @@ const {
   initializePills,
   indicatorStyle,
   handleNavigation,
-} = usePills({ position: "bottom", updateRoute: false });
+} = usePills({ position: "bottom", updateRoute: false, autoInit: true, containerRef: tabElements });
 
 
 const currentTab = computed({

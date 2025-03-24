@@ -1,5 +1,5 @@
-import { ref, watch, nextTick, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, watch, nextTick, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 export function usePills(options = {}) {
   const {
@@ -7,13 +7,16 @@ export function usePills(options = {}) {
     indicatorHeight = 15,
     verticalOffset = 7,
     horizontalOffset = 7,
-    position = "left",
+    position = 'left',
+    defaultPill = '',
     indicatorWidth = 2,
     updateRoute = true,
     hideIndicatorPaths = [],
+    autoInit = false,
+    containerRef = null,
   } = options;
 
-  const currentPill = ref("");
+  const currentPill = ref(defaultPill);
   const indicatorPosition = ref(0);
   const showIndicator = ref(false);
 
@@ -22,46 +25,46 @@ export function usePills(options = {}) {
 
   const styleMap = {
     left: {
-      mainDimension: "top",
-      mainSize: "height",
-      crossSize: "width",
+      mainDimension: 'top',
+      mainSize: 'height',
+      crossSize: 'width',
       mainOffset: verticalOffset,
-      crossValue: indicatorWidth + "px",
-      mainUnit: "px",
-      crossUnit: "px",
+      crossValue: indicatorWidth + 'px',
+      mainUnit: 'px',
+      crossUnit: 'px',
     },
     right: {
-      mainDimension: "top",
-      mainSize: "height",
-      crossSize: "width",
+      mainDimension: 'top',
+      mainSize: 'height',
+      crossSize: 'width',
       mainOffset: verticalOffset,
-      crossValue: indicatorWidth + "px",
-      mainUnit: "px",
-      crossUnit: "px",
-      crossOffset: "0px",
-      crossAlign: "right",
+      crossValue: indicatorWidth + 'px',
+      mainUnit: 'px',
+      crossUnit: 'px',
+      crossOffset: '0px',
+      crossAlign: 'right',
     },
     top: {
-      mainDimension: "left",
-      mainSize: "width",
-      crossSize: "height",
+      mainDimension: 'left',
+      mainSize: 'width',
+      crossSize: 'height',
       mainOffset: horizontalOffset,
-      crossValue: indicatorWidth + "px",
-      mainUnit: "px",
-      crossUnit: "px",
-      crossOffset: "0px",
-      crossAlign: "top",
+      crossValue: indicatorWidth + 'px',
+      mainUnit: 'px',
+      crossUnit: 'px',
+      crossOffset: '0px',
+      crossAlign: 'top',
     },
     bottom: {
-      mainDimension: "left",
-      mainSize: "width",
-      crossSize: "height",
+      mainDimension: 'left',
+      mainSize: 'width',
+      crossSize: 'height',
       mainOffset: horizontalOffset,
-      crossValue: indicatorWidth + "px",
-      mainUnit: "px",
-      crossUnit: "px",
-      crossOffset: "0px",
-      crossAlign: "bottom",
+      crossValue: indicatorWidth + 'px',
+      mainUnit: 'px',
+      crossUnit: 'px',
+      crossOffset: '0px',
+      crossAlign: 'bottom',
     },
   };
 
@@ -71,10 +74,10 @@ export function usePills(options = {}) {
 
     const mainSize =
       element[
-        currentStyle.mainSize == "width" ? "offsetWidth" : "offsetHeight"
+        currentStyle.mainSize == 'width' ? 'offsetWidth' : 'offsetHeight'
       ];
     const mainOffset =
-      element[currentStyle.mainDimension == "top" ? "offsetTop" : "offsetLeft"];
+      element[currentStyle.mainDimension == 'top' ? 'offsetTop' : 'offsetLeft'];
 
     return mainOffset + mainSize / 2 - currentStyle.mainOffset;
   };
@@ -103,7 +106,7 @@ export function usePills(options = {}) {
   const handleNavigation = async (path, element) => {
     selectPill(path);
     if (updateRoute) {
-     await router.push(path);
+      await router.push(path);
     }
     nextTick(() => {
       updatePillIndicator(element);
@@ -143,41 +146,64 @@ export function usePills(options = {}) {
 
     if (currentStyle.crossOffset) {
       style[currentStyle.crossAlign] = `${currentStyle.crossOffset}`;
-      style[currentStyle.mainDimension == "top" ? "left" : "top"] = "auto";
+      style[currentStyle.mainDimension == 'top' ? 'left' : 'top'] = 'auto';
     }
 
     return style;
   });
 
-  const initializePills = async (initialPillId = null, containerRef = null) => {
+  const initializePills = async (initialPillId = null, elementsRef = null) => {
     await nextTick();
     
-    // Use provided pill ID or default to the current pill
-    const pillId = initialPillId || currentPill.value;
-    
-    // Find the element either in the provided container or in the document
+    const pillId = initialPillId || currentPill.value || defaultPill;
     let pillElement = null;
     
-    if (containerRef && containerRef.value) {
-      // If a container ref is provided, search within it
-      pillElement = Array.from(containerRef.value).find(
-        el => el.dataset.path === pillId
-      );
-    } else {
-      // Otherwise search in the document
+    // Use the provided elementsRef or fall back to containerRef from options
+    const targetRef = elementsRef || containerRef;
+    
+    if (targetRef && targetRef.value) {
+      // Handle array of elements (like v-for refs)
+      if (Array.isArray(targetRef.value)) {
+        pillElement = targetRef.value.find(
+          (el) => el && el.dataset && el.dataset.path === pillId
+        );
+      } else if (targetRef.value.querySelector) {
+        // Handle single element with querySelector
+        pillElement = targetRef.value.querySelector(`[data-path="${pillId}"]`);
+      }
+    }
+    
+    // Fallback to document query if not found
+    if (!pillElement) {
       pillElement = document.querySelector(`[data-path="${pillId}"]`);
     }
     
     if (pillElement) {
-      // Initialize the pill and update the indicator
       selectPill(pillId);
       updatePillIndicator(pillElement, true);
       return true;
     } else {
-      console.warn(`Element with data-path="${pillId}" not found`);
+      console.warn(`[usePills] Element with data-path="${pillId}" not found`);
       return false;
     }
   };
+
+  // Improved auto-initialization with retry logic
+  if (autoInit) {
+    onMounted(async () => {
+      // First attempt - immediate
+      let success = await initializePills();
+      
+      // If first attempt fails, try again after a short delay
+      // This helps when components render children asynchronously
+      if (!success) {
+        setTimeout(async () => {
+          await initializePills();
+        }, 50);
+      }
+    });
+  }
+
 
   return {
     currentPill,
@@ -187,6 +213,6 @@ export function usePills(options = {}) {
     selectPill,
     handleNavigation,
     indicatorStyle,
-    initializePills
+    initializePills,
   };
 }

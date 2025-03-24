@@ -1,5 +1,13 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" @update:isOpen="closeMenu" :show-toggle="false" title="Menu" mainClass="dark:bg-gray-900">
+  <BasePanel 
+    :is-open="isOpen" 
+    :is-mobile="isMobile" 
+    @update:isOpen="closeMenu" 
+    :show-toggle="false" 
+    title="Menu" 
+    position="side" 
+    sideWidth="64" 
+    mainClass="dark:bg-gray-900">
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
       <ScrollAreaRoot class="h-full w-full">

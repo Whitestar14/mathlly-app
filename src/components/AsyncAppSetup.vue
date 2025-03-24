@@ -5,7 +5,10 @@
     <sidebar-menu :is-open="isSidebarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeSidebar" />
 
     <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-      :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']">
+      :class="[
+        !deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '',
+        !deviceStore.isMobile && isMenubarOpen ? 'mr-64' : ''
+      ]">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
       <Suspense>
