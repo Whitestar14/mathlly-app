@@ -1,5 +1,5 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" position="side" position-side="left" sideWidth="64"
+  <BasePanel :is-open="isOpen" :is-mobile="isMobile" position="side" position-side="left" width="64"
     :show-toggle="false" :show-header="false" :show-footer="false" @update:isOpen="closeSidebar">
 
     <!-- Custom header -->
@@ -29,8 +29,7 @@
       <div class="flex-1 overflow-y-auto">
         <NavigationMenuRoot>
           <NavigationMenuList class="px-3 py-2 space-y-6">
-            <div v-show="showIndicator"
-              class="absolute will-change-auto z-50 left-3 rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
+            <div class="absolute will-change-auto z-50 left-3 rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
               :style="indicatorStyle" />
             <div v-for="category in categories" :key="category.title" class="space-y-2">
               <h2 class="px-3 text-[11px] font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">

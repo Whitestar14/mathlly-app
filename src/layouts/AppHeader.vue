@@ -28,7 +28,8 @@
             </Button>
 
             <Button v-tippy="{ content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left' }" variant="ghost" size="icon" @click="$emit('toggle-menubar')">
-              <PanelRightIcon class="h-5 w-5 rotate-180" />
+              <PanelRightIcon v-if="!isMobile" class="h-5 w-5 rotate-180" />
+              <MoreVerticalIcon v-else class="h-5 w-5"/>
           </Button>
       </div>
         </div>
@@ -42,7 +43,8 @@
 import { computed, watch, ref } from "vue"
 import {
   Command,
-  PanelRightIcon
+  PanelRightIcon,
+  MoreVerticalIcon
 } from "lucide-vue-next"
 import { useRoute } from "vue-router"
 import { useSettingsStore } from "@/stores/settings"

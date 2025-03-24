@@ -1,10 +1,9 @@
 <template>
-  <!-- TODO: Fix the historyItem contextMenu appearing behind the items -->
   <div class="group relative">
     <ContextMenu :side-offset="5" align="start">
       <template #trigger>
         <div
-          class="history-item-card"
+          class="rounded-lg bg-gray-100 dark:bg-gray-700 p-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
           :class="{ 'animate-highlight': selectedItemId === item.id }"
           @click="$emit('select', item)"
         >
@@ -81,10 +80,6 @@ defineEmits(["select", "delete", "copy", "copy-json"]);
 </script>
 
 <style>
-.history-item-card {
-  @apply rounded-lg bg-gray-100 dark:bg-gray-700 p-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer;
-}
-
 .animate-highlight {
   animation: highlight 0.3s ease-out;
 }
