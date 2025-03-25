@@ -1,12 +1,13 @@
 <template>
-  <div class="flex-grow h-full relative overflow-hidden">
+  <div class="flex-grow h-full relative overflow-hidden !font-mono">
     <div class="absolute w-full h-full">
       <!-- Result container -->
       <div
-        class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
+        ref="resultContainer"
+        class="absolute w-full transform-gpu"
         :class="{
-          'translate-y-0 opacity-100': isAnimating,
-          'translate-y-result opacity-0': !isAnimating,
+          'opacity-100': isAnimating,
+          'opacity-0': !isAnimating,
         }"
       >
         <div class="text-right text-3xl font-bold text-gray-900 dark:text-white mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -16,10 +17,11 @@
 
       <!-- Input container -->
       <div
-        class="absolute w-full transition-all duration-500 ease-custom transform-gpu"
+        ref="inputContainer"
+        class="absolute w-full transform-gpu"
         :class="{
-          'translate-y-input opacity-0': isAnimating,
-          'translate-y-0 opacity-100': !isAnimating,
+          'opacity-0': isAnimating,
+          'opacity-100': !isAnimating,
         }"
       >
         <div
@@ -52,6 +54,7 @@
         </div>
         <div
           v-if="preview && !error"
+          ref="previewContainer"
           class="text-right text-xl text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
           aria-live="polite"
           aria-atomic="true"
@@ -70,13 +73,15 @@
     </div>
   </div>
 </template>
+
   
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { DisplayFormatter } from '@/services/display/DisplayFormatter';
 import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core';
 import { ParenthesesHighlighter } from '@/utils/display/ParenthesesHighlighter';
 import { useParenthesesTracking } from '@/composables/useParenthesesTracking';
+import anime from 'animejs/lib/anime.es.js';
 
 const props = defineProps({
   input: { type: String, default: "" },
@@ -108,23 +113,23 @@ const formattedPreview = computed(() => {
 });
 
 const displayClasses = computed(() => [
-  'main-display text-right font-bold mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide transition-all',
+  'main-display text-right font-bold mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide transition-all font-size-transition',
   getFontSizeClass(props.input),
   props.error ? 'text-red-500 dark:text-red-400' : 'text-gray-700 dark:text-gray-200 transition-colors'
-]);
+])
 
 const getFontSizeClass = (value) => {
-  if (!value) return 'text-3xl';
+  if (!value) return 'text-size-large'; // Replace 'text-3xl'
   
   const length = value.toString().length;
   const mode = props.mode;
 
   if (mode === 'Standard') {
-    if (length > 70) return 'text-xl';
-    if (length > 50) return 'text-2xl';
-    return 'text-3xl';
+    if (length > 70) return 'text-size-small'; // Replace 'text-xl'
+    if (length > 50) return 'text-size-medium'; // Replace 'text-2xl'
+    return 'text-size-large'; // Replace 'text-3xl'
   }
-  return props.activeBase === 'BIN' ? 'text-2xl' : 'text-3xl';
+  return props.activeBase === 'BIN' ? 'text-size-medium' : 'text-size-large';
 };
 
 const formattedParts = computed(() => {
@@ -172,6 +177,88 @@ function scrollToNext() {
   }
 }
 
+const resultContainer = ref(null);
+const inputContainer = ref(null);
+const previewContainer = ref(null);
+
+// Watch for animation state changes
+watch(() => props.isAnimating, (newValue) => {
+  if (newValue) {
+    // Start animation when isAnimating becomes true
+    animateCalculation();
+  } else {
+    // Reset positions when animation ends
+    resetPositions();
+  }
+}, { immediate: true });
+
+function animateCalculation() {
+  if (!resultContainer.value || !inputContainer.value) return;
+  
+  // Hide preview immediately during animation
+  if (previewContainer.value) {
+    anime.set(previewContainer.value, {
+      opacity: 0
+    });
+  }
+  
+  // Reset positions first
+  anime.set(resultContainer.value, {
+    translateY: '100%'
+  });
+  
+  anime.set(inputContainer.value, {
+    translateY: '0'
+  });
+  
+  // Create animation timeline
+  const timeline = anime.timeline({
+    easing: 'cubicBezier(0.25, 0.1, 0.25, 1)',
+    duration: 450
+  });
+  
+  // Animate input sliding up and out
+  timeline.add({
+    targets: inputContainer.value,
+    translateY: '-100%',
+    opacity: [1, 0],
+    easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
+  });
+  
+  // Animate result sliding up and in
+  timeline.add({
+    targets: resultContainer.value,
+    translateY: '0',
+    opacity: [0, 1],
+    easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
+  }, '-=350'); // Start slightly before the first animation ends
+}
+
+function resetPositions() {
+  if (!resultContainer.value || !inputContainer.value) return;
+  
+  anime.set(resultContainer.value, {
+    translateY: '100%',
+    opacity: 0
+  });
+  
+  anime.set(inputContainer.value, {
+    translateY: '0',
+    opacity: 1
+  });
+  
+  // Fade in the preview with a smooth animation
+  if (previewContainer.value && props.preview && !props.error) {
+    anime({
+      targets: previewContainer.value,
+      opacity: [0, 1],
+      duration: 300,
+      easing: 'cubicBezier(0.4, 0.0, 0.2, 1)',
+      delay: 100 // Small delay to let the input container settle first
+    });
+  }
+}
+
 onMounted(() => {
   updateScrollState();
 });
@@ -215,8 +302,20 @@ defineExpose({
   transform: translate3d(0, 100%, 0);
 }
 
-.ease-custom {
-  transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+.font-size-transition {
+  transition: font-size 0.3s ease;
+}
+
+.text-size-small {
+  font-size: 1.25rem; /* Equivalent to text-xl */
+}
+
+.text-size-medium {
+  font-size: 1.5rem; /* Equivalent to text-2xl */
+}
+
+.text-size-large {
+  font-size: 1.875rem; /* Equivalent to text-3xl */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
