@@ -1,13 +1,13 @@
 <template>
     <div class="flex flex-col h-full">
       <!-- Header -->
-      <div v-if="showHeader" class="flex-shrink-0 h-14 px-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div v-show="showHeader" class="flex-shrink-0 h-14 px-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <h2 class="text-base font-medium text-gray-800 dark:text-gray-200">
           {{ title }}
         </h2>
         <div class="flex items-center gap-2">
           <slot name="header-actions"></slot>
-          <Button v-if="showCloseButton" variant="ghost" size="icon" @click="$emit('close')">
+          <Button v-show="showCloseButton && isMobile" variant="ghost" size="icon" @click="$emit('close')">
             <XIcon class="h-4 w-4" />
           </Button>
         </div>
@@ -19,7 +19,7 @@
       </div>
       
       <!-- Footer -->
-      <div v-if="showFooter && $slots.footer" class="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-3 min-h-14">
+      <div v-show="showFooter && $slots.footer" class="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-3 min-h-14">
         <slot name="footer"></slot>
       </div>
     </div>
@@ -31,10 +31,11 @@
   
   defineProps({
     title: { type: String, default: "" },
+    contentClass: { type: String, default: "" },
     showHeader: { type: Boolean, default: true },
     showFooter: { type: Boolean, default: true },
     showCloseButton: { type: Boolean, default: true },
-    contentClass: { type: String, default: "" }
+    isMobile: { type: Boolean, default: false },
   })
   
   defineEmits(['close'])

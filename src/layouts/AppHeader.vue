@@ -28,7 +28,7 @@
             </Button>
 
             <Button v-tippy="{ content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left' }" variant="ghost" size="icon" @click="$emit('toggle-menubar')">
-              <PanelRightIcon v-if="!isMobile" class="h-5 w-5 rotate-180" />
+              <PanelRightIcon v-if="!isMobile" class="h-5 w-5" :class="[isMenubarOpen ? 'rotate-0' : 'rotate-180']" />
               <MoreVerticalIcon v-else class="h-5 w-5"/>
           </Button>
       </div>

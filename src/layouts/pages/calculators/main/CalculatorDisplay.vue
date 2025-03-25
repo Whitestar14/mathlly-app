@@ -20,7 +20,6 @@
       <BaseDisplay v-show="mode === 'Programmer'" :display-values="displayValues" :active-base="activeBase"
       @base-change="$emit('base-change', $event)" />
     </div>
-    <Toast />
   </div>
 </template>
 
@@ -28,7 +27,6 @@
 import ChevronScroll from "@/components/ui/ChevronScroll.vue"
 import ControlButtons from "@/components/ui/ControlButtons.vue"
 import MainDisplay from "@/components/ui/MainDisplay.vue"
-import Toast from "@/components/base/BaseToast.vue"
 import BaseDisplay from "@/components/ui/BaseDisplay.vue"
 import { computed, nextTick, ref, watch } from "vue"
 import { useToast } from "@/composables/useToast"

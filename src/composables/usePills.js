@@ -120,17 +120,21 @@ export function usePills(options = {}) {
   watch(
     () => route.path,
     (newPath) => {
-      selectPill(newPath);
-      nextTick(() => {
-        const activeElement = document.querySelector(
-          `[data-path="${newPath}"]`
-        );
-        if (activeElement) {
-          updatePillIndicator(activeElement, true);
-        }
-      });
+      // Only update currentPill if updateRoute is true
+      // This prevents route changes from affecting local pills
+      if (updateRoute) {
+        selectPill(newPath);
+        nextTick(() => {
+          const activeElement = document.querySelector(
+            `[data-path="${newPath}"]`
+          );
+          if (activeElement) {
+            updatePillIndicator(activeElement, true);
+          }
+        });
+      }
     },
-    { immediate: true }
+    { immediate: updateRoute }
   );
 
   const indicatorStyle = computed(() => {
@@ -142,6 +146,7 @@ export function usePills(options = {}) {
       [currentStyle.mainDimension]: `${indicatorPosition.value}${currentStyle.mainUnit}`,
       [currentStyle.mainSize]: `${indicatorHeight}${currentStyle.crossUnit}`,
       [currentStyle.crossSize]: `${currentStyle.crossValue}`,
+      'display': showIndicator.value ? '' : 'none'
     };
 
     if (currentStyle.crossOffset) {
@@ -155,7 +160,8 @@ export function usePills(options = {}) {
   const initializePills = async (initialPillId = null, elementsRef = null) => {
     await nextTick();
     
-    const pillId = initialPillId || currentPill.value || defaultPill;
+    // Important change: prioritize initialPillId, then defaultPill, then currentPill
+    const pillId = initialPillId || defaultPill || currentPill.value;
     let pillElement = null;
     
     // Use the provided elementsRef or fall back to containerRef from options
@@ -188,14 +194,13 @@ export function usePills(options = {}) {
     }
   };
 
-  // Improved auto-initialization with retry logic
   if (autoInit) {
     onMounted(async () => {
       // First attempt - immediate
+      await nextTick();
       let success = await initializePills();
       
-      // If first attempt fails, try again after a short delay
-      // This helps when components render children asynchronously
+      // If first attempt fails, try again after a delay
       if (!success) {
         setTimeout(async () => {
           await initializePills();
