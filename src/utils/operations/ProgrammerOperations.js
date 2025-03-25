@@ -49,41 +49,44 @@ export class ProgrammerOperations {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input.trim();
-
+  
       // Handle empty or error states
-      if (currentInput === "" || currentInput === "Error") {
+      if (!currentInput || currentInput === "Error") {
         return { input: state.input, error: "Invalid operation" };
       }
-
+  
       // Don't add operator after opening parenthesis
       if (currentInput.endsWith("(")) {
         return { input: state.input, error: null };
       }
-
+  
       // Don't add shift operator if last part is incomplete
       const parts = currentInput.split(/\s+/);
       const lastPart = parts[parts.length - 1];
       if (!lastPart || /[+\-×÷]$/.test(lastPart)) {
         return { input: state.input, error: null };
       }
-
+  
+      // Ensure proper spacing for all cases
       let newInput;
-      if (this.isLastCharClosingParenthesis()) {
-        newInput = `${currentInput} ${op} `;
-      } else if (this.isLastCharOperator()) {
-        // Only replace if it's another shift operator
-        if (/>>\s*$|<<\s*$/.test(currentInput)) {
-          newInput = currentInput.replace(/\s*(?:<<|>>)\s*$/, ` ${op} `);
-        } else {
-          return { input: state.input, error: null };
-        }
-      } else if (this.isLastCharNumber()) {
-        newInput = `${currentInput} ${op} `;
-      } else {
+      
+      // Explicitly check for closing parenthesis
+      if (currentInput.trim().endsWith(")")) {
+        newInput = `${currentInput.trim()} ${op} `;
+      } 
+      // Replace existing shift operator
+      else if (/>>\s*$|<<\s*$/.test(currentInput)) {
+        newInput = currentInput.replace(/\s*(?:<<|>>)\s*$/, ` ${op} `);
+      } 
+      // Add after number
+      else if (this.isLastCharNumber()) {
+        newInput = `${currentInput.trim()} ${op} `;
+      } 
+      else {
         return { input: state.input, error: "Invalid operation" };
       }
-
-      state.input = newInput.trim() + " ";
+  
+      state.input = newInput;
       return { input: state.input, error: null };
     } catch (err) {
       console.error('Error in handleShiftOperator:', err);
@@ -93,6 +96,7 @@ export class ProgrammerOperations {
       };
     }
   }
+  
 
   handleBasicOperator(op) {
     const state = this.calculator.states[this.calculator.activeBase];
