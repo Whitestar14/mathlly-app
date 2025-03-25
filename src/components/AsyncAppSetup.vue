@@ -28,6 +28,7 @@
     <!-- Main Menu Panel -->
     <MainMenu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
   </div>
+  <Toast />
 </template>
 
 <script setup>
@@ -43,6 +44,7 @@ import SidebarMenu from "@/layouts/SidebarMenu.vue"
 import MainMenu from "@/components/ui/MainMenu.vue"
 import BaseLoader from "@/components/base/BaseLoader.vue"
 import RouterViewTransition from "@/components/RouterViewTransition.vue"
+import Toast from "@/components/base/BaseToast.vue"
 
 const router = useRouter()
 const deviceStore = useDeviceStore()

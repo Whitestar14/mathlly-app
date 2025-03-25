@@ -7,12 +7,20 @@
       </h2>
       <div class="grid gap-6">
         <UpdateCard
-          v-for="update in updates"
+          v-for="update in visibleUpdates"
           :key="update.version"
           :version="update.version"
           :date="update.date"
           :features="update.features"
         />
+      </div>
+      
+      <div v-if="hasMoreUpdates" class="flex justify-center mt-8">
+        <Button
+        variant="primary" 
+          @click="showMoreUpdates">
+          See More
+        </Button>
       </div>
     </section>
 
@@ -37,9 +45,23 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
 import { ClockIcon } from 'lucide-vue-next';
 import { updates, upcomingFeatures } from '@/data/changelog';
 import UpdateCard from '@/components/cards/UpdateCard.vue';
 import BasePage from '@/components/base/BasePage.vue';
-</script>
+import Button from '@/components/base/BaseButton.vue';
 
+const UPDATES_PER_PAGE = 10;
+const visibleCount = ref(UPDATES_PER_PAGE);
+const visibleUpdates = computed(() => {
+  return updates.slice(0, visibleCount.value);
+});
+const hasMoreUpdates = computed(() => {
+  return visibleCount.value < updates.length;
+});
+
+function showMoreUpdates() {
+  visibleCount.value += UPDATES_PER_PAGE;
+}
+</script>
