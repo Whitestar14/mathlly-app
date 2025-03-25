@@ -6,7 +6,7 @@
     <!-- Backdrop (mobile only) -->
     <Transition name="fade">
       <div
-        v-if="(isMobile || (position === 'side' && isMobile)) && isOpen"
+        v-if="isMobile && isOpen && position !== 'side'"
         class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
         aria-hidden="true"
         @click="onClose"

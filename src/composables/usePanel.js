@@ -50,6 +50,14 @@ export function usePanel(storageKey, isMobile, defaultDesktopState = true) {
     updatePreferences()
   })
 
+  watch(
+    () => isMobile,
+    (newIsMobile) => {
+      handleResize(newIsMobile);
+    },
+    { immediate: true }
+  );
+
   return {
     isOpen,
     toggle,
