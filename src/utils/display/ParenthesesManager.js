@@ -9,7 +9,12 @@ export class ParenthesesManager {
     let currentIndex = 0;
     let nestLevel = 0;
     
-    const isOperator = (char) => /[+\-×÷%]/.test(char);
+    // Updated to include shift operators
+    const isOperator = (char, nextChar) => {
+      if (/[+\-×÷%]/.test(char)) return true;
+      if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) return true;
+      return false;
+    };
     
     for (let i = 0; i < expr.length; i++) {
       if (expr[i] === '(') {
@@ -33,13 +38,20 @@ export class ParenthesesManager {
         // Add closing parenthesis
         parts.push({ type: 'close', content: ')', level: --nestLevel });
         currentIndex = i + 1;
-      } else if (isOperator(expr[i])) {
+      } else if (isOperator(expr[i], expr[i+1])) {
         // Handle operators with proper spacing
         if (i > currentIndex) {
           const beforeOp = expr.slice(currentIndex, i).trim();
           if (beforeOp) parts.push({ type: 'text', content: beforeOp });
         }
-        parts.push({ type: 'text', content: ` ${expr[i]} ` });
+        
+        // Special handling for shift operators
+        if ((expr[i] === '<' && expr[i+1] === '<') || (expr[i] === '>' && expr[i+1] === '>')) {
+          parts.push({ type: 'text', content: ` ${expr.slice(i, i+2)} ` });
+          i++; // Skip the next character since we've already processed it
+        } else {
+          parts.push({ type: 'text', content: ` ${expr[i]} ` });
+        }
         currentIndex = i + 1;
       }
     }
@@ -58,7 +70,6 @@ export class ParenthesesManager {
     return this.cleanupParts(parts);
   }
   
-
   cleanupParts(parts) {
     // Clean up double spaces and ensure proper spacing
     return parts.reduce((acc, part, index) => {
@@ -74,8 +85,10 @@ export class ParenthesesManager {
         return acc;
       }
       
-      // Handle spacing around operators
-      if (part.type === 'text' && /^[+\-×÷%]/.test(part.content.trim())) {
+      // Handle spacing around operators, including shift operators
+      if (part.type === 'text' && 
+          (/^[+\-×÷%]/.test(part.content.trim()) || 
+           /^<<|^>>/.test(part.content.trim()))) {
         const lastPart = acc[acc.length - 1];
         if (lastPart?.type === 'text') {
           lastPart.content = lastPart.content.trimEnd();
