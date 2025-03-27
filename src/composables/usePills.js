@@ -1,4 +1,4 @@
-import { ref, watch, nextTick, computed, onMounted } from 'vue';
+import { ref, watch, nextTick, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   useElementVisibility,
@@ -18,9 +18,7 @@ export function usePills(options = {}) {
     indicatorWidth = 2,
     updateRoute = true,
     hideIndicatorPaths = [],
-    autoInit = false,
     containerRef = null,
-    watchVisibility = false,
   } = options;
 
   const currentPill = ref(defaultPill);
@@ -165,16 +163,14 @@ export function usePills(options = {}) {
   );
 
   // Watch for visibility changes
-  if (watchVisibility) {
-    watch(isElementVisible, async (newIsVisible) => {
-      if (newIsVisible) {
-        await nextTick();
-        await initializePills();
-      } else {
-        showIndicator.value = false;
-      }
-    });
-  }
+  watch(isElementVisible, async (newIsVisible) => {
+    if (newIsVisible) {
+      await nextTick();
+      await initializePills();
+    } else {
+      showIndicator.value = false;
+    }
+  });
 
   const indicatorStyle = computed(() => {
     const currentStyle = styleMap[position];
@@ -262,22 +258,6 @@ export function usePills(options = {}) {
     subtree: true,
     attributeFilter: ['class', 'style', 'hidden'],
   });
-
-  // Auto-initialization
-  if (autoInit) {
-    onMounted(async () => {
-      // First attempt - immediate
-      await nextTick();
-      let success = await initializePills();
-
-      if (!success) {
-        setTimeout(async () => {
-          let retrySuccess = await initializePills();
-          if (!retrySuccess) console.warn('[usePills] Auto-init failed.');
-        }, 50);
-      }
-    });
-  }
 
   return {
     currentPill,

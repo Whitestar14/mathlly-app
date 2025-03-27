@@ -9,7 +9,7 @@
         <div 
           v-for="(toast, index) in toasts" 
           :key="toast.id" 
-          class="toast absolute bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 w-full transform-gpu"
+          class="origin-bottom-right duration-300 absolute bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 w-full transform-gpu"
           :style="{
             zIndex: toasts.length - index, // Newer toasts have higher z-index
             bottom: isMobile ? `${index * 4}px` : `${index * 8}px`,
@@ -25,7 +25,7 @@
                 {{ toast.description }}
               </p>
             </div>
-            <div class="absolute top-2 right-2">
+            <div class="absolute top-2 right-2 hidden md:block">
               <Button 
                 size="sm" 
                 variant="secondary" 
@@ -44,12 +44,14 @@
 <script setup>
 import { XIcon } from 'lucide-vue-next'
 import { useToast } from '@/composables/useToast'
-import { useDeviceStore } from '@/stores/device'
 import Button from "@/components/base/BaseButton.vue"
 
-const deviceStore = useDeviceStore();
-
-const isMobile = deviceStore.isMobile;
+defineProps({
+  isMobile: {
+    type: Boolean,
+    required: true
+  }
+})
 const { toasts, removeToast } = useToast()
 </script>
 
@@ -73,13 +75,6 @@ const { toasts, removeToast } = useToast()
 }
 
 .toast-transition-leave-to {
-  transform: translateX(30px);
-  opacity: 0;
-}
-
-/* Card stack effect - simplified for mobile */
-.toast {
-  transition: all 0.3s ease;
-  transform-origin: bottom right;
+@apply translate-y-[30px] md:translate-x-[30px] md:translate-y-0 opacity-0;
 }
 </style>

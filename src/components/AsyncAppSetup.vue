@@ -28,7 +28,7 @@
     <!-- Main Menu Panel -->
     <MainMenu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
   </div>
-  <Toast />
+  <Toast :is-mobile="deviceStore.isMobile"/>
 </template>
 
 <script setup>

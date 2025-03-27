@@ -4,7 +4,7 @@
     <div class="container mx-auto flex justify-between items-center gap-2">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">
-        <Button v-tippy="{ content: 'Open Sidebar', placement: 'right' }" :class="{ 'hidden': isSidebarOpen }" variant="ghost"
+        <Button v-tippy="{ content: 'Open Sidebar', placement: 'right' }" :class="{ 'opacity-0': isSidebarOpen }" variant="ghost"
           size="icon" @click="$emit('toggle-sidebar')">
           <PanelRightIcon class="h-5 w-5" />
         </Button>
@@ -22,7 +22,7 @@
 
           <div class="flex items-center justify-between gap-2">
             <!-- Keyboard Shortcuts -->
-            <Button v-show="!isMobile" v-tippy="{content: 'Keyboard Shortcuts'}" variant="ghost" size="icon" @click="openShortcutModal">
+            <Button v-if="!isMobile" v-tippy="{content: 'Keyboard Shortcuts'}" variant="ghost" size="icon" @click="openShortcutModal">
                 <Command class="h-5 w-5" />
                 <span class="sr-only">Keyboard Shortcuts</span>
             </Button>

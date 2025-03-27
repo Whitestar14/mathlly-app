@@ -142,7 +142,6 @@ const {
   position: "bottom", 
   updateRoute: false, 
   defaultPill: "encode",
-  autoInit: true,
   containerRef: tabElements
 });
 

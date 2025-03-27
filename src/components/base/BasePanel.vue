@@ -159,8 +159,8 @@ const props = defineProps({
   width: { type: String, default: '64' },
   mainClass: { type: String, default: '' },
   contentClass: { type: String, default: '' },
-  position: { type: String, default: 'right' }, // 'right', 'left', or 'side'
-  positionSide: { type: String, default: 'right' }, // 'right' or 'left' for side panel
+  position: { type: String, default: 'right' },
+  positionSide: { type: String, default: 'right' },
 });
 
 const emit = defineEmits(['update:isOpen']);

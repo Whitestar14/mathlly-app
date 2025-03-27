@@ -40,8 +40,8 @@
                         : 'text-gray-500/80 dark:text-gray-500/80'
                         " />
                       <span>{{ item.name }}</span>
-                      <Badge v-show="item.comingSoon" type="soon" class="opacity-75" />
-                      <Badge v-show="item.isNew" type="new" class="opacity-75" />
+                      <Badge v-if="item.comingSoon" type="soon" class="opacity-75" />
+                      <Badge v-if="item.isNew" type="new" class="opacity-75" />
                     </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
@@ -194,7 +194,6 @@ const {
 } = usePills({
   position: "left",
   updateRoute: true,
-  watchVisibility: true,
   containerRef: sidebarElements,
   hideIndicatorPaths: ["/settings", "/feedback", "/:pathMatch(.*)*"],
   onNavigate: () => {
