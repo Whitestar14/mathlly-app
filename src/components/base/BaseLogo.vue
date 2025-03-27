@@ -2,14 +2,14 @@
   <div :class="containerClasses">
     <!-- Inline SVG when svgContent is provided -->
     <div 
-      v-if="svgContent" 
+      v-if="type === 'svg' && svgPath" 
       class="inline-block"
       v-html="svgContent"
     ></div>
     
     <!-- Image/SVG from src when provided -->
     <img 
-      v-else-if="src" 
+      v-if="type === 'img' && src" 
       :src="src" 
       :alt="alt" 
       :class="imageClasses"
@@ -17,7 +17,7 @@
     
     <!-- Default text-based logo -->
     <kbd
-      v-else
+      v-show="type === 'text'"
       :class="[
         'font-medium monospace pointer-events-none',
         'bg-gray-100 dark:bg-gray-800',
@@ -38,6 +38,11 @@
 import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
+  type: {
+    type: String,
+    default: "text",
+    validator: (value) => ["text", "img", "svg"].includes(value),
+  },
   size: {
     type: String,
     default: "md",

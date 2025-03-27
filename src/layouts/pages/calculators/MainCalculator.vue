@@ -1,7 +1,7 @@
 <template>
   <main class="flex-grow flex">
     <div class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300">
-      <div class="flex flex-col h-full p-4 gap-2 mx-auto">
+      <div class="grid grid-cols-1 h-full p-4 gap-2 mx-auto" :class="mode === 'Programmer' ? 'grid-rows-[1fr_1.5fr]': 'grid-rows-[1fr_3fr]'">
         <calculator-display :input="input" :preview="preview" :error="error" :is-animating="isAnimating"
           :animated-result="animatedResult" :active-base="activeBase" :mode="mode" :display-values="displayValues"
           @open-history="toggleHistory" @base-change="handleBaseChange" />
@@ -87,7 +87,7 @@ const preview = computed(() => {
 const currentInput = ref("0")
 const showWelcomeModal = ref(localStorage.getItem("mathlly-welcome-shown") !== "true")
 const { addToHistory } = useHistory()
-const { isOpen: isHistoryOpen, toggle: toggleHistory, handleResize } = usePanel('history-panel', props.isMobile)
+const { isOpen: isHistoryOpen, close:closeHistory, toggle: toggleHistory, handleResize } = usePanel('history-panel', props.isMobile)
 
 watch(
   () => props.isMobile,
@@ -270,6 +270,8 @@ const selectHistoryItem = ({ expression }) => {
   calculator.value.input = expression
   calculator.value.currentExpression = ""
   currentInput.value = expression
+
+  closeHistory();
 }
 
 const closeWelcomeModal = () => {
