@@ -15,6 +15,7 @@
           <div
             v-for="tab in tabs"
             :key="tab.value"
+            :data-path="tab.value"
             ref="tabElements"
             class="px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer"
             :class="[
@@ -22,13 +23,11 @@
                 ? 'text-indigo-600 dark:text-indigo-400'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
             ]"
-            :data-path="tab.value"
             @click="handleTabChange(tab.value, $event.target)"
           >
             {{ tab.label }}
           </div>
           <div
-            v-show="showIndicator || currentPill.value"
             class="absolute will-change-transform rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
             :style="indicatorStyle"
           />
@@ -114,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import { ArrowDownUp, Copy, ClipboardPaste } from "lucide-vue-next";
 import { useToast } from "@/composables/useToast";
 import { useClipboard } from "@vueuse/core";
@@ -135,15 +134,16 @@ const inputArea = ref(null);
 const { copy } = useClipboard();
 const { toast } = useToast();
 
-
 const {
   currentPill,
-  showIndicator,
-  initializePills,
   indicatorStyle,
-  handleNavigation,
-} = usePills({ position: "bottom", updateRoute: false });
-
+  handleNavigation
+} = usePills({ 
+  position: "bottom", 
+  updateRoute: false, 
+  defaultPill: "encode",
+  containerRef: tabElements
+});
 
 const currentTab = computed({
   get: () => {
@@ -210,9 +210,5 @@ useKeyboard("tools", {
   swap: handleSwap,
   paste: pasteFromClipboard,
   copy: handleCopy,
-});
-
-onMounted(async () => {
-  await initializePills("encode", tabElements);
 });
 </script>

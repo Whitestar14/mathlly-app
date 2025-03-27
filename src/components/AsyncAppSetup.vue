@@ -5,7 +5,10 @@
     <sidebar-menu :is-open="isSidebarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeSidebar" />
 
     <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
-      :class="[!deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '']">
+      :class="[
+        !deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '',
+        !deviceStore.isMobile && isMenubarOpen ? 'mr-64' : ''
+      ]">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
       <Suspense>
@@ -25,6 +28,7 @@
     <!-- Main Menu Panel -->
     <MainMenu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
   </div>
+  <Toast :is-mobile="deviceStore.isMobile"/>
 </template>
 
 <script setup>
@@ -40,12 +44,13 @@ import SidebarMenu from "@/layouts/SidebarMenu.vue"
 import MainMenu from "@/components/ui/MainMenu.vue"
 import BaseLoader from "@/components/base/BaseLoader.vue"
 import RouterViewTransition from "@/components/RouterViewTransition.vue"
+import Toast from "@/components/base/BaseToast.vue"
 
 const router = useRouter()
 const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
 
-// Ensure minimum loading time of 1.2 seconds
+// Ensure minimum loading time of 2 seconds
 const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000))
 
 await Promise.all([
@@ -117,15 +122,3 @@ onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 300ms ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

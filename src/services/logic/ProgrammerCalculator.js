@@ -1,4 +1,4 @@
-import { EngineCalculator } from "@/utils/misc/EngineCalculator";
+import { EngineCalculator } from "@/utils/misc/CalculatorCore";
 import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
 import { ProgrammerCalculations } from "@/utils/calculations/ProgrammerCalculations";
 import {

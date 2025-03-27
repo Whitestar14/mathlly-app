@@ -19,7 +19,6 @@
     <div class="mt-4">
       <div class="flex border-b border-gray-200 dark:border-gray-700 relative">
         <div
-          v-show="showIndicator || currentPill"
           class="absolute will-change-transform bottom-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 transition-all duration-200"
           :style="indicatorStyle"
         />
@@ -97,11 +96,11 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { usePills } from "@/composables/usePills";
 
-const props = defineProps({
+defineProps({
   open: Boolean,
 });
 
@@ -135,25 +134,20 @@ const shortcutGroups = {
     "ctrl+s": { description: "Swap Input/Output" },
   },
 };
-const { currentPill, showIndicator, indicatorStyle, initializePills, handleNavigation } =
-  usePills({
-    position: "bottom",
-    updateRoute: false,
-  });
+const { 
+  currentPill, 
+  indicatorStyle, 
+  handleNavigation 
+} = usePills({
+  position: "bottom",
+  updateRoute: false,
+  defaultPill: "Global",
+  containerRef: tabElements
+});
 
 const handleTabChange = (category, tabElement) => {
   handleNavigation(category, tabElement); 
 };
-
-watch(
-  () => props.open,
-  async (newIsOpen) => {
-    if (newIsOpen) {
-      await initializePills("Global", tabElements);
-    }
-  },
-  { immediate: false } 
-);
 </script>
 
 <style scoped>

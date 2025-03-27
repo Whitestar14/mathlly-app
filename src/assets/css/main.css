@@ -51,17 +51,6 @@
 @import url(./buttons.css);
 
 @layer base {
-  :root {
-    --border-input: theme("colors.gray.200");
-    --ring: theme("colors.indigo.500");
-    --ring-offset: theme("colors.white");
-  }
-  .dark {
-    --border-input: theme("colors.gray.700");
-    --ring: theme("colors.indigo.400");
-    --ring-offset: theme("colors.gray.900");
-  }
-
   /* Global definitions */
   @font-face {
     font-family: "Geist Mono";
@@ -147,29 +136,31 @@
     @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
   }
 
-}
-
   /* VueTippy custom tooltip styles */
   .tippy-box[data-theme~="custom"] {
     @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-700 text-gray-300 p-1 rounded-lg;
+  
+    &[data-placement^="top"] > .tippy-arrow::before {
+      @apply border-t-gray-800 dark:border-t-gray-100;
+    }
+  
+    &[data-placement^="bottom"] > .tippy-arrow::before {
+      @apply border-b-gray-800 dark:border-b-gray-100;
+    }
+  
+    &[data-placement^="left"] > .tippy-arrow::before {
+      @apply border-l-gray-800 dark:border-l-gray-100;
+    }
+  
+    &[data-placement^="right"] > .tippy-arrow::before {
+      @apply border-r-gray-800 dark:border-r-gray-100;
+    }
   }
-
-  .tippy-box[data-theme~="custom"][data-placement^='top'] > .tippy-arrow::before {
-     @apply border-t-gray-800 dark:border-t-gray-100;
-  }
-  .tippy-box[data-theme~="custom"][data-placement^='bottom'] > .tippy-arrow::before {
-     @apply border-b-gray-800 dark:border-b-gray-100;
-  }
-  .tippy-box[data-theme~="custom"][data-placement^='left'] > .tippy-arrow::before {
-     @apply border-l-gray-800 dark:border-l-gray-100;
-  }
-  .tippy-box[data-theme~="custom"][data-placement^='right'] > .tippy-arrow::before {
-     @apply border-r-gray-800 dark:border-r-gray-100;
-  }
+}
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium duration-200 transition-colors focus-visible:outline-none 
+    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors focus-visible:outline-none 
     focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
   }
 
@@ -198,7 +189,7 @@
   }
 
   .btn-default-size {
-    @apply h-9 py-1 px-4 rounded-md;
+    @apply h-9 py-1 px-3 rounded-md;
   }
 
   .btn-sm {
@@ -212,23 +203,22 @@
   .btn-icon {
     @apply size-8 rounded-md;
   }
-}
 
-@layer utilities {
-  .bg-muted {
-    @apply bg-gray-300 dark:bg-gray-500 opacity-30;
+  /* Keeping Necessary Loader Animations */
+  .loader-macro, .loader-micro, .loader-mini {
+    @apply flex justify-center items-center 
   }
-
-  .bg-accent {
-    @apply bg-indigo-500 dark:bg-indigo-600;
+  
+  .loader-macro {
+    @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
   }
-
-  .bg-muted-30 {
-    @apply bg-muted opacity-30;
+  
+  .loader-mini {
+    @apply min-w-10 min-h-10;
   }
-
-  .ring-offset-background {
-    --tw-ring-offset-color: theme("colors.background.DEFAULT");
+  
+  .loader-micro {
+    @apply min-w-6 min-h-6;
   }
 }
 

@@ -19,7 +19,7 @@
         <div 
           v-for="n in 24" 
           :key="n" 
-          class="min-h-[3rem] max-h-[4.5rem] bg-gray-200 dark:bg-gray-700 rounded-lg"
+          class="calc-btn-grid bg-gray-200 dark:bg-gray-700 rounded-lg"
         />
       </div>
     </template>
