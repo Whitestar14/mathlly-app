@@ -1,5 +1,5 @@
 <template>
-  <BasePage :showHeader="false" :showFooter="true" title="Home" mainClass="w-full mx-auto text-sm">
+  <BasePage :showHeader="false" :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
     <!-- Hero Section with Gradient Background -->
     <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50/50 to-white dark:from-gray-900 dark:to-gray-800/80">
       <!-- Grid Pattern Background -->
@@ -42,14 +42,14 @@
               class="flex justify-center md:justify-start flex-wrap gap-4 mt-8">
               <RouterLink to="/calculator">
                 <Button variant="primary" size="lg" class="w-full sm:w-auto">
-                  <CalculatorIcon class="h-4 w-4 mr-2" />
+                  <CalculatorIcon class="h-4 w-4" />
                   Get Started
                 </Button>
               </RouterLink>
               <a href="https://github.com/Whitestar14/mathlly-app" target="_blank">
                 <Button variant="outline" size="lg" class="w-full sm:w-auto">
-                  <GithubIcon class="h-4 w-4 mr-2" />
-                  View on GitHub
+                  <GithubIcon class="h-4 w-4" />
+                  View GitHub
                 </Button>
               </a>
             </div>
@@ -60,9 +60,8 @@
             :initial="{ opacity: 0, scale: 0.9 }"
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
-            <Logo size="lg" class="relative transform scale-125 transition-all duration-500 hover:scale-150">
-              <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 rounded-full blur-xl"></div>
-            </Logo>
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 md:aspect-square top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 width-full rounded-full blur-xl"></div>
+            <Logo type="svg" :svgPath="isDark ? '/img/mathlly-dark.svg' : '/img/mathlly-light.svg'" size="lg" class="relative transform scale-[2] hover:scale-[2.5] md:scale-[3] md:hover:scale-[3.5] transition-all duration-500" />
           </div>
         </div>
       </div>
@@ -220,20 +219,6 @@
       :enter="{ opacity: 1, y: 0 }"
       class="relative overflow-hidden rounded-lg shadow-lg"
     >
-      <!-- Background with grid pattern -->
-      <div class="absolute inset-0 pattern-grid opacity-10 dark:opacity-20"></div>
-      
-      <!-- Gradient overlay - adjusted for better dark mode appearance -->
-      <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-800 dark:to-blue-900"></div>
-      
-      <!-- Decorative elements with dark mode adjustments -->
-      <div class="absolute top-0 right-0 w-64 h-64 -mt-12 -mr-12 opacity-20 dark:opacity-10">
-        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-300 blur-3xl"></div>
-      </div>
-      <div class="absolute bottom-0 left-0 w-48 h-48 -mb-8 -ml-8 opacity-20 dark:opacity-10">
-        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-300 blur-3xl"></div>
-      </div>
-      
       <!-- Content -->
       <div class="relative z-10 p-8 md:p-12 text-center">
         <!-- Logo accent -->
@@ -242,7 +227,7 @@
         </div>
         
         <!-- Title with monospace accent - improved for dark mode -->
-        <h2 class="text-2xl md:text-3xl font-medium mb-4 text-white">
+        <h2 class="text-2xl md:text-3xl font-mono font-medium mb-4 text-white">
           Ready to experience <kbd class="font-mono inline-block bg-white/10 dark:bg-white/30 px-2 py-1 rounded text-white dark:text-white border border-white/20">
             {math<span class="text-indigo-200 dark:text-indigo-300 font-black inline-block mx-0.5">//</span>y}
           </kbd>?
@@ -269,7 +254,7 @@
             <Button 
               variant="outline" 
               size="lg" 
-              class="border-white/30 dark:border-white/40 text-white hover:text-white hover:bg-white/10 dark:hover:bg-white/15 w-full sm:w-auto"
+              class="border-white/30 dark:border-white/40 !text-white hover:bg-white/10 dark:hover:bg-white/15 w-full sm:w-auto"
             >
               <GithubIcon class="h-4 w-4" />
               Star on GitHub
@@ -281,6 +266,20 @@
         <div class="mt-8 flex justify-center">
           <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
         </div>
+      </div>
+
+      <!-- Gradient overlay - adjusted for better dark mode appearance -->
+      <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-800 dark:to-blue-900"></div>
+
+      <!-- Background with grid pattern -->
+      <div class="absolute inset-0 pattern-grid opacity-10 dark:opacity-50"></div>
+      
+      <!-- Decorative elements with dark mode adjustments -->
+      <div class="absolute top-0 right-0 w-64 h-64 -mt-12 -mr-12 opacity-20 dark:opacity-10">
+        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
+      </div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 -mb-8 -ml-8 opacity-20 dark:opacity-10">
+        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
       </div>
     </div>
   </div>
@@ -312,6 +311,9 @@ import Logo from '@/components/base/BaseLogo.vue';
 import Button from '@/components/base/BaseButton.vue';
 import Badge from '@/components/base/BaseBadge.vue';
 import { RouterLink } from 'vue-router';
+import { useTheme } from '@/composables/useTheme'
+
+const { isDark } = useTheme();
 
 // Simple CountUp component
 const CountUp = defineComponent({
