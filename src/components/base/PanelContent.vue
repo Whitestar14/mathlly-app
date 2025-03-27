@@ -5,7 +5,7 @@
         <h2 class="text-base font-medium text-gray-800 dark:text-gray-200">
           {{ title }}
         </h2>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 w-full">
           <slot name="header-actions"></slot>
           <Button v-show="showCloseButton && isMobile" variant="ghost" size="icon" @click="$emit('close')">
             <XIcon class="h-4 w-4" />

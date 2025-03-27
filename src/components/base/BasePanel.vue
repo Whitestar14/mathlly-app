@@ -6,8 +6,8 @@
     <!-- Backdrop (mobile only) -->
     <Transition name="fade">
       <div
-        v-if="isMobile && isOpen && position !== 'side'"
-        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+        v-show="isMobile && isOpen && position !== 'side'"
+        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20"
         aria-hidden="true"
         @click="onClose"
       />
@@ -16,8 +16,7 @@
     <!-- Side Panel -->
     <Transition :name="positionSide === 'left' ? 'slide-left' : 'slide-right'">
       <div
-        v-if="position === 'side'"
-        v-show="isOpen"
+        v-show="position === 'side' && isOpen"
         class="side-panel-container"
         :class="[
           isMobile ? 'w-full' : `w-${width}`,
@@ -55,8 +54,9 @@
         v-if="!isMobile && position !== 'side'"
         class="desktop-panel"
         :class="[
-          'transition-all duration-300 ease-in-out border-l border-gray-200 dark:border-gray-700',
-          isOpen ? 'w-[18.5rem]' : 'w-10'
+          'transition-all duration-300 ease-in-out border-gray-200 dark:border-gray-700',
+          isOpen ? 'w-[18.5rem]' : 'w-10',
+          positionSide === 'left' ? 'border-l' : 'border-r',
         ]"
       >
         <div
@@ -115,7 +115,7 @@
     <Transition name="slide-up">
       <div
         v-if="isMobile && position !== 'side' && isOpen"
-        class="fixed inset-x-0 bottom-0 z-50 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]"
+        class="fixed inset-x-0 bottom-0 z-30 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]"
       >
         <div class="panel-content h-full" :class="mainClass">
           <PanelContent
@@ -176,7 +176,7 @@ const onToggle = () => {
 <style scoped>
 .panel-container {
   position: relative;
-  z-index: 10;
+  z-index: 20;
   display: flex;
   flex: 0 1 auto;
   flex-direction: column;
@@ -211,7 +211,7 @@ const onToggle = () => {
 }
 
 .side-panel-container {
-  @apply fixed top-0 bottom-0 z-50 inset-y-0 bg-gray-50 dark:bg-gray-900 transition-all;
+  @apply fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900 transition-all;
   height: 100vh;
   overflow: hidden;
   display: flex;

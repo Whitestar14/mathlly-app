@@ -1,5 +1,11 @@
 import { ref, watch, nextTick, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import {
+  useElementVisibility,
+  useResizeObserver,
+  useMutationObserver,
+  useDebounceFn,
+} from '@vueuse/core';
 
 export function usePills(options = {}) {
   const {
@@ -14,6 +20,7 @@ export function usePills(options = {}) {
     hideIndicatorPaths = [],
     autoInit = false,
     containerRef = null,
+    watchVisibility = false,
   } = options;
 
   const currentPill = ref(defaultPill);
@@ -22,6 +29,12 @@ export function usePills(options = {}) {
 
   const route = useRoute();
   const router = useRouter();
+
+  // Create a ref to track the active element
+  const activeElementRef = ref(null);
+
+  // Use VueUse's useElementVisibility to track visibility
+  const isElementVisible = useElementVisibility(activeElementRef);
 
   const styleMap = {
     left: {
@@ -72,6 +85,8 @@ export function usePills(options = {}) {
     const currentStyle = styleMap[position];
     if (!currentStyle || !element) return 0;
 
+    // Update the activeElementRef to the current element
+    activeElementRef.value = element;
     const mainSize =
       element[
         currentStyle.mainSize == 'width' ? 'offsetWidth' : 'offsetHeight'
@@ -94,6 +109,16 @@ export function usePills(options = {}) {
         showIndicator.value = false;
         return;
       }
+
+      // Update the activeElementRef to track this element's visibility
+      activeElementRef.value = element;
+
+      // Check if element is actually visible
+      if (!isElementVisible.value) {
+        showIndicator.value = false;
+        return;
+      }
+
       indicatorPosition.value = getOffset(element);
       showIndicator.value = true;
     }
@@ -130,12 +155,26 @@ export function usePills(options = {}) {
           );
           if (activeElement) {
             updatePillIndicator(activeElement, true);
+          } else {
+            console.log('[usePills] Element not found for path:', newPath);
           }
         });
       }
     },
     { immediate: updateRoute }
   );
+
+  // Watch for visibility changes
+  if (watchVisibility) {
+    watch(isElementVisible, async (newIsVisible) => {
+      if (newIsVisible) {
+        await nextTick();
+        await initializePills();
+      } else {
+        showIndicator.value = false;
+      }
+    });
+  }
 
   const indicatorStyle = computed(() => {
     const currentStyle = styleMap[position];
@@ -146,7 +185,7 @@ export function usePills(options = {}) {
       [currentStyle.mainDimension]: `${indicatorPosition.value}${currentStyle.mainUnit}`,
       [currentStyle.mainSize]: `${indicatorHeight}${currentStyle.crossUnit}`,
       [currentStyle.crossSize]: `${currentStyle.crossValue}`,
-      'display': showIndicator.value ? '' : 'none'
+      display: showIndicator.value ? '' : 'none',
     };
 
     if (currentStyle.crossOffset) {
@@ -159,31 +198,37 @@ export function usePills(options = {}) {
 
   const initializePills = async (initialPillId = null, elementsRef = null) => {
     await nextTick();
-    
+
     // Important change: prioritize initialPillId, then defaultPill, then currentPill
     const pillId = initialPillId || defaultPill || currentPill.value;
     let pillElement = null;
-    
+
     // Use the provided elementsRef or fall back to containerRef from options
     const targetRef = elementsRef || containerRef;
-    
+
     if (targetRef && targetRef.value) {
       // Handle array of elements (like v-for refs)
       if (Array.isArray(targetRef.value)) {
         pillElement = targetRef.value.find(
           (el) => el && el.dataset && el.dataset.path === pillId
         );
+        if (!pillElement) {
+          console.log(
+            '[usePills] No element found in array with data-path:',
+            pillId
+          );
+        }
       } else if (targetRef.value.querySelector) {
         // Handle single element with querySelector
         pillElement = targetRef.value.querySelector(`[data-path="${pillId}"]`);
       }
     }
-    
+
     // Fallback to document query if not found
     if (!pillElement) {
       pillElement = document.querySelector(`[data-path="${pillId}"]`);
     }
-    
+
     if (pillElement) {
       selectPill(pillId);
       updatePillIndicator(pillElement, true);
@@ -194,28 +239,49 @@ export function usePills(options = {}) {
     }
   };
 
+  // Use VueUse's useResizeObserver to detect layout changes
+  const resize = useDebounceFn(() => {
+    if (isElementVisible.value) initializePills();
+  }, 300);
+
+  const mutation = useDebounceFn(() => {
+    const activeElement = document.querySelector(
+      `[data-path="${currentPill.value}"]`
+    );
+    if (activeElement) {
+      activeElementRef.value = activeElement;
+    }
+  }, 300);
+
+  if (containerRef) {
+    useResizeObserver(containerRef, resize);
+  }
+
+  useMutationObserver(document.body, mutation, {
+    childList: true,
+    subtree: true,
+    attributeFilter: ['class', 'style', 'hidden'],
+  });
+
+  // Auto-initialization
   if (autoInit) {
     onMounted(async () => {
       // First attempt - immediate
       await nextTick();
       let success = await initializePills();
-      
-      // If first attempt fails, try again after a delay
+
       if (!success) {
         setTimeout(async () => {
-          await initializePills();
+          let retrySuccess = await initializePills();
+          if (!retrySuccess) console.warn('[usePills] Auto-init failed.');
         }, 50);
       }
     });
   }
 
-
   return {
     currentPill,
     indicatorPosition,
-    showIndicator,
-    updatePillIndicator,
-    selectPill,
     handleNavigation,
     indicatorStyle,
     initializePills,

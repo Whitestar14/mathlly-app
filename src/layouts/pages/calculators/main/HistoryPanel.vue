@@ -1,5 +1,5 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" title="History" @update:is-open="toggleHistory">
+  <BasePanel :is-open="isOpen" :is-mobile="isMobile" title="History" positionSide="left" @update:is-open="toggleHistory">
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
       <ScrollAreaRoot class="h-full w-full">

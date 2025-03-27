@@ -9,8 +9,8 @@ export function useToast() {
   const addToast = useThrottleFn((toastData) => {
     const id = Date.now();
     const zIndex = 50 - toasts.value.length;
-    
-    toasts.value.push({id, ...toastData, zIndex: Math.max(1, zIndex)});
+
+    toasts.value.push({ id, ...toastData, zIndex: Math.max(1, zIndex) });
 
     useTimeoutFn(() => {
       removeToast(id);
@@ -21,10 +21,10 @@ export function useToast() {
   const toast = (toastData) => {
     addToast(toastData);
   };
-  
+
   // Function to remove a toast by ID
   const removeToast = (id) => {
-    const index = toasts.value.findIndex(t => t.id === id);
+    const index = toasts.value.findIndex((t) => t.id === id);
     if (index !== -1) {
       toasts.value.splice(index, 1);
     }
