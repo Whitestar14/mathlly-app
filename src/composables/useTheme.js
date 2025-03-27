@@ -14,22 +14,22 @@ export function useTheme() {
         ...settings.$state,
         theme: newTheme,
       });
-    }
+    },
   });
 
   // Sync theme changes between settings and VueUse dark mode.
   watch(selectedTheme, (newTheme) => {
-    if (newTheme === "dark") {
+    if (newTheme === 'dark') {
       isDark.value = true;
-    } else if (newTheme === "light") {
+    } else if (newTheme === 'light') {
       isDark.value = false;
-    } else if (newTheme === "system") {
-      isDark.value = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    } else if (newTheme === 'system') {
+      isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
   });
 
   const toggleTheme = async () => {
-    const newTheme = isDark.value ? "light" : "dark";
+    const newTheme = isDark.value ? 'light' : 'dark';
     await settings.saveSettings({
       ...settings.$state,
       theme: newTheme,
@@ -47,6 +47,6 @@ export function useTheme() {
     isDark,
     selectedTheme,
     toggleTheme,
-    setTheme
+    setTheme,
   };
 }

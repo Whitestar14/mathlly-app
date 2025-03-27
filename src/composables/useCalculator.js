@@ -1,11 +1,11 @@
-import { ref } from 'vue'
-import { StandardCalculator } from '@/services/logic/StandardCalculator'
-import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator'
-import { useCalculatorState } from './useCalculatorState'
+import { ref } from 'vue';
+import { StandardCalculator } from '@/services/logic/StandardCalculator';
+import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator';
+import { useCalculatorState } from './useCalculatorState';
 
 const calculatorTypes = {
-  'Standard': StandardCalculator,
-  'Programmer': ProgrammerCalculator
+  Standard: StandardCalculator,
+  Programmer: ProgrammerCalculator,
 };
 
 export function useCalculator(mode, settings) {
@@ -15,11 +15,11 @@ export function useCalculator(mode, settings) {
     updateDisplayValues,
     setActiveBase,
     setAnimation,
-    clearState
-  } = useCalculatorState()
+    clearState,
+  } = useCalculatorState();
 
   let calculator = ref(null);
-  
+
   const createCalculator = (mode) => {
     const CalculatorClass = calculatorTypes[mode];
     if (!CalculatorClass) {
@@ -28,20 +28,22 @@ export function useCalculator(mode, settings) {
     }
     return new CalculatorClass(settings);
   };
-  
+
   // Initialize calculator
   calculator.value = createCalculator(mode);
 
   const updateDisplayState = () => {
-    if (mode === "Programmer") {
+    if (mode === 'Programmer') {
       const updatedValues = calculator.value.updateDisplayValues();
       if (updatedValues) {
         updateDisplayValues(updatedValues);
         // Only update input if it's different from current state
-        if (updatedValues[state.value.activeBase]?.input !== state.value.input) {
+        if (
+          updatedValues[state.value.activeBase]?.input !== state.value.input
+        ) {
           updateState({
-            input: updatedValues[state.value.activeBase]?.input || "0",
-            error: ""
+            input: updatedValues[state.value.activeBase]?.input || '0',
+            error: '',
           });
         }
       }
@@ -57,6 +59,6 @@ export function useCalculator(mode, settings) {
     setActiveBase,
     setAnimation,
     clearState,
-    updateDisplayState
-  }
+    updateDisplayState,
+  };
 }

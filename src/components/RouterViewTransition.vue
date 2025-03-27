@@ -32,7 +32,7 @@ defineProps({
 defineEmits(['settings-change', 'update:mode'])
 
 // Ensure minimum loading time of 1.2 seconds
-const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000))
+const minLoadTime = new Promise(resolve => setTimeout(resolve, 1200))
 
 await Promise.all([
     minLoadTime])

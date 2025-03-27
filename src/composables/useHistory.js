@@ -1,6 +1,6 @@
-import { ref } from "vue";
-import { useDebounceFn } from "@vueuse/core";
-import db from "@/data/db";
+import { ref } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+import db from '@/data/db';
 
 const historyItems = ref([]);
 
@@ -10,11 +10,11 @@ export function useHistory() {
   const loadHistory = async () => {
     try {
       const items = await db.history
-        .orderBy("timestamp")
+        .orderBy('timestamp')
         .reverse()
         .limit(MAX_HISTORY_ITEMS)
         .toArray();
-      
+
       historyItems.value = items;
     } catch (error) {
       console.error('Error loading history:', error);
@@ -30,15 +30,18 @@ export function useHistory() {
 
       const timestamp = Date.now();
       const id = await db.history.add({ expression, result, timestamp });
-      
+
       // Optimistic update
-      historyItems.value = [{ id, expression, result, timestamp }, ...historyItems.value];
-      
+      historyItems.value = [
+        { id, expression, result, timestamp },
+        ...historyItems.value,
+      ];
+
       // Ensure consistency without triggering animation
       setTimeout(() => loadHistory(), 500);
     } catch (error) {
       console.error('Error adding to history:', error);
-    } 
+    }
   }, 300);
 
   // Simplified database operations
@@ -57,6 +60,6 @@ export function useHistory() {
     addToHistory,
     deleteItem,
     clearAll,
-    loadHistory
+    loadHistory,
   };
 }

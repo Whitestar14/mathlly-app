@@ -1,25 +1,67 @@
 <template>
-  <BasePage :showHeader="true" :showFooter="true" title="Home" mainClass="w-full mx-auto text-sm">
-    <!-- Hero Section with Animated Background -->
-    <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div ref="particlesContainer" class="absolute inset-0 pointer-events-none opacity-20"></div>
-      <div class="container mx-auto px-4 py-16 md:py-24">
+  <BasePage :showHeader="false" :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
+    <!-- Hero Section with Gradient Background -->
+    <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50/50 to-white dark:from-gray-900 dark:to-gray-800/80">
+      <!-- Grid Pattern Background -->
+      <div class="absolute inset-0">
+        <div class="absolute inset-0 pattern-grid opacity-30 dark:opacity-70"></div>
+      </div>
+      
+      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative z-10">
         <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div class="w-full md:w-2/3 flex justify-center flex-col text-center md:text-left space-y-6">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-mono font-bold tracking-tight">
+            <div 
+              v-motion
+              :initial="{ opacity: 0, y: 20 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 0.2 } }"
+              class="self-center md:self-start mb-2">
+              <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
+            </div>
+            
+            <h1 
+              v-motion
+              :initial="{ opacity: 0, y: 20 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 0.3 } }"
+              class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               Mathematical precision
               <span class="block text-indigo-600 dark:text-indigo-400 mt-2">for modern development</span>
             </h1>
-            <p class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
+            
+            <p 
+              v-motion
+              :initial="{ opacity: 0, y: 20 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 0.4 } }"
+              class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
               A comprehensive suite of mathematical tools designed to streamline your development workflow
             </p>
-            <div class="flex justify-center md:justify-start flex-wrap gap-4 mt-8">
-              <Button variant="primary" size="lg" class="w-full sm:w-auto">Get Started</Button>
-              <Button variant="outline" size="lg" class="w-full sm:w-auto">View Demo</Button>
+            
+            <div 
+              v-motion
+              :initial="{ opacity: 0, y: 20 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 0.5 } }"
+              class="flex justify-center md:justify-start flex-wrap gap-4 mt-8">
+              <RouterLink to="/calculator">
+                <Button variant="primary" size="lg" class="w-full sm:w-auto">
+                  <CalculatorIcon class="h-4 w-4" />
+                  Get Started
+                </Button>
+              </RouterLink>
+              <a href="https://github.com/Whitestar14/mathlly-app" target="_blank">
+                <Button variant="outline" size="lg" class="w-full sm:w-auto">
+                  <GithubIcon class="h-4 w-4" />
+                  View GitHub
+                </Button>
+              </a>
             </div>
           </div>
-          <div class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
-            <Logo size="lg" class="transform scale-125 transition-all duration-500 hover:scale-150" />
+          
+          <div 
+            v-motion
+            :initial="{ opacity: 0, scale: 0.9 }"
+            :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
+            class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 md:aspect-square top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 width-full rounded-full blur-xl"></div>
+            <Logo type="svg" :svgPath="isDark ? '/img/mathlly-dark.svg' : '/img/mathlly-light.svg'" size="lg" class="relative transform scale-[2] hover:scale-[2.5] md:scale-[3] md:hover:scale-[3.5] transition-all duration-500" />
           </div>
         </div>
       </div>
@@ -28,15 +70,18 @@
     <!-- Statistics Section -->
     <section class="py-16 bg-white dark:bg-gray-800">
       <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div 
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
+          class="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div 
             v-for="stat in statistics" 
             :key="stat.label"
-            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300"
-            ref="statElements"
+            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-600"
           >
-            <h3 class="text-3xl md:text-4xl font-mono font-bold text-indigo-600 dark:text-indigo-400 mb-2">
-              <span ref="countElements">0</span>{{ stat.suffix }}
+            <h3 class="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
+              <CountUp :end-val="stat.value" :duration="2.5" :suffix="stat.suffix" />
             </h3>
             <p class="text-gray-600 dark:text-gray-300">{{ stat.label }}</p>
           </div>
@@ -49,16 +94,19 @@
       <div class="container mx-auto px-4">
         <div class="flex items-center justify-between mb-10">
           <h2 class="text-2xl md:text-3xl font-medium">Essential Tools</h2>
-          <Button variant="link" class="group"> 
-            View all tools
-            <ArrowRightIcon class="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-          </Button>
+          <RouterLink to="/calculator">
+            <Button variant="link" class="group"> 
+              View all tools
+              <ArrowRightIcon class="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+            </Button>
+          </RouterLink>
         </div>
+        
         <div 
-          class="grid grid-cols-1 md:grid-cols-3 gap-6"
           v-motion
           :initial="{ opacity: 0, y: 20 }"
           :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
+          class="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           <RouterLink
             v-for="tool in quickTools"
@@ -66,12 +114,16 @@
             :to="tool.path"
             class="block h-full transition-transform duration-300 hover:-translate-y-1"
           >
-            <FeatureCard
-              :icon="tool.icon.name"
-              :title="tool.name"
-              :description="tool.description"
-              class="h-full"
-            />
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 p-6 h-full">
+              <div class="flex items-center mb-4">
+                <div class="bg-indigo-50 dark:bg-gray-700 p-3 rounded-lg mr-3">
+                  <component :is="tool.icon" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ tool.name }}</h3>
+                <Badge v-if="tool.isNew" type="new" class="ml-2" />
+              </div>
+              <p class="text-gray-600 dark:text-gray-300">{{ tool.description }}</p>
+            </div>
           </RouterLink>
         </div>
       </div>
@@ -82,156 +134,253 @@
       <div class="container mx-auto px-4">
         <h2 class="text-2xl md:text-3xl font-medium mb-10 text-center">Key Features</h2>
         <div 
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           v-motion
           :initial="{ opacity: 0, y: 20 }"
           :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          <FeatureCard
+          <div
             v-for="feature in features"
             :key="feature.title"
-            :icon="feature.icon"
-            :title="feature.title"
-            :description="feature.description"
-            class="h-full transition-all duration-300 hover:shadow-md"
-          />
+            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 border border-gray-100 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300"
+          >
+            <div class="flex items-center mb-4">
+              <div class="bg-indigo-100 dark:bg-gray-600 p-2 rounded-lg mr-3">
+                <component :is="getFeatureIcon(feature.icon)" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ feature.title }}</h3>
+            </div>
+            <p class="text-gray-600 dark:text-gray-300">{{ feature.description }}</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Why Choose Us & Mission Section -->
+    <!-- Redesigned Why Choose Us & Mission Section -->
     <section class="py-16 bg-gray-50 dark:bg-gray-900">
       <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Why Choose Us Section -->
-          <div class="space-y-6">
-            <h2 class="text-2xl md:text-3xl font-medium">Why Choose Mathlly?</h2>
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm h-full">
-              <ul class="space-y-4">
-                <li v-for="(reason, index) in reasons" :key="index" class="flex items-center group">
-                  <div class="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full mr-4 shrink-0">
+        <div class="flex flex-col gap-12">
+          <!-- Why Choose Us Section - Redesigned -->
+          <div 
+            v-motion
+            :initial="{ opacity: 0, y: 20 }"
+            :enter="{ opacity: 1, y: 0 }"
+            class="w-full">
+            <h2 class="text-2xl md:text-3xl font-medium mb-6">Why Choose Mathlly?</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="(reason, index) in reasons" :key="index" class="flex items-start">
+                  <div class="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-full mr-4 shrink-0 mt-0.5">
                     <CheckCircleIcon class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <span class="text-gray-700 dark:text-gray-300">{{ reason }}</span>
-                </li>
-              </ul>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Mission Section -->
-          <div class="space-y-6">
-            <h2 class="text-2xl md:text-3xl font-medium">Our Mission</h2>
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm h-full">
-              <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-                At Mathlly, we're committed to empowering developers with powerful, intuitive, and efficient mathematical tools. 
-                Our goal is to streamline complex calculations, making your coding journey smoother and more productive.
-              </p>
-              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                We believe that mathematical precision should be accessible to all developers, regardless of their background or experience level.
-              </p>
+          <!-- Mission Section - Redesigned -->
+          <div 
+            v-motion
+            :initial="{ opacity: 0, y: 20 }"
+            :enter="{ opacity: 1, y: 0 }"
+            class="w-full">
+            <h2 class="text-2xl md:text-3xl font-medium mb-6">Our Mission</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div class="flex flex-col md:flex-row">
+                <div class="md:w-2/3 p-6">
+                  <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+                    At Mathlly, we're committed to empowering developers with powerful, intuitive, and efficient mathematical tools. 
+                    Our goal is to streamline complex calculations, making your coding journey smoother and more productive.
+                  </p>
+                  <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    We believe that mathematical precision should be accessible to all developers, regardless of their background or experience level.
+                  </p>
+                </div>
+                <div class="md:w-1/3 bg-indigo-50 dark:bg-gray-700 p-6 flex items-center justify-center">
+                  <div class="text-center">
+                    <FunctionSquareIcon class="h-16 w-16 text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
+                    <p class="text-indigo-700 dark:text-indigo-300 font-medium">Precision & Simplicity</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-16 bg-white dark:bg-gray-800">
-      <div class="container mx-auto px-4">
-        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-700 dark:to-blue-700 rounded-lg p-8 md:p-12 text-center shadow-lg">
-          <h2 class="font-mono text-2xl md:text-3xl font-medium mb-4 text-white">Ready to get started?</h2>
-          <p class="text-indigo-100 max-w-2xl mx-auto mb-8 text-lg">
-            Join hundreds of developers who are already using Mathlly to streamline their mathematical workflows.
-          </p>
-          <Button 
-            variant="secondary" 
-            size="lg" 
-            class="bg-white text-indigo-600 hover:bg-indigo-40 shadow-md hover:shadow-lg transition-all duration-300"
-          >
-            Try Mathlly Now
-          </Button>
+<!-- CTA Section - Redesigned with improved dark mode support -->
+<section class="py-16 bg-white dark:bg-gray-800">
+  <div class="container mx-auto px-4">
+    <div 
+      v-motion
+      :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0 }"
+      class="relative overflow-hidden rounded-lg shadow-lg"
+    >
+      <!-- Content -->
+      <div class="relative z-10 p-8 md:p-12 text-center">
+        <!-- Logo accent -->
+        <div class="flex justify-center mb-6">
+          <Logo size="sm" :themeSensitive="true" />
+        </div>
+        
+        <!-- Title with monospace accent - improved for dark mode -->
+        <h2 class="text-2xl md:text-3xl font-mono font-medium mb-4 text-white">
+          Ready to experience <kbd class="font-mono inline-block bg-white/10 dark:bg-white/30 px-2 py-1 rounded text-white dark:text-white border border-white/20">
+            {math<span class="text-indigo-200 dark:text-indigo-300 font-black inline-block mx-0.5">//</span>y}
+          </kbd>?
+        </h2>
+        
+        <p class="text-indigo-100 dark:text-indigo-50 max-w-2xl mx-auto mb-8 text-lg">
+          Join hundreds of developers who are already using Mathlly to streamline their mathematical workflows.
+        </p>
+        
+        <!-- Action buttons with badge - improved for dark mode -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <RouterLink to="/calculator">
+            <Button 
+              variant="secondary" 
+              size="lg" 
+              class="bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-gray-200 shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
+            >
+              <CalculatorIcon class="h-4 w-4" />
+              Try Mathlly Now
+            </Button>
+          </RouterLink>
+          
+          <a href="https://github.com/Whitestar14/mathlly-app" target="_blank">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              class="border-white/30 dark:border-white/40 !text-white hover:bg-white/10 dark:hover:bg-white/15 w-full sm:w-auto"
+            >
+              <GithubIcon class="h-4 w-4" />
+              Star on GitHub
+            </Button>
+          </a>
+        </div>
+        
+        <!-- Version badge -->
+        <div class="mt-8 flex justify-center">
+          <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
         </div>
       </div>
-    </section>
+
+      <!-- Gradient overlay - adjusted for better dark mode appearance -->
+      <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-800 dark:to-blue-900"></div>
+
+      <!-- Background with grid pattern -->
+      <div class="absolute inset-0 pattern-grid opacity-10 dark:opacity-50"></div>
+      
+      <!-- Decorative elements with dark mode adjustments -->
+      <div class="absolute top-0 right-0 w-64 h-64 -mt-12 -mr-12 opacity-20 dark:opacity-10">
+        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
+      </div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 -mb-8 -ml-8 opacity-20 dark:opacity-10">
+        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
   </BasePage>
 </template>
 
 <script setup>
 import BasePage from "@/components/base/BasePage.vue";
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, defineComponent, h, onMounted } from 'vue';
 import { 
-  Code2Icon, 
   Binary, 
   FunctionSquareIcon, 
   ArrowRightIcon, 
   CheckCircleIcon,
+  CalculatorIcon,
+  GithubIcon,
+  EyeIcon,
+  HistoryIcon,
+  PaletteIcon,
+  CodeIcon,
+  CloudIcon
 } from 'lucide-vue-next';
 import { useTitle } from '@vueuse/core';
+import { useVersionStore } from '@/stores/version';
 import Logo from '@/components/base/BaseLogo.vue';
 import Button from '@/components/base/BaseButton.vue';
-import anime from 'animejs';
-import FeatureCard from "@/components/cards/FeatureCard.vue";
+import Badge from '@/components/base/BaseBadge.vue';
+import { RouterLink } from 'vue-router';
+import { useTheme } from '@/composables/useTheme'
 
-const mounted = ref(false);
-const windowWidth = ref(window.innerWidth);
-const particlesContainer = ref(null);
-const statElements = ref([]);
-const animeInstances = ref([]);
+const { isDark } = useTheme();
 
-// Update window width on resize
-const handleResize = () => {
-  windowWidth.value = window.innerWidth;
-  adjustParticlesForScreenSize();
-};
-
-onMounted(() => {
-  window.addEventListener('resize', handleResize);
-  mounted.value = true;
-  
-  // Initialize animations
-  initParticles();
-  setTimeout(() => {
-    animateStatistics();
-  }, 500);
+// Simple CountUp component
+const CountUp = defineComponent({
+  name: 'CountUp',
+  props: {
+    endVal: { type: Number, required: true },
+    duration: { type: Number, default: 2 },
+    suffix: { type: String, default: '' }
+  },
+  setup(props) {
+    const currentValue = ref(0);
+    
+    onMounted(() => {
+      const startTime = Date.now();
+      const endTime = startTime + props.duration * 1000;
+      
+      const updateValue = () => {
+        const now = Date.now();
+        if (now >= endTime) {
+          currentValue.value = props.endVal;
+          return;
+        }
+        
+        const elapsed = now - startTime;
+        const progress = elapsed / (props.duration * 1000);
+        currentValue.value = Math.floor(progress * props.endVal);
+        requestAnimationFrame(updateValue);
+      };
+      
+      updateValue();
+    });
+    
+    return () => h('span', {}, `${currentValue.value}${props.suffix}`);
+  }
 });
 
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize);
-  // Clean up anime.js instances
-  animeInstances.value.forEach(instance => {
-    if (instance && typeof instance.pause === 'function') {
-      instance.pause();
-    }
-  });
-});
-
+const version = useVersionStore();
 useTitle('Mathlly - Mathematical Precision for Modern Development');
 
 const quickTools = [
   {
     name: 'Calculator',
     path: '/calculator',
-    icon: Code2Icon,
-    description: 'Advanced calculator with programming-specific features and real-time evaluation.'
+    icon: CalculatorIcon,
+    description: 'Advanced calculator with programming-specific features and real-time evaluation.',
+    isNew: false
   },
   {
     name: 'Base64',
     path: '/tools/base64',
     icon: Binary,
-    description: 'Efficiently encode and decode Base64 strings with instant preview and validation.'
+    description: 'Efficiently encode and decode Base64 strings with instant preview and validation.',
+    isNew: true
   },
   {
     name: 'Functions',
     path: '/functions',
     icon: FunctionSquareIcon,
-    description: 'Comprehensive mathematical functions with visualization capabilities.'
+    description: 'Comprehensive mathematical functions with visualization capabilities.',
+    isNew: false
   }
 ];
 
 const statistics = [
   { label: 'Calculations Performed', value: 50000, suffix: '+' },
   { label: 'Active Users', value: 300, suffix: '+' },
-  { label: 'Tools Available', value: 5, suffix: '+' }
+  { label: 'Tools Available', value: 15, suffix: '+' }
 ];
 
 const features = [
@@ -281,98 +430,28 @@ const reasons = [
   "Extensive documentation and support resources",
 ];
 
-// Determine number of particles based on screen size
-const getParticleCount = () => {
-  if (windowWidth.value < 640) return 20; // Mobile
-  if (windowWidth.value < 1024) return 40; // Tablet
-  return 60; // Desktop
-};
-
-// Adjust particles for screen size
-const adjustParticlesForScreenSize = () => {
-  if (!particlesContainer.value) return;
+// Map feature icon names to actual components
+const getFeatureIcon = (iconName) => {
+  const iconMap = {
+    'Calculator': CalculatorIcon,
+    'Eye': EyeIcon,
+    'History': HistoryIcon,
+    'Palette': PaletteIcon,
+    'Code': CodeIcon,
+    'Cloud': CloudIcon
+  };
   
-  // Clear existing particles
-  particlesContainer.value.innerHTML = '';
-  
-  // Create new particles based on screen size
-  initParticles();
-};
-
-// Particles Animation
-const initParticles = () => {
-  if (!particlesContainer.value) return;
-  
-  const particleCount = getParticleCount();
-  const particles = Array.from({ length: particleCount }, () => {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    return particle;
-  });
-  
-  particles.forEach(p => particlesContainer.value.appendChild(p));
-  
-  const instance = anime({
-    targets: '.particle',
-    translateX: () => anime.random(-windowWidth.value/2, windowWidth.value/2),
-    translateY: () => anime.random(-400, 500),
-    scale: () => anime.random(1, windowWidth.value < 640 ? 2 : 3),
-    opacity: () => anime.random(0.1, 0.5),
-    easing: 'linear',
-    duration: () => anime.random(2000, 5000),
-    delay: () => anime.random(0, 1000),
-    loop: true,
-    direction: 'alternate'
-  });
-  
-  animeInstances.value.push(instance);
-};
-
-// Statistics Animation with IntersectionObserver for better performance
-const animateStatistics = () => {
-  if (!statElements.value.length) return;
-  
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        statistics.forEach((stat, index) => {
-          if (!statElements.value[index]) return;
-          
-          const instance = anime({
-            targets: statElements.value[index].querySelector('span'),
-            innerHTML: [0, stat.value],
-            round: 1,
-            easing: 'easeInOutExpo',
-            duration: 2000,
-            delay: index * 200
-          });
-          
-          animeInstances.value.push(instance);
-        });
-        observer.disconnect();
-      }
-    });
-  }, { threshold: 0.1 });
-  
-  observer.observe(statElements.value[0]);
+  return iconMap[iconName] || CalculatorIcon;
 };
 </script>
 
 <style scoped>
-.particle {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background: currentColor;
-  border-radius: 50%;
-  opacity: 0.3;
-}
-
-@media (max-width: 640px) {
-  .particle {
-    width: 3px;
-    height: 3px;
-  }
+/* Grid pattern using CSS */
+.pattern-grid {
+  background-image: 
+    linear-gradient(to right, rgba(128, 128, 128, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(128, 128, 128, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 /* Add subtle hover effects */

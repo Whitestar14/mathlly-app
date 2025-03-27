@@ -76,9 +76,6 @@
 
 <script setup>
 import { CheckCircleIcon } from 'lucide-vue-next';
-import { useTitle } from '@vueuse/core';
 import BasePage from "@/components/base/BasePage.vue";
-
-useTitle("Feedback - Mathlly");
 </script>
 

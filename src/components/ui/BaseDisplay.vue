@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-2 gap-1 mb-2 text-sm">
+  <div class="grid grid-cols-2 gap-1 text-xs">
     <button
       v-for="base in ['HEX', 'DEC', 'OCT', 'BIN']"
       :key="base"

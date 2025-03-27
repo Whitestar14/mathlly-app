@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col flex-none" :class="mode === 'Programmer' ? 'h-[40%]' : 'h-1/4'">
-    <div class="p-4 rounded-lg mb-2 transition-all duration-300 flex-1 relative flex items-end" :class="[
+  <div class="flex flex-col h-full gap-2">
+    <div class="p-4 rounded-lg transition-all duration-300 flex-1 relative flex items-end" :class="[
       error
         ? 'bg-destructive/10 dark:bg-destructive/20'
         : 'transition-colors duration-300 bg-gray-100 dark:bg-gray-700',
@@ -20,7 +20,6 @@
       <BaseDisplay v-show="mode === 'Programmer'" :display-values="displayValues" :active-base="activeBase"
       @base-change="$emit('base-change', $event)" />
     </div>
-    <Toast />
   </div>
 </template>
 
@@ -28,7 +27,6 @@
 import ChevronScroll from "@/components/ui/ChevronScroll.vue"
 import ControlButtons from "@/components/ui/ControlButtons.vue"
 import MainDisplay from "@/components/ui/MainDisplay.vue"
-import Toast from "@/components/base/BaseToast.vue"
 import BaseDisplay from "@/components/ui/BaseDisplay.vue"
 import { computed, nextTick, ref, watch } from "vue"
 import { useToast } from "@/composables/useToast"

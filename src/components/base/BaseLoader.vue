@@ -36,7 +36,7 @@
         <div class="relative flex items-center justify-center">
           <div
             :class="[
-              'font-medium animate-spin-mini',
+              'font-medium animate-spin-2000',
               variant === 'micro' ? 'text-sm' : 'text-base'
             ]"
           >
@@ -154,19 +154,5 @@ onMounted(() => {
 
 <style scoped>
 /* Only keeping necessary custom animations */
-.animate-spin-mini {
-  @apply animate-spin-2000;
-}
 
-.loader-macro {
-  @apply fixed inset-0 z-50 flex items-center justify-center bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
-}
-
-.loader-mini {
-  @apply flex justify-center items-center min-w-10 min-h-10;
-}
-
-.loader-micro {
-  @apply flex justify-center items-center min-w-6 min-h-6;
-}
 </style>
