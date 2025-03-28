@@ -1,9 +1,9 @@
 <template>
   <Suspense>
-      <async-app-setup />
+      <app-setup />
   </Suspense>
 </template>
 
 <script setup>
-import AsyncAppSetup from '@/components/AsyncAppSetup.vue';
+import AppSetup from '@/components/AppSetup.vue';
 </script>

@@ -285,12 +285,16 @@
   </div>
 </section>
 
-
+  <!-- Welcome Modal -->
+<welcome-modal 
+    :is-open="showWelcomeModal" 
+    @update:is-open="showWelcomeModal = $event" 
+    @close="closeWelcomeModal" 
+  />
   </BasePage>
 </template>
 
 <script setup>
-import BasePage from "@/components/base/BasePage.vue";
 import { ref, defineComponent, h, onMounted } from 'vue';
 import { 
   Binary, 
@@ -305,14 +309,15 @@ import {
   CodeIcon,
   CloudIcon
 } from 'lucide-vue-next';
-import { useTitle } from '@vueuse/core';
+import { useTitle, useTimeoutFn } from '@vueuse/core';
 import { useVersionStore } from '@/stores/version';
+import { RouterLink } from 'vue-router';
+import { useTheme } from '@/composables/useTheme'
 import Logo from '@/components/base/BaseLogo.vue';
 import Button from '@/components/base/BaseButton.vue';
 import Badge from '@/components/base/BaseBadge.vue';
-import { RouterLink } from 'vue-router';
-import { useTheme } from '@/composables/useTheme'
-
+import BasePage from "@/components/base/BasePage.vue";
+import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 const { isDark } = useTheme();
 
 // Simple CountUp component
@@ -442,6 +447,24 @@ const getFeatureIcon = (iconName) => {
   };
   
   return iconMap[iconName] || CalculatorIcon;
+};
+
+const showWelcomeModal = ref(false);
+
+onMounted(() => {
+  // Check if the welcome modal has been shown before
+  const hasShownWelcome = localStorage.getItem("mathlly-welcome-shown") === "true";
+  
+  if (!hasShownWelcome) {
+    // Add a delay before showing the modal
+    useTimeoutFn(() => {
+      showWelcomeModal.value = true;
+    }, 1000); // 1 second delay, adjust as needed
+  }
+});
+
+const closeWelcomeModal = () => {
+  showWelcomeModal.value = false;
 };
 </script>
 
