@@ -93,8 +93,16 @@
     font-display: swap;
   }
 
-  body {
-    @apply font-sans font-normal;
+  :root {
+    @apply font-sans font-normal text-sm sm:text-base;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium text-gray-900 dark:text-gray-100;
+  }
+
+  p {
+    @apply text-xs md:text-sm;
   }
   /* Scrollbar styles */
   body,
@@ -119,23 +127,12 @@
     @apply rounded-lg bg-transparent;
   }
 
-  kbd,
-  .monospace,
-  .main-display {
-    @apply font-mono;
-  }
-
   kbd {
-    @apply w-fit bg-gray-200/90 text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
+    @apply w-fit bg-gray-200/90 font-mono text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
   }
 
-  .toast {
-    @apply bg-white dark:bg-gray-800 border border-gray-200 
-  dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm w-full;
-  }
-
-  .toast + .toast {
-    @apply mt-2;
+  textarea {
+    @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
   }
 
   /* Settings toggle classes */
@@ -143,29 +140,27 @@
     @apply !animate-none !duration-0;
   }
 
-  textarea {
-    @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
-  }
-
-}
-
   /* VueTippy custom tooltip styles */
   .tippy-box[data-theme~="custom"] {
-    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-700 text-gray-300 p-1 rounded-lg;
+    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-800 text-gray-100 p-1 rounded-lg;
+  
+    &[data-placement^="top"] > .tippy-arrow::before {
+      @apply border-t-gray-800 dark:border-t-gray-100;
+    }
+  
+    &[data-placement^="bottom"] > .tippy-arrow::before {
+      @apply border-b-gray-800 dark:border-b-gray-100;
+    }
+  
+    &[data-placement^="left"] > .tippy-arrow::before {
+      @apply border-l-gray-800 dark:border-l-gray-100;
+    }
+  
+    &[data-placement^="right"] > .tippy-arrow::before {
+      @apply border-r-gray-800 dark:border-r-gray-100;
+    }
   }
-
-  .tippy-box[data-theme~="custom"][data-placement^='top'] > .tippy-arrow::before {
-     @apply border-t-gray-800 dark:border-t-gray-100;
-  }
-  .tippy-box[data-theme~="custom"][data-placement^='bottom'] > .tippy-arrow::before {
-     @apply border-b-gray-800 dark:border-b-gray-100;
-  }
-  .tippy-box[data-theme~="custom"][data-placement^='left'] > .tippy-arrow::before {
-     @apply border-l-gray-800 dark:border-l-gray-100;
-  }
-  .tippy-box[data-theme~="custom"][data-placement^='right'] > .tippy-arrow::before {
-     @apply border-r-gray-800 dark:border-r-gray-100;
-  }
+}
 
 @layer components {
   .btn {
@@ -218,29 +213,16 @@
   .bg-muted {
     @apply bg-gray-300 dark:bg-gray-500 opacity-30;
   }
-
-  .bg-accent {
-    @apply bg-indigo-500 dark:bg-indigo-600;
+  
+  .loader-macro {
+    @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
   }
-
-  .bg-muted-30 {
-    @apply bg-muted opacity-30;
+  
+  .loader-mini {
+    @apply min-w-10 min-h-10;
   }
-
-  .ring-offset-background {
-    --tw-ring-offset-color: theme("colors.background.DEFAULT");
-  }
-}
-
-.loader-fade {
-  animation: loader-fade 1s ease-in-out infinite alternate;
-}
-
-@keyframes loader-fade {
-  from {
-    opacity: 0.4;
-  }
-  to {
-    opacity: 0.8;
+  
+  .loader-micro {
+    @apply min-w-6 min-h-6;
   }
 }
