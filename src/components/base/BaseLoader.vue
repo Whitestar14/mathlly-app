@@ -1,67 +1,73 @@
 <template>
-    <div v-if="isActive" :class="containerClasses" class="relative h-full font-mono">
-      <!-- Macro Loader -->
-      <template v-if="variant === 'macro'">
-        <div class="relative flex flex-col items-center justify-center gap-8">
-          <div class="relative z-10 flex items-center justify-center">
-            <div class="relative text-6xl inline-flex">
-              <span ref="bracketLeft" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">{</span>
+  <div v-if="isActive" :class="containerClasses" class="relative h-full font-mono">
+    <!-- Expanded Loader (formerly macro) -->
+    <template v-if="variant === 'expanded'">
+      <div class="relative flex flex-col items-center justify-center gap-8">
+        <div class="relative z-10 flex items-center justify-center">
+          <div class="relative text-6xl inline-flex">
+            <span ref="bracketLeft" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">{</span>
 
-              <span class="inline-flex *:text-gray-800 *:dark:text-gray-100 *:opacity-0">
-                <span ref="letterM">m</span>
-                <span ref="letterA">a</span>
-                <span ref="letterT">t</span>
-                <span ref="letterH">h</span>
-              </span>
-              <span class="relative inline-flex items-center justify-center w-[1.2em] *:left-1/2 *:-translate-x-1/2 *:text-indigo-500 *:dark:text-indigo-400 *:font-black *:opacity-0">
-                <span ref="slashTop" class="top-0 origin-bottom">/</span>
-                <span ref="slashBottom" class="bottom-0 origin-top">/</span>
-              </span>
-              <span ref="letterY" class="text-gray-800 dark:text-gray-100 opacity-0">y</span>
+            <span class="inline-flex *:text-gray-800 *:dark:text-gray-100 *:opacity-0">
+              <span ref="letterM">m</span>
+              <span ref="letterA">a</span>
+              <span ref="letterT">t</span>
+              <span ref="letterH">h</span>
+            </span>
+            <span class="relative inline-flex items-center justify-center w-[1.2em] *:left-1/2 *:-translate-x-1/2 *:text-indigo-500 *:dark:text-indigo-400 *:font-black *:opacity-0">
+              <span ref="slashTop" class="top-0 origin-bottom">/</span>
+              <span ref="slashBottom" class="bottom-0 origin-top">/</span>
+            </span>
+            <span ref="letterY" class="text-gray-800 dark:text-gray-100 opacity-0">y</span>
 
-              <span ref="bracketRight" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">}</span>
-            </div>
-          </div>
-
-          <div v-if="message" class="relative z-10 text-center">
-            <div class=" text-sm text-gray-600 dark:text-gray-300">
-              {{ message }}
-            </div>
+            <span ref="bracketRight" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">}</span>
           </div>
         </div>
-      </template>
 
-      <!-- Mini/Micro Loader -->
-      <template v-else>
-        <div class="relative flex items-center justify-center">
-          <div
-            :class="[
-              'font-medium animate-spin-mini',
-              variant === 'micro' ? 'text-sm' : 'text-base'
-            ]"
-          >
-            {<span class="text-indigo-500 dark:text-indigo-400 font-bold">//</span>}
+        <div v-if="message" class="relative z-10 text-center">
+          <div class="text-sm text-gray-600 dark:text-gray-300">
+            {{ message }}
           </div>
         </div>
+      </div>
+    </template>
+
+    <!-- Regular Loader (formerly mini) -->
+    <template v-else-if="variant === 'regular'">
+      <div class="flex items-center justify-center">
+        <span class="css-loader w-8 h-8"></span>
+        <span
+          v-if="message"
+          class="ml-3 text-sm text-gray-600 dark:text-gray-300"
+        >
+          {{ message }}
+        </span>
+      </div>
+    </template>
+
+    <!-- Compact Loader (formerly micro) -->
+    <template v-else>
+      <div class="flex items-center justify-center">
+        <span class="css-loader w-6 h-6"></span>
         <span
           v-if="message"
           class="ml-2 text-sm text-gray-600 dark:text-gray-300"
         >
           {{ message }}
         </span>
-      </template>
-    </div>
+      </div>
+    </template>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import anime from 'animejs';
 
 const props = defineProps({
   variant: {
     type: String,
-    default: "mini",
-    validator: (value) => ["macro", "mini", "micro"].includes(value),
+    default: "regular",
+    validator: (value) => ["compact", "regular", "expanded"].includes(value),
   },
   message: {
     type: String,
@@ -70,13 +76,13 @@ const props = defineProps({
   isActive: {
     type: Boolean,
     default: true,
-  },
+  }
 });
 
 const containerClasses = computed(() => [
   `loader-${props.variant}`,
   {
-    "flex items-center justify-center": props.message && props.variant !== "macro",
+    "flex items-center justify-center h-full": props.message && props.variant !== "expanded",
   },
 ]);
 
@@ -91,29 +97,31 @@ const letterT = ref(null);
 const letterH = ref(null);
 const letterY = ref(null);
 
-
 // Animation timeline
-let timeline;
+let firstTimeline;
+let secondTimeline;
 
 function initializeAnimation() {
   if (!slashTop.value || !slashBottom.value) return;
 
   // Continuous animations
-  const secondPhase = anime({
-      targets: [bracketLeft.value, bracketRight.value],
-      opacity: [0.5, 1],
-      duration: 1000,
-      loop: true,
-      direction: 'alternate',
-      easing: 'easeInOutSine',
-    });
+  secondTimeline = anime({
+    targets: [bracketLeft.value, bracketRight.value],
+    opacity: [0.5, 1],
+    duration: 1000,
+    loop: true,
+    direction: 'alternate',
+    easing: 'easeInOutSine',
+    autoplay: false
+  });
   
-  timeline = anime.timeline({
+  firstTimeline = anime.timeline({
     easing: 'easeOutExpo',
+    autoplay: false
   });
 
   // Slashes animation with better timing
-  timeline.add({
+  firstTimeline.add({
     targets: slashTop.value,
     translateY: ['-100%', '0%'],
     opacity: [0, 1],
@@ -138,35 +146,102 @@ function initializeAnimation() {
   // Brackets animation
   .add({
     targets: [bracketLeft.value, bracketRight.value],
-    opacity: [0, 1],
+    opacity: [0, 0.5],
     translateX: (el, i) => [(i === 0 ? -20 : 20), 0],
     duration: 400,
-    complete: secondPhase.play()
-  }, '-=200')
+    complete: () => secondTimeline.play()
+  }, '-=200');
+
+  // Play the animation
+  firstTimeline.play();
 }
 
 onMounted(() => {
-  if (props.variant === 'macro') {
-    initializeAnimation();
+  if (props.variant === 'expanded') {
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    requestAnimationFrame(() => {
+      initializeAnimation();
+    });
+  }
+});
+
+onBeforeUnmount(() => {
+  // Clean up animations to prevent memory leaks
+  if (firstTimeline) {
+    firstTimeline.pause();
+    firstTimeline = null;
+  }
+  if (secondTimeline) {
+    secondTimeline.pause();
+    secondTimeline = null;
   }
 });
 </script>
 
 <style scoped>
-/* Only keeping necessary custom animations */
-.animate-spin-mini {
-  @apply animate-spin-2000;
+.css-loader {
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  border: 2px solid;
+  border-color: #9ca3af #9ca3af transparent transparent;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
 
-.loader-macro {
-  @apply fixed inset-0 z-50 flex items-center justify-center bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
+.css-loader::after,
+.css-loader::before {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  border: 2px solid;
+  border-color: transparent transparent #6366f1 #6366f1;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  border-radius: 50%;
+  animation: rotationBack 0.5s linear infinite;
+  transform-origin: center center;
 }
 
-.loader-mini {
-  @apply flex justify-center items-center min-w-10 min-h-10;
+.css-loader::before {
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  border-color: #9ca3af #9ca3af transparent transparent;
+  animation: rotation 1.5s linear infinite;
 }
 
-.loader-micro {
-  @apply flex justify-center items-center min-w-6 min-h-6;
+.dark .css-loader {
+  border-color: #4b5563 #4b5563 transparent transparent;
+}
+
+.dark .css-loader::after {
+  border-color: transparent transparent #818cf8 #818cf8;
+}
+
+.dark .css-loader::before {
+  border-color: #4b5563 #4b5563 transparent transparent;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotationBack {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
 }
 </style>

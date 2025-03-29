@@ -1,10 +1,5 @@
 <template>
-  <BasePage title="About Mathlly" :showFooter="true">
-    <div class="inline-flex items-center rounded-full border border-indigo-200 dark:border-gray-800 bg-indigo-50 dark:bg-gray-800/50 px-3 py-1 text-sm font-medium mb-8">
-      <span class="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400 mr-2" />
-      <span class="text-indigo-600 dark:text-indigo-400 font-['Geist_Mono']">v{{ version.versionInfo.full }}</span>
-    </div>
-
+  <BasePage title="About" :showFooter="true" :showVersion="true">
     <section class="mb-24 font-mono">
       <h2 class="text-4xl sm:text-6xl lg:text-8xl font-medium tracking-tight mb-4">
         The toolset by developers,
@@ -75,13 +70,8 @@
 
 <script setup>
 import { CheckCircleIcon } from "lucide-vue-next";
-import { useTitle } from "@vueuse/core";
-import { useVersionStore } from "@/stores/version";
 import FeatureCard from "@/components/cards/FeatureCard.vue";
 import BasePage from "@/components/base/BasePage.vue";
-
-useTitle("About - Mathlly");
-const version = useVersionStore();
 
 const features = [
   {

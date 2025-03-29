@@ -1,10 +1,10 @@
 <template>
   <header
-    class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 h-14">
+    class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 min-h-14">
     <div class="container mx-auto flex justify-between items-center gap-2">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">
-        <Button v-tippy="{ content: 'Open Sidebar', placement: 'right' }" :class="{ 'hidden': isSidebarOpen }" variant="ghost"
+        <Button v-tippy="{ content: 'Open Sidebar', placement: 'right' }" :class="{ 'opacity-0': isSidebarOpen }" variant="ghost"
           size="icon" @click="$emit('toggle-sidebar')">
           <PanelRightIcon class="h-5 w-5" />
         </Button>
@@ -22,13 +22,14 @@
 
           <div class="flex items-center justify-between gap-2">
             <!-- Keyboard Shortcuts -->
-            <Button v-show="!isMobile" v-tippy="{content: 'Keyboard Shortcuts'}" variant="ghost" size="icon" @click="openShortcutModal">
+            <Button v-if="!isMobile" v-tippy="{content: 'Keyboard Shortcuts'}" variant="ghost" size="icon" @click="openShortcutModal">
                 <Command class="h-5 w-5" />
                 <span class="sr-only">Keyboard Shortcuts</span>
             </Button>
 
-            <Button v-tippy="{content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left'}" variant="ghost" size="icon" @click="$emit('toggle-menubar')">
-              <PanelRightIcon class="h-5 w-5 rotate-180" />
+            <Button v-tippy="{ content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left' }" variant="ghost" size="icon" @click="$emit('toggle-menubar')">
+              <PanelRightIcon v-if="!isMobile" class="h-5 w-5" :class="[isMenubarOpen ? 'rotate-0' : 'rotate-180']" />
+              <MoreVerticalIcon v-else class="h-5 w-5"/>
           </Button>
       </div>
         </div>
@@ -42,7 +43,8 @@
 import { computed, watch, ref } from "vue"
 import {
   Command,
-  PanelRightIcon
+  PanelRightIcon,
+  MoreVerticalIcon
 } from "lucide-vue-next"
 import { useRoute } from "vue-router"
 import { useSettingsStore } from "@/stores/settings"
@@ -53,12 +55,13 @@ import Select from "@/components/ui/SelectBar.vue"
 import Button from "@/components/base/BaseButton.vue"
 
 defineProps({
-  isSidebarOpen: {
-    type: Boolean,
-  },
   isMobile: {
     type: Boolean,
-    default: true,
+    required: true,
+  },
+  isSidebarOpen: {
+    type: Boolean,
+    default: false,
   },
   isMenubarOpen: {
     type: Boolean,

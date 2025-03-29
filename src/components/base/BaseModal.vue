@@ -3,10 +3,12 @@
     :open="open"
     @update:open="$emit('update:open', $event)"
   >
+  <Transition name="fade">
     <DialogOverlay
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-fade"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
       @click="$emit('update:open', false)"
     />
+  </Transition>
 
     <Transition
       enter-active-class="transition duration-200 ease-out"

@@ -1,5 +1,5 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" title="History" @update:is-open="toggleHistory">
+  <BasePanel :is-open="isOpen" :is-mobile="isMobile" title="History" positionSide="left" @update:is-open="toggleHistory">
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
       <ScrollAreaRoot class="h-full w-full">
@@ -213,7 +213,6 @@ const copyAsJson = (item) => {
 // Transition handlers
 const onBeforeEnter = (el) => {
   el.style.opacity = 0
-  el.style.transform = "translateY(0)" // Reset transform
 }
 
 const onEnter = (el, done) => {
@@ -221,7 +220,7 @@ const onEnter = (el, done) => {
     targets: el,
     opacity: [0, 1],
     duration: 400,
-    delay: el.dataset.index * 30, // Stagger effect
+    delay: el.dataset.index * 30,
     easing: "easeOutQuad",
     complete: done,
   })

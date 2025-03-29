@@ -1,22 +1,26 @@
 <template>
-  <BasePage title="What's New" :showFooter="true">
-    <div class="inline-flex items-center rounded-full border border-indigo-200 dark:border-gray-800 bg-indigo-50 dark:bg-gray-800/50 px-3 py-1 text-sm font-medium mb-8">
-      <span class="h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400 mr-2" />
-      <span class="text-indigo-600 dark:text-indigo-400 font-['Geist_Mono']">v{{ version.versionInfo.full }}</span>
-    </div>
+  <BasePage title="What's New" :showFooter="true" :showVersion="true">
 
-    <section class="space-y-8">
-      <h2 class="text-2xl font-medium tracking-tight">
+    <section class="space-y-6 mx-auto max-w-4xl">
+      <h2 class="text-lg font-medium tracking-tight">
         Latest Updates
       </h2>
       <div class="grid gap-6">
         <UpdateCard
-          v-for="update in updates"
+          v-for="update in visibleUpdates"
           :key="update.version"
           :version="update.version"
           :date="update.date"
           :features="update.features"
         />
+      </div>
+      
+      <div v-if="hasMoreUpdates" class="flex justify-center mt-8">
+        <Button
+        variant="primary" 
+          @click="showMoreUpdates">
+          See More
+        </Button>
       </div>
     </section>
 
@@ -41,14 +45,23 @@
 </template>
 
 <script setup>
-import { useTitle } from '@vueuse/core';
-import { useVersionStore } from '@/stores/version'
+import { ref, computed } from 'vue';
 import { ClockIcon } from 'lucide-vue-next';
 import { updates, upcomingFeatures } from '@/data/changelog';
 import UpdateCard from '@/components/cards/UpdateCard.vue';
 import BasePage from '@/components/base/BasePage.vue';
+import Button from '@/components/base/BaseButton.vue';
 
-useTitle("What's New - Mathlly");
-const version = useVersionStore();
+const UPDATES_PER_PAGE = 10;
+const visibleCount = ref(UPDATES_PER_PAGE);
+const visibleUpdates = computed(() => {
+  return updates.slice(0, visibleCount.value);
+});
+const hasMoreUpdates = computed(() => {
+  return visibleCount.value < updates.length;
+});
+
+function showMoreUpdates() {
+  visibleCount.value += UPDATES_PER_PAGE;
+}
 </script>
-

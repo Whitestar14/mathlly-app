@@ -51,17 +51,6 @@
 @import url(./buttons.css);
 
 @layer base {
-  :root {
-    --border-input: theme("colors.gray.200");
-    --ring: theme("colors.indigo.500");
-    --ring-offset: theme("colors.white");
-  }
-  .dark {
-    --border-input: theme("colors.gray.700");
-    --ring: theme("colors.indigo.400");
-    --ring-offset: theme("colors.gray.900");
-  }
-
   /* Global definitions */
   @font-face {
     font-family: "Geist Mono";
@@ -140,9 +129,13 @@
     @apply !animate-none !duration-0;
   }
 
+  textarea {
+    @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
+  }
+
   /* VueTippy custom tooltip styles */
   .tippy-box[data-theme~="custom"] {
-    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-800 text-gray-100 p-1 rounded-lg;
+    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-700 text-gray-300 p-1 rounded-lg;
   
     &[data-placement^="top"] > .tippy-arrow::before {
       @apply border-t-gray-800 dark:border-t-gray-100;
@@ -164,7 +157,7 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium duration-200 transition-colors focus-visible:outline-none 
+    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors focus-visible:outline-none 
     focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
   }
 
@@ -193,7 +186,7 @@
   }
 
   .btn-default-size {
-    @apply h-9 py-1 px-4 rounded-md;
+    @apply h-9 py-1 px-3 rounded-md;
   }
 
   .btn-sm {
@@ -207,22 +200,52 @@
   .btn-icon {
     @apply size-8 rounded-md;
   }
-}
 
-@layer utilities {
-  .bg-muted {
-    @apply bg-gray-300 dark:bg-gray-500 opacity-30;
+  /* Keeping Necessary Loader Animations */
+  .loader-expanded, .loader-regular, .loader-compact {
+    @apply flex justify-center items-center h-full
   }
   
-  .loader-macro {
+  .loader-expanded {
     @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
   }
   
-  .loader-mini {
+  .loader-regular {
     @apply min-w-10 min-h-10;
   }
   
-  .loader-micro {
+  .loader-compact {
     @apply min-w-6 min-h-6;
   }
+}
+
+.loader-fade {
+  animation: loader-fade 1s ease-in-out infinite alternate;
+}
+
+@keyframes loader-fade {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 0.8;
+  }
+}
+
+@layer utilities {
+  .z-5 {
+    z-index: 5;
+  }
+}
+
+/* Vue Transition animation styles */
+/* Fade animations for backdrop */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
