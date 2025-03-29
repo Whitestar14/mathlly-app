@@ -1,8 +1,8 @@
 <template>
   <BasePage title="What's New" :showFooter="true" :showVersion="true">
 
-    <section class="space-y-8">
-      <h2 class="text-2xl font-medium tracking-tight">
+    <section class="space-y-6 mx-auto max-w-4xl">
+      <h2 class="text-lg font-medium tracking-tight">
         Latest Updates
       </h2>
       <div class="grid gap-6">

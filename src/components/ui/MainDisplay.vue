@@ -94,12 +94,13 @@ const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
   throttle: 16, 
   onScroll: useThrottleFn(updateScrollState, 100)
 });
+
 const formattedParts = computed(() => {
   const formatted = DisplayFormatter.format(props.input, { base: props.activeBase, mode: props.mode });
   
   return ParenthesesHighlighter.formatWithParentheses(formatted, parenthesesTracker.value);
 });
-console.log(formattedParts);
+
 const formattedPreview = computed(() => {
   if (!props.preview) return "";
   return DisplayFormatter.format(props.preview, {

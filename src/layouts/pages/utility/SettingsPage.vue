@@ -1,6 +1,6 @@
 <template>
   <BasePage title="Settings">
-    <div class="max-w-2xl mx-auto space-y-8">
+    <div class="space-y-8 mx-auto max-w-4xl">
       <section class="space-y-6">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-medium tracking-tight">

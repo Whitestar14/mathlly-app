@@ -1,10 +1,10 @@
 <template>
   <div class="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-medium tracking-tight">
+      <h3 class="text-base font-mono font-medium tracking-tight">
         {{ version }}
       </h3>
-      <span class="text-sm text-gray-500 dark:text-gray-400">{{ date }}</span>
+      <span class="text-xs text-gray-500 dark:text-gray-400">{{ date }}</span>
     </div>
     <ul class="space-y-3">
       <li

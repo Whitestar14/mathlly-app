@@ -205,19 +205,19 @@
   }
 
   /* Keeping Necessary Loader Animations */
-  .loader-macro, .loader-micro, .loader-mini {
-    @apply flex justify-center items-center 
+  .loader-expanded, .loader-regular, .loader-compact {
+    @apply flex justify-center items-center h-full
   }
   
-  .loader-macro {
+  .loader-expanded {
     @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
   }
   
-  .loader-mini {
+  .loader-regular {
     @apply min-w-10 min-h-10;
   }
   
-  .loader-micro {
+  .loader-compact {
     @apply min-w-6 min-h-6;
   }
 }
@@ -233,4 +233,22 @@
   to {
     opacity: 0.8;
   }
+}
+
+@layer utilities {
+  .z-5 {
+    z-index: 5;
+  }
+}
+
+/* Vue Transition animation styles */
+/* Fade animations for backdrop */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }

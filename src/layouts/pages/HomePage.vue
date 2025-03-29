@@ -1,5 +1,5 @@
 <template>
-  <BasePage :showHeader="false" :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
+  <BasePage :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
     <!-- Hero Section with Gradient Background -->
     <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50/50 to-white dark:from-gray-900 dark:to-gray-800/80">
       <!-- Grid Pattern Background -->
@@ -7,7 +7,7 @@
         <div class="absolute inset-0 pattern-grid opacity-30 dark:opacity-70"></div>
       </div>
       
-      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative z-10">
+      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative z-5">
         <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div class="w-full md:w-2/3 flex justify-center flex-col text-center md:text-left space-y-6">
             <div 
@@ -285,12 +285,16 @@
   </div>
 </section>
 
-
+  <!-- Welcome Modal -->
+<welcome-modal 
+    :is-open="showWelcomeModal" 
+    @update:is-open="showWelcomeModal = $event" 
+    @close="closeWelcomeModal" 
+  />
   </BasePage>
 </template>
 
 <script setup>
-import BasePage from "@/components/base/BasePage.vue";
 import { ref, defineComponent, h, onMounted } from 'vue';
 import { 
   Binary, 
@@ -305,14 +309,15 @@ import {
   CodeIcon,
   CloudIcon
 } from 'lucide-vue-next';
-import { useTitle } from '@vueuse/core';
+import { useTitle, useTimeoutFn } from '@vueuse/core';
 import { useVersionStore } from '@/stores/version';
+import { RouterLink } from 'vue-router';
+import { useTheme } from '@/composables/useTheme'
 import Logo from '@/components/base/BaseLogo.vue';
 import Button from '@/components/base/BaseButton.vue';
 import Badge from '@/components/base/BaseBadge.vue';
-import { RouterLink } from 'vue-router';
-import { useTheme } from '@/composables/useTheme'
-
+import BasePage from "@/components/base/BasePage.vue";
+import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 const { isDark } = useTheme();
 
 // Simple CountUp component
@@ -443,6 +448,24 @@ const getFeatureIcon = (iconName) => {
   
   return iconMap[iconName] || CalculatorIcon;
 };
+
+const showWelcomeModal = ref(false);
+
+onMounted(() => {
+  // Check if the welcome modal has been shown before
+  const hasShownWelcome = localStorage.getItem("mathlly-welcome-shown") === "true";
+  
+  if (!hasShownWelcome) {
+    // Add a delay before showing the modal
+    useTimeoutFn(() => {
+      showWelcomeModal.value = true;
+    }, 1000); // 1 second delay, adjust as needed
+  }
+});
+
+const closeWelcomeModal = () => {
+  showWelcomeModal.value = false;
+};
 </script>
 
 <style scoped>
@@ -462,11 +485,5 @@ const getFeatureIcon = (iconName) => {
 .feature-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-/* Ensure smooth animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

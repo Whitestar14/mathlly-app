@@ -1,5 +1,5 @@
 <template>
-  <BasePage title="About Mathlly" :showFooter="true" :showVersion="true">
+  <BasePage title="About" :showFooter="true" :showVersion="true">
     <section class="mb-24 font-mono">
       <h2 class="text-4xl sm:text-6xl lg:text-8xl font-medium tracking-tight mb-4">
         The toolset by developers,
