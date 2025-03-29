@@ -260,15 +260,4 @@ const onToggle = () => {
 .slide-right-leave-from {
   transform: translateX(0%);
 }
-
-/* Fade animations for backdrop */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
 </style>

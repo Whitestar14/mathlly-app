@@ -1,5 +1,5 @@
 <template>
-  <BasePage :showHeader="false" :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
+  <BasePage :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
     <!-- Hero Section with Gradient Background -->
     <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50/50 to-white dark:from-gray-900 dark:to-gray-800/80">
       <!-- Grid Pattern Background -->
@@ -7,7 +7,7 @@
         <div class="absolute inset-0 pattern-grid opacity-30 dark:opacity-70"></div>
       </div>
       
-      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative z-10">
+      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative z-5">
         <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div class="w-full md:w-2/3 flex justify-center flex-col text-center md:text-left space-y-6">
             <div 
@@ -485,11 +485,5 @@ const closeWelcomeModal = () => {
 .feature-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-/* Ensure smooth animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>
