@@ -234,3 +234,21 @@
     opacity: 0.8;
   }
 }
+
+@layer utilities {
+  .z-5 {
+    z-index: 5;
+  }
+}
+
+/* Vue Transition animation styles */
+/* Fade animations for backdrop */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
