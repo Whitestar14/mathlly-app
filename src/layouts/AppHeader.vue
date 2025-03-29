@@ -1,6 +1,6 @@
 <template>
   <header
-    class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 h-14">
+    class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 min-h-14">
     <div class="container mx-auto flex justify-between items-center gap-2">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">
@@ -55,12 +55,13 @@ import Select from "@/components/ui/SelectBar.vue"
 import Button from "@/components/base/BaseButton.vue"
 
 defineProps({
-  isSidebarOpen: {
-    type: Boolean,
-  },
   isMobile: {
     type: Boolean,
-    default: true,
+    required: true,
+  },
+  isSidebarOpen: {
+    type: Boolean,
+    default: false,
   },
   isMenubarOpen: {
     type: Boolean,

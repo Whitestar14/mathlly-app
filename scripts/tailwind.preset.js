@@ -2,17 +2,23 @@ module.exports = {
   theme: {
     extend: {
       animation: {
+        "spin-fast": "spin 1s linear infinite",
         "spin-slow": "spin 3s linear infinite",
-        "spin-1000": "spin 1s linear infinite",
-        "spin-2000": "spin 2s linear infinite",
-        "spin-3000": "spin 3s linear infinite",
-        "spin-4000": "spin 4s linear infinite",
-        "spin-5000": "spin 5s linear infinite",
+        "fade-in": "fade-in 0.3s ease-out",
+        "scale-in": "scale-in 0.3s ease-out",
       },
       keyframes: {
         spin: {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "scale-in": {
+          "0%": { transform: "scale(0.95)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
         },
       },
       fontFamily: {

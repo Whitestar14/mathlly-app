@@ -12,9 +12,6 @@
 
     </div>
     <history-panel :mode="mode" :is-mobile="isMobile" :is-open="isHistoryOpen" @update:is-open="toggleHistory" @select-item="selectHistoryItem" />
-
-    <!-- Welcome Modal -->
-    <welcome-modal :is-open="showWelcomeModal" @update:is-open="showWelcomeModal = $event" @close="closeWelcomeModal" />
   </main>
 </template>
 
@@ -27,7 +24,6 @@ import { useCalculator } from "@/composables/useCalculator"
 import { useKeyboard } from "@/composables/useKeyboard"
 import { useInputValidation } from "@/composables/useValidation"
 import HistoryPanel from "@/layouts/pages/calculators/main/HistoryPanel.vue"
-import WelcomeModal from "@/layouts/modals/WelcomeModal.vue"
 import CalculatorDisplay from "@/layouts/pages/calculators/main/CalculatorDisplay.vue"
 import CalculatorButtons from "@/layouts/pages/calculators/main/CalculatorButtons.vue"
 import { useSettingsStore } from "@/stores/settings"
@@ -85,7 +81,6 @@ const preview = computed(() => {
 })
 
 const currentInput = ref("0")
-const showWelcomeModal = ref(localStorage.getItem("mathlly-welcome-shown") !== "true")
 const { addToHistory } = useHistory()
 const { isOpen: isHistoryOpen, close:closeHistory, toggle: toggleHistory, handleResize } = usePanel('history-panel', props.isMobile)
 
@@ -272,9 +267,5 @@ const selectHistoryItem = ({ expression }) => {
   currentInput.value = expression
 
   closeHistory();
-}
-
-const closeWelcomeModal = () => {
-  showWelcomeModal.value = false
 }
 </script>
