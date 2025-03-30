@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col">
-    <div class="grid grid-cols-5 gap-1 mb-1">
+  <div class="flex flex-col gap-1">
+    <div class="grid grid-cols-5 gap-1">
       <button
         v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
         :key="op"

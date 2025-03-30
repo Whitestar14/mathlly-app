@@ -10,7 +10,7 @@
           'opacity-0': !isAnimating,
         }"
       >
-        <div class="text-3xl mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
+        <div :class="displayClass">
           {{ animatedResult }}
         </div>
       </div>

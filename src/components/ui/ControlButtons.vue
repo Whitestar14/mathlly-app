@@ -11,7 +11,7 @@
         class="rounded-none hover:bg-gray-50 group-hover:bg-opacity-100 md:hidden"
         @click="openHistory"
       >
-        <HistoryIcon size="20" />
+        <HistoryIcon size="15" />
       </Button>
       <Separator
         class="h-6 bg-gray-300 dark:bg-gray-600 w-px md:hidden group-has-[.rounded-none:hover]:h-8 transition-[height]"
@@ -23,7 +23,7 @@
         class="rounded-none hover:bg-gray-50 group-hover:bg-opacity-100"
         @click="copyToClipboard"
       >
-        <Copy size="20" />
+        <Copy size="15" />
       </Button>
     </div>
   </div>
