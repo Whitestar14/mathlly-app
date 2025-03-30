@@ -55,8 +55,9 @@
         v-if="!isMobile && position !== 'side'"
         class="desktop-panel"
         :class="[
-          'transition-all duration-300 ease-in-out border-l border-gray-200 dark:border-gray-700',
-          isOpen ? 'w-[18.5rem]' : 'w-10'
+          'transition-[width] duration-300 ease-in-out border-gray-200 dark:border-gray-700',
+          isOpen ? 'w-[18.5rem]' : 'w-10',
+          positionSide === 'left' ? 'border-l' : 'border-r',
         ]"
       >
         <div
@@ -211,7 +212,7 @@ const onToggle = () => {
 }
 
 .side-panel-container {
-  @apply fixed top-0 bottom-0 z-50 inset-y-0 bg-gray-50 dark:bg-gray-900 transition-all;
+  @apply fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900 transition-transform;
   height: 100vh;
   overflow: hidden;
   display: flex;
