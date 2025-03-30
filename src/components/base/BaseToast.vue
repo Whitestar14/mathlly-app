@@ -1,6 +1,6 @@
 <template>
     <!-- Toast stack container - simplified for mobile -->
-    <div class="fixed z-50 bottom-4 right-4 h-auto w-72" :class="{ '-translate-x-1/2 left-1/2 right-auto': isMobile }">
+    <div class="fixed z-50 bottom-4 right-4 h-auto w-72 pointer-events-none" :class="{ '-translate-x-1/2 left-1/2 right-auto': isMobile }">
       <TransitionGroup 
         name="toast-transition" 
         tag="div"
@@ -17,7 +17,7 @@
           }"
         >
           <div class="flex justify-between items-start">
-            <div class="pr-6"> <!-- Add padding to prevent text overlap with close button -->
+            <div class="pr-3"> <!-- Add padding to prevent text overlap with close button -->
               <h3 class="font-medium text-gray-900 dark:text-gray-100">
                 {{ toast.title }}
               </h3>

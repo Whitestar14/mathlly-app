@@ -82,9 +82,18 @@
     font-display: swap;
   }
 
-  body {
-    @apply font-sans font-normal;
+  :root {
+    @apply font-sans font-normal text-sm sm:text-base;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium text-gray-900 dark:text-gray-100;
+  }
+
+  p {
+    @apply text-xs md:text-sm;
+  }
+
   /* Scrollbar styles */
   body,
   html {
@@ -118,15 +127,6 @@
     @apply w-fit bg-gray-200/90 text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
   }
 
-  .toast {
-    @apply bg-white dark:bg-gray-800 border border-gray-200 
-  dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm w-full;
-  }
-
-  .toast + .toast {
-    @apply mt-2;
-  }
-
   /* Settings toggle classes */
   .animation-disabled * {
     @apply !animate-none !duration-0;
@@ -138,7 +138,7 @@
 
   /* VueTippy custom tooltip styles */
   .tippy-box[data-theme~="custom"] {
-    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-700 text-gray-300 p-1 rounded-lg;
+    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-800 text-gray-100 p-1 rounded-lg;
   
     &[data-placement^="top"] > .tippy-arrow::before {
       @apply border-t-gray-800 dark:border-t-gray-100;
@@ -222,17 +222,40 @@
   }
 }
 
-.loader-fade {
-  animation: loader-fade 1s ease-in-out infinite alternate;
+/* Vue Transition animation styles */
+/* Fade animations for backdrop */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-@keyframes loader-fade {
-  from {
-    opacity: 0.4;
-  }
-  to {
-    opacity: 0.8;
-  }
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.scale-enter-active,
+.scale-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.scale-enter-from,
+.scale-leave-to {
+  transform: scale(0.985)
+}
+@layer utilities {
+    /* Pattern utilities */
+    .pattern-grid {
+      background-image: 
+        linear-gradient(to right, rgba(128, 128, 128, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(128, 128, 128, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+  
+    .pattern-dots {
+      background-image: radial-gradient(rgba(128, 128, 128, 0.1) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
 }
 
 @layer utilities {
