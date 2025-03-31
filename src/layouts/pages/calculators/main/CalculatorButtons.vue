@@ -10,6 +10,7 @@
       :active-base="activeBase"
         :input-length="inputLength"
         :max-length="maxLength"
+        :has-memory="hasMemory"
         @button-click="handleButtonClick"
         @clear="handleClear"
       />
@@ -47,6 +48,10 @@ const props = defineProps({
   maxLength: {
     type: Number,
     default: 50
+  },
+  hasMemory: {
+    type: Boolean,
+    default: false
   }
 });
 

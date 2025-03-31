@@ -1,5 +1,5 @@
 // composables/useCalculatorState.js
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 
 export function useCalculatorState() {
   const state = ref({
@@ -16,32 +16,26 @@ export function useCalculatorState() {
       BIN: { input: '0', display: '0' },
     },
     currentExpression: '',
+    memoryStates: {
+      Standard: false,
+      Programmer: false
+    }
   });
 
-  const getCurrentDisplayValue = computed(() => {
-    return state.value.displayValues[state.value.activeBase]?.input || '0';
-  });
-
-  const updateState = (newState) => {
-    state.value = {
-      ...state.value,
-      ...newState,
-    };
+  // Add method to update memory state for a specific calculator type
+  const updateMemoryState = (calculatorType, hasMemory) => {
+    const updatedMemoryStates = { ...state.value.memoryStates };
+    updatedMemoryStates[calculatorType] = hasMemory;
+    
+    updateState({
+      memoryStates: updatedMemoryStates
+    });
   };
 
-  // Update useCalculatorState's updateDisplayValues
   const updateDisplayValues = (values) => {
-    if (!values) return;
-
     const updatedDisplayValues = { ...state.value.displayValues };
-
-    Object.keys(values).forEach((base) => {
-      if (updatedDisplayValues[base]) {
-        updatedDisplayValues[base] = {
-          ...updatedDisplayValues[base],
-          ...values[base],
-        };
-      }
+    Object.keys(values).forEach(base => {
+      updatedDisplayValues[base] = values[base];
     });
 
     // Update both displayValues and input to ensure consistency
@@ -49,6 +43,17 @@ export function useCalculatorState() {
       displayValues: updatedDisplayValues,
       input: values[state.value.activeBase]?.input || state.value.input,
     });
+  };
+
+  const updateState = (newState) => {
+    state.value = {
+      ...state.value,
+      ...newState,
+    }
+  }
+
+  const getCurrentDisplayValue = () => {
+    return state.value.displayValues[state.value.activeBase] || { input: '0', display: '0' };
   };
 
   const setActiveBase = (base) => {
@@ -73,6 +78,9 @@ export function useCalculatorState() {
   };
 
   const clearState = () => {
+    // Save current memory states
+    const currentMemoryStates = { ...state.value.memoryStates };
+    
     const defaultState = {
       input: '0',
       preview: '',
@@ -85,17 +93,21 @@ export function useCalculatorState() {
       },
       activeBase: 'DEC',
       currentExpression: '',
+      // Restore memory states
+      memoryStates: currentMemoryStates
     };
-
+  
     // Reset state based on calculator mode
     updateState(defaultState);
   };
+  
 
   return {
     state,
     getCurrentDisplayValue,
     updateState,
     updateDisplayValues,
+    updateMemoryState,
     setActiveBase,
     setAnimation,
     clearState,

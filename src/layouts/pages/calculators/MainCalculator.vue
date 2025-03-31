@@ -7,9 +7,9 @@
           @open-history="toggleHistory" @base-change="handleBaseChange" />
 
         <calculator-buttons :mode="mode" :input-length="input.length" :max-length="maxInputLength"
-          :active-base="activeBase" @button-click="handleButtonClick" @clear="handleClear" />
+          :active-base="activeBase" :has-memory="hasMemory" @button-click="handleButtonClick" @clear="handleClear" />
       </div>
-
+      
     </div>
     <history-panel :mode="mode" :is-mobile="isMobile" :is-open="isHistoryOpen" @update:is-open="toggleHistory" @select-item="selectHistoryItem" />
   </main>
@@ -46,6 +46,8 @@ const {
   setAnimation,
   clearState,
   updateDisplayState,
+  handleMemoryOperation,
+  checkMemoryState
 } = useCalculator(props.mode, props.settings)
 
 provide("calculator", computed(() => calculator.value));
@@ -58,6 +60,7 @@ const animatedResult = computed(() => state.value.animatedResult)
 const activeBase = computed(() => state.value.activeBase)
 const displayValues = computed(() => state.value.displayValues)
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)
+const hasMemory = computed(() => state.value.memoryStates[props.mode] || false)
 
 const preview = computed(() => {
   if (props.mode === "Programmer") {
@@ -93,7 +96,14 @@ watch(
 
 const handleButtonClick = (btn) => {
   try {
-    const result = calculator.value.handleButtonClick(btn)
+    let result;
+    
+    // Handle memory operations through our special handler for both modes
+    if (['MC', 'MR', 'M+', 'M-', 'MS'].includes(btn)) {
+      result = handleMemoryOperation(btn);
+    } else {
+      result = calculator.value.handleButtonClick(btn);
+    }
 
     updateState({
       input: result.input,
@@ -207,8 +217,21 @@ watch(
   () => props.mode,
   (newMode) => {
     if (!newMode) return // Skip if mode is not set
-    clearState()
+    
+    // Create new calculator without clearing state first
     calculator.value = createCalculator(newMode)
+    
+    // Check memory state for the new mode AFTER calculator is created
+    checkMemoryState(newMode)
+    
+    // Now clear other state (but not memory state)
+    const currentMemoryStates = { ...state.value.memoryStates };
+    clearState()
+    
+    // Restore memory states after clearing
+    updateState({
+      memoryStates: currentMemoryStates
+    });
 
     if (newMode === "Programmer") {
       setActiveBase("DEC")
@@ -219,6 +242,7 @@ watch(
   },
   { immediate: true }
 )
+
 
 watch(
   currentInput,
