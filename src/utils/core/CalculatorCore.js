@@ -1,7 +1,7 @@
 import { Memory } from "./Memory";
 import { useSettingsStore } from '@/stores/settings';
 
-export class EngineCalculator {
+export class CalculatorCore {
   constructor(settings) {
     // Fallback to settings store if not provided
     this.settings = settings || useSettingsStore(); 
