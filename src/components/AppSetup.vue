@@ -39,12 +39,12 @@ import { useDeviceStore } from "@/stores/device"
 import { useSettingsStore } from "@/stores/settings"
 import { useKeyboard } from "@/composables/useKeyboard"
 import { usePanel } from "@/composables/usePanel"
+import MainMenu from "@/layouts/MainMenu.vue"
 import AppHeader from "@/layouts/AppHeader.vue"
 import SidebarMenu from "@/layouts/SidebarMenu.vue"
-import MainMenu from "@/components/ui/MainMenu.vue"
+import AppView from "@/components/AppView.vue"
 import Loader from "@/components/base/BaseLoader.vue"
 import Toast from "@/components/base/BaseToast.vue"
-import AppView from "@/components/AppView.vue"
 
 const router = useRouter()
 const deviceStore = useDeviceStore()

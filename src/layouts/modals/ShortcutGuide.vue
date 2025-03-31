@@ -18,10 +18,7 @@
 
     <div class="mt-4">
       <div class="flex border-b border-gray-200 dark:border-gray-700 relative">
-        <div
-          class="absolute will-change-transform bottom-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 transition-all duration-200"
-          :style="indicatorStyle"
-        />
+        <Indicator :position="indicatorStyle" />
         <button
           v-for="category in Object.keys(shortcutGroups)"
           :key="category"
@@ -99,6 +96,7 @@
 import { ref } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { usePills } from "@/composables/usePills";
+import Indicator from "@/components/ui/PillIndicator.vue";
 
 defineProps({
   open: Boolean,
@@ -122,8 +120,8 @@ const shortcutGroups = {
     backspace: { description: "Delete Last Character" },
   },
   Programmer: {
-    "ctrl+1": { description: "Switch to Decimal" },
-    "ctrl+2": { description: "Switch to Hexadecimal" },
+    "ctrl+1": { description: "Switch to Hexadecimal" },
+    "ctrl+2": { description: "Switch to Decimal" },
     "ctrl+3": { description: "Switch to Octal" },
     "ctrl+4": { description: "Switch to Binary" },
   },

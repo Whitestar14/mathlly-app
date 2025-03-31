@@ -163,7 +163,7 @@
         <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0 }"
           class="relative overflow-hidden rounded-lg shadow-lg">
           <!-- Content -->
-          <div class="relative z-10 p-8 md:p-12 text-center">
+          <div class="relative z-5 p-8 md:p-12 text-center">
             <!-- Logo accent -->
             <div class="flex justify-center mb-6">
               <Logo size="sm" :themeSensitive="true" />

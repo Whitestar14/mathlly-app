@@ -5,10 +5,11 @@
         <h2 class="text-base font-medium text-gray-800 dark:text-gray-200">
           {{ title }}
         </h2>
-        <div class="flex items-center gap-2" :class="!(showCloseButton && isMobile) && 'w-full'">
+        <div class="flex items-center gap-2 justify-between">
           <slot name="header-actions"></slot>
-          <Button v-if="showCloseButton && isMobile" variant="ghost" size="icon" @click="$emit('close')">
-            <XIcon class="h-4 w-4" />
+          <Button v-if="showCloseButton || isMobile || (showCloseButton && isMobile)" variant="ghost" size="icon" @click="$emit('close')">
+            <XIcon v-if="isMobile" class="h-4 w-4" />
+            <PanelRightIcon v-else class="h-5 w-5" />
           </Button>
         </div>
       </div>
@@ -26,7 +27,7 @@
   </template>
   
   <script setup>
-  import { XIcon } from "lucide-vue-next"
+  import { XIcon, PanelRightIcon } from "lucide-vue-next"
   import Button from "@/components/base/BaseButton.vue"
   
   defineProps({

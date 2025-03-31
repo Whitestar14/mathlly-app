@@ -1,5 +1,5 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" @update:isOpen="closeMenu" :show-toggle="false" title="Menu"
+  <BasePanel :is-open="isOpen" :is-mobile="isMobile" @update:isOpen="closeMenu" :show-toggle="false" :show-close-button="false" title="Menu"
     position="side" width="64" mainClass="dark:bg-gray-900">
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
@@ -27,23 +27,11 @@
 
     <template #footer>
       <div class="space-y-1.5">
-        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 px-3">Theme</h3>
-        <ToggleGroupRoot type="single" v-model="selectedTheme"
-          class="inline-flex items-center gap-1 p-1 mx-3 bg-gray-100/50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-          <ToggleGroupItem value="light"
-            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
-            <Sun class="h-4 w-4" />
-            <span class="sr-only">Light</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem value="dark"
-            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
-            <Moon class="h-4 w-4" />
-            <span class="sr-only">Dark</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem value="system"
-            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
-            <AppWindowMac class="h-4 w-4" />
-            <span class="sr-only">System</span>
+        <h3 class="text-xs uppercase tracking-wider font-medium text-gray-500 dark:text-gray-400 px-3">Theme</h3>
+        <ToggleGroupRoot type="single" v-model="selectedTheme" class="inline-flex *:items-center gap-1 p-1 mx-3 bg-gray-100/50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+          <ToggleGroupItem v-for="item of items" :key="item.id" :value="item.id" class="text-gray-700 dark:text-gray-300 flex justify-center w-8 h-8 rounded-md transition-colors duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-gray-100/80 dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
+            <component :is="item.icon" class="h-4 w-4" />
+            <span class="sr-only">{{ item.title }}</span>
           </ToggleGroupItem>
         </ToggleGroupRoot>
       </div>
@@ -86,6 +74,11 @@ const closeMenu = () => emit('update:isOpen', false)
 
 const { selectedTheme, isDark } = useTheme()
 
+const items = [
+  { id: "light", title: "Light", icon: Sun },
+  { id: "dark", title: "Dark", icon: Moon },
+  { id: "system", title: "System", icon: AppWindowMac }
+]
 // Update theme immediately when selectedTheme changes if needed.
 onMounted(() => {
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')

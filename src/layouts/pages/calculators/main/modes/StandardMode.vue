@@ -10,6 +10,7 @@
         {{ op }}
       </button>
     </div>
+    
     <div class="grid grid-cols-4 gap-1 flex-grow">
       <button
         class="calc-btn calc-function-btn calc-btn-grid"

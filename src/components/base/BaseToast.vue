@@ -1,6 +1,6 @@
 <template>
     <!-- Toast stack container - simplified for mobile -->
-    <div class="fixed z-50 bottom-4 right-4 h-auto w-72 pointer-events-none" :class="{ '-translate-x-1/2 left-1/2 right-auto': isMobile }">
+    <div class="fixed z-50 bottom-4 right-4 h-auto w-72" :class="{ '-translate-x-1/2 left-1/2 pointer-events-none right-auto': isMobile }">
       <TransitionGroup 
         name="toast-transition" 
         tag="div"

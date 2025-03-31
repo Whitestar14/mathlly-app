@@ -1,18 +1,19 @@
 <!-- CalculatorButtons.vue -->
 <template>
-  <Transition name="scale" mode="out-in">
   <Suspense>
     <!-- Main Content -->
     <template #default>
+      <Transition name="scale" mode="out-in">
       <component 
-        :is="modeComponent" 
-        class="flex-auto"
-        :active-base="activeBase"
+      :is="modeComponent" 
+      class="flex-auto"
+      :active-base="activeBase"
         :input-length="inputLength"
         :max-length="maxLength"
         @button-click="handleButtonClick"
         @clear="handleClear"
       />
+    </Transition>
     </template>
     <!-- Loading State -->
     <template #fallback>
@@ -25,7 +26,6 @@
       </div>
     </template>
   </Suspense>
-  </Transition>
 </template>
 
 <script setup>

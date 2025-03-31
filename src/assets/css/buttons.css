@@ -12,39 +12,29 @@
 
   .calc-letter-btn,
   .calc-number-btn {
-  @apply bg-gray-200 text-gray-700 hover:bg-gray-300 
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 
          dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500
-         disabled:hover:bg-gray-200 disabled:dark:hover:bg-gray-600;
+         disabled:hover:bg-gray-100 disabled:dark:hover:bg-gray-600;
   }
 
   .calc-function-btn {
-    @apply bg-gray-300 text-gray-900 hover:bg-gray-400 
+    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 
          dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600
-         disabled:hover:bg-gray-300 disabled:dark:hover:bg-gray-700;
+         disabled:hover:bg-gray-200 disabled:dark:hover:bg-gray-700;
   }
 
   .calc-operator-btn {
-    @apply bg-indigo-500 text-white hover:bg-indigo-600 
+    @apply bg-indigo-400 text-white hover:bg-indigo-500 
          dark:bg-gray-500 dark:text-white dark:hover:bg-gray-400
-         disabled:hover:bg-indigo-500 disabled:dark:hover:bg-gray-500;
+         disabled:hover:bg-indigo-400 disabled:dark:hover:bg-gray-500;
   }
 
   .calc-special-btn-ac {
     @apply bg-red-500 text-white hover:bg-red-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-500;
   }
 
-  .calc-equals-btn {
-    @apply bg-gray-500 text-white hover:bg-gray-900;
-  }
-
   .calc-memory-btn {
-    @apply text-sm tracking-wider text-gray-800 hover:bg-gray-200 dark:text-gray-200 dark:hover:bg-gray-700;
+    @apply text-sm tracking-wider text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700;
   }
 
-  .calc-bitwise-select-btn {
-    @apply appearance-none text-sm cursor-pointer text-gray-800 dark:bg-gray-800 dark:text-white py-2 px-4 pr-8 rounded leading-tight focus:outline-none dark:hover:bg-gray-700 focus:opacity-50 dark:focus:bg-gray-700 dark:focus:border-gray-500;
-  }
-  .calc-c {
-    @apply dark:bg-gray-300 dark:text-gray-700 dark:hover:bg-gray-200;
-  }
 }

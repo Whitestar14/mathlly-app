@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col gap-1">
     <div class="grid grid-cols-5 gap-1 flex-grow">
       <div class="flex flex-col gap-1">
         <button

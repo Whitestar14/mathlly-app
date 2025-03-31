@@ -16,7 +16,7 @@
     <!-- Side Panel -->
     <Transition :name="positionSide === 'left' ? 'slide-left' : 'slide-right'">
       <div
-        v-show="position === 'side' && isOpen"
+        v-if="position === 'side' && isOpen"
         class="side-panel-container"
         :class="[
           isMobile ? 'w-full' : `w-${width}`,
