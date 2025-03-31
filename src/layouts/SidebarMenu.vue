@@ -181,7 +181,7 @@ const categories = ref([
   {
     title: "Information",
     items: [
-      { name: "What's New", path: "/info/whats-new", icon: SparklesIcon },
+      { name: "Updates", path: "/info/update", icon: SparklesIcon },
       { name: "About", path: "/info/about", icon: InfoIcon },
     ],
   },
