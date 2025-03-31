@@ -31,17 +31,17 @@
         <ToggleGroupRoot type="single" v-model="selectedTheme"
           class="inline-flex items-center gap-1 p-1 mx-3 bg-gray-100/50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
           <ToggleGroupItem value="light"
-            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
+            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
             <Sun class="h-4 w-4" />
             <span class="sr-only">Light</span>
           </ToggleGroupItem>
           <ToggleGroupItem value="dark"
-            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
+            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
             <Moon class="h-4 w-4" />
             <span class="sr-only">Dark</span>
           </ToggleGroupItem>
           <ToggleGroupItem value="system"
-            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-all duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
+            class="text-gray-700 dark:text-gray-300 flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900 focus-visible:ring-2 ring-indigo-500 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-800/80 data-[state=on]:shadow-sm data-[state=on]:text-indigo-600 data-[state=on]:dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/50">
             <AppWindowMac class="h-4 w-4" />
             <span class="sr-only">System</span>
           </ToggleGroupItem>
@@ -65,8 +65,9 @@ import {
   ScrollAreaRoot,
   ScrollAreaScrollbar,
   ScrollAreaViewport,
+  ToggleGroupRoot,
+  ToggleGroupItem
 } from "radix-vue"
-import { ToggleGroupRoot, ToggleGroupItem } from "radix-vue"
 import { onMounted } from 'vue'
 
 defineProps({

@@ -1,7 +1,7 @@
 <template>
   <main class="flex-grow flex">
     <div class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300">
-      <div class="grid grid-cols-1 h-full p-4 gap-2 mx-auto" :class="mode === 'Programmer' ? 'grid-rows-[1fr_1.5fr]': 'grid-rows-[1fr_3fr]'">
+      <div class="grid grid-cols-1 h-full p-4 gap-1 mx-auto" :class="mode === 'Programmer' ? 'grid-rows-[1fr_2fr]': 'grid-rows-[1fr_2.5fr]'">
         <calculator-display :input="input" :preview="preview" :error="error" :is-animating="isAnimating"
           :animated-result="animatedResult" :active-base="activeBase" :mode="mode" :display-values="displayValues"
           @open-history="toggleHistory" @base-change="handleBaseChange" />

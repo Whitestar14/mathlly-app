@@ -1,44 +1,29 @@
 <template>
   <BasePage :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
     <!-- Hero Section with Gradient Background -->
-    <section class="relative overflow-hidden bg-gradient-to-b from-indigo-50/50 to-white dark:from-gray-900 dark:to-gray-800/80">
+    <section
+      class="pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">
       <!-- Grid Pattern Background -->
-      <div class="absolute inset-0">
-        <div class="absolute inset-0 pattern-grid opacity-30 dark:opacity-70"></div>
-      </div>
-      
-      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative z-5">
+      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative">
         <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div class="w-full md:w-2/3 flex justify-center flex-col text-center md:text-left space-y-6">
-            <div 
-              v-motion
-              :initial="{ opacity: 0, y: 20 }"
-              :enter="{ opacity: 1, y: 0, transition: { delay: 0.2 } }"
+            <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.2 } }"
               class="self-center md:self-start mb-2">
               <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
             </div>
-            
-            <h1 
-              v-motion
-              :initial="{ opacity: 0, y: 20 }"
-              :enter="{ opacity: 1, y: 0, transition: { delay: 0.3 } }"
-              class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+
+            <h1 v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.3 } }"
+              class="text-5xl md:text-6xl lg:text-7xl font-mono font-bold tracking-tight">
               Mathematical precision
               <span class="block text-indigo-600 dark:text-indigo-400 mt-2">for modern development</span>
             </h1>
-            
-            <p 
-              v-motion
-              :initial="{ opacity: 0, y: 20 }"
-              :enter="{ opacity: 1, y: 0, transition: { delay: 0.4 } }"
+
+            <p v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.4 } }"
               class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
               A comprehensive suite of mathematical tools designed to streamline your development workflow
             </p>
-            
-            <div 
-              v-motion
-              :initial="{ opacity: 0, y: 20 }"
-              :enter="{ opacity: 1, y: 0, transition: { delay: 0.5 } }"
+
+            <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.5 } }"
               class="flex justify-center md:justify-start flex-wrap gap-4 mt-8">
               <RouterLink to="/calculator">
                 <Button variant="primary" size="lg" class="w-full sm:w-auto">
@@ -54,14 +39,12 @@
               </a>
             </div>
           </div>
-          
-          <div 
-            v-motion
-            :initial="{ opacity: 0, scale: 0.9 }"
+
+          <div v-motion :initial="{ opacity: 0, scale: 0.9 }"
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
-            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 md:aspect-square top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 width-full rounded-full blur-xl"></div>
-            <Logo type="svg" :svgPath="isDark ? '/img/mathlly-dark.svg' : '/img/mathlly-light.svg'" size="lg" class="relative transform scale-[2] hover:scale-[2.5] md:scale-[3] md:hover:scale-[3.5] transition-all duration-500" />
+            <Logo type="svg" :svgPath="isDark ? '/img/mathlly-dark.svg' : '/img/mathlly-light.svg'" size="lg"
+              class="relative hidden md:block scale-[2.5] md:scale-[3.5]" />
           </div>
         </div>
       </div>
@@ -70,16 +53,10 @@
     <!-- Statistics Section -->
     <section class="py-16 bg-white dark:bg-gray-800">
       <div class="container mx-auto px-4">
-        <div 
-          v-motion
-          :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
+        <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
           class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div 
-            v-for="stat in statistics" 
-            :key="stat.label"
-            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-600"
-          >
+          <div v-for="stat in statistics" :key="stat.label"
+            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-600">
             <h3 class="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
               <CountUp :end-val="stat.value" :duration="2.5" :suffix="stat.suffix" />
             </h3>
@@ -95,35 +72,24 @@
         <div class="flex items-center justify-between mb-10">
           <h2 class="text-2xl md:text-3xl font-medium">Essential Tools</h2>
           <RouterLink to="/calculator">
-            <Button variant="link" class="group"> 
+            <Button variant="link" class="group">
               View all tools
               <ArrowRightIcon class="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
             </Button>
           </RouterLink>
         </div>
-        
-        <div 
-          v-motion
-          :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
-          class="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
-          <RouterLink
-            v-for="tool in quickTools"
-            :key="tool.path"
-            :to="tool.path"
-            class="block h-full transition-transform duration-300 hover:-translate-y-1"
-          >
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 p-6 h-full">
-              <div class="flex items-center mb-4">
-                <div class="bg-indigo-50 dark:bg-gray-700 p-3 rounded-lg mr-3">
-                  <component :is="tool.icon" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ tool.name }}</h3>
-                <Badge v-if="tool.isNew" type="new" class="ml-2" />
-              </div>
-              <p class="text-gray-600 dark:text-gray-300">{{ tool.description }}</p>
-            </div>
+
+        <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
+          class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <RouterLink v-for="tool in quickTools" :key="tool.path" :to="tool.path"
+            class="relative block h-full transition-transform duration-300 hover:-translate-y-1">
+            <FeatureCard 
+            :key="tool.name"
+            :title="tool.name"
+            :icon="tool.icon"
+            :description="tool.description"
+            />
+            <Badge v-if="tool.isNew" type="new" class="absolute right-5 top-5" />
           </RouterLink>
         </div>
       </div>
@@ -133,25 +99,10 @@
     <section class="py-16 bg-white dark:bg-gray-800">
       <div class="container mx-auto px-4">
         <h2 class="text-2xl md:text-3xl font-medium mb-10 text-center">Key Features</h2>
-        <div 
-          v-motion
-          :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          <div
-            v-for="feature in features"
-            :key="feature.title"
-            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 border border-gray-100 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300"
-          >
-            <div class="flex items-center mb-4">
-              <div class="bg-indigo-100 dark:bg-gray-600 p-2 rounded-lg mr-3">
-                <component :is="getFeatureIcon(feature.icon)" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ feature.title }}</h3>
-            </div>
-            <p class="text-gray-600 dark:text-gray-300">{{ feature.description }}</p>
-          </div>
+        <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <FeatureCard v-for="feature in features" :key="feature.title" :icon="feature.icon" :title="feature.title"
+            :description="feature.description" />
         </div>
       </div>
     </section>
@@ -161,11 +112,7 @@
       <div class="container mx-auto px-4">
         <div class="flex flex-col gap-12">
           <!-- Why Choose Us Section - Redesigned -->
-          <div 
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :enter="{ opacity: 1, y: 0 }"
-            class="w-full">
+          <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0 }" class="w-full">
             <h2 class="text-2xl md:text-3xl font-medium mb-6">Why Choose Mathlly?</h2>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -180,26 +127,26 @@
           </div>
 
           <!-- Mission Section - Redesigned -->
-          <div 
-            v-motion
-            :initial="{ opacity: 0, y: 20 }"
-            :enter="{ opacity: 1, y: 0 }"
-            class="w-full">
+          <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0 }" class="w-full">
             <h2 class="text-2xl md:text-3xl font-medium mb-6">Our Mission</h2>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div
+              class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div class="flex flex-col md:flex-row">
                 <div class="md:w-2/3 p-6">
                   <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-                    At Mathlly, we're committed to empowering developers with powerful, intuitive, and efficient mathematical tools. 
-                    Our goal is to streamline complex calculations, making your coding journey smoother and more productive.
+                    At Mathlly, we're committed to empowering developers with powerful, intuitive, and efficient
+                    mathematical tools.
+                    Our goal is to streamline complex calculations, making your coding journey smoother and more
+                    productive.
                   </p>
                   <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                    We believe that mathematical precision should be accessible to all developers, regardless of their background or experience level.
+                    We believe that mathematical precision should be accessible to all developers, regardless of their
+                    background or experience level.
                   </p>
                 </div>
                 <div class="md:w-1/3 bg-indigo-50 dark:bg-gray-700 p-6 flex items-center justify-center">
                   <div class="text-center">
-                    <FunctionSquareIcon class="h-16 w-16 text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
+                    <AsteriskIcon class="h-16 w-16 text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
                     <p class="text-indigo-700 dark:text-indigo-300 font-medium">Precision & Simplicity</p>
                   </div>
                 </div>
@@ -210,106 +157,89 @@
       </div>
     </section>
 
-<!-- CTA Section - Redesigned with improved dark mode support -->
-<section class="py-16 bg-white dark:bg-gray-800">
-  <div class="container mx-auto px-4">
-    <div 
-      v-motion
-      :initial="{ opacity: 0, y: 20 }"
-      :enter="{ opacity: 1, y: 0 }"
-      class="relative overflow-hidden rounded-lg shadow-lg"
-    >
-      <!-- Content -->
-      <div class="relative z-10 p-8 md:p-12 text-center">
-        <!-- Logo accent -->
-        <div class="flex justify-center mb-6">
-          <Logo size="sm" :themeSensitive="true" />
-        </div>
-        
-        <!-- Title with monospace accent - improved for dark mode -->
-        <h2 class="text-2xl md:text-3xl font-mono font-medium mb-4 text-white">
-          Ready to experience <kbd class="font-mono inline-block bg-white/10 dark:bg-white/30 px-2 py-1 rounded text-white dark:text-white border border-white/20">
-            {math<span class="text-indigo-200 dark:text-indigo-300 font-black inline-block mx-0.5">//</span>y}
-          </kbd>?
-        </h2>
-        
-        <p class="text-indigo-100 dark:text-indigo-50 max-w-2xl mx-auto mb-8 text-lg">
-          Join hundreds of developers who are already using Mathlly to streamline their mathematical workflows.
-        </p>
-        
-        <!-- Action buttons with badge - improved for dark mode -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <RouterLink to="/calculator">
-            <Button 
-              variant="secondary" 
-              size="lg" 
-              class="bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-gray-200 shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
-            >
-              <CalculatorIcon class="h-4 w-4" />
-              Try Mathlly Now
-            </Button>
-          </RouterLink>
-          
-          <a href="https://github.com/Whitestar14/mathlly-app" target="_blank">
-            <Button 
-              variant="outline" 
-              size="lg" 
-              class="border-white/30 dark:border-white/40 !text-white hover:bg-white/10 dark:hover:bg-white/15 w-full sm:w-auto"
-            >
-              <GithubIcon class="h-4 w-4" />
-              Star on GitHub
-            </Button>
-          </a>
-        </div>
-        
-        <!-- Version badge -->
-        <div class="mt-8 flex justify-center">
-          <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
+    <!-- CTA Section - Redesigned with improved dark mode support -->
+    <section class="py-16 bg-white dark:bg-gray-800">
+      <div class="container mx-auto px-4">
+        <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0 }"
+          class="relative overflow-hidden rounded-lg shadow-lg">
+          <!-- Content -->
+          <div class="relative z-10 p-8 md:p-12 text-center">
+            <!-- Logo accent -->
+            <div class="flex justify-center mb-6">
+              <Logo size="sm" :themeSensitive="true" />
+            </div>
+
+            <!-- Title with monospace accent - improved for dark mode -->
+            <h2 class="text-2xl md:text-3xl font-mono font-medium mb-4 text-white">
+              Ready to experience <kbd
+                class="font-mono inline-block bg-white/10 dark:bg-white/30 px-2 py-1 rounded text-white dark:text-white border border-white/20">
+                {math<span class="text-indigo-200 dark:text-indigo-300 font-black inline-block mx-0.5">//</span>y}
+              </kbd>?
+            </h2>
+
+            <p class="text-indigo-100 dark:text-indigo-50 max-w-2xl mx-auto mb-8 text-lg">
+              Join hundreds of developers who are already using Mathlly to streamline their mathematical workflows.
+            </p>
+
+            <!-- Action buttons with badge - improved for dark mode -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <RouterLink to="/calculator">
+                <Button variant="secondary" size="lg"
+                  class="bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-gray-200 shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto">
+                  <CalculatorIcon class="h-4 w-4" />
+                  Try Mathlly Now
+                </Button>
+              </RouterLink>
+
+              <a href="https://github.com/Whitestar14/mathlly-app" target="_blank">
+                <Button variant="outline" size="lg"
+                  class="border-white/30 dark:border-white/40 !text-white hover:bg-white/10 dark:hover:bg-white/15 w-full sm:w-auto">
+                  <GithubIcon class="h-4 w-4" />
+                  Star on GitHub
+                </Button>
+              </a>
+            </div>
+
+            <!-- Version badge -->
+            <div class="mt-8 flex justify-center">
+              <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
+            </div>
+          </div>
+
+          <!-- Gradient overlay - adjusted for better dark mode appearance -->
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-800 dark:to-blue-900">
+          </div>
+
+          <!-- Background with grid pattern -->
+          <div class="absolute inset-0 pattern-grid opacity-10 dark:opacity-50"></div>
+
+          <!-- Decorative elements with dark mode adjustments -->
+          <div class="absolute top-0 right-0 w-64 h-64 -mt-12 -mr-12 opacity-20 dark:opacity-10">
+            <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
+          </div>
+          <div class="absolute bottom-0 left-0 w-48 h-48 -mb-8 -ml-8 opacity-20 dark:opacity-10">
+            <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <!-- Gradient overlay - adjusted for better dark mode appearance -->
-      <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-800 dark:to-blue-900"></div>
-
-      <!-- Background with grid pattern -->
-      <div class="absolute inset-0 pattern-grid opacity-10 dark:opacity-50"></div>
-      
-      <!-- Decorative elements with dark mode adjustments -->
-      <div class="absolute top-0 right-0 w-64 h-64 -mt-12 -mr-12 opacity-20 dark:opacity-10">
-        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
-      </div>
-      <div class="absolute bottom-0 left-0 w-48 h-48 -mb-8 -ml-8 opacity-20 dark:opacity-10">
-        <div class="w-full h-full rounded-full bg-white dark:bg-indigo-400 blur-3xl"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-  <!-- Welcome Modal -->
-<welcome-modal 
-    :is-open="showWelcomeModal" 
-    @update:is-open="showWelcomeModal = $event" 
-    @close="closeWelcomeModal" 
-  />
+    <!-- Welcome Modal -->
+    <welcome-modal :is-open="showWelcomeModal" @update:is-open="showWelcomeModal = $event" @close="closeWelcomeModal" />
   </BasePage>
 </template>
 
 <script setup>
 import { ref, defineComponent, h, onMounted } from 'vue';
-import { 
-  Binary, 
-  FunctionSquareIcon, 
+import {
   ArrowRightIcon, 
   CheckCircleIcon,
   CalculatorIcon,
   GithubIcon,
-  EyeIcon,
-  HistoryIcon,
-  PaletteIcon,
-  CodeIcon,
-  CloudIcon
+  AsteriskIcon
 } from 'lucide-vue-next';
-import { useTitle, useTimeoutFn } from '@vueuse/core';
+import { useTimeoutFn } from '@vueuse/core';
 import { useVersionStore } from '@/stores/version';
 import { RouterLink } from 'vue-router';
 import { useTheme } from '@/composables/useTheme'
@@ -317,6 +247,7 @@ import Logo from '@/components/base/BaseLogo.vue';
 import Button from '@/components/base/BaseButton.vue';
 import Badge from '@/components/base/BaseBadge.vue';
 import BasePage from "@/components/base/BasePage.vue";
+import FeatureCard from "@/components/cards/FeatureCard.vue";
 import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 const { isDark } = useTheme();
 
@@ -356,27 +287,26 @@ const CountUp = defineComponent({
 });
 
 const version = useVersionStore();
-useTitle('Mathlly - Mathematical Precision for Modern Development');
 
 const quickTools = [
   {
     name: 'Calculator',
     path: '/calculator',
-    icon: CalculatorIcon,
+    icon: 'Calculator',
     description: 'Advanced calculator with programming-specific features and real-time evaluation.',
     isNew: false
   },
   {
     name: 'Base64',
     path: '/tools/base64',
-    icon: Binary,
+    icon: 'Binary',
     description: 'Efficiently encode and decode Base64 strings with instant preview and validation.',
     isNew: true
   },
   {
     name: 'Functions',
     path: '/functions',
-    icon: FunctionSquareIcon,
+    icon: 'FunctionSquare',
     description: 'Comprehensive mathematical functions with visualization capabilities.',
     isNew: false
   }
@@ -435,20 +365,6 @@ const reasons = [
   "Extensive documentation and support resources",
 ];
 
-// Map feature icon names to actual components
-const getFeatureIcon = (iconName) => {
-  const iconMap = {
-    'Calculator': CalculatorIcon,
-    'Eye': EyeIcon,
-    'History': HistoryIcon,
-    'Palette': PaletteIcon,
-    'Code': CodeIcon,
-    'Cloud': CloudIcon
-  };
-  
-  return iconMap[iconName] || CalculatorIcon;
-};
-
 const showWelcomeModal = ref(false);
 
 onMounted(() => {
@@ -459,7 +375,7 @@ onMounted(() => {
     // Add a delay before showing the modal
     useTimeoutFn(() => {
       showWelcomeModal.value = true;
-    }, 1000); // 1 second delay, adjust as needed
+    }, 1000);
   }
 });
 
@@ -467,23 +383,3 @@ const closeWelcomeModal = () => {
   showWelcomeModal.value = false;
 };
 </script>
-
-<style scoped>
-/* Grid pattern using CSS */
-.pattern-grid {
-  background-image: 
-    linear-gradient(to right, rgba(128, 128, 128, 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(128, 128, 128, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-/* Add subtle hover effects */
-.feature-card {
-  transition: all 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-</style>

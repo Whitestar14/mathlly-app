@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300" :class="{
+  <div class="min-h-screen flex bg-background dark:bg-background-dark duration-300" :class="{
     'animation-disabled': settings.animationDisabled,
   }">
     <sidebar-menu :is-open="isSidebarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeSidebar" />
 
-    <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
+    <div class="flex flex-col flex-grow duration-300"
       :class="[
         !deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '',
         !deviceStore.isMobile && isMenubarOpen ? 'mr-64' : ''
