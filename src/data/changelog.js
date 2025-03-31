@@ -1,5 +1,21 @@
 export const updates = [
   {
+    version: '0.11.8',
+    date: 'March 29, 2025',
+    features: [
+      '@milestone: Fixed Panels in app behave predictably',
+      'Enhanced `BaseLogo.vue` by extending theme-sensitive mathlly logos to Home Page banner',
+      'Removed redundant code across preset scripts and component files coupled with codebase refractoring',
+      'Renamed a few components for semantic consistency and for better responsibility description',
+      'Redesigned main calculator interface to absolve to taking all available client viewport across devices',
+      'Implemented a simpler, softer on system resources loader system to improve performance',
+      'Generalized `BaseBadge.vue` component to support notching',
+      'Introduced dynamic font sizing for mobile/desktop responsiveness',
+      'Improved general app performance by fixing pill logic issues and leveraging vueuse composables',
+      'What\'s New Page interface was refined for better interactability',
+    ]
+  },
+  {
     version: '0.11.7',
     date: 'March 23, 2025',
     features: [
