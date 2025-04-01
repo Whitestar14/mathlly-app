@@ -34,11 +34,6 @@ export class StandardCalculator extends EngineCalculator {
 
   processButton(btn) {
     const operationMap = {
-      MC: () => this.handleMemoryClear(),
-      MR: () => this.handleMemoryRecall(),
-      "M+": () => this.handleMemoryAdd(),
-      "M-": () => this.handleMemorySubtract(),
-      MS: () => this.handleMemoryStore(),
       "=": () => this.handleEquals(),
       AC: () => this.handleClear(),
       C: () => this.handleClear(),

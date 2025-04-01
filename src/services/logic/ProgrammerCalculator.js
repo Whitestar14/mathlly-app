@@ -98,12 +98,6 @@ export class ProgrammerCalculator extends EngineCalculator {
         case "-":
         case "×":
         case "÷": return this.operations.handleOperator(btn);
-              // Memory operations - use the existing methods from EngineCalculator
-      case "MC": return this.handleMemoryClear();
-      case "MR": return this.handleMemoryRecall();
-      case "M+": return this.handleMemoryAdd();
-      case "M-": return this.handleMemorySubtract();
-      case "MS": return this.handleMemoryStore();
         default: this.operations.handleNumber(btn);
       }
 
@@ -243,51 +237,4 @@ export class ProgrammerCalculator extends EngineCalculator {
     return this.states[this.activeBase].input.length >= this.MAX_INPUT_LENGTH &&
       !["=", "AC", "backspace", "<<", ">>", "±", "%"].includes(btn);
   }
-
-  // Override memory methods to handle base conversions
-handleMemoryRecall() {
-  const value = this.memory.recall();
-  if (value !== null) {
-    // Convert the decimal memory value to the current base
-    const convertedValue = this.formatResult(value, this.activeBase);
-    this.states[this.activeBase].input = convertedValue;
-  }
-  return { input: this.states[this.activeBase].input, error: this.error };
-}
-
-handleMemoryAdd() {
-  try {
-    const currentValue = this.evaluateExpression(this.states[this.activeBase].input, this.activeBase);
-    if (!this.memory.add(currentValue)) {
-      this.error = "Memory operation failed";
-    }
-  } catch (err) {
-    this.error = "Memory operation failed";
-  }
-  return { input: this.states[this.activeBase].input, error: this.error };
-}
-
-handleMemorySubtract() {
-  try {
-    const currentValue = this.evaluateExpression(this.states[this.activeBase].input, this.activeBase);
-    if (!this.memory.subtract(currentValue)) {
-      this.error = "Memory operation failed";
-    }
-  } catch (err) {
-    this.error = "Memory operation failed";
-  }
-  return { input: this.states[this.activeBase].input, error: this.error };
-}
-
-handleMemoryStore() {
-  try {
-    const value = this.evaluateExpression(this.states[this.activeBase].input, this.activeBase);
-    if (!this.memory.store(value)) {
-      this.error = "Cannot store in memory";
-    }
-  } catch (err) {
-    this.error = "Cannot store in memory";
-  }
-  return { input: this.states[this.activeBase].input, error: this.error };
-}
 }
