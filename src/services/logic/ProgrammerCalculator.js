@@ -1,4 +1,4 @@
-import { EngineCalculator } from "@/utils/misc/CalculatorCore";
+import { CalculatorCore } from "@/utils/core/CalculatorCore";
 import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
 import { ProgrammerCalculations } from "@/utils/calculations/ProgrammerCalculations";
 import {
@@ -6,9 +6,9 @@ import {
   DecCalculator,
   HexCalculator,
   OctCalculator,
-} from "../../utils/misc/BaseCalculator";
+} from "../../utils/core/BaseCalculator";
 
-export class ProgrammerCalculator extends EngineCalculator {
+export class ProgrammerCalculator extends CalculatorCore {
   constructor(settings) {
     super(settings);
     this.MAX_INPUT_LENGTH = 29;
