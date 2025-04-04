@@ -1,7 +1,9 @@
 import { evaluate, bignumber, isNegative, isNaN } from "mathjs";
 
 export class ProgrammerCalculations {
-  static MAX_VALUE = Infinity;
+    // Use 63-bit signed integer max value (2^63-1)
+    static MAX_VALUE = bignumber("9223372036854775807");
+    static MIN_VALUE = bignumber("-9223372036854775808"); // 2^63 negated  
 
   static bases = {
     BIN: 2,
@@ -28,8 +30,8 @@ export class ProgrammerCalculations {
         throw new Error("Invalid operation");
       }
       
-      // Check for overflow
-      if (Math.abs(result) > this.MAX_VALUE) {
+      // Check for overflow against 63-bit limits
+      if (result > this.MAX_VALUE || result < this.MIN_VALUE) {
         throw new Error("Overflow");
       }
       
@@ -93,7 +95,7 @@ export class ProgrammerCalculations {
     
     try {
       const decimalValue = result.toNumber();
-      if (Math.abs(decimalValue) > this.MAX_VALUE) return "Overflow";
+      if (decimalValue > this.MAX_VALUE || decimalValue < this.MIN_VALUE) return "Overflow";
       
       const absoluteValue = Math.abs(decimalValue);
       const converted = absoluteValue.toString(this.bases[base]).toUpperCase();

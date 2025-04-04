@@ -11,7 +11,7 @@ import {
 export class ProgrammerCalculator extends CalculatorCore {
   constructor(settings) {
     super(settings);
-    this.MAX_INPUT_LENGTH = 29;
+    this.MAX_INPUT_LENGTH = 69;
     this.states = {
       DEC: { input: "0", display: "0" },
       BIN: { input: "0", display: "0" },

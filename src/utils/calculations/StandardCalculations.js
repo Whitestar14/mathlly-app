@@ -3,7 +3,9 @@ import { evaluate, format, bignumber, fraction } from "mathjs";
 export class StandardCalculations {
   constructor(settings) {
     this.settings = settings;
+    // 63-bit signed integer limits
     this.MAX_VALUE = bignumber("9223372036854775807");
+    this.MIN_VALUE = bignumber("-9223372036854775808");
     this.MAX_INPUT_LENGTH = 100;
   }
 
@@ -33,6 +35,11 @@ export class StandardCalculations {
         throw new Error("Invalid result");
       }
 
+      // Add overflow check
+      if (result > this.MAX_VALUE || result < this.MIN_VALUE) {
+        throw new Error("Overflow");
+      }
+
       return result;
     } catch (err) {
       throw new Error("Invalid expression: " + err.message);
@@ -41,24 +48,24 @@ export class StandardCalculations {
 
   static trimUnnecessaryZeros(formattedNumber) {
     // Don't trim if in scientific notation
-    if (formattedNumber.includes('e')) return formattedNumber;
-    
+    if (formattedNumber.includes("e")) return formattedNumber;
+
     // Split into whole and decimal parts
-    const [whole, decimal] = formattedNumber.split('.');
-    
+    const [whole, decimal] = formattedNumber.split(".");
+
     // No decimal part, return as is
     if (!decimal) return whole;
-    
+
     // Trim trailing zeros from decimal
-    const trimmedDecimal = decimal.replace(/0+$/, '');
-    
+    const trimmedDecimal = decimal.replace(/0+$/, "");
+
     // If all decimal digits were zeros, return whole number
     return trimmedDecimal ? `${whole}.${trimmedDecimal}` : whole;
   }
-  
+
   formatResult(result) {
     if (result === undefined) return "";
-  
+
     try {
       if (this.settings.useFractions) {
         const frac = fraction(result);
@@ -68,10 +75,13 @@ export class StandardCalculations {
       }
 
       // Handle special cases first
-      if (Math.abs(result) >= 1e21 || (Math.abs(result) < 1e-7 && result !== 0)) {
+      if (
+        Math.abs(result) >= 1e21 ||
+        (Math.abs(result) < 1e-7 && result !== 0)
+      ) {
         return format(result, {
           precision: this.settings.precision,
-          notation: 'exponential'
+          notation: "exponential",
         });
       }
 
@@ -84,13 +94,13 @@ export class StandardCalculations {
       // For decimal numbers, respect precision but trim unnecessary zeros
       const formattedDecimal = format(result, {
         precision: this.settings.precision,
-        notation: 'fixed'
+        notation: "fixed",
       });
 
       // Remove trailing zeros after decimal point, but keep the decimal point if needed
-      const parts = formattedDecimal.split('.');
+      const parts = formattedDecimal.split(".");
       if (parts.length === 2) {
-        const trimmedDecimal = parts[1].replace(/0+$/, '');
+        const trimmedDecimal = parts[1].replace(/0+$/, "");
         return trimmedDecimal ? `${parts[0]}.${trimmedDecimal}` : parts[0];
       }
 
