@@ -34,7 +34,6 @@
   }
 
   .calc-memory-btn {
-    @apply text-sm tracking-wider text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700;
+    @apply text-sm tracking-wider text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 disabled:dark:hover:bg-transparent;
   }
-
 }

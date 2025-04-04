@@ -13,19 +13,17 @@
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
       <suspense>
         <template #default>
-        <app-view 
-          :mode="mode" 
-          :settings="settings" 
-          :is-mobile="deviceStore.isMobile"
-          @settings-change="updateSettings" 
-          @update:mode="updateMode" 
-        />
+          <app-view
+            :mode="mode"
+            :settings="settings"
+            :is-mobile="deviceStore.isMobile"
+            @settings-change="updateSettings"
+            @update:mode="updateMode" />
         </template>
         <template #fallback><loader variant="regular" /></template>
       </suspense>
     </div>
 
-    <!-- Main Menu Panel -->
     <main-menu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
   </div>
   <toast :is-mobile="deviceStore.isMobile"/>
@@ -50,7 +48,7 @@ const router = useRouter()
 const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
 
-// Ensure minimum loading time of 2 seconds
+// --- Loading Logic ---
 const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000))
 
 await Promise.all([
@@ -99,6 +97,7 @@ watch(
   }
 )
 
+// Close panels on mobile route change
 watch(router.currentRoute, () => {
   if (deviceStore.isMobile) {
     closeSidebar()
@@ -106,13 +105,10 @@ watch(router.currentRoute, () => {
   }
 })
 
+// --- Keyboard Shortcuts ---
 useKeyboard("global", {
-  toggleSidebar: () => {
-    toggleSidebar()
-  },
-  toggleMenubar: () => {
-    toggleMenubar()
-  },
+  toggleSidebar: toggleSidebar, // Simplified syntax
+  toggleMenubar: toggleMenubar,
   toggleFullscreen: () => {
     useFullscreen(document.documentElement).toggle()
   },
@@ -121,4 +117,5 @@ useKeyboard("global", {
 onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
+
 </script>

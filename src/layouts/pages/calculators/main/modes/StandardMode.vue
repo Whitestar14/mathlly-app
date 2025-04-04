@@ -5,7 +5,7 @@
   v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
   :key="op"
   class="calc-btn calc-memory-btn calc-btn-grid"
-  :class="{ 'opacity-50': (op === 'MC' || op === 'MR') && !hasMemory }"
+  :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
   @click="handleClick(op)"
 >
   {{ op }}

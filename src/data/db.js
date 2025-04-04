@@ -1,9 +1,10 @@
 import Dexie from "dexie";
 
-const db = new Dexie("CalculatorDB");
+const db = new Dexie('mathlly-db');
+
 db.version(2).stores({
-  history: "++id, expression, result, timestamp",
-  settings: "id, precision, useFractions, useThousandsSeparator, formatBinary, formatHexadecimal, formatOctal, theme, mode, animationDisabled"
+  history: '++id,timestamp',
+  settings: 'id'
 });
 
 // Perform database upgrade
