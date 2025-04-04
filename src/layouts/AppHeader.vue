@@ -4,9 +4,10 @@
     <div class="container mx-auto flex justify-between items-center gap-2">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">
-        <Button v-tippy="{ content: 'Open Sidebar', placement: 'right' }" :class="{ 'opacity-0': isSidebarOpen }" variant="ghost"
+        <Button v-tippy="{ content: isSidebarOpen ? 'Close Sidebar': 'Open Sidebar', placement: 'right' }" variant="ghost"
           size="icon" @click="$emit('toggle-sidebar')">
-          <PanelRightIcon class="h-5 w-5" />
+          <PanelLeftIcon v-if="!isSidebarOpen" class="h-5 w-5" />
+          <PanelLeftCloseIcon v-else class="h-5 w-5" />
         </Button>
       </div>
 
@@ -28,7 +29,10 @@
             </Button>
 
             <Button v-tippy="{ content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left' }" variant="ghost" size="icon" @click="$emit('toggle-menubar')">
-              <PanelRightIcon v-if="!isMobile" class="h-5 w-5" :class="[isMenubarOpen ? 'rotate-0' : 'rotate-180']" />
+              <div v-if="!isMobile" class="rotate-180">
+                <PanelLeftIcon v-if="!isMenubarOpen" class="h-5 w-5" />
+                <PanelLeftCloseIcon v-else class="h-5 w-5" />
+              </div>
               <MoreVerticalIcon v-else class="h-5 w-5"/>
           </Button>
       </div>
@@ -43,7 +47,8 @@
 import { computed, watch, ref } from "vue"
 import {
   Command,
-  PanelRightIcon,
+  PanelLeftIcon,
+  PanelLeftCloseIcon,
   MoreVerticalIcon
 } from "lucide-vue-next"
 import { useRoute } from "vue-router"

@@ -1,4 +1,5 @@
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 import { StandardCalculator } from '@/services/logic/StandardCalculator';
 import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator';
 import { useCalculatorState } from './useCalculatorState';
@@ -32,23 +33,26 @@ export function useCalculator(mode, settings) {
   // Initialize calculator
   calculator.value = createCalculator(mode);
 
-  const updateDisplayState = () => {
+  // Debounce display updates to prevent UI jank
+  const updateDisplayState = useDebounceFn(() => {
     if (mode === 'Programmer') {
-      const updatedValues = calculator.value.updateDisplayValues();
-      if (updatedValues) {
-        updateDisplayValues(updatedValues);
-        // Only update input if it's different from current state
-        if (
-          updatedValues[state.value.activeBase]?.input !== state.value.input
-        ) {
-          updateState({
-            input: updatedValues[state.value.activeBase]?.input || '0',
-            error: '',
-          });
+      nextTick(() => {
+        const updatedValues = calculator.value.updateDisplayValues();
+        if (updatedValues) {
+          updateDisplayValues(updatedValues);
+          // Only update input if it's different from current state
+          if (
+            updatedValues[state.value.activeBase]?.input !== state.value.input
+          ) {
+            updateState({
+              input: updatedValues[state.value.activeBase]?.input || '0',
+              error: '',
+            });
+          }
         }
-      }
+      });
     }
-  };
+  }, 16);
 
   return {
     calculator,

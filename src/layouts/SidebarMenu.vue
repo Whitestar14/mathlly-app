@@ -4,12 +4,8 @@
 
     <!-- Custom header -->
     <template #header-actions>
-      <div class="flex justify-between items-center w-full">
-      <Logo />
-      <Button v-tippy="{ content: 'Close Sidebar', placement: 'bottom' }" variant="ghost" size="icon"
-        @click="closeSidebar">
-        <PanelLeftIcon class="h-5 w-5" />
-      </Button>
+    <div class="flex justify-between items-center">
+      <Logo class="absolute left-2"/>
     </div>
     </template>
 
@@ -19,14 +15,13 @@
       <div class="flex-1 overflow-y-auto">
         <NavigationMenuRoot>
           <NavigationMenuList class="px-3 py-2 space-y-6">
-            <div class="absolute will-change-auto z-50 left-3 rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
-              :style="indicatorStyle" />
+            <Indicator :position="indicatorStyle"/>
             <div v-for="category in categories" :key="category.title" class="space-y-2">
               <h2 class="px-3 text-xs font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">
                 {{ category.title }}
               </h2>
               <div class="space-y-0.5">
-                <NavigationMenuItem v-for="item in category.items" ref="sidebarElements" :key="item.path" class="space-y-0.5 z-0">
+                <NavigationMenuItem v-for="item in category.items" ref="sidebarElements" :key="item.path" class="space-y-0.5">
                   <NavigationMenuLink :active="currentPill === item.path" as-child>
                     <button :data-path="item.path" :class="[
                       menuItemClasses,
@@ -99,7 +94,6 @@ import {
   RegexIcon,
   LineChartIcon,
   ArrowRightLeftIcon,
-  PanelLeftIcon,
   Binary,
 } from "lucide-vue-next"
 import {
@@ -112,9 +106,8 @@ import { ref } from "vue"
 import { usePills } from "@/composables/usePills"
 import Badge from "@/components/base/BaseBadge.vue"
 import Logo from '@/components/base/BaseLogo.vue'
-import Button from "@/components/base/BaseButton.vue"
 import BasePanel from "@/components/base/BasePanel.vue"
-
+import Indicator from "@/components/ui/PillIndicator.vue"
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -181,7 +174,7 @@ const categories = ref([
   {
     title: "Information",
     items: [
-      { name: "What's New", path: "/info/whats-new", icon: SparklesIcon },
+      { name: "Updates", path: "/info/update", icon: SparklesIcon },
       { name: "About", path: "/info/about", icon: InfoIcon },
     ],
   },

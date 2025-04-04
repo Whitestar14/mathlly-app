@@ -1,17 +1,20 @@
 <!-- CalculatorButtons.vue -->
 <template>
-  <Suspense class="h-full">
+  <Suspense>
     <!-- Main Content -->
     <template #default>
+      <Transition name="scale" mode="out-in">
       <component 
-        :is="modeComponent" 
-        class="flex-auto"
-        :active-base="activeBase"
+      :is="modeComponent" 
+      class="flex-auto"
+      :active-base="activeBase"
         :input-length="inputLength"
         :max-length="maxLength"
+        :has-memory="hasMemory"
         @button-click="handleButtonClick"
         @clear="handleClear"
       />
+    </Transition>
     </template>
     <!-- Loading State -->
     <template #fallback>
@@ -19,7 +22,7 @@
         <div 
           v-for="n in 24" 
           :key="n" 
-          class="calc-btn-grid bg-gray-200 dark:bg-gray-700 rounded-lg"
+          class="animate-pulse calc-btn-grid bg-gray-200 dark:bg-gray-700 rounded-lg"
         />
       </div>
     </template>
@@ -45,6 +48,10 @@ const props = defineProps({
   maxLength: {
     type: Number,
     default: 50
+  },
+  hasMemory: {
+    type: Boolean,
+    default: false
   }
 });
 

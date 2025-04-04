@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300" :class="{
+  <div class="min-h-screen flex bg-background dark:bg-background-dark duration-300" :class="{
     'animation-disabled': settings.animationDisabled,
   }">
     <sidebar-menu :is-open="isSidebarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeSidebar" />
 
-    <div class="flex flex-col flex-grow transition-all duration-300 ease-in-out"
+    <div class="flex flex-col flex-grow duration-300"
       :class="[
         !deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '',
         !deviceStore.isMobile && isMenubarOpen ? 'mr-64' : ''
@@ -13,19 +13,17 @@
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
       <suspense>
         <template #default>
-        <app-view 
-          :mode="mode" 
-          :settings="settings" 
-          :is-mobile="deviceStore.isMobile"
-          @settings-change="updateSettings" 
-          @update:mode="updateMode" 
-        />
+          <app-view
+            :mode="mode"
+            :settings="settings"
+            :is-mobile="deviceStore.isMobile"
+            @settings-change="updateSettings"
+            @update:mode="updateMode" />
         </template>
         <template #fallback><loader variant="regular" /></template>
       </suspense>
     </div>
 
-    <!-- Main Menu Panel -->
     <main-menu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
   </div>
   <toast :is-mobile="deviceStore.isMobile"/>
@@ -39,18 +37,18 @@ import { useDeviceStore } from "@/stores/device"
 import { useSettingsStore } from "@/stores/settings"
 import { useKeyboard } from "@/composables/useKeyboard"
 import { usePanel } from "@/composables/usePanel"
+import MainMenu from "@/layouts/MainMenu.vue"
 import AppHeader from "@/layouts/AppHeader.vue"
 import SidebarMenu from "@/layouts/SidebarMenu.vue"
-import MainMenu from "@/components/ui/MainMenu.vue"
+import AppView from "@/components/AppView.vue"
 import Loader from "@/components/base/BaseLoader.vue"
 import Toast from "@/components/base/BaseToast.vue"
-import AppView from "@/components/AppView.vue"
 
 const router = useRouter()
 const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
 
-// Ensure minimum loading time of 2 seconds
+// --- Loading Logic ---
 const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000))
 
 await Promise.all([
@@ -99,6 +97,7 @@ watch(
   }
 )
 
+// Close panels on mobile route change
 watch(router.currentRoute, () => {
   if (deviceStore.isMobile) {
     closeSidebar()
@@ -106,13 +105,10 @@ watch(router.currentRoute, () => {
   }
 })
 
+// --- Keyboard Shortcuts ---
 useKeyboard("global", {
-  toggleSidebar: () => {
-    toggleSidebar()
-  },
-  toggleMenubar: () => {
-    toggleMenubar()
-  },
+  toggleSidebar: toggleSidebar, // Simplified syntax
+  toggleMenubar: toggleMenubar,
   toggleFullscreen: () => {
     useFullscreen(document.documentElement).toggle()
   },
@@ -121,4 +117,5 @@ useKeyboard("global", {
 onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
+
 </script>

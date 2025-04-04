@@ -1,5 +1,5 @@
 <template>
-  <BasePage title="What's New" :showFooter="true" :showVersion="true">
+  <BasePage title="Updates" :showFooter="true" :showVersion="true">
 
     <section class="space-y-6 mx-auto max-w-4xl">
       <h2 class="text-lg font-medium tracking-tight">

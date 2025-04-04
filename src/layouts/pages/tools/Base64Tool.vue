@@ -12,6 +12,7 @@
 
       <div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 relative">
+          <Indicator :position="indicatorStyle" />                   
           <div
             v-for="tab in tabs"
             :key="tab.value"
@@ -27,10 +28,6 @@
           >
             {{ tab.label }}
           </div>
-          <div
-            class="absolute will-change-transform rounded-full bg-indigo-500/80 dark:bg-indigo-400/80 transition-all duration-300 ease-in-out"
-            :style="indicatorStyle"
-          />
         </div>
 
         <div class="p-6 bg-white dark:bg-gray-800">
@@ -114,12 +111,13 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from "vue";
+import { useClipboard } from "@vueuse/core";
 import { ArrowDownUp, Copy, ClipboardPaste } from "lucide-vue-next";
 import { useToast } from "@/composables/useToast";
-import { useClipboard } from "@vueuse/core";
-import BaseButton from "@/components/base/BaseButton.vue";
 import { usePills } from "@/composables/usePills";
 import { useKeyboard } from "@/composables/useKeyboard";
+import BaseButton from "@/components/base/BaseButton.vue";
+import Indicator from "@/components/ui/PillIndicator.vue"
 
 defineOptions({ name: "Base64Tool" });
 

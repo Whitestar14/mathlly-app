@@ -18,10 +18,7 @@
 
     <div class="mt-4">
       <div class="flex border-b border-gray-200 dark:border-gray-700 relative">
-        <div
-          class="absolute will-change-transform bottom-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 transition-all duration-200"
-          :style="indicatorStyle"
-        />
+        <Indicator :position="indicatorStyle" />
         <button
           v-for="category in Object.keys(shortcutGroups)"
           :key="category"
@@ -41,10 +38,10 @@
 
       <div class="relative overflow-hidden">
         <TransitionGroup
-          enter-active-class="transition-all duration-200 ease-out"
+          enter-active-class="transition-transform duration-200 ease-out"
           enter-from-class="opacity-0 translate-x-4"
           enter-to-class="opacity-100 translate-x-0"
-          leave-active-class="transition-all duration-200 ease-in"
+          leave-active-class="transition-transform duration-200 ease-in"
           leave-from-class="opacity-100 translate-x-0"
           leave-to-class="opacity-0 -translate-x-4"
         >
@@ -99,6 +96,7 @@
 import { ref } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { usePills } from "@/composables/usePills";
+import Indicator from "@/components/ui/PillIndicator.vue";
 
 defineProps({
   open: Boolean,
@@ -122,8 +120,8 @@ const shortcutGroups = {
     backspace: { description: "Delete Last Character" },
   },
   Programmer: {
-    "ctrl+1": { description: "Switch to Decimal" },
-    "ctrl+2": { description: "Switch to Hexadecimal" },
+    "ctrl+1": { description: "Switch to Hexadecimal" },
+    "ctrl+2": { description: "Switch to Decimal" },
     "ctrl+3": { description: "Switch to Octal" },
     "ctrl+4": { description: "Switch to Binary" },
   },
@@ -155,32 +153,10 @@ const handleTabChange = (category, tabElement) => {
   @apply px-2 py-1 min-w-[1.8rem] text-center rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono shadow-sm;
 }
 
-/* Tab transition styles - keep these */
-.scale-x-100 {
-  transform: scaleX(1);
-  transition: transform 0.2s ease;
-}
-
-.scale-x-0 {
-  transform: scaleX(0);
-  transition: transform 0.2s ease;
-}
-
-/* Smoother transitions for content - keep these */
-.transition-all {
-  will-change: transform, opacity;
-}
 
 .relative.overflow-hidden {
-  /* Target the container */
   overflow: hidden;
-  /* Hide vertical and horizontal overflow */
   height: 250px;
   overflow-y: auto;
-  /* Example fixed height - adjust as needed */
-  /* You can also use max-height and overflow-y: auto if you want scrollable tabs
-      max-height: 300px;
-
-  */
 }
 </style>

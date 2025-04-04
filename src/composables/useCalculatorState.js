@@ -34,14 +34,8 @@ export function useCalculatorState() {
     if (!values) return;
 
     const updatedDisplayValues = { ...state.value.displayValues };
-
-    Object.keys(values).forEach((base) => {
-      if (updatedDisplayValues[base]) {
-        updatedDisplayValues[base] = {
-          ...updatedDisplayValues[base],
-          ...values[base],
-        };
-      }
+    Object.keys(values).forEach(base => {
+      updatedDisplayValues[base] = values[base];
     });
 
     // Update both displayValues and input to ensure consistency

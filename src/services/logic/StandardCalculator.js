@@ -1,7 +1,7 @@
-import { EngineCalculator } from "@/utils/misc/CalculatorCore";
+import { CalculatorCore } from "@/utils/core/CalculatorCore";
 import { StandardOperations } from "@/utils/operations/StandardOperations";
 import { StandardCalculations } from "@/utils/calculations/StandardCalculations";
-export class StandardCalculator extends EngineCalculator {
+export class StandardCalculator extends CalculatorCore {
   constructor(settings) {
     super(settings);
     this.MAX_INPUT_LENGTH = 100;
@@ -34,11 +34,6 @@ export class StandardCalculator extends EngineCalculator {
 
   processButton(btn) {
     const operationMap = {
-      MC: () => this.handleMemoryClear(),
-      MR: () => this.handleMemoryRecall(),
-      "M+": () => this.handleMemoryAdd(),
-      "M-": () => this.handleMemorySubtract(),
-      MS: () => this.handleMemoryStore(),
       "=": () => this.handleEquals(),
       AC: () => this.handleClear(),
       C: () => this.handleClear(),
