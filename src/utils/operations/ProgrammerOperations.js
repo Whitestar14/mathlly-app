@@ -6,45 +6,68 @@ export class ProgrammerOperations {
     this.parenthesesTracker = new ParenthesesTracker();
   }
 
+  /**
+   * Handle numeric input
+   * @param {string} num - Number to add
+   * @returns {Object} Updated state
+   */
   handleNumber(num) {
-    const state = this.calculator.states[this.calculator.activeBase];
-    const currentInput = state.input;
+    try {
+      const state = this.calculator.states[this.calculator.activeBase];
+      const currentInput = state.input;
 
-    if (currentInput === "0" || currentInput === "Error") {
-      state.input = num;
-    } else if (this.isLastCharClosingParenthesis()) {
-      state.input += ` × ${num}`;
-    } else {
-      state.input += num;
+      if (currentInput === "0" || currentInput === "Error") {
+        state.input = num;
+      } else if (this.isLastCharClosingParenthesis()) {
+        state.input += ` × ${num}`;
+      } else {
+        state.input += num;
+      }
+
+      return this.createResponse(state.input);
+    } catch (err) {
+      return this.createErrorResponse(err);
     }
-
-    return { input: state.input };
   }
 
+  /**
+   * Handle operator input
+   * @param {string} op - Operator to add
+   * @returns {Object} Updated state
+   */
   handleOperator(op) {
-    const state = this.calculator.states[this.calculator.activeBase];
-    const currentInput = state.input.trim();
+    try {
+      const state = this.calculator.states[this.calculator.activeBase];
+      const currentInput = state.input.trim();
 
-    // Allow minus sign after operators or at start
-    if ((currentInput === "" || this.isLastCharOperator()) && op === "-") {
-      state.input = currentInput ? `${currentInput} ${op}` : op;
-      return { input: state.input };
+      // Allow minus sign after operators or at start
+      if ((currentInput === "" || this.isLastCharOperator()) && op === "-") {
+        state.input = currentInput ? `${currentInput} ${op}` : op;
+        return this.createResponse(state.input);
+      }
+
+      // Don't allow other operators at the start
+      if (currentInput === "" && op !== "-") {
+        return this.createResponse(state.input);
+      }
+
+      // Handle shift operators specially
+      if (op === "<<" || op === ">>") {
+        return this.handleShiftOperator(op);
+      }
+
+      // Use handleBasicOperator for all other arithmetic operators
+      return this.handleBasicOperator(op);
+    } catch (err) {
+      return this.createErrorResponse(err);
     }
-
-    // Don't allow other operators at the start
-    if (currentInput === "" && op !== "-") {
-      return { input: state.input };
-    }
-
-    // Handle shift operators specially
-    if (op === "<<" || op === ">>") {
-      return this.handleShiftOperator(op);
-    }
-
-    // Use handleBasicOperator for all other arithmetic operators
-    return this.handleBasicOperator(op);
   }
 
+  /**
+   * Handle shift operators (<< and >>)
+   * @param {string} op - Shift operator
+   * @returns {Object} Updated state
+   */
   handleShiftOperator(op) {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
@@ -52,19 +75,19 @@ export class ProgrammerOperations {
   
       // Handle empty or error states
       if (!currentInput || currentInput === "Error") {
-        return { input: state.input, error: "Invalid operation" };
+        return this.createErrorResponse(new Error("Invalid operation"));
       }
   
       // Don't add operator after opening parenthesis
       if (currentInput.endsWith("(")) {
-        return { input: state.input, error: null };
+        return this.createResponse(state.input);
       }
   
       // Don't add shift operator if last part is incomplete
       const parts = currentInput.split(/\s+/);
       const lastPart = parts[parts.length - 1];
       if (!lastPart || /[+\-×÷]$/.test(lastPart)) {
-        return { input: state.input, error: null };
+        return this.createResponse(state.input);
       }
   
       // Ensure proper spacing for all cases
@@ -83,64 +106,79 @@ export class ProgrammerOperations {
         newInput = `${currentInput.trim()} ${op} `;
       } 
       else {
-        return { input: state.input, error: "Invalid operation" };
+        return this.createErrorResponse(new Error("Invalid operation"));
       }
   
       state.input = newInput;
-      return { input: state.input, error: null };
+      return this.createResponse(state.input);
     } catch (err) {
-      console.error('Error in handleShiftOperator:', err);
-      return {
-        input: this.calculator.states[this.calculator.activeBase].input,
-        error: "Operation error"
-      };
+      return this.createErrorResponse(err);
     }
   }
   
-
+  /**
+   * Handle basic arithmetic operators (+, -, ×, ÷, %)
+   * @param {string} op - Operator to add
+   * @returns {Object} Updated state
+   */
   handleBasicOperator(op) {
-    const state = this.calculator.states[this.calculator.activeBase];
-    const currentInput = state.input.trim();
-    
-    // Allow operators after closing parenthesis
-    if (this.isLastCharClosingParenthesis()) {
+    try {
+      const state = this.calculator.states[this.calculator.activeBase];
+      const currentInput = state.input.trim();
+      
+      // Allow operators after closing parenthesis
+      if (this.isLastCharClosingParenthesis()) {
+        state.input = `${currentInput} ${op} `;
+        return this.createResponse(state.input);
+      }
+
+      // Replace last operator if it exists
+      if (this.isLastCharOperator()) {
+        state.input = currentInput.replace(/\s*[+\-×÷<<>>%]\s*$/, ` ${op} `);
+        return this.createResponse(state.input);
+      }
+
+      // Don't add operator if input ends with opening parenthesis
+      if (currentInput.endsWith("(")) {
+        return this.createResponse(state.input);
+      }
+
+      // Add operator with proper spacing
       state.input = `${currentInput} ${op} `;
-      return { input: state.input };
+      return this.createResponse(state.input);
+    } catch (err) {
+      return this.createErrorResponse(err);
     }
-
-    // Replace last operator if it exists
-    if (this.isLastCharOperator()) {
-      state.input = currentInput.replace(/\s*[+\-×÷<<>>%]\s*$/, ` ${op} `);
-      return { input: state.input };
-    }
-
-    // Don't add operator if input ends with opening parenthesis
-    if (currentInput.endsWith("(")) {
-      return { input: state.input };
-    }
-
-    // Add operator with proper spacing
-    state.input = `${currentInput} ${op} `;
-    return { input: state.input };
   }
 
+  /**
+   * Handle parenthesis input
+   * @param {string} parenthesis - Opening or closing parenthesis
+   * @returns {Object} Updated state
+   */
   handleParenthesis(parenthesis) {
-    const state = this.calculator.states[this.calculator.activeBase];
-    const currentInput = state.input.trim();
-    const position = currentInput.length;
+    try {
+      const state = this.calculator.states[this.calculator.activeBase];
+      const currentInput = state.input.trim();
+      const position = currentInput.length;
 
-    if (parenthesis === "(") {
-      this.handleOpenParenthesis(currentInput, position);
-    } else if (parenthesis === ")" && this.canCloseParenthesis(currentInput)) {
-      this.handleCloseParenthesis(currentInput, position);
+      if (parenthesis === "(") {
+        this.handleOpenParenthesis(currentInput, position);
+      } else if (parenthesis === ")" && this.canCloseParenthesis(currentInput)) {
+        this.handleCloseParenthesis(currentInput, position);
+      }
+
+      return this.createResponse(state.input);
+    } catch (err) {
+      return this.createErrorResponse(err);
     }
-
-    return {
-      input: state.input,
-      error: this.calculator.error
-    };
   }
 
+  /**
+   * Check if a closing parenthesis can be added
+   * @param {string} expr - Current expression
+   * @returns {boolean} Whether closing parenthesis can be added
+   */
   canCloseParenthesis(expr) {
     if (this.parenthesesTracker.getOpenCount() <= 0) return false;
     if (!expr.trim()) return false;
@@ -161,6 +199,11 @@ export class ProgrammerOperations {
     return /[0-9A-Fa-f)]/.test(lastChar);
   }
 
+  /**
+   * Handle opening parenthesis
+   * @param {string} currentInput - Current input
+   * @param {number} position - Current cursor position
+   */
   handleOpenParenthesis(currentInput, position) {
     if (currentInput === "0" || currentInput === "Error") {
       this.calculator.states[this.calculator.activeBase].input = "(";
@@ -174,33 +217,53 @@ export class ProgrammerOperations {
     }
   }
 
+  /**
+   * Handle closing parenthesis
+   * @param {string} currentInput - Current input
+   * @param {number} position - Current cursor position
+   */
   handleCloseParenthesis(currentInput, position) {
     this.calculator.states[this.calculator.activeBase].input = `${currentInput})`;
     this.parenthesesTracker.close(position);
   }
 
+  /**
+   * Handle backspace operation
+   * @returns {Object} Updated state
+   */
   handleBackspace() {
-    const state = this.calculator.states[this.calculator.activeBase];
-    const currentInput = state.input;
-    
-    if (currentInput === "0" || currentInput === "Error") {
-      return;
-    }
+    try {
+      const state = this.calculator.states[this.calculator.activeBase];
+      const currentInput = state.input;
+      
+      if (currentInput === "0" || currentInput === "Error") {
+        return this.createResponse(state.input);
+      }
 
-    const beforeBackspace = currentInput;
+      const beforeBackspace = currentInput;
 
-    if (this.handleSpecialBackspace(currentInput)) {
-      return;
-    }
+      if (this.handleSpecialBackspace(currentInput)) {
+        return this.createResponse(state.input);
+      }
 
-    this.handleDefaultBackspace(currentInput);
+      this.handleDefaultBackspace(currentInput);
 
-    // Validate result after backspace
-    if (state.input === beforeBackspace) {
-      console.debug('[ProgrammerOperations] Backspace had no effect');
+      // Validate result after backspace
+      if (state.input === beforeBackspace) {
+        console.debug('[ProgrammerOperations] Backspace had no effect');
+      }
+      
+      return this.createResponse(state.input);
+    } catch (err) {
+      return this.createErrorResponse(err);
     }
   }
 
+  /**
+   * Handle special backspace cases (operators, shift operators)
+   * @param {string} currentInput - Current input
+   * @returns {boolean} Whether special case was handled
+   */
   handleSpecialBackspace(currentInput) {
     const state = this.calculator.states[this.calculator.activeBase];
     
@@ -224,6 +287,10 @@ export class ProgrammerOperations {
     return false;
   }
 
+  /**
+   * Handle default backspace behavior
+   * @param {string} currentInput - Current input
+   */
   handleDefaultBackspace(currentInput) {
     if (currentInput.length === 1) {
       this.calculator.states[this.calculator.activeBase].input = "0";
@@ -233,7 +300,78 @@ export class ProgrammerOperations {
     }
   }
 
+  /**
+   * Handle sign toggle operation
+   * @returns {Object} Updated state
+   */
+  handleToggleSign() {
+    try {
+      const state = this.calculator.states[this.calculator.activeBase];
+      const currentInput = state.input;
+
+      if (currentInput !== "0" && currentInput !== "Error") {
+        // Handle expression parts for proper negation
+        const parts = currentInput.split(/([+×÷<<>>%])/);
+        const lastPart = parts[parts.length - 1].trim();
+        
+        if (lastPart) {
+          if (lastPart.startsWith("-")) {
+            parts[parts.length - 1] = lastPart.slice(1);
+          } else {
+            parts[parts.length - 1] = "-" + lastPart;
+          }
+          state.input = parts.join(" ").trim();
+        }
+      }
+      return this.createResponse(state.input);
+    } catch (err) {
+      return this.createErrorResponse(err);
+    }
+  }
+
+  /**
+   * Handle modulo operator
+   * @returns {Object} Updated state
+   */
+  handleModuloSign() {
+    try {
+      const state = this.calculator.states[this.calculator.activeBase];
+      const currentInput = state.input.trim();
+      
+      // Don't add modulo if input is empty or error
+      if (!currentInput || currentInput === "0" || currentInput === "Error") {
+        return this.createResponse(state.input);
+      }
+
+      // Don't add operator if input ends with opening parenthesis
+      if (currentInput.endsWith("(")) {
+        return this.createResponse(state.input);
+      }
+
+      // Allow modulo after closing parenthesis or numbers
+      if (this.isLastCharClosingParenthesis() || this.isLastCharNumber()) {
+        state.input = `${currentInput} % `;
+        return this.createResponse(state.input);
+      }
+
+      // Replace last operator if it exists
+      if (this.isLastCharOperator()) {
+        state.input = currentInput.replace(/\s*[+\-×÷%<<>>]\s*$/, " % ");
+        return this.createResponse(state.input);
+      }
+
+      return this.createResponse(state.input);
+    } catch (err) {
+      return this.createErrorResponse(err);
+    }
+  }
+
   // Helper methods
+  
+  /**
+   * Check if last character is an operator
+   * @returns {boolean} Whether last character is an operator
+   */
   isLastCharOperator() {
     const input = this.calculator.states[this.calculator.activeBase].input.trim();
     return /[+\-×÷%]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
@@ -244,71 +382,64 @@ export class ProgrammerOperations {
            input.endsWith(" % ");
   }
 
+  /**
+   * Check if last character is a number or hex digit
+   * @returns {boolean} Whether last character is a number
+   */
   isLastCharNumber() {
     return /[0-9A-Fa-f]$/.test(
       this.calculator.states[this.calculator.activeBase].input
     );
   }
 
+  /**
+   * Check if last character is a closing parenthesis
+   * @returns {boolean} Whether last character is a closing parenthesis
+   */
   isLastCharClosingParenthesis() {
     return this.calculator.states[this.calculator.activeBase].input.trim().endsWith(")");
   }
 
+  /**
+   * Get count of open parentheses
+   * @returns {number} Count of open parentheses
+   */
   getParenthesesCount() {
     return this.parenthesesTracker.getOpenCount();
   }
 
+  /**
+   * Reset parentheses tracker
+   */
   resetParentheses() {
     this.parenthesesTracker = new ParenthesesTracker();
   }
 
-  handleToggleSign() {
-    const state = this.calculator.states[this.calculator.activeBase];
-    const currentInput = state.input;
-
-    if (currentInput !== "0" && currentInput !== "Error") {
-      // Handle expression parts for proper negation
-      const parts = currentInput.split(/([+×÷<<>>%])/);
-      const lastPart = parts[parts.length - 1].trim();
-      
-      if (lastPart) {
-        if (lastPart.startsWith("-")) {
-          parts[parts.length - 1] = lastPart.slice(1);
-        } else {
-          parts[parts.length - 1] = "-" + lastPart;
-        }
-        state.input = parts.join(" ").trim();
-      }
-    }
-    return { input: state.input };
+  /**
+   * Create standardized response object
+   * @param {string} input - Current input
+   * @param {string} [error=null] - Error message if any
+   * @returns {Object} Standardized response
+   */
+  createResponse(input, error = null) {
+    return {
+      input: input,
+      error: error,
+      expression: this.calculator.currentExpression
+    };
   }
 
-  handleModuloSign() {
-    const state = this.calculator.states[this.calculator.activeBase];
-    const currentInput = state.input.trim();
-    
-    // Don't add modulo if input is empty or error
-    if (!currentInput || currentInput === "0" || currentInput === "Error") {
-      return { input: state.input };
-    }
-
-    // Don't add operator if input ends with opening parenthesis
-    if (currentInput.endsWith("(")) {
-      return { input: state.input };
-    }
-
-    // Allow modulo after closing parenthesis or numbers
-    if (this.isLastCharClosingParenthesis() || this.isLastCharNumber()) {
-      state.input = `${currentInput} % `;
-      return { input: state.input };
-    }
-
-    // Replace last operator if it exists
-    if (this.isLastCharOperator()) {
-      state.input = currentInput.replace(/\s*[+\-×÷%<<>>]\s*$/, " % ");
-      return { input: state.input };
-    }
-
-    return { input: state.input };
+  /**
+   * Create standardized error response
+   * @param {Error} err - Error object
+   * @returns {Object} Standardized error response
+   */
+  createErrorResponse(err) {
+    console.error('[ProgrammerOperations] Error:', err);
+    return {
+      input: this.calculator.states[this.calculator.activeBase].input,
+      error: err.message || "Operation error",
+      expression: this.calculator.currentExpression
+    };
   }
 }

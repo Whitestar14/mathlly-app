@@ -1,18 +1,33 @@
 import { evaluate, bignumber, isNegative, isNaN } from "mathjs";
 
+/**
+ * Handles calculations for programmer calculator
+ */
 export class ProgrammerCalculations {
-    // Use 63-bit signed integer max value (2^63-1)
-    static MAX_VALUE = bignumber("9223372036854775807");
-    static MIN_VALUE = bignumber("-9223372036854775808"); // 2^63 negated  
+  /**
+   * Create a new programmer calculations instance
+   * @param {Object} settings - Calculator settings
+   */
+  constructor(settings) {
+    this.settings = settings;
+    // 63-bit signed integer limits
+    this.MAX_VALUE = bignumber("9223372036854775807");
+    this.MIN_VALUE = bignumber("-9223372036854775808"); 
+    this.bases = {
+      BIN: 2,
+      OCT: 8,
+      DEC: 10,
+      HEX: 16
+    };
+  }
 
-  static bases = {
-    BIN: 2,
-    OCT: 8,
-    DEC: 10,
-    HEX: 16
-  };
-
-  static evaluateExpression(expr, base) {
+  /**
+   * Evaluate a mathematical expression
+   * @param {string} expr - Expression to evaluate
+   * @param {string} base - Base for evaluation
+   * @returns {Object} Evaluation result
+   */
+  evaluateExpression(expr, base) {
     if (!expr || expr.trim() === "") return bignumber(0);
 
     // Check for division by zero before sanitization
@@ -21,6 +36,10 @@ export class ProgrammerCalculations {
     }
 
     const sanitizedExpr = this.sanitizeExpression(expr, base);
+    
+    if (!sanitizedExpr) {
+      throw new Error("Invalid expression format");
+    }
     
     try {
       const result = evaluate(sanitizedExpr);
@@ -40,14 +59,21 @@ export class ProgrammerCalculations {
       // Preserve specific error messages
       if (err.message.includes("Division by zero") || 
           err.message === "Invalid operation" ||
-          err.message === "Overflow") {
+          err.message === "Overflow" ||
+          err.message === "Invalid expression format") {
         throw err;
       }
       throw new Error("Invalid expression");
     }
   }
 
-  static sanitizeExpression(expr, base) {
+  /**
+   * Sanitize expression for evaluation
+   * @param {string} expr - Expression to sanitize
+   * @param {string} base - Base for evaluation
+   * @returns {string} Sanitized expression
+   */
+  sanitizeExpression(expr, base) {
     // First pass: basic cleanup
     let sanitized = expr
       .replace(/×/g, "*")
@@ -72,7 +98,13 @@ export class ProgrammerCalculations {
     return sanitized;
   }
 
-  static convertToDecimal(expr, fromBase) {
+  /**
+   * Convert expression from specified base to decimal
+   * @param {string} expr - Expression to convert
+   * @param {string} fromBase - Source base
+   * @returns {string} Converted expression
+   */
+  convertToDecimal(expr, fromBase) {
     // Split expression keeping operators intact
     const parts = expr.split(/(\s*<<\s*|\s*>>\s*|\s*%\s*|\s*[+\-*/()]\s*)/);
     return parts
@@ -90,8 +122,14 @@ export class ProgrammerCalculations {
       .join("");
   }
 
-  static formatResult(result, base) {
-    if (!result) return "Overflow";
+  /**
+   * Format calculation result for display
+   * @param {Object} result - Result to format
+   * @param {string} base - Base for formatting
+   * @returns {string} Formatted result
+   */
+  formatResult(result, base) {
+    if (!result && result !== 0) return "Overflow";
     
     try {
       const decimalValue = result.toNumber();
@@ -101,26 +139,46 @@ export class ProgrammerCalculations {
       const converted = absoluteValue.toString(this.bases[base]).toUpperCase();
       
       return isNegative(decimalValue) ? "-" + converted : converted;
-    } catch {
+    } catch (err) {
+      console.error('Error formatting result:', err);
       return "Overflow";
     }
   }
 
-  static convertBetweenBases(value, fromBase, toBase) {
+  /**
+   * Convert value between bases
+   * @param {string|number} value - Value to convert
+   * @param {string} fromBase - Source base
+   * @param {string} toBase - Target base
+   * @returns {string} Converted value
+   */
+  convertBetweenBases(value, fromBase, toBase) {
     try {
       if (!value || value === "Overflow") return "0";
       
-      const decimal = parseInt(value.toString(), this.bases[fromBase]);
+      // Handle negative values
+      const isNegative = typeof value === 'string' && value.startsWith('-');
+      const absValue = isNegative ? value.substring(1) : value;
+      
+      const decimal = parseInt(absValue.toString(), this.bases[fromBase]);
       if (isNaN(decimal)) return "0";
       if (Math.abs(decimal) > this.MAX_VALUE) return "Overflow";
       
-      return decimal.toString(this.bases[toBase]).toUpperCase();
-    } catch {
+      const result = decimal.toString(this.bases[toBase]).toUpperCase();
+      return isNegative ? "-" + result : result;
+    } catch (err) {
+      console.error('Error converting between bases:', err);
       return "0";
     }
   }
 
-  static validateForBase(value, base) {
+  /**
+   * Validate value for specified base
+   * @param {string} value - Value to validate
+   * @param {string} base - Base to validate against
+   * @returns {boolean} Whether value is valid for base
+   */
+  validateForBase(value, base) {
     if (!value || typeof value !== 'string') return false;
     
     const patterns = {

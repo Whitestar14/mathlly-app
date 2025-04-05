@@ -1,97 +1,114 @@
-// composables/useCalculatorState.js
-import { ref, computed } from 'vue';
+import { reactive, readonly } from 'vue'
 
-export function useCalculatorState() {
-  const state = ref({
+/**
+ * @typedef {Object} CalculatorState
+ * @property {string} input - Current input string
+ * @property {string} error - Current error message
+ * @property {boolean} isAnimating - Whether result animation is active
+ * @property {string} animatedResult - Result being animated
+ * @property {string} activeBase - Active base for programmer mode (DEC, HEX, BIN, OCT)
+ * @property {Object} displayValues - Display values for different bases
+ * @property {string} mode - Current calculator mode
+ */
+
+/**
+ * Provides unified state management for calculator
+ * @param {string} initialMode - Initial calculator mode
+ * @returns {Object} Calculator state and methods
+ */
+export function useCalculatorState(initialMode) {
+  // Create a single reactive state object
+  const state = reactive({
     input: '0',
     error: '',
-    preview: '',
     isAnimating: false,
     animatedResult: '',
     activeBase: 'DEC',
     displayValues: {
-      HEX: { input: '0', display: '0' },
       DEC: { input: '0', display: '0' },
-      OCT: { input: '0', display: '0' },
       BIN: { input: '0', display: '0' },
+      HEX: { input: '0', display: '0' },
+      OCT: { input: '0', display: '0' }
     },
-    currentExpression: '',
-  });
+    mode: initialMode || 'Standard'
+  })
 
-  const getCurrentDisplayValue = computed(() => {
-    return state.value.displayValues[state.value.activeBase]?.input || '0';
-  });
+  // Remove preview calculation logic entirely
 
-  const updateState = (newState) => {
-    state.value = {
-      ...state.value,
-      ...newState,
-    };
-  };
+  /**
+   * Update state with partial updates
+   * @param {Partial<CalculatorState>} updates - Partial state updates
+   */
+  function updateState(updates) {
+    Object.assign(state, updates)
+  }
 
-  // Update useCalculatorState's updateDisplayValues
-  const updateDisplayValues = (values) => {
-    if (!values) return;
-
-    const updatedDisplayValues = { ...state.value.displayValues };
-    Object.keys(values).forEach(base => {
-      updatedDisplayValues[base] = values[base];
-    });
-
-    // Update both displayValues and input to ensure consistency
+  /**
+   * Reset state to initial values
+   * @param {string} mode - Calculator mode
+   */
+  function resetState(mode = state.mode) {
     updateState({
-      displayValues: updatedDisplayValues,
-      input: values[state.value.activeBase]?.input || state.value.input,
-    });
-  };
+      input: '0',
+      error: '',
+      isAnimating: false,
+      animatedResult: '',
+      mode,
+      activeBase: 'DEC',
+      displayValues: {
+        DEC: { input: '0', display: '0' },
+        BIN: { input: '0', display: '0' },
+        HEX: { input: '0', display: '0' },
+        OCT: { input: '0', display: '0' }
+      }
+    })
+  }
 
-  const setActiveBase = (base) => {
-    if (!['HEX', 'DEC', 'OCT', 'BIN'].includes(base)) return;
+  /**
+   * Set animation state
+   * @param {string} result - Result to animate
+   */
+  function setAnimation(result) {
     updateState({
-      activeBase: base,
-      input: state.value.displayValues[base]?.input || '0',
-    });
-  };
-
-  const setAnimation = (result) => {
-    updateState({
-      animatedResult: result,
       isAnimating: true,
-    });
+      animatedResult: result
+    })
+    
+    // Auto-clear animation after 1 second
     setTimeout(() => {
       updateState({
         isAnimating: false,
-        animatedResult: '',
-      });
-    }, 500);
-  };
+        animatedResult: ''
+      })
+    }, 1000)
+  }
 
-  const clearState = () => {
-    const defaultState = {
-      input: '0',
-      preview: '',
-      error: '',
-      displayValues: {
-        HEX: { input: '0', display: '0' },
-        DEC: { input: '0', display: '0' },
-        OCT: { input: '0', display: '0' },
-        BIN: { input: '0', display: '0' },
-      },
-      activeBase: 'DEC',
-      currentExpression: '',
-    };
+  /**
+   * Update display values for programmer mode
+   * @param {Object} values - New display values
+   */
+  function updateDisplayValues(values) {
+    updateState({
+      displayValues: { ...values }
+    })
+  }
 
-    // Reset state based on calculator mode
-    updateState(defaultState);
-  };
+  /**
+   * Set active base for programmer mode
+   * @param {string} base - New active base
+   */
+  function setActiveBase(base) {
+    updateState({
+      activeBase: base
+    })
+  }
 
   return {
-    state,
-    getCurrentDisplayValue,
+    state: readonly(state),
     updateState,
-    updateDisplayValues,
-    setActiveBase,
+    resetState,
     setAnimation,
-    clearState,
-  };
+    updateDisplayValues,
+    setActiveBase
+  }
 }
