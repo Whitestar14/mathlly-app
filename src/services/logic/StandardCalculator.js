@@ -1,134 +1,122 @@
-import { CalculatorCore } from "@/utils/core/CalculatorCore";
+import { ICalculator } from "@/utils/core/ICalculator";
 import { StandardOperations } from "@/utils/operations/StandardOperations";
 import { StandardCalculations } from "@/utils/calculations/StandardCalculations";
-export class StandardCalculator extends CalculatorCore {
+import { CalculatorConstants } from "@/utils/constants/CalculatorConstants";
+
+/**
+ * Calculator implementation for standard mode
+ * 
+ * @class StandardCalculator
+ * @extends ICalculator
+ */
+export class StandardCalculator extends ICalculator {
+  /**
+   * Create a new standard calculator
+   * 
+   * @param {Object} settings - Calculator settings
+   */
   constructor(settings) {
     super(settings);
-    this.MAX_INPUT_LENGTH = 100;
-    this.isExponentMode = false;
-    this.hasExponent = false;
+    this.MAX_INPUT_LENGTH = CalculatorConstants.MAX_INPUT_LENGTH.STANDARD;
+    
+    // Use composition for calculations and operations
     this.calculations = new StandardCalculations(settings);
     this.operations = new StandardOperations(this);
   }
 
-  handleButtonClick(btn) {
-    try {
-      this.error = "";
-
-      if (this.input === "Error") {
-        this.handleClear();
-      }
-
-      if (this.isInputTooLong(btn)) {
-        this.error = "Maximum input length reached";
-        return { input: this.input, error: this.error };
-      }
-
-      const result = this.processButton(btn);
-      return result;
-    } catch (err) {
-      if (err.message === "Overflow")
-        return { input: "Error", error: "Overflow: Exceeding max limit bound" };
-    }
-  }
-
-  processButton(btn) {
-    const operationMap = {
-      "=": () => this.handleEquals(),
-      AC: () => this.handleClear(),
-      C: () => this.handleClear(),
-      CE: () => this.handleClearEntry(),
-      backspace: () => this.operations.handleBackspace(),
-      "1/x": () => this.operations.handleReciprocal(),
-      "x²": () => this.operations.handleSquare(),
-      "√": () => this.operations.handleSquareRoot(),
-      "%": () => this.operations.handlePercentage(),
-      "±": () => this.operations.handleToggleSign(),
-      EXP: () => this.operations.handleExponent(),
-    };
-
-    if (operationMap[btn]) {
-      return operationMap[btn]();
-    }
-
-    if (["+", "-", "×", "÷"].includes(btn)) {
-      return this.operations.handleOperator(btn);
-    }
-
-    return this.operations.handleNumber(btn);
-  }
-
-  evaluateExpression(expr) {
-    return this.calculations.evaluateExpression(expr);
-  }
-
+  /**
+   * Format a result for display
+   * 
+   * @param {*} result - Result to format
+   * @returns {string} Formatted result
+   */
   formatResult(result) {
     return this.calculations.formatResult(result);
   }
 
+  /**
+   * Handle equals operation
+   * 
+   * @returns {Object} Calculation result
+   */
   handleEquals() {
     try {
-      this.hasExponent = false;
-      this.isExponentMode = false;
       this.currentExpression = this.input;
-
       const result = this.evaluateExpression(this.currentExpression);
       this.input = this.formatResult(result);
 
-      return {
+      return this.normalizeResponse({
         expression: this.currentExpression,
         result: this.input,
-        input: this.input,
-        error: this.error,
-      };
+        input: this.input
+      });
     } catch (err) {
-      this.input = "Error";
-      this.error = err.message;
-      return {
-        expression: this.currentExpression,
-        input: "Error",
-        error: this.error,
-      };
+      return this.createErrorResponse(err, this.input);
     }
   }
 
-  handleClear() {
-    Object.assign(this, {
-      input: "0",
-      error: "",
-      currentExpression: "",
-      isExponentMode: false,
-      hasExponent: false,
-    });
-    return { input: this.input, error: this.error };
+  /**
+   * Handle operator input
+   * 
+   * @param {string} op - Operator symbol
+   * @returns {Object} Updated state
+   */
+  handleOperator(op) {
+    return this.normalizeResponse(this.operations.handleOperator(op));
   }
 
-  handleClearEntry() {
-    if (this.input !== "0" && this.input !== "Error") {
-      const parts = this.input.split(" ");
-      this.input = parts.length > 1 ? parts.slice(0, -1).join(" ") : "0";
-    } else {
-      this.handleClear();
-    }
-    return { input: this.input, error: this.error };
+  /**
+   * Handle number input
+   * 
+   * @param {string} num - Number or digit
+   * @returns {Object} Updated state
+   */
+  handleNumber(num) {
+    return this.normalizeResponse(this.operations.handleNumber(num));
   }
 
-  isInputTooLong(btn) {
-    const excludedButtons = [
-      "=",
-      "AC",
-      "backspace",
-      "MC",
-      "MR",
-      "M+",
-      "M-",
-      "MS",
-      "C",
-      "CE",
-    ];
-    return (
-      this.input.length >= this.MAX_INPUT_LENGTH &&
-      !excludedButtons.includes(btn)
-    );
+  /**
+   * Handle backspace operation
+   * 
+   * @returns {Object} Updated state
+   */
+  handleBackspace() {
+    return this.normalizeResponse(this.operations.handleBackspace());
+  }
+
+  /**
+   * Handle square operation
+   * 
+   * @returns {Object} Updated state
+   */
+  handleSquare() {
+    return this.normalizeResponse(this.operations.handleSquare());
+  }
+
+  /**
+   * Handle square root operation
+   * 
+   * @returns {Object} Updated state
+   */
+  handleSquareRoot() {
+    return this.normalizeResponse(this.operations.handleSquareRoot());
+  }
+
+  /**
+   * Handle reciprocal operation
+   * 
+   * @returns {Object} Updated state
+   */
+  handleReciprocal() {
+    return this.normalizeResponse(this.operations.handleReciprocal());
+  }
+
+  /**
+   * Handle percentage operation
+   * 
+   * @returns {Object} Updated state
+   */
+  handlePercentage() {
+    return this.normalizeResponse(this.operations.handlePercentage());
   }
 }

@@ -1,7 +1,7 @@
 // composables/useInputValidation.js
 export const useInputValidation = () => {
   const isValidForBase = (value, base) => {
-    const validators = {
+    const pattern = {
       BIN: /^[0-1]$/,
       OCT: /^[0-7]$/,
       DEC: /^[0-9]$/,
@@ -22,7 +22,7 @@ export const useInputValidation = () => {
       '%',
       '±',
     ];
-    return allowedKeys.includes(value) || validators[base]?.test(value);
+    return allowedKeys.includes(value) || pattern[base]?.test(value);
   };
 
   return { isValidForBase };
