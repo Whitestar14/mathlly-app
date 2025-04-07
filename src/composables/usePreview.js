@@ -6,7 +6,7 @@ import { useMemoize } from '@vueuse/core'
  * @param {Object} options - Options
  * @returns {Object} Preview calculation utilities
  */
-export function usePreviewCalculation({ calculator, state }) {
+export function usePreview({ calculator, state }) {
   /**
    * Memoized preview calculation function
    */

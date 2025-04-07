@@ -27,7 +27,7 @@ import { useMemory } from '@/composables/useMemory'
 import { useInputValidation } from '@/composables/useValidation'
 import { useCalculatorState } from '@/composables/useCalculatorState'
 import { useCalculatorOperations } from '@/composables/useCalculatorOperations'
-import { usePreviewCalculation } from '@/composables/usePreviewCalculation'
+import { usePreview } from '@/composables/usePreview'
 import { useCalculatorKeyboard } from '@/composables/useCalculatorKeyboard'
 import { CalculatorFactory } from '@/services/factory/CalculatorFactory'
 import HistoryPanel from '@/layouts/pages/calculators/main/HistoryPanel.vue'
@@ -68,7 +68,7 @@ const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)
 const hasMemoryValue = computed(() => hasMemory(props.mode).value)
 
 // Setup preview calculation
-const { preview } = usePreviewCalculation({ calculator, state })
+const { preview } = usePreview({ calculator, state })
 
 // History panel management
 const { addToHistory } = useHistory()
