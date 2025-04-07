@@ -1,72 +1,51 @@
-import { evaluate, format, bignumber, fraction } from "mathjs";
+import { format, fraction } from "mathjs";
+import { ExpressionEvaluator } from "@/utils/core/ExpressionEvaluator";
+import { CalculatorUtils } from "@/utils/constants/CalculatorConstants"
 
+/**
+ * Handles calculations for the standard calculator mode
+ */
 export class StandardCalculations {
+  /**
+   * Creates a new StandardCalculations instance
+   * @param {Object} settings - Calculator settings including precision and fraction preferences
+   */
   constructor(settings) {
     this.settings = settings;
-    // 63-bit signed integer limits
-    this.MAX_VALUE = bignumber("9223372036854775807");
-    this.MIN_VALUE = bignumber("-9223372036854775808");
-    this.MAX_INPUT_LENGTH = 100;
+    this.evaluator = ExpressionEvaluator.getInstance();
   }
 
-  sanitizeInput(expr) {
-    // Allow e/E for scientific notation along with other characters
-    const allowedChars = /[^0-9+\-×÷.()%e/]/g;
-    return expr.replace(allowedChars, "").slice(0, this.MAX_INPUT_LENGTH);
-  }
-
+  /**
+   * Evaluates a mathematical expression
+   * @param {string} expr - The expression to evaluate
+   * @returns {number} The evaluated result
+   * @throws {Error} If the expression is invalid or causes an error
+   */
   evaluateExpression(expr) {
     try {
-      let sanitizedExpr = this.sanitizeInput(expr)
-        .replace(/×/g, "*")
-        .replace(/÷/g, "/")
-        .replace(/[+\-*/]\s*$/, "")
-        .replace(/\s+/g, " ")
-        .replace(/([0-9])([e])([-+]?)([0-9]+)/g, "$1 * 10^($3$4)")
-        .trim();
-
-      if (sanitizedExpr.includes("/0")) {
-        throw new Error("Division by zero is not allowed");
-      }
-
-      const result = evaluate(sanitizedExpr);
-
-      if (typeof result !== "number" && !result.isBigNumber) {
-        throw new Error("Invalid result");
-      }
-
-      // Add overflow check
-      if (result > this.MAX_VALUE || result < this.MIN_VALUE) {
-        throw new Error("Overflow");
-      }
-
-      return result;
+      return this.evaluator.evaluate(expr);
     } catch (err) {
+      // Preserve specific error messages
+      if (err.message.includes("Division by zero") || 
+          err.message === "Invalid operation" ||
+          err.message === "Overflow" ||
+          err.message === "Invalid expression format") {
+        throw err;
+      }
       throw new Error("Invalid expression: " + err.message);
     }
   }
 
-  static trimUnnecessaryZeros(formattedNumber) {
-    // Don't trim if in scientific notation
-    if (formattedNumber.includes("e")) return formattedNumber;
-
-    // Split into whole and decimal parts
-    const [whole, decimal] = formattedNumber.split(".");
-
-    // No decimal part, return as is
-    if (!decimal) return whole;
-
-    // Trim trailing zeros from decimal
-    const trimmedDecimal = decimal.replace(/0+$/, "");
-
-    // If all decimal digits were zeros, return whole number
-    return trimmedDecimal ? `${whole}.${trimmedDecimal}` : whole;
-  }
-
+  /**
+   * Formats a numeric result according to calculator settings
+   * @param {number} result - The numeric result to format
+   * @returns {string} The formatted result as a string
+   */
   formatResult(result) {
-    if (result === undefined) return "";
+    if (!result && result !== 0) return "Overflow";
 
     try {
+      // Try to display as fraction if enabled in settings
       if (this.settings.useFractions) {
         const frac = fraction(result);
         if (frac.d <= 10000) {
@@ -74,7 +53,7 @@ export class StandardCalculations {
         }
       }
 
-      // Handle special cases first
+      // Handle special cases for very large or very small numbers
       if (
         Math.abs(result) >= 1e21 ||
         (Math.abs(result) < 1e-7 && result !== 0)
@@ -98,13 +77,7 @@ export class StandardCalculations {
       });
 
       // Remove trailing zeros after decimal point, but keep the decimal point if needed
-      const parts = formattedDecimal.split(".");
-      if (parts.length === 2) {
-        const trimmedDecimal = parts[1].replace(/0+$/, "");
-        return trimmedDecimal ? `${parts[0]}.${trimmedDecimal}` : parts[0];
-      }
-
-      return formattedDecimal;
+      return CalculatorUtils.trimUnnecessaryZeros(formattedDecimal);
     } catch (err) {
       console.error("Formatting error:", err);
       return result.toString();

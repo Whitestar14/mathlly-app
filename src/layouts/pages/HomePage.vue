@@ -43,7 +43,7 @@
           <div v-motion :initial="{ opacity: 0, scale: 0.9 }"
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
-            <Logo type="svg" :svgPath="isDark ? '/img/mathlly-dark.svg' : '/img/mathlly-light.svg'" size="lg"
+            <Logo type="svg" :svgPath="isDark ? '/img/icons/mathlly-dark.svg' : '/img/icons/mathlly-light.svg'" size="lg"
               class="relative hidden md:block scale-[2.5] md:scale-[3.5]" />
           </div>
         </div>

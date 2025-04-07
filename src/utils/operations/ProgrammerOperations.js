@@ -1,6 +1,13 @@
 import { ParenthesesTracker } from "@/utils/core/ParenthesesTracker";
 
+/**
+ * Handles operations for the programmer calculator mode
+ */
 export class ProgrammerOperations {
+  /**
+   * Creates a new ProgrammerOperations instance
+   * @param {Object} calculator - The calculator instance to operate on
+   */
   constructor(calculator) {
     this.calculator = calculator;
     this.parenthesesTracker = new ParenthesesTracker();
@@ -205,14 +212,16 @@ export class ProgrammerOperations {
    * @param {number} position - Current cursor position
    */
   handleOpenParenthesis(currentInput, position) {
+    const state = this.calculator.states[this.calculator.activeBase];
+    
     if (currentInput === "0" || currentInput === "Error") {
-      this.calculator.states[this.calculator.activeBase].input = "(";
+      state.input = "(";
       this.parenthesesTracker.open(position);
     } else {
       const lastChar = currentInput.slice(-1);
       const needsMultiplication = /[0-9A-Fa-f)]/.test(lastChar);
       const newInput = `${currentInput}${needsMultiplication ? " × " : " "}(`;
-      this.calculator.states[this.calculator.activeBase].input = newInput;
+      state.input = newInput;
       this.parenthesesTracker.open(position + (needsMultiplication ? 3 : 1));
     }
   }
@@ -292,11 +301,12 @@ export class ProgrammerOperations {
    * @param {string} currentInput - Current input
    */
   handleDefaultBackspace(currentInput) {
+    const state = this.calculator.states[this.calculator.activeBase];
+    
     if (currentInput.length === 1) {
-      this.calculator.states[this.calculator.activeBase].input = "0";
+      state.input = "0";
     } else {
-      this.calculator.states[this.calculator.activeBase].input = 
-        currentInput.trimEnd().slice(0, -1);
+      state.input = currentInput.trimEnd().slice(0, -1);
     }
   }
 
@@ -366,8 +376,6 @@ export class ProgrammerOperations {
     }
   }
 
-  // Helper methods
-  
   /**
    * Check if last character is an operator
    * @returns {boolean} Whether last character is an operator

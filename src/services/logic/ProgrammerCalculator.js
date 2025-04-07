@@ -1,24 +1,29 @@
 import { ICalculator } from "@/utils/core/ICalculator";
 import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
 import { ProgrammerCalculations } from "@/utils/calculations/ProgrammerCalculations";
+import { CalculatorConstants } from "@/utils/constants/CalculatorConstants";
 import {
   BinCalculator,
   DecCalculator,
   HexCalculator,
   OctCalculator,
-} from "../../utils/core/BaseCalculator";
+} from "@/utils/core/BaseCalculator";
 
 /**
  * Calculator implementation for programmer mode with multiple base support
+ * 
+ * @class ProgrammerCalculator
+ * @extends ICalculator
  */
 export class ProgrammerCalculator extends ICalculator {
   /**
    * Create a new programmer calculator
+   * 
    * @param {Object} settings - Calculator settings
    */
   constructor(settings) {
     super(settings);
-    this.MAX_INPUT_LENGTH = 69;
+    this.MAX_INPUT_LENGTH = CalculatorConstants.MAX_INPUT_LENGTH.PROGRAMMER;
     
     // Initialize state for each base
     this.states = {
@@ -43,6 +48,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Get the calculator for the active base
+   * 
    * @returns {Object} Active base calculator
    */
   get activeCalculator() {
@@ -51,6 +57,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Evaluate a mathematical expression
+   * 
    * @param {string} expr - Expression to evaluate
    * @param {string} [base=this.activeBase] - Base for evaluation
    * @returns {*} Evaluation result
@@ -66,6 +73,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Format a result for display
+   * 
    * @param {*} result - Result to format
    * @param {string} [base=this.activeBase] - Base for formatting
    * @returns {string} Formatted result
@@ -76,17 +84,19 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Convert a value between bases
+   * 
    * @param {string|number} value - Value to convert
    * @param {string} fromBase - Source base
    * @param {string} toBase - Target base
    * @returns {string} Converted value
    */
   convertToBase(value, fromBase, toBase) {
-    return this.calculations.convertBetweenBases(value, fromBase, toBase) || "0";
+    return this.calculations.convertToBase(value, fromBase, toBase) || "0";
   }
 
   /**
    * Handle button click
+   * 
    * @param {string} btn - Button value
    * @returns {Object} Updated state
    */
@@ -113,13 +123,13 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Process button input
+   * 
    * @param {string} btn - Button value
    * @returns {Object} Processing result
    */
   processButton(btn) {
     try {
       const isFunctionKey = ["<<", ">>", "(", ")", "backspace", "AC", "CE", "±", "%"].includes(btn);
-      this.error = "";
 
       switch (btn) {
         case "=":
@@ -161,12 +171,13 @@ export class ProgrammerCalculator extends ICalculator {
         expression: this.currentExpression
       };
     } catch (err) {
-      return this.handleError(err);
+      return this.createErrorResponse(err);
     }
   }
 
   /**
    * Handle equals operation
+   * 
    * @returns {Object} Calculation result
    */
   handleEquals() {
@@ -191,12 +202,13 @@ export class ProgrammerCalculator extends ICalculator {
         displayValues: { ...this.states }
       };
     } catch (err) {
-      return this.handleError(err);
+      return this.createErrorResponse(err);
     }
   }
 
   /**
    * Update display values for all bases
+   * 
    * @returns {Object} Updated states
    */
   updateDisplayValues() {
@@ -219,6 +231,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Handle base change
+   * 
    * @param {string} newBase - New base to switch to
    * @returns {Object} Updated state
    */
@@ -248,12 +261,13 @@ export class ProgrammerCalculator extends ICalculator {
         displayValues: this.states
       };
     } catch (err) {
-      return this.handleError(err);
+      return this.createErrorResponse(err);
     }
   }
 
   /**
    * Update all base states with a value
+   * 
    * @param {string|number} value - Value to set
    */
   updateAllStates(value) {
@@ -273,6 +287,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Clear calculator state
+   * 
    * @returns {Object} Updated state
    */
   handleClear() {
@@ -290,6 +305,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   /**
    * Clear current entry
+   * 
    * @returns {Object} Updated state
    */
   handleClearEntry() {
@@ -309,52 +325,8 @@ export class ProgrammerCalculator extends ICalculator {
   }
 
   /**
-   * Handle calculation error
-   * @param {Error} err - Error object
-   * @returns {Object} Error state
-   */
-  handleError(err) {
-    this.error = err.message;
-    this.states[this.activeBase].input = "Error";
-    return {
-      input: this.states[this.activeBase].input,
-      error: err.message,
-      expression: this.currentExpression
-    };
-  }
-
-  /**
-   * Create error response
-   * @param {Error} err - Error object
-   * @param {string} [input="Error"] - Input to display
-   * @returns {Object} Error response
-   */
-  createErrorResponse(err, input = "Error") {
-    this.error = err.message || "Operation failed";
-    return {
-      input: input,
-      error: this.error,
-      expression: this.currentExpression
-    };
-  }
-
-  /**
-   * Normalize operation response
-   * @param {Object} response - Operation response
-   * @returns {Object} Normalized response
-   */
-  normalizeResponse(response) {
-    return {
-      input: response.input || this.states[this.activeBase].input,
-      error: response.error || this.error || "",
-      expression: response.expression || this.currentExpression,
-      result: response.result || null,
-      displayValues: response.displayValues || this.states
-    };
-  }
-
-  /**
    * Check if input is too long
+   * 
    * @param {string} btn - Button being pressed
    * @returns {boolean} True if input would be too long
    */

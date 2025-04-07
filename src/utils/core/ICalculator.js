@@ -1,12 +1,17 @@
 import { useSettingsStore } from '@/stores/settings';
+import { ExpressionEvaluator } from '@/utils/core/ExpressionEvaluator';
+import { CalculatorConstants } from '@/utils/constants/CalculatorConstants';
 
 /**
  * Interface for calculator implementations.
- * All calculator types should implement these methods
+ * All calculator types should implement these methods.
+ * 
+ * @class ICalculator
  */
 export class ICalculator {
   /**
-   * Create a calculator core instance
+   * Create a calculator instance
+   * 
    * @param {Object} settings - Calculator settings
    */
   constructor(settings) {
@@ -16,8 +21,10 @@ export class ICalculator {
     this.error = '';
     this.currentExpression = '';
     this.activeBase = 'DEC';
-    this.MAX_INPUT_LENGTH = 50;
-
+    
+    // Use shared evaluator instance
+    this.evaluator = ExpressionEvaluator.getInstance();
+    
     // Operations will be injected by derived classes
     this.operations = null;
     this.calculations = null;
@@ -75,19 +82,29 @@ export class ICalculator {
     };
   }
 
-/**
- * Evaluate a mathematical expression - must be implemented by derived classes
- * @param {string} expr - Expression to evaluate
- * @param {string} [base] - Base for programmer mode
- * @returns {*} Evaluation result
- */
-evaluateExpression(expr, base) {
-  // eslint-disable-next-line no-unused-vars
-  throw new Error("evaluateExpression must be implemented in derived class");
-}
+  /**
+   * Evaluate a mathematical expression
+   * 
+   * @param {string} expr - Expression to evaluate
+   * @param {string} [base] - Base for programmer mode
+   * @returns {*} Evaluation result
+   * @throws {Error} If expression is invalid
+   */
+  evaluateExpression(expr, base) {
+    try {
+      return this.evaluator.evaluate(expr, {
+        base,
+        maxValue: CalculatorConstants.MAX_VALUE,
+        minValue: CalculatorConstants.MIN_VALUE
+      });
+    } catch (err) {
+      throw new Error(`Invalid expression: ${err.message}`);
+    }
+  }
 
   /**
    * Format a result for display
+   * 
    * @param {*} result - Result to format
    * @param {string} [base] - Base for programmer mode
    * @returns {string} Formatted result
@@ -95,10 +112,12 @@ evaluateExpression(expr, base) {
   formatResult(result, base) {
     // Add eslint-disable-next-line to suppress the warning
     // eslint-disable-next-line no-unused-vars
-    return result.toString();
+    throw new Error('formatResult must be implemented in derived class');
   }
+
   /**
    * Handle button click
+   * 
    * @param {string} btn - Button value
    * @returns {Object} Updated state
    */
@@ -110,11 +129,10 @@ evaluateExpression(expr, base) {
 
     // Check input length
     if (this.isInputTooLong(btn)) {
-      this.error = 'Maximum input length reached';
-      return {
-        input: this.input,
-        error: this.error,
-      };
+      return this.createErrorResponse(
+        'Maximum input length reached',
+        this.input
+      );
     }
 
     try {
@@ -131,16 +149,13 @@ evaluateExpression(expr, base) {
         return this.handleNumber(btn);
       }
     } catch (err) {
-      this.error = err.message || 'Operation failed';
-      return {
-        input: 'Error',
-        error: this.error,
-      };
+      return this.createErrorResponse(err);
     }
   }
 
   /**
-   * Handle equals operation - must be implemented by derived classes
+   * Handle equals operation
+   * 
    * @returns {Object} Calculation result
    */
   handleEquals() {
@@ -148,27 +163,28 @@ evaluateExpression(expr, base) {
   }
 
   /**
-   * Handle operator input - must be implemented by derived classes
+   * Handle operator input
+   * 
    * @param {string} operator - Operator symbol
    * @returns {Object} Updated state
    */
   handleOperator(operator) {
-    // eslint-disable-next-line no-unused-vars
     throw new Error('handleOperator must be implemented in derived class');
   }
 
   /**
-   * Handle number input - must be implemented by derived classes
+   * Handle number input
+   * 
    * @param {string} num - Number or digit
    * @returns {Object} Updated state
    */
   handleNumber(num) {
-    // eslint-disable-next-line no-unused-vars
     throw new Error('handleNumber must be implemented in derived class');
   }
 
   /**
-   * Handle backspace operation - must be implemented by derived classes
+   * Handle backspace operation
+   * 
    * @returns {Object} Updated state
    */
   handleBackspace() {
@@ -177,6 +193,7 @@ evaluateExpression(expr, base) {
 
   /**
    * Clear calculator state
+   * 
    * @returns {Object} Updated state
    */
   handleClear() {
@@ -191,6 +208,7 @@ evaluateExpression(expr, base) {
 
   /**
    * Check if input is too long
+   * 
    * @param {string} btn - Button being pressed
    * @returns {boolean} True if input would be too long
    */
