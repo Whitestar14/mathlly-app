@@ -1,6 +1,7 @@
 import { isNegative, isNaN } from 'mathjs';
 import { ExpressionEvaluator } from '@/utils/core/ExpressionEvaluator';
-import { CalculatorConstants } from '@/utils/constants/CalculatorConstants';
+import { CalculatorConstants, CalculatorUtils } from '@/utils/constants/CalculatorConstants';
+
 /**
  * Handles calculations for programmer calculator
  */
@@ -23,18 +24,12 @@ export class ProgrammerCalculations {
    */
   evaluateExpression(expr, base) {
     try {
-      return this.evaluator.evaluate(expr, { base });
+      // Use CalculatorUtils.sanitizeExpression for consistent sanitization
+      const sanitizedExpr = CalculatorUtils.sanitizeExpression(expr);
+      return this.evaluator.evaluate(sanitizedExpr, { base });
     } catch (err) {
-      // Preserve specific error messages
-      if (
-        err.message.includes('Division by zero') ||
-        err.message === 'Invalid operation' ||
-        err.message === 'Overflow' ||
-        err.message === 'Invalid expression format'
-      ) {
-        throw err;
-      }
-      throw new Error('Invalid expression: ' + err.message);
+      // Use CalculatorUtils.formatError for consistent error handling
+      throw new Error(CalculatorUtils.formatError(err, "Invalid expression"));
     }
   }
 
@@ -48,10 +43,11 @@ export class ProgrammerCalculations {
     if (!result && result !== 0) return 'Overflow';
 
     try {
-      const absoluteValue = Math.abs(result);
-      const converted = absoluteValue.toString(this.bases[base]).toUpperCase();
-
-      return isNegative(result) ? '-' + converted : converted;
+      // Use CalculatorUtils.formatForBase for consistent formatting
+      return CalculatorUtils.formatForBase(
+        isNegative(result) ? -Math.abs(result) : Math.abs(result),
+        base
+      );
     } catch (err) {
       console.error('Error formatting result:', err);
       return 'Overflow';
@@ -73,11 +69,19 @@ export class ProgrammerCalculations {
       const isNegative = typeof value === 'string' && value.startsWith('-');
       const absValue = isNegative ? value.substring(1) : value;
 
+      // Use CalculatorUtils.isValidForBase for consistent validation
+      if (!CalculatorUtils.isValidForBase(absValue, fromBase)) {
+        return '0';
+      }
+
       const decimal = parseInt(absValue.toString(), this.bases[fromBase]);
       if (isNaN(decimal)) return '0';
-      if (Math.abs(decimal) > this.evaluator.MAX_VALUE) return 'Overflow';
+      
+      // Check for overflow
+      if (Math.abs(decimal) > CalculatorConstants.MAX_VALUE) return 'Overflow';
 
-      const result = decimal.toString(this.bases[toBase]).toUpperCase();
+      // Use CalculatorUtils.formatForBase for consistent formatting
+      const result = CalculatorUtils.formatForBase(decimal, toBase);
       return isNegative ? '-' + result : result;
     } catch (err) {
       console.error('Error converting between bases:', err);

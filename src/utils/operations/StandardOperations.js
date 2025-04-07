@@ -36,7 +36,7 @@ export class StandardOperations {
    */
   handleOperator(op) {
     const lastChar = this.calculator.input.trim().slice(-1);
-    const isLastCharOperator = ["+", "-", "×", "÷"].includes(lastChar);
+    const isLastCharOperator = this.isOperator(lastChar);
 
     if (
       op === "-" &&
@@ -177,6 +177,16 @@ export class StandardOperations {
       return !parts[parts.length - 1].includes(".");
     }
     return true;
+  }
+
+  /**
+   * Checks if a character is an operator
+   * @param {string} char - Character to check
+   * @returns {boolean} Whether the character is an operator
+   */
+  isOperator(char) {
+    // Import from CalculatorUtils
+    return ["+", "-", "×", "÷"].includes(char);
   }
 
   /**

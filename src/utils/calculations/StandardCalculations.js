@@ -23,16 +23,12 @@ export class StandardCalculations {
    */
   evaluateExpression(expr) {
     try {
-      return this.evaluator.evaluate(expr);
+      // Use sanitized expression from CalculatorUtils
+      const sanitizedExpr = CalculatorUtils.sanitizeExpression(expr);
+      return this.evaluator.evaluate(sanitizedExpr);
     } catch (err) {
-      // Preserve specific error messages
-      if (err.message.includes("Division by zero") || 
-          err.message === "Invalid operation" ||
-          err.message === "Overflow" ||
-          err.message === "Invalid expression format") {
-        throw err;
-      }
-      throw new Error("Invalid expression: " + err.message);
+      // Use CalculatorUtils.formatError for consistent error handling
+      throw new Error(CalculatorUtils.formatError(err, "Invalid expression"));
     }
   }
 
@@ -76,7 +72,6 @@ export class StandardCalculations {
         notation: "fixed",
       });
 
-      // Remove trailing zeros after decimal point, but keep the decimal point if needed
       return CalculatorUtils.trimUnnecessaryZeros(formattedDecimal);
     } catch (err) {
       console.error("Formatting error:", err);

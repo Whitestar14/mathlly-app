@@ -1,7 +1,7 @@
 import { ICalculator } from "@/utils/core/ICalculator";
 import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
 import { ProgrammerCalculations } from "@/utils/calculations/ProgrammerCalculations";
-import { CalculatorConstants } from "@/utils/constants/CalculatorConstants";
+import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants";
 import {
   BinCalculator,
   DecCalculator,
@@ -66,8 +66,7 @@ export class ProgrammerCalculator extends ICalculator {
     try {
       return this.calculations.evaluateExpression(expr, base);
     } catch (err) {
-      // Preserve specific error messages
-      throw new Error("Invalid expression: " + err.message);
+      throw new Error(CalculatorUtils.formatError(err, "Invalid expression"));
     }
   }
 
@@ -103,7 +102,6 @@ export class ProgrammerCalculator extends ICalculator {
   handleButtonClick(btn) {
     // Allow error clearing operations
     if (["backspace", "AC", "CE"].includes(btn)) {
-      this.error = "";
       return this.normalizeResponse(this.processButton(btn));
     }
 
@@ -117,7 +115,7 @@ export class ProgrammerCalculator extends ICalculator {
     try {
       return this.normalizeResponse(this.processButton(btn));
     } catch (err) {
-      return this.createErrorResponse(err);
+      return this.createErrorResponse(err, this.states[this.activeBase].input);
     }
   }
 
@@ -129,7 +127,12 @@ export class ProgrammerCalculator extends ICalculator {
    */
   processButton(btn) {
     try {
-      const isFunctionKey = ["<<", ">>", "(", ")", "backspace", "AC", "CE", "±", "%"].includes(btn);
+      this.error = "";
+      // Use CalculatorConstants for button type checking
+      const isFunctionKey = [
+        ...CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS,
+        "(", ")", "backspace", "AC", "CE", "±", "%"
+      ].includes(btn);
 
       switch (btn) {
         case "=":
@@ -239,7 +242,7 @@ export class ProgrammerCalculator extends ICalculator {
     try {
       // Clean up incomplete expressions before evaluating
       const currentInput = this.states[this.activeBase].input.trim();
-      const cleanedInput = currentInput.replace(/\s*(?:<<|>>|\+|-|×|÷)\s*$/, '');
+      const cleanedInput = CalculatorUtils.sanitizeExpression(currentInput);
       
       if (cleanedInput !== currentInput) {
         this.states[this.activeBase].input = cleanedInput;
@@ -331,7 +334,15 @@ export class ProgrammerCalculator extends ICalculator {
    * @returns {boolean} True if input would be too long
    */
   isInputTooLong(btn) {
+    // Use CalculatorConstants.BUTTON_TYPES for excluded buttons
+    const excludedButtons = [
+      "=", "AC", "backspace", 
+      ...CalculatorConstants.BUTTON_TYPES.MEMORY,
+      ...CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS,
+      "CE", "±", "%"
+    ];
+    
     return this.states[this.activeBase].input.length >= this.MAX_INPUT_LENGTH &&
-      !["=", "AC", "backspace", "<<", ">>", "±", "%"].includes(btn);
+      !excludedButtons.includes(btn);
   }
 }

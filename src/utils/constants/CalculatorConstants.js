@@ -56,7 +56,25 @@ export const CalculatorConstants = {
   REGEX: {
     OPERATOR: /[+\-×÷]/,
     NUMBER: /[0-9A-Fa-f.]/,
-    VALID_EXPRESSION: /^[0-9A-Fa-f\s+\-*/%()<<>>]*$/
+    VALID_EXPRESSION: /^[0-9A-Fa-f\s+\-*/%()<<>>]*$/,
+    LAST_OPERATOR: /\s*[+\-×÷%<<>>]\s*$/,
+    DECIMAL_POINT: /\./,
+    SHIFT_OPERATOR: /\s*[<>]{2}\s*$/,
+    PARENTHESIS: /[()]/
+  },
+  
+  /**
+   * Error messages
+   * @type {Object}
+   */
+  ERROR_MESSAGES: {
+    OVERFLOW: "Overflow: Evaluated result exceeding max limit",
+    DIVISION_BY_ZERO: "Division by zero is not allowed",
+    INVALID_EXPRESSION: "Invalid expression format",
+    MAX_INPUT_LENGTH: "Maximum input length reached",
+    NEGATIVE_SQUARE_ROOT: "Cannot calculate square root of negative number",
+    OPERATION_ERROR: "Operation error",
+    INVALID_BASE: "Invalid base for conversion"
   }
 };
 
@@ -147,28 +165,288 @@ export const CalculatorUtils = {
       displayValues: data.displayValues,
       success: !data.error
     };
-
   },
 
   /**
- * Handle common error cases
- * 
- * @param {Error} error - Error object
- * @param {string} defaultMessage - Default error message
- * @returns {string} Formatted error message
- */
+   * Handle common error cases
+   * 
+   * @param {Error} error - Error object
+   * @param {string} defaultMessage - Default error message
+   * @returns {string} Formatted error message
+   */
   formatError(error, defaultMessage = "Operation failed") {
     if (!error) return defaultMessage;
     
     // Handle specific error types
     if (error.message.includes("division by zero")) {
-      return "Division by zero is not allowed";
+      return CalculatorConstants.ERROR_MESSAGES.DIVISION_BY_ZERO;
     }
     
     if (error.message.includes("overflow")) {
-      return "Overflow: Result exceeds maximum value";
+      return CalculatorConstants.ERROR_MESSAGES.OVERFLOW;
+    }
+    
+    if (error.message.includes("square root of negative")) {
+      return CalculatorConstants.ERROR_MESSAGES.NEGATIVE_SQUARE_ROOT;
     }
     
     return error.message || defaultMessage;
+  },
+  
+  /**
+   * Check if input contains a valid number
+   * 
+   * @param {string} input - Input to check
+   * @returns {boolean} True if input contains a valid number
+   */
+  containsValidNumber(input) {
+    return /\d/.test(input);
+  },
+  
+  /**
+   * Split expression into parts preserving operators
+   * 
+   * @param {string} expr - Expression to split
+   * @returns {Array} Array of expression parts
+   */
+  splitExpression(expr) {
+    return expr.split(/([+\-×÷%]|\s+<<\s+|\s+>>\s+)/);
+  },
+  
+  /**
+   * Get last part of an expression
+   * 
+   * @param {string} expr - Expression to analyze
+   * @returns {string} Last part of expression
+   */
+  getLastExpressionPart(expr) {
+    const parts = this.splitExpression(expr);
+    return parts[parts.length - 1].trim();
+  },
+  
+  /**
+   * Check if expression ends with an operator
+   * 
+   * @param {string} expr - Expression to check
+   * @returns {boolean} True if expression ends with an operator
+   */
+  endsWithOperator(expr) {
+    return CalculatorConstants.REGEX.LAST_OPERATOR.test(expr.trim());
+  },
+  
+  /**
+   * Remove last operator from expression
+   * 
+   * @param {string} expr - Expression to modify
+   * @returns {string} Expression without last operator
+   */
+  removeLastOperator(expr) {
+    return expr.replace(CalculatorConstants.REGEX.LAST_OPERATOR, '');
+  },
+  
+  /**
+   * Check if a string represents a valid number in any base
+   * 
+   * @param {string} str - String to check
+   * @param {string} [base='DEC'] - Base to check against
+   * @returns {boolean} True if string is a valid number
+   */
+  isValidNumber(str, base = 'DEC') {
+    if (!str || typeof str !== 'string') return false;
+    
+    switch(base) {
+      case 'BIN': return /^-?[01]+$/.test(str);
+      case 'OCT': return /^-?[0-7]+$/.test(str);
+      case 'DEC': return /^-?[0-9]+(\.[0-9]*)?$/.test(str);
+      case 'HEX': return /^-?[0-9A-Fa-f]+$/.test(str);
+      default: return false;
+    }
+  },
+  
+  /**
+   * Format number for display according to base
+   * 
+   * @param {number|string} num - Number to format
+   * @param {string} base - Base for formatting
+   * @returns {string} Formatted number
+   */
+  formatForBase(num, base) {
+    if (num === undefined || num === null) return '0';
+    
+    try {
+      const numValue = typeof num === 'string' ? parseFloat(num) : num;
+      
+      if (isNaN(numValue)) return '0';
+      
+      const isNegative = numValue < 0;
+      const absValue = Math.abs(numValue);
+      
+      let result;
+      switch(base) {
+        case 'BIN': result = Math.floor(absValue).toString(2); break;
+        case 'OCT': result = Math.floor(absValue).toString(8); break;
+        case 'HEX': result = Math.floor(absValue).toString(16).toUpperCase(); break;
+        case 'DEC': 
+        default:
+          result = absValue.toString();
+      }
+      
+      return isNegative ? '-' + result : result;
+    } catch (err) {
+      console.error('Error formatting number:', err);
+      return '0';
+    }
+  },
+  
+  /**
+   * Check if expression has balanced parentheses
+   * 
+   * @param {string} expr - Expression to check
+   * @returns {boolean} True if parentheses are balanced
+   */
+  hasBalancedParentheses(expr) {
+    let count = 0;
+    for (let i = 0; i < expr.length; i++) {
+      if (expr[i] === '(') count++;
+      else if (expr[i] === ')') {
+        count--;
+        if (count < 0) return false;
+      }
+    }
+    return count === 0;
+  },
+  
+  /**
+   * Check if expression ends with a shift operator
+   * 
+   * @param {string} expr - Expression to check
+   * @returns {boolean} True if expression ends with a shift operator
+   */
+  endsWithShiftOperator(expr) {
+    return CalculatorConstants.REGEX.SHIFT_OPERATOR.test(expr.trim());
+  },
+  
+  /**
+   * Remove shift operator from expression
+   * 
+   * @param {string} expr - Expression to modify
+   * @returns {string} Expression without shift operator
+   */
+  removeShiftOperator(expr) {
+    return expr.replace(CalculatorConstants.REGEX.SHIFT_OPERATOR, '');
+  },
+  
+  /**
+   * Check if a character is a valid digit for a specific base
+   * 
+   * @param {string} char - Character to check
+   * @param {string} base - Base to check against
+   * @returns {boolean} True if character is valid for base
+   */
+  isValidDigitForBase(char, base) {
+    if (!char || char.length !== 1) return false;
+    
+    switch(base) {
+      case 'BIN': return /[01]/.test(char);
+      case 'OCT': return /[0-7]/.test(char);
+      case 'DEC': return /[0-9]/.test(char);
+      case 'HEX': return /[0-9A-Fa-f]/i.test(char);
+      default: return false;
+    }
+  },
+  
+  /**
+   * Convert between bases with error handling
+   * 
+   * @param {string|number} value - Value to convert
+   * @param {string} fromBase - Source base
+   * @param {string} toBase - Target base
+   * @returns {string} Converted value or error message
+   */
+  convertBetweenBases(value, fromBase, toBase) {
+    try {
+      if (!value || value === 'Overflow') return '0';
+      
+      // Handle negative values
+      const isNegative = typeof value === 'string' && value.startsWith('-');
+      const absValue = isNegative ? value.substring(1) : value;
+      
+      // Validate input for source base
+      if (!this.isValidForBase(absValue, fromBase)) {
+        return '0';
+      }
+      
+      // Convert to decimal first
+      const decimal = parseInt(absValue.toString(), CalculatorConstants.BASES[fromBase]);
+      if (isNaN(decimal)) return '0';
+      
+      // Check for overflow
+      if (Math.abs(decimal) > CalculatorConstants.MAX_VALUE) {
+        return 'Overflow';
+      }
+      
+      // Convert to target base
+      const result = decimal.toString(CalculatorConstants.BASES[toBase]).toUpperCase();
+      return isNegative ? '-' + result : result;
+    } catch (err) {
+      console.error('Error converting between bases:', err);
+      return '0';
+    }
+  },
+  
+  /**
+   * Add proper spacing to an expression
+   * 
+   * @param {string} expr - Expression to format
+   * @returns {string} Formatted expression with proper spacing
+   */
+  formatExpression(expr) {
+    return expr
+      .replace(/([+\-×÷%])/g, ' $1 ')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/(\d)\s*\(\s*/g, '$1 × (')
+      .replace(/\)\s*(\d)/g, ') × $1')
+      .trim();
+  },
+  
+  /**
+   * Check if an expression is complete and can be evaluated
+   * 
+   * @param {string} expr - Expression to check
+   * @returns {boolean} True if expression is complete
+   */
+  isCompleteExpression(expr) {
+    if (!expr || expr === '0' || expr === 'Error') return false;
+    
+    // Check for balanced parentheses
+    if (!this.hasBalancedParentheses(expr)) return false;
+    
+    // Check if expression ends with an operator
+    if (this.endsWithOperator(expr)) return false;
+    
+    // Check if expression ends with a shift operator
+    if (this.endsWithShiftOperator(expr)) return false;
+    
+    return true;
+  },
+  
+  /**
+   * Complete an expression by adding missing closing parentheses
+   * 
+   * @param {string} expr - Expression to complete
+   * @returns {string} Completed expression
+   */
+  completeExpression(expr) {
+    let openCount = 0;
+    for (let i = 0; i < expr.length; i++) {
+      if (expr[i] === '(') openCount++;
+      else if (expr[i] === ')') openCount--;
+    }
+    
+    if (openCount > 0) {
+      return expr + ')'.repeat(openCount);
+    }
+    
+    return expr;
   }
-}
+};

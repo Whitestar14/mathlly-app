@@ -1,17 +1,20 @@
 import { useSettingsStore } from '@/stores/settings';
 import { ExpressionEvaluator } from '@/utils/core/ExpressionEvaluator';
-import { CalculatorConstants } from '@/utils/constants/CalculatorConstants';
+import {
+  CalculatorConstants,
+  CalculatorUtils,
+} from '@/utils/constants/CalculatorConstants';
 
 /**
  * Interface for calculator implementations.
  * All calculator types should implement these methods.
- * 
+ *
  * @class ICalculator
  */
 export class ICalculator {
   /**
    * Create a calculator instance
-   * 
+   *
    * @param {Object} settings - Calculator settings
    */
   constructor(settings) {
@@ -21,10 +24,10 @@ export class ICalculator {
     this.error = '';
     this.currentExpression = '';
     this.activeBase = 'DEC';
-    
+
     // Use shared evaluator instance
     this.evaluator = ExpressionEvaluator.getInstance();
-    
+
     // Operations will be injected by derived classes
     this.operations = null;
     this.calculations = null;
@@ -38,13 +41,10 @@ export class ICalculator {
    * @returns {Object} Standardized error response object
    */
   createErrorResponse(error, fallbackInput = 'Error') {
-    // Extract message from Error object or use the string directly
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : typeof error === 'string'
-        ? error
-        : 'Operation failed';
+    // Use CalculatorUtils.formatError for consistent error handling
+    const errorMessage = CalculatorUtils.formatError(
+      error instanceof Error ? error : new Error(error || 'Operation failed')
+    );
 
     // Update calculator state
     this.error = errorMessage;
@@ -71,20 +71,19 @@ export class ICalculator {
       return this.createErrorResponse('Invalid operation result');
     }
 
-    // Create standardized response with defaults for missing properties
-    return {
+    // Use CalculatorUtils.createResponse for standardized response format
+    return CalculatorUtils.createResponse({
       input: result.input ?? this.input,
       error: result.error ?? '',
       expression: result.expression ?? this.currentExpression,
       displayValues: result.displayValues ?? undefined,
       result: result.result,
-      success: !result.error,
-    };
+    });
   }
 
   /**
    * Evaluate a mathematical expression
-   * 
+   *
    * @param {string} expr - Expression to evaluate
    * @param {string} [base] - Base for programmer mode
    * @returns {*} Evaluation result
@@ -95,29 +94,99 @@ export class ICalculator {
       return this.evaluator.evaluate(expr, {
         base,
         maxValue: CalculatorConstants.MAX_VALUE,
-        minValue: CalculatorConstants.MIN_VALUE
+        minValue: CalculatorConstants.MIN_VALUE,
       });
     } catch (err) {
-      throw new Error(`Invalid expression: ${err.message}`);
+      throw new Error(CalculatorUtils.formatError(err, 'Invalid expression'));
     }
   }
 
   /**
    * Format a result for display
-   * 
+   *
    * @param {*} result - Result to format
    * @param {string} [base] - Base for programmer mode
    * @returns {string} Formatted result
    */
   formatResult(result, base) {
-    // Add eslint-disable-next-line to suppress the warning
     // eslint-disable-next-line no-unused-vars
     throw new Error('formatResult must be implemented in derived class');
   }
 
   /**
-   * Handle button click
-   * 
+   * Process button input and route to appropriate handler
+   * @param {string} btn - Button value
+   * @returns {Object} Processing result
+   */
+  processButton(btn) {
+    try {
+      this.error = '';
+
+      // Handle basic calculator operations
+      switch (btn) {
+        // Equals operation
+        case '=':
+          return this.handleEquals();
+
+        // Clear operations
+        case 'AC':
+          return this.handleClear();
+        case 'CE':
+          return this.handleClearEntry
+            ? this.handleClearEntry()
+            : this.handleClear();
+
+        // Delete operation
+        case 'backspace':
+          return this.handleBackspace();
+
+        // Basic arithmetic operators
+        case '+':
+        case '-':
+        case '×':
+        case '÷':
+          return this.handleOperator(btn);
+
+        // Scientific operations
+        case 'x²':
+          return this.handleSquare
+            ? this.handleSquare()
+            : this.createErrorResponse(new Error('Operation not supported'));
+        case 'x³':
+          return this.handleCube
+            ? this.handleCube()
+            : this.createErrorResponse(new Error('Operation not supported'));
+        case '√':
+          return this.handleSquareRoot
+            ? this.handleSquareRoot()
+            : this.createErrorResponse(new Error('Operation not supported'));
+        case '∛':
+          return this.handleCubeRoot
+            ? this.handleCubeRoot()
+            : this.createErrorResponse(new Error('Operation not supported'));
+        case '1/x':
+          return this.handleReciprocal
+            ? this.handleReciprocal()
+            : this.createErrorResponse(new Error('Operation not supported'));
+        case '%':
+          return this.handlePercentage
+            ? this.handlePercentage()
+            : this.createErrorResponse(new Error('Operation not supported'));
+        case '±':
+          return this.handleToggleSign
+            ? this.handleToggleSign()
+            : this.createErrorResponse(new Error('Operation not supported'));
+        // Default case - handle as number or other input
+        default:
+          return this.handleNumber(btn);
+      }
+    } catch (err) {
+      return this.createErrorResponse(err);
+    }
+  }
+
+  /**
+   * Handle button click - main entry point for button processing
    * @param {string} btn - Button value
    * @returns {Object} Updated state
    */
@@ -130,24 +199,14 @@ export class ICalculator {
     // Check input length
     if (this.isInputTooLong(btn)) {
       return this.createErrorResponse(
-        'Maximum input length reached',
+        new Error('Maximum input length reached'),
         this.input
       );
     }
 
     try {
-      // Process button based on type
-      if (btn === '=') {
-        return this.handleEquals();
-      } else if (['AC', 'CE'].includes(btn)) {
-        return this.handleClear();
-      } else if (btn === 'backspace') {
-        return this.handleBackspace();
-      } else if (['+', '-', '×', '÷'].includes(btn)) {
-        return this.handleOperator(btn);
-      } else {
-        return this.handleNumber(btn);
-      }
+      // Use the standardized processButton method
+      return this.normalizeResponse(this.processButton(btn));
     } catch (err) {
       return this.createErrorResponse(err);
     }
@@ -155,7 +214,7 @@ export class ICalculator {
 
   /**
    * Handle equals operation
-   * 
+   *
    * @returns {Object} Calculation result
    */
   handleEquals() {
@@ -164,7 +223,7 @@ export class ICalculator {
 
   /**
    * Handle operator input
-   * 
+   *
    * @param {string} operator - Operator symbol
    * @returns {Object} Updated state
    */
@@ -174,7 +233,7 @@ export class ICalculator {
 
   /**
    * Handle number input
-   * 
+   *
    * @param {string} num - Number or digit
    * @returns {Object} Updated state
    */
@@ -184,7 +243,7 @@ export class ICalculator {
 
   /**
    * Handle backspace operation
-   * 
+   *
    * @returns {Object} Updated state
    */
   handleBackspace() {
@@ -192,8 +251,72 @@ export class ICalculator {
   }
 
   /**
+   * Handle clear entry operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handleClearEntry() {
+    return this.handleClear();
+  }
+
+  /**
+   * Handle square operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handleSquare() {
+    return this.createErrorResponse(new Error('Operation not supported'));
+  }
+
+  /**
+   * Handle cube operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handleCube() {
+    return this.createErrorResponse(new Error('Operation not supported'));
+  }
+
+  /**
+   * Handle square root operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handleSquareRoot() {
+    return this.createErrorResponse(new Error('Operation not supported'));
+  }
+
+  /**
+   * Handle cube root operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handleCubeRoot() {
+    return this.createErrorResponse(new Error('Operation not supported'));
+  }
+
+  /**
+   * Handle reciprocal operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handleReciprocal() {
+    return this.createErrorResponse(new Error('Operation not supported'));
+  }
+
+  /**
+   * Handle percentage operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handlePercentage() {
+    return this.createErrorResponse(new Error('Operation not supported'));
+  }
+
+  /**
+   * Handle sign toggle operation - may be implemented by derived classes
+   * @returns {Object} Updated state
+   */
+  handleToggleSign() {
+    return this.createErrorResponse(new Error('Operation not supported'));
+  }
+
+  /**
    * Clear calculator state
-   * 
+   *
    * @returns {Object} Updated state
    */
   handleClear() {
@@ -208,7 +331,7 @@ export class ICalculator {
 
   /**
    * Check if input is too long
-   * 
+   *
    * @param {string} btn - Button being pressed
    * @returns {boolean} True if input would be too long
    */
@@ -217,11 +340,7 @@ export class ICalculator {
       '=',
       'AC',
       'backspace',
-      'MC',
-      'MR',
-      'M+',
-      'M-',
-      'MS',
+      ...CalculatorConstants.BUTTON_TYPES.MEMORY,
       'CE',
     ];
     return (

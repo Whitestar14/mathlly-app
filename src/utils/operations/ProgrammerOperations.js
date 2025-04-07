@@ -1,4 +1,5 @@
 import { ParenthesesTracker } from "@/utils/core/ParenthesesTracker";
+import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants";
 
 /**
  * Handles operations for the programmer calculator mode
@@ -59,7 +60,7 @@ export class ProgrammerOperations {
       }
 
       // Handle shift operators specially
-      if (op === "<<" || op === ">>") {
+      if (CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(op)) {
         return this.handleShiftOperator(op);
       }
 
@@ -82,7 +83,7 @@ export class ProgrammerOperations {
   
       // Handle empty or error states
       if (!currentInput || currentInput === "Error") {
-        return this.createErrorResponse(new Error("Invalid operation"));
+        return this.createErrorResponse(new Error(CalculatorConstants.ERROR_MESSAGES.INVALID_EXPRESSION));
       }
   
       // Don't add operator after opening parenthesis
@@ -91,9 +92,8 @@ export class ProgrammerOperations {
       }
   
       // Don't add shift operator if last part is incomplete
-      const parts = currentInput.split(/\s+/);
-      const lastPart = parts[parts.length - 1];
-      if (!lastPart || /[+\-×÷]$/.test(lastPart)) {
+      const lastPart = CalculatorUtils.getLastExpressionPart(currentInput);
+      if (!lastPart || CalculatorConstants.REGEX.OPERATOR.test(lastPart)) {
         return this.createResponse(state.input);
       }
   
@@ -101,7 +101,7 @@ export class ProgrammerOperations {
       let newInput;
       
       // Explicitly check for closing parenthesis
-      if (currentInput.trim().endsWith(")")) {
+      if (this.isLastCharClosingParenthesis()) {
         newInput = `${currentInput.trim()} ${op} `;
       } 
       // Replace existing shift operator
@@ -113,7 +113,7 @@ export class ProgrammerOperations {
         newInput = `${currentInput.trim()} ${op} `;
       } 
       else {
-        return this.createErrorResponse(new Error("Invalid operation"));
+        return this.createErrorResponse(new Error(CalculatorConstants.ERROR_MESSAGES.INVALID_EXPRESSION));
       }
   
       state.input = newInput;
@@ -141,7 +141,8 @@ export class ProgrammerOperations {
 
       // Replace last operator if it exists
       if (this.isLastCharOperator()) {
-        state.input = currentInput.replace(/\s*[+\-×÷<<>>%]\s*$/, ` ${op} `);
+        // Use CalculatorUtils.removeLastOperator for consistent handling
+        state.input = CalculatorUtils.removeLastOperator(currentInput) + ` ${op} `;
         return this.createResponse(state.input);
       }
 
@@ -203,6 +204,7 @@ export class ProgrammerOperations {
 
     // Check if content is a complete expression
     const lastChar = expr.trim().slice(-1);
+    // Use CalculatorConstants.REGEX.NUMBER for consistent validation
     return /[0-9A-Fa-f)]/.test(lastChar);
   }
 
@@ -219,6 +221,7 @@ export class ProgrammerOperations {
       this.parenthesesTracker.open(position);
     } else {
       const lastChar = currentInput.slice(-1);
+      // Use CalculatorConstants.REGEX.NUMBER for consistent validation
       const needsMultiplication = /[0-9A-Fa-f)]/.test(lastChar);
       const newInput = `${currentInput}${needsMultiplication ? " × " : " "}(`;
       state.input = newInput;
@@ -283,14 +286,10 @@ export class ProgrammerOperations {
       return true;
     }
 
-    // Handle other operators
-    const operatorMatch = currentInput.match(/(.*?)(\s*[+\-×÷%]\s*)$/);
-    if (operatorMatch) {
-      const [, beforeOperator] = operatorMatch;
-      if (beforeOperator.match(/(\d|\w)$/)) {
-        state.input = beforeOperator;
-        return true;
-      }
+    // Handle other operators - use CalculatorUtils.endsWithOperator for consistent checking
+    if (CalculatorUtils.endsWithOperator(currentInput)) {
+      state.input = CalculatorUtils.removeLastOperator(currentInput);
+      return true;
     }
 
     return false;
@@ -320,8 +319,8 @@ export class ProgrammerOperations {
       const currentInput = state.input;
 
       if (currentInput !== "0" && currentInput !== "Error") {
-        // Handle expression parts for proper negation
-        const parts = currentInput.split(/([+×÷<<>>%])/);
+        // Use CalculatorUtils.splitExpression for consistent expression parsing
+        const parts = CalculatorUtils.splitExpression(currentInput);
         const lastPart = parts[parts.length - 1].trim();
         
         if (lastPart) {
@@ -366,7 +365,8 @@ export class ProgrammerOperations {
 
       // Replace last operator if it exists
       if (this.isLastCharOperator()) {
-        state.input = currentInput.replace(/\s*[+\-×÷%<<>>]\s*$/, " % ");
+        // Use CalculatorUtils.removeLastOperator for consistent handling
+        state.input = CalculatorUtils.removeLastOperator(currentInput) + " % ";
         return this.createResponse(state.input);
       }
 
@@ -382,8 +382,8 @@ export class ProgrammerOperations {
    */
   isLastCharOperator() {
     const input = this.calculator.states[this.calculator.activeBase].input.trim();
-    return /[+\-×÷%]$|\s*<<\s*$|\s*>>\s*$/.test(input) || 
-           /\s*[+\-×÷%]\s*$/.test(input) || 
+    // Use CalculatorUtils.endsWithOperator for consistent checking
+    return CalculatorUtils.endsWithOperator(input) || 
            (/-$/.test(input) && !/-\d+$/.test(input)) ||
            input.endsWith(" << ") || 
            input.endsWith(" >> ") || 
@@ -395,8 +395,9 @@ export class ProgrammerOperations {
    * @returns {boolean} Whether last character is a number
    */
   isLastCharNumber() {
-    return /[0-9A-Fa-f]$/.test(
-      this.calculator.states[this.calculator.activeBase].input
+    // Use CalculatorConstants.REGEX.NUMBER for consistent validation
+    return CalculatorConstants.REGEX.NUMBER.test(
+      this.calculator.states[this.calculator.activeBase].input.slice(-1)
     );
   }
 
@@ -430,11 +431,11 @@ export class ProgrammerOperations {
    * @returns {Object} Standardized response
    */
   createResponse(input, error = null) {
-    return {
+    return CalculatorUtils.createResponse({
       input: input,
       error: error,
       expression: this.calculator.currentExpression
-    };
+    });
   }
 
   /**
@@ -444,9 +445,10 @@ export class ProgrammerOperations {
    */
   createErrorResponse(err) {
     console.error('[ProgrammerOperations] Error:', err);
+    // Use CalculatorUtils.formatError for consistent error handling
     return {
       input: this.calculator.states[this.calculator.activeBase].input,
-      error: err.message || "Operation error",
+      error: CalculatorUtils.formatError(err, "Operation error"),
       expression: this.calculator.currentExpression
     };
   }

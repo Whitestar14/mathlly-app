@@ -1,5 +1,5 @@
 import { evaluate, bignumber } from 'mathjs';
-import { CalculatorConstants } from '@/utils/constants/CalculatorConstants';
+import { CalculatorConstants, CalculatorUtils } from '@/utils/constants/CalculatorConstants';
 
 /**
  * Singleton expression evaluator with memoization
@@ -91,45 +91,28 @@ export class ExpressionEvaluator {
 
     // Check for division by zero before sanitization
     if (expr.includes('÷ 0') || expr.includes('/ 0')) {
-      throw new Error('Division by zero is not allowed');
+      throw new Error(CalculatorConstants.ERROR_MESSAGES.DIVISION_BY_ZERO);
     }
 
-    // Sanitize expression
-    const sanitizedExpr = this.sanitizeExpression(expr, base);
+    // Use CalculatorUtils.sanitizeExpression instead of custom implementation
+    const sanitizedExpr = base && base !== 'DEC' 
+      ? this.convertToDecimal(CalculatorUtils.sanitizeExpression(expr), base)
+      : CalculatorUtils.sanitizeExpression(expr);
 
     // Evaluate using mathjs
-    const result = evaluate(sanitizedExpr);
+    try {
+      const result = evaluate(sanitizedExpr);
 
-    // Check bounds
-    if (result > maxValue || result < minValue) {
-      throw new Error('Overflow');
+      // Check bounds
+      if (result > maxValue || result < minValue) {
+        throw new Error(CalculatorConstants.ERROR_MESSAGES.OVERFLOW);
+      }
+
+      return result;
+    } catch (err) {
+      // Use CalculatorUtils.formatError for consistent error handling
+      throw new Error(CalculatorUtils.formatError(err));
     }
-
-    return result;
-  }
-
-  /**
-   * Sanitize expression for evaluation
-   * 
-   * @param {string} expr - Expression to sanitize
-   * @param {string} base - Numeric base
-   * @returns {string} Sanitized expression
-   */
-  sanitizeExpression(expr, base) {
-    // Basic sanitization
-    let sanitized = expr
-      .replace(/×/g, '*')
-      .replace(/÷/g, '/')
-      .replace(/\s+/g, ' ')
-      .replace(/[+\-*/]\s*$/, '')
-      .trim();
-
-    // Handle base conversion if needed
-    if (base && base !== 'DEC') {
-      sanitized = this.convertToDecimal(sanitized, base);
-    }
-
-    return sanitized;
   }
 
   /**
@@ -152,8 +135,12 @@ export class ExpressionEvaluator {
 
         // Convert numbers to decimal
         try {
-          const decimal = parseInt(part, bases[fromBase]);
-          return isNaN(decimal) ? part : decimal.toString(10);
+          // Use CalculatorUtils.isValidForBase to check validity
+          if (CalculatorUtils.isValidForBase(part, fromBase)) {
+            const decimal = parseInt(part, bases[fromBase]);
+            return isNaN(decimal) ? part : decimal.toString(10);
+          }
+          return part;
         } catch {
           return part;
         }
