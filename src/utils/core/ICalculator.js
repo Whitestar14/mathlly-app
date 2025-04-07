@@ -108,8 +108,8 @@ export class ICalculator {
    * @param {string} [base] - Base for programmer mode
    * @returns {string} Formatted result
    */
+  // eslint-disable-next-line no-unused-vars
   formatResult(result, base) {
-    // eslint-disable-next-line no-unused-vars
     throw new Error('formatResult must be implemented in derived class');
   }
 
@@ -227,6 +227,7 @@ export class ICalculator {
    * @param {string} operator - Operator symbol
    * @returns {Object} Updated state
    */
+  // eslint-disable-next-line no-unused-vars
   handleOperator(operator) {
     throw new Error('handleOperator must be implemented in derived class');
   }
@@ -237,6 +238,7 @@ export class ICalculator {
    * @param {string} num - Number or digit
    * @returns {Object} Updated state
    */
+  // eslint-disable-next-line no-unused-vars
   handleNumber(num) {
     throw new Error('handleNumber must be implemented in derived class');
   }
