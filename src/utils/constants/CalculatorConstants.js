@@ -279,7 +279,7 @@ export const CalculatorUtils = {
       if (isNaN(numValue)) return '0';
       
       const isNegative = numValue < 0;
-      const absValue = Math.abs(numValue);
+      const absValue = Math.floor(Math.abs(numValue));
       
       let result;
       switch(base) {

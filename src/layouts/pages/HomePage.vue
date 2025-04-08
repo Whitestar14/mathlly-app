@@ -26,13 +26,13 @@
             <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.5 } }"
               class="flex justify-center md:justify-start flex-wrap gap-4 mt-8">
               <RouterLink to="/calculator">
-                <Button variant="primary" size="lg" class="w-full sm:w-auto">
+                <Button variant="primary" class="w-full sm:w-auto">
                   <CalculatorIcon class="h-4 w-4" />
                   Get Started
                 </Button>
               </RouterLink>
               <a href="https://github.com/Whitestar14/mathlly-app" target="_blank">
-                <Button variant="outline" size="lg" class="w-full sm:w-auto">
+                <Button variant="outline" class="w-full sm:w-auto">
                   <GithubIcon class="h-4 w-4" />
                   View GitHub
                 </Button>
@@ -43,7 +43,7 @@
           <div v-motion :initial="{ opacity: 0, scale: 0.9 }"
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
-            <Logo type="svg" :svgPath="isDark ? '/img/icons/mathlly-dark.svg' : '/img/icons/mathlly-light.svg'" size="lg"
+            <Logo type="svg" :svgPath="isDark ? '/icons/mathlly-dark.svg' : '/icons/mathlly-light.svg'" size="lg"
               class="relative hidden md:block scale-[2.5] md:scale-[3.5]" />
           </div>
         </div>
@@ -184,7 +184,7 @@
             <!-- Action buttons with badge - improved for dark mode -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
               <RouterLink to="/calculator">
-                <Button variant="secondary" size="lg"
+                <Button variant="secondary"
                   class="bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-gray-200 shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto">
                   <CalculatorIcon class="h-4 w-4" />
                   Try Mathlly Now
@@ -192,7 +192,7 @@
               </RouterLink>
 
               <a href="https://github.com/Whitestar14/mathlly-app" target="_blank">
-                <Button variant="outline" size="lg"
+                <Button variant="outline"
                   class="border-white/30 dark:border-white/40 !text-white hover:bg-white/10 dark:hover:bg-white/15 w-full sm:w-auto">
                   <GithubIcon class="h-4 w-4" />
                   Star on GitHub

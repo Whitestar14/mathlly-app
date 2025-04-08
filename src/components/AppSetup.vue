@@ -11,7 +11,9 @@
       ]">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
-      <suspense>
+      
+      <error-fallback v-if="hasError" :error="error" />
+      <suspense v-else>
         <template #default>
           <app-view
             :mode="mode"
@@ -30,7 +32,7 @@
 </template>
 
 <script setup>
-import { onUnmounted, computed, watch } from "vue"
+import { onUnmounted, computed, watch, ref, onErrorCaptured } from "vue"
 import { useRouter } from "vue-router"
 import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
@@ -43,19 +45,27 @@ import SidebarMenu from "@/layouts/SidebarMenu.vue"
 import AppView from "@/components/AppView.vue"
 import Loader from "@/components/base/BaseLoader.vue"
 import Toast from "@/components/base/BaseToast.vue"
+import ErrorFallback from "@/layouts/pages/ErrorFallback.vue"
 
 const router = useRouter()
 const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
+const error = ref(null)
+const hasError = ref(false)
 
 // --- Loading Logic ---
 const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000))
 
-await Promise.all([
-  minLoadTime,
-  settingsStore.loadSettings(),
-  router.isReady(),
-])
+try {
+  await Promise.all([
+    minLoadTime,
+    settingsStore.loadSettings(),
+    router.isReady(),
+  ])
+} catch (err) {
+  error.value = err
+  hasError.value = true
+}
 
 deviceStore.initializeDeviceInfo()
 
@@ -77,16 +87,26 @@ const {
 } = usePanel('menu', deviceStore.isMobile, false)
 
 const updateMode = async (newMode) => {
-  settingsStore.setCurrentMode(newMode)
+  try {
+    settingsStore.setCurrentMode(newMode)
+  } catch (err) {
+    error.value = err
+    hasError.value = true
+  }
 }
 
 const updateSettings = async (newSettings) => {
-  if (newSettings.mode !== settingsStore.mode) {
-    await settingsStore.setDefaultMode(newSettings.mode)
+  try {
+    if (newSettings.mode !== settingsStore.mode) {
+      await settingsStore.setDefaultMode(newSettings.mode)
+    }
+    const settingsToSave = { ...newSettings }
+    delete settingsToSave.mode
+    await settingsStore.saveSettings(settingsToSave)
+  } catch (err) {
+    error.value = err
+    hasError.value = true
   }
-  const settingsToSave = { ...newSettings }
-  delete settingsToSave.mode
-  await settingsStore.saveSettings(settingsToSave)
 }
 
 watch(
@@ -107,7 +127,7 @@ watch(router.currentRoute, () => {
 
 // --- Keyboard Shortcuts ---
 useKeyboard("global", {
-  toggleSidebar: toggleSidebar, // Simplified syntax
+  toggleSidebar: toggleSidebar,
   toggleMenubar: toggleMenubar,
   toggleFullscreen: () => {
     useFullscreen(document.documentElement).toggle()
@@ -118,4 +138,10 @@ onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
 
+// Capture any errors
+onErrorCaptured((err) => {
+  error.value = err
+  hasError.value = true
+  return false // Prevent error from propagating
+})
 </script>

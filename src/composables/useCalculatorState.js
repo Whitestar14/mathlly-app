@@ -1,7 +1,7 @@
 import { reactive, readonly, ref } from 'vue'
 
 // Define constants
-const ANIMATION_DURATION = 1000;
+const ANIMATION_DURATION = 500;
 const DEFAULT_BASE = 'DEC';
 const DEFAULT_MODE = 'Standard';
 const BASES = ['DEC', 'BIN', 'HEX', 'OCT'];
@@ -115,7 +115,6 @@ export function useCalculatorState(initialMode) {
    * @param {Object} values - New display values
    */
   function updateDisplayValues(values) {
-    // Create a proper deep copy
     const newValues = {};
     
     Object.keys(values).forEach(base => {

@@ -1,122 +1,125 @@
 <template>
   <BasePage title="About" :showFooter="true" :showVersion="true">
-    <section class="mb-24 font-mono">
-      <h2 class="text-4xl sm:text-6xl lg:text-8xl font-medium tracking-tight mb-4">
-        The toolset by developers,
-        <span class="block mb-4 text-gray-600 dark:text-gray-400">
-          for developers
-        </span>
-      </h2>
+    <!-- Team & Vision Section -->
+    <section class="mb-16 font-mono pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">
+      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative">
+        <h2 class="text-5xl md:text-6xl lg:text-7xl font-mono font-bold tracking-tight">
+          Built with passion,
+          <span class="block mb-4 text-indigo-600 dark:text-indigo-400">
+            driven by community
+          </span>
+        </h2>
 
-      <p class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400 font-sans">
-        Mathlly is more than just a calculator. It's a comprehensive suite of
-        mathematical tools crafted to streamline your workflow and boost your
-        productivity.
-      </p>
-    </section>
-
-    <section class="space-y-8">
-      <h3 class="text-2xl font-medium tracking-tight">
-        Key Features
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <FeatureCard
-          v-for="feature in features"
-          :key="feature.title"
-          :icon="feature.icon"
-          :title="feature.title"
-          :description="feature.description"
-        />
-      </div>
-    </section>
-
-    <section class="mt-16 space-y-6">
-      <h3 class="text-2xl font-medium tracking-tight">
-        Why Choose Mathlly?
-      </h3>
-      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <ul class="space-y-4">
-          <li
-            v-for="(reason, index) in reasons"
-            :key="index"
-            class="flex items-start group"
-          >
-            <CheckCircleIcon
-              class="h-4 w-4 text-green-500 dark:text-green-400 mt-1 mr-3 shrink-0 opacity-75 group-hover:opacity-100 transition-opacity"
-            />
-            <span class="text-sm text-gray-600 dark:text-gray-300">{{
-              reason
-            }}</span>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="mt-16 space-y-6">
-      <h3 class="text-2xl font-medium tracking-tight">
-        Our Mission
-      </h3>
-      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-          At Mathlly, we're committed to empowering developers with powerful,
-          intuitive, and efficient mathematical tools. Our goal is to
-          streamline complex calculations, making your coding journey smoother
-          and more productive.
+        <p class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400 font-sans">
+          Started as a developer's side project, Mathlly has grown into a community-driven platform 
+          that pushes the boundaries of development tools.
         </p>
+      </div>
+    </section>
+
+    <!-- Core Values -->
+    <section class="space-y-8 mb-16">
+      <h3 class="text-2xl font-medium tracking-tight">Core Values</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <FeatureCard v-for="coreValue in coreValues" :key="coreValue.title" :icon="coreValue.icon" :title="coreValue.title"
+      :description="coreValue.description"/>
+      </div>
+    </section>
+
+    <!-- Development Process -->
+    <section class="space-y-6 mb-16">
+      <h3 class="text-2xl font-medium tracking-tight">Development Process</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div v-for="(phase, index) in devProcess" :key="index" class="space-y-3">
+            <div class="flex items-center gap-2">
+              <component :is="phase.icon" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <h4 class="font-medium">{{ phase.title }}</h4>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300">{{ phase.description }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contributing Section -->
+    <section class="space-y-6">
+      <h3 class="text-2xl font-medium tracking-tight">Contributing</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div class="space-y-4">
+          <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            Mathlly is open source and welcomes contributions from developers worldwide. Whether you're fixing bugs, 
+            adding features, or improving documentation, your help makes Mathlly better for everyone.
+          </p>
+          <div class="flex gap-4">
+            <Button variant="primary" @click="goToGithub">
+              <GithubIcon class="h-4 w-4" />
+              View on GitHub
+            </Button>
+            <Button variant="outline" @click="goToContributing">
+              <BookOpenIcon class="h-4 w-4" />
+              Contributing Guide
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   </BasePage>
 </template>
 
 <script setup>
-import { CheckCircleIcon } from "lucide-vue-next";
-import FeatureCard from "@/components/cards/FeatureCard.vue";
+import { 
+  GithubIcon, 
+  BookOpenIcon, 
+  UsersIcon, 
+  RocketIcon, 
+  TestTubeIcon,
+} from "lucide-vue-next";
 import BasePage from "@/components/base/BasePage.vue";
+import FeatureCard from "@/components/cards/FeatureCard.vue";
+import Button from "@/components/base/BaseButton.vue";
 
-const features = [
+const coreValues = [
   {
-    icon: "CalculatorIcon",
-    title: "Advanced Modes",
-    description:
-      "From basic arithmetic to complex programming calculations, we've got you covered.",
+    title: 'Community Driven',
+    icon: 'Heart',
+    description: 'Built by developers, for developers. Every feature and improvement is inspired by real user needs.'
   },
   {
-    icon: "EyeIcon",
-    title: "Real-time Preview",
-    description:
-      "See your results instantly as you type, enhancing your productivity.",
+    title: 'Open Source',
+    icon: 'ShieldCheck',
+    description: 'Transparent development process with a focus on security, reliability, and continuous improvement.'
   },
   {
-    icon: "HistoryIcon",
-    title: "Calculation History",
-    description:
-      "Never lose track of your work with our comprehensive history feature.",
-  },
-  {
-    icon: "PaletteIcon",
-    title: "Customizable UI",
-    description:
-      "Tailor the interface to your preferences for a personalized experience.",
-  },
-  {
-    icon: "CodeIcon",
-    title: "Developer-Focused",
-    description:
-      "Built with the needs of developers in mind, including programmer-specific functions.",
-  },
-  {
-    icon: "CloudIcon",
-    title: "Cloud Sync",
-    description:
-      "Access your calculations and settings across all your devices.",
-  },
+    title: 'Innovation',
+    icon: 'Sparkles',
+    description: 'Pushing boundaries with cutting-edge features while maintaining simplicity and usability.'
+  }
 ];
 
-const reasons = [
-  "Designed specifically for developers and programmers",
-  "Constantly updated with new features based on user feedback",
-  "Open-source and community-driven development",
-  "Seamless integration with popular IDEs and text editors",
-  "Extensive documentation and support resources",
+const devProcess = [
+  {
+    title: 'Community First',
+    icon: UsersIcon,
+    description: 'Features and improvements driven by real developer needs and feedback.'
+  },
+  {
+    title: 'Test Driven',
+    icon: TestTubeIcon,
+    description: 'Rigorous testing ensures reliability and stability.'
+  },
+  {
+    title: 'Continuous Delivery',
+    icon: RocketIcon,
+    description: 'Regular updates and improvements keep Mathlly cutting edge.'
+  }
 ];
+
+const goToGithub = () => {
+  window.open('https://github.com/Whitestar14/mathlly-app', '_blank');
+};
+
+const goToContributing = () => {
+  window.open('https://github.com/Whitestar14/mathlly-app/blob/main/CONTRIBUTING.md', '_blank');
+};
 </script>

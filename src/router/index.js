@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { setupRouteErrorHandling, routeError, routePath, clearRouteError } from './errorHandler';
 
 const routes = [
   // Home route
@@ -53,6 +54,23 @@ const routes = [
     meta: { transition: 'fade', group: 'utility' }
   },
 
+  // Error fallback route
+  {
+    path: "/error",
+    name: "Error",
+    component: () => import('@/layouts/pages/ErrorFallback.vue'),
+    props: () => ({ error: routeError.value, path: routePath.value }),
+    beforeEnter: (to, from, next) => {
+      // Only allow access if there's an error
+      if (routeError.value) {
+        next();
+      } else {
+        next('/');
+      }
+    },
+    meta: { transition: 'fade' }
+  },
+
   // 404 route
   {
     path: "/:pathMatch(.*)*",
@@ -65,6 +83,16 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// Setup error handling
+setupRouteErrorHandling(router);
+
+// Clear error when navigating away from error page
+router.afterEach((to) => {
+  if (to.path !== '/error') {
+    clearRouteError();
+  }
 });
 
 export default router;
