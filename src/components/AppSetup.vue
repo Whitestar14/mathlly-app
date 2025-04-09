@@ -3,32 +3,28 @@
     'animation-disabled': settings.animationDisabled,
   }">
     <sidebar-menu :is-open="isSidebarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeSidebar" />
-
-    <div class="flex flex-col flex-grow duration-300"
-      :class="[
-        !deviceStore.isMobile && isSidebarOpen ? 'ml-64' : '',
-        !deviceStore.isMobile && isMenubarOpen ? 'mr-64' : ''
-      ]">
+    <div class="flex flex-col flex-grow duration-300" :class="[
+      !deviceStore.isMobile && isSidebarOpen ? 'pl-64' : '',
+      !deviceStore.isMobile && isMenubarOpen ? 'pr-64' : ''
+    ]">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
-      
+
       <error-fallback v-if="hasError" :error="error" />
       <suspense v-else>
         <template #default>
-          <app-view
-            :mode="mode"
-            :settings="settings"
-            :is-mobile="deviceStore.isMobile"
-            @settings-change="updateSettings"
-            @update:mode="updateMode" />
+          <app-view :mode="mode" :settings="settings" :is-mobile="deviceStore.isMobile"
+            @settings-change="updateSettings" @update:mode="updateMode" />
         </template>
-        <template #fallback><loader variant="regular" /></template>
+        <template #fallback>
+          <loader variant="regular" />
+        </template>
       </suspense>
     </div>
 
     <main-menu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
   </div>
-  <toast :is-mobile="deviceStore.isMobile"/>
+  <toast :is-mobile="deviceStore.isMobile" />
 </template>
 
 <script setup>

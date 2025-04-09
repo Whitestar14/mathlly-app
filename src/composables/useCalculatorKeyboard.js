@@ -45,8 +45,8 @@ export function useCalculatorKeyboard({
     if (mode.value !== 'Programmer') return;
 
     const shortcuts = {
-      'ctrl+1': () => handleBaseChange('DEC'),
-      'ctrl+2': () => handleBaseChange('HEX'),
+      'ctrl+1': () => handleBaseChange('HEX'),
+      'ctrl+2': () => handleBaseChange('DEC'),
       'ctrl+3': () => handleBaseChange('OCT'),
       'ctrl+4': () => handleBaseChange('BIN')
     };

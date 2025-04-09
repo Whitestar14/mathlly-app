@@ -1,8 +1,7 @@
 <template>
   <BasePage title="Updates" :showFooter="true">
     <!-- Hero Section -->
-    <section class="mb-12 pattern-grid overflow-hidden py-8">
-      <div class="bg-gradient-to-b from-indigo-50/20 to-transparent dark:from-transparent dark:to-gray-800/80 rounded-lg">
+    <section class="mb-12 pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80 py-8 rounded-lg">
       <div class="container mx-auto px-4 py-6 relative">
         <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4 font-mono">
           What's New in Mathlly
@@ -14,7 +13,6 @@
           We're constantly working to make Mathlly better. Check out our latest updates and upcoming features.
         </p>
       </div>
-    </div>
     </section>
 
     <!-- Latest Updates Section -->
@@ -22,51 +20,38 @@
       <div class="flex items-center justify-between mb-8">
         <div class="flex items-center">
           <div class="relative flex items-center">
-            <div class="p-2 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 rounded-full z-5">
+            <div class="h-10 w-10 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 rounded-full z-5">
               <HistoryIcon class="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
             </div>
             <!-- This connects to the timeline line -->
-            <div class="absolute left-5 top-5 bottom-0 w-px h-12 bg-indigo-200 dark:bg-indigo-800/50"></div>
+            <div class="absolute left-5 top-10 bottom-0 w-px h-12 bg-indigo-200 dark:bg-indigo-800/50"></div>
           </div>
           <h3 class="text-xl font-medium tracking-tight ml-3">
             Release History
           </h3>
         </div>
         
-        <!-- Version filter dropdown -->
-        <div v-if="showFilters" class="relative">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            class="text-xs flex items-center gap-1"
-            @click="isFilterOpen = !isFilterOpen"
-          >
-            <FilterIcon class="h-3 w-3" />
-            {{ selectedFilter === 'all' ? 'All Versions' : `${selectedFilter} Versions` }}
-            <ChevronDownIcon class="h-3 w-3 ml-1" :class="{ 'rotate-180': isFilterOpen }" />
-          </Button>
-          
-          <!-- Filter dropdown -->
-          <div v-if="isFilterOpen" 
-            class="absolute right-0 mt-1 w-40 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-20">
-            <div class="py-1">
-              <button 
-                v-for="filter in filters" 
-                :key="filter.value"
-                @click="applyFilter(filter.value)"
-                class="w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
-                :class="selectedFilter === filter.value ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : ''"
-              >
-                {{ filter.label }}
-              </button>
-            </div>
-          </div>
+        <!-- Version filter using SelectBar -->
+        <div class="w-32">
+          <SelectBar
+            v-model="selectedFilter"
+            :options="filters"
+            placeholder="Filter versions"
+            label=""
+            position="popper"
+          />
         </div>
       </div>
       
       <!-- Timeline Line -->
-        <div class="grid gap-8">
-          <div v-for="update in filteredUpdates" :key="update.version">
+      <div class="relative">
+        <div class="absolute left-0 top-0 bottom-0 w-px bg-indigo-200 dark:bg-indigo-800/50 ml-5"></div>
+        
+        <div class="grid gap-8 pl-10">
+          <div v-for="update in filteredUpdates" :key="update.version" class="relative">
+            <!-- Timeline dot -->
+            <div class="absolute -left-7 top-6 h-4 w-4 bg-indigo-400 dark:bg-indigo-500 rounded-full z-5 border-4 border-white dark:border-gray-900"></div>
+            
             <UpdateCard
               :version="update.version"
               :date="update.date"
@@ -74,14 +59,15 @@
             />
           </div>
         </div>
+      </div>
       
-      <div v-if="hasMoreUpdates" class="flex justify-center mt-8 pl-5">
+      <div v-if="hasMoreUpdates" class="flex justify-center mt-8">
         <Button
           variant="outline" 
           @click="showMoreUpdates"
           class="group"
         >
-          <ChevronDownIcon class="h-4 w-4 mr-2 group-hover:translate-y-0.5 transition-transform" />
+          <ChevronDownIcon class="h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
           Load More Updates
         </Button>
       </div>
@@ -115,44 +101,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { ClockIcon, HistoryIcon, ChevronDownIcon, FilterIcon, RocketIcon } from 'lucide-vue-next';
+import { ref, computed, watch } from 'vue';
+import { ClockIcon, HistoryIcon, ChevronDownIcon, RocketIcon } from 'lucide-vue-next';
 import { updates, upcomingFeatures } from '@/data/changelog';
 import UpdateCard from '@/components/cards/UpdateCard.vue';
 import BasePage from '@/components/base/BasePage.vue';
 import Button from '@/components/base/BaseButton.vue';
-import { useEventListener } from '@vueuse/core';
+import SelectBar from '@/components/ui/SelectBar.vue';
 
 const UPDATES_PER_PAGE = 5;
 const visibleCount = ref(UPDATES_PER_PAGE);
-const showFilters = ref(true);
-const isFilterOpen = ref(false);
 const selectedFilter = ref('all');
 
 // Filter options
 const filters = [
-  { label: 'All Versions', value: 'all' },
-  { label: 'Major Versions', value: 'major' },
-  { label: 'Recent Only', value: 'recent' }
+  { label: 'All', value: 'all' },
+  { label: 'Major', value: 'major' },
+  { label: 'Recent', value: 'recent' }
 ];
 
-// Close filter dropdown when clicking outside
-const closeFilterDropdown = () => {
-  if (isFilterOpen.value) {
-    isFilterOpen.value = false;
-  }
-};
-
-// Use vueuse's useEventListener for cleaner event handling
-useEventListener(document, 'click', closeFilterDropdown);
-
-// Apply selected filter
-const applyFilter = (filterValue) => {
-  selectedFilter.value = filterValue;
-  isFilterOpen.value = false;
-  // Reset visible count when filter changes
+watch(selectedFilter, () => {
   visibleCount.value = UPDATES_PER_PAGE;
-};
+});
 
 // Filter updates based on selected filter
 const filteredUpdates = computed(() => {
@@ -179,26 +149,24 @@ const filteredUpdates = computed(() => {
 });
 
 const hasMoreUpdates = computed(() => {
-  if (selectedFilter.value === 'all') {
-    return visibleCount.value < updates.length;
-  } else if (selectedFilter.value === 'major') {
-    const majorVersions = updates.filter(update => {
+  let totalFilteredUpdates = updates;
+  
+  if (selectedFilter.value === 'major') {
+    totalFilteredUpdates = updates.filter(update => {
       const versionParts = update.version.split('.');
       return versionParts[1] === '0' && versionParts[2] === '0';
     });
-    return visibleCount.value < majorVersions.length;
   } else if (selectedFilter.value === 'recent') {
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     
-    const recentUpdates = updates.filter(update => {
+    totalFilteredUpdates = updates.filter(update => {
       const updateDate = new Date(update.date);
       return updateDate >= threeMonthsAgo;
     });
-    return visibleCount.value < recentUpdates.length;
   }
   
-  return false;
+  return visibleCount.value < totalFilteredUpdates.length;
 });
 
 function showMoreUpdates() {

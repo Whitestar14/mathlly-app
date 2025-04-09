@@ -43,8 +43,8 @@
           <div v-motion :initial="{ opacity: 0, scale: 0.9 }"
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
-            <Logo type="svg" :svgPath="isDark ? '/icons/mathlly-dark.svg' : '/icons/mathlly-light.svg'" size="lg"
-              class="relative hidden md:block scale-[2.5] md:scale-[3.5]" />
+            <Logo type="svg" :path="{light: '/icons/mathlly-light.svg'}" size="lg"
+              class="relative hidden md:block scale-150 md:scale-[2.5] lg:scale-[3.5]" />
           </div>
         </div>
       </div>
@@ -83,12 +83,7 @@
           class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <RouterLink v-for="tool in quickTools" :key="tool.path" :to="tool.path"
             class="relative block h-full transition-transform duration-300 hover:-translate-y-1">
-            <FeatureCard 
-            :key="tool.name"
-            :title="tool.name"
-            :icon="tool.icon"
-            :description="tool.description"
-            />
+            <FeatureCard :key="tool.name" :title="tool.name" :icon="tool.icon" :description="tool.description" />
             <Badge v-if="tool.isNew" type="new" class="absolute right-5 top-5" />
           </RouterLink>
         </div>
@@ -231,25 +226,23 @@
 </template>
 
 <script setup>
-import { ref, defineComponent, h, onMounted } from 'vue';
+import { ref, defineComponent, h, onMounted } from 'vue'
 import {
-  ArrowRightIcon, 
+  ArrowRightIcon,
   CheckCircleIcon,
   CalculatorIcon,
   GithubIcon,
   AsteriskIcon
-} from 'lucide-vue-next';
-import { useTimeoutFn } from '@vueuse/core';
-import { useVersionStore } from '@/stores/version';
-import { RouterLink } from 'vue-router';
-import { useTheme } from '@/composables/useTheme'
-import Logo from '@/components/base/BaseLogo.vue';
-import Button from '@/components/base/BaseButton.vue';
-import Badge from '@/components/base/BaseBadge.vue';
-import BasePage from "@/components/base/BasePage.vue";
-import FeatureCard from "@/components/cards/FeatureCard.vue";
-import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
-const { isDark } = useTheme();
+} from 'lucide-vue-next'
+import { useTimeoutFn } from '@vueuse/core'
+import { useVersionStore } from '@/stores/version'
+import { RouterLink } from 'vue-router'
+import Logo from '@/components/base/BaseLogo.vue'
+import Button from '@/components/base/BaseButton.vue'
+import Badge from '@/components/base/BaseBadge.vue'
+import BasePage from "@/components/base/BasePage.vue"
+import FeatureCard from "@/components/cards/FeatureCard.vue"
+import WelcomeModal from "@/layouts/modals/WelcomeModal.vue"
 
 // Simple CountUp component
 const CountUp = defineComponent({
@@ -260,33 +253,33 @@ const CountUp = defineComponent({
     suffix: { type: String, default: '' }
   },
   setup(props) {
-    const currentValue = ref(0);
-    
-    onMounted(() => {
-      const startTime = Date.now();
-      const endTime = startTime + props.duration * 1000;
-      
-      const updateValue = () => {
-        const now = Date.now();
-        if (now >= endTime) {
-          currentValue.value = props.endVal;
-          return;
-        }
-        
-        const elapsed = now - startTime;
-        const progress = elapsed / (props.duration * 1000);
-        currentValue.value = Math.floor(progress * props.endVal);
-        requestAnimationFrame(updateValue);
-      };
-      
-      updateValue();
-    });
-    
-    return () => h('span', {}, `${currentValue.value}${props.suffix}`);
-  }
-});
+    const currentValue = ref(0)
 
-const version = useVersionStore();
+    onMounted(() => {
+      const startTime = Date.now()
+      const endTime = startTime + props.duration * 1000
+
+      const updateValue = () => {
+        const now = Date.now()
+        if (now >= endTime) {
+          currentValue.value = props.endVal
+          return
+        }
+
+        const elapsed = now - startTime
+        const progress = elapsed / (props.duration * 1000)
+        currentValue.value = Math.floor(progress * props.endVal)
+        requestAnimationFrame(updateValue)
+      }
+
+      updateValue()
+    })
+
+    return () => h('span', {}, `${currentValue.value}${props.suffix}`)
+  }
+})
+
+const version = useVersionStore()
 
 const quickTools = [
   {
@@ -310,13 +303,13 @@ const quickTools = [
     description: 'Comprehensive mathematical functions with visualization capabilities.',
     isNew: false
   }
-];
+]
 
 const statistics = [
   { label: 'Calculations Performed', value: 50000, suffix: '+' },
   { label: 'Active Users', value: 300, suffix: '+' },
   { label: 'Tools Available', value: 15, suffix: '+' }
-];
+]
 
 const features = [
   {
@@ -355,7 +348,7 @@ const features = [
     description:
       "Access your calculations and settings across all your devices.",
   },
-];
+]
 
 const reasons = [
   "Designed specifically for developers and programmers",
@@ -363,23 +356,23 @@ const reasons = [
   "Open-source and community-driven development",
   "Seamless integration with popular IDEs and text editors",
   "Extensive documentation and support resources",
-];
+]
 
-const showWelcomeModal = ref(false);
+const showWelcomeModal = ref(false)
 
 onMounted(() => {
   // Check if the welcome modal has been shown before
-  const hasShownWelcome = localStorage.getItem("mathlly-welcome-shown") === "true";
-  
+  const hasShownWelcome = localStorage.getItem("mathlly-welcome-shown") === "true"
+
   if (!hasShownWelcome) {
     // Add a delay before showing the modal
     useTimeoutFn(() => {
-      showWelcomeModal.value = true;
-    }, 1000);
+      showWelcomeModal.value = true
+    }, 1000)
   }
-});
+})
 
 const closeWelcomeModal = () => {
-  showWelcomeModal.value = false;
-};
+  showWelcomeModal.value = false
+}
 </script>

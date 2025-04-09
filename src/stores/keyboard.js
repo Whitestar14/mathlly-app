@@ -1,7 +1,55 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, markRaw } from "vue";
+import { useStorage } from "@vueuse/core";
 
+/**
+ * Store for managing keyboard shortcuts and input validation
+ */
 export const useKeyboardStore = defineStore("keyboard", () => {
+  /**
+   * Base validation regular expressions for programmer mode
+   * @type {Object}
+   */
+  const BASE_VALIDATORS = markRaw({
+    BIN: /^[0-1]$/,
+    OCT: /^[0-7]$/,
+    DEC: /^[0-9]$/,
+    HEX: /^[0-9a-fA-F]$/,
+  });
+
+  /**
+   * Keys that are always allowed regardless of context
+   * @type {string[]}
+   */
+  const COMMON_KEYS = markRaw([
+    "backspace", 
+    "enter", 
+    "escape", 
+    "+", 
+    "-", 
+    "×", 
+    "÷", 
+    "(", 
+    ")", 
+    "%"
+  ]);
+
+  /**
+   * Key normalization mapping
+   * @type {Object}
+   */
+  const KEY_MAP = markRaw({
+    enter: "enter",
+    backspace: "backspace",
+    escape: "escape",
+    "*": "×",
+    "/": "÷",
+  });
+
+  /**
+   * Registered keyboard shortcuts by context
+   * @type {import('vue').Ref<Object>}
+   */
   const shortcuts = ref({
     global: {
       "ctrl+alt+f": {
@@ -60,54 +108,81 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     tools: {
       "ctrl+enter": { action: "process", description: "Process Input" },
       "ctrl+s": { action: "swap", description: "Swap Input and Output" },
-      "ctrl+v": { action: "paste", description: "Paste from Clipboard" }, // New shortcut
-      "ctrl+c": { action: "copy", description: "Copy Result" }, // New shortcut
+      "ctrl+v": { action: "paste", description: "Paste from Clipboard" },
+      "ctrl+c": { action: "copy", description: "Copy Result" },
     },
   });
 
+  /**
+   * Whether keyboard shortcuts are enabled
+   * @type {import('vue').Ref<boolean>}
+   */
   const isEnabled = ref(true);
-  const contextStack = ref(["global"]); // Use a stack to manage context hierarchy
-  const debug = ref(false);
+  
+  /**
+   * Current context stack (hierarchical)
+   * @type {import('vue').Ref<string[]>}
+   */
+  const contextStack = ref(["global"]);
+  
+  /**
+   * Debug mode flag with persistence
+   * @type {import('vue').Ref<boolean>}
+   */
+  const debug = useStorage("keyboard-debug-mode", false);
 
-  // Base validation maps
-  const BASE_VALIDATORS = {
-    BIN: /^[0-1]$/,
-    OCT: /^[0-7]$/,
-    DEC: /^[0-9]$/,
-    HEX: /^[0-9a-fA-F]$/,
-  };
-
-  const COMMON_KEYS = ["backspace", "enter", "escape", "+", "-", "×", "÷", "(", ")", "%"];
-
-  // Compute active shortcuts based on context stack
+  /**
+   * Active shortcuts based on current context stack
+   * @type {import('vue').ComputedRef<Object>}
+   */
   const activeShortcuts = computed(() => {
     return contextStack.value.reduce((acc, context) => {
       return { ...acc, ...(shortcuts.value[context] || {}) };
     }, {});
   });
 
-  // Current active context (excluding global)
+  /**
+   * Current active context (excluding global)
+   * @type {import('vue').ComputedRef<string>}
+   */
   const currentContext = computed(() => {
     return contextStack.value[contextStack.value.length - 1];
   });
 
+  /**
+   * Sets the current keyboard context
+   * @param {string} ctx - Context to set
+   */
   function setContext(ctx) {
     if (debug.value) console.log("Setting context:", ctx);
+    
     // Remove existing instance of context if it exists
     contextStack.value = contextStack.value.filter((c) => c !== ctx);
+    
     // Add new context to top of stack
     contextStack.value.push(ctx);
   }
 
+  /**
+   * Clears a context from the stack
+   * @param {string} ctx - Context to clear
+   */
   function clearContext(ctx) {
     if (debug.value) console.log("Clearing context:", ctx);
+    
     contextStack.value = contextStack.value.filter((c) => c !== ctx);
+    
+    // Ensure global context is always present
     if (contextStack.value.length === 0) {
       contextStack.value = ["global"];
     }
   }
 
-  // Enhanced input validation
+  /**
+   * Validates if a key is valid input in the current context
+   * @param {string} key - Key to validate
+   * @returns {boolean} Whether the key is valid input
+   */
   function isValidInput(key) {
     // Normalize the key to handle special cases
     const normalizedKey = key.toLowerCase();
@@ -122,20 +197,18 @@ export const useKeyboardStore = defineStore("keyboard", () => {
 
     // For programmer mode, validate against current base
     const validator = BASE_VALIDATORS[currentContext.value];
+    
     // Ensure validation happens against the normalized key
     return validator?.test(normalizedKey) ?? false;
   }
 
+  /**
+   * Normalizes key names for consistency
+   * @param {string} key - Key to normalize
+   * @returns {string} Normalized key name
+   */
   function normalizeKey(key) {
-    // Handle special key mappings
-    const keyMap = {
-      enter: "enter",
-      backspace: "backspace",
-      escape: "escape",
-      "*": "×",
-      "/": "÷",
-    };
-    return keyMap[key] || key;
+    return KEY_MAP[key] || key;
   }
 
   return {

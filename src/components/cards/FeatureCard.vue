@@ -1,5 +1,5 @@
 <template>
-  <div class="\relative bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+  <div class="relative bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-colors duration-300">
     <div class="flex items-center gap-2 mb-4">
     <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
      <component

@@ -31,26 +31,20 @@
       </div>
     </template>
 
-    <!-- Regular Loader (formerly mini) -->
-    <template v-else-if="variant === 'regular'">
+    <!-- Regular and Compact Loaders with simplified structure -->
+    <template v-else>
       <div class="flex items-center justify-center">
-        <span class="css-loader w-8 h-8"></span>
+        <div 
+          class="css-loader" 
+          :style="{ 
+            '--loader-size': variant === 'compact' ? '1.5rem' : '2rem' 
+          }"
+          aria-label="Loading"
+        ></div>
         <span
           v-if="message"
           class="ml-3 text-sm text-gray-600 dark:text-gray-300"
-        >
-          {{ message }}
-        </span>
-      </div>
-    </template>
-
-    <!-- Compact Loader (formerly micro) -->
-    <template v-else>
-      <div class="flex items-center justify-center">
-        <span class="css-loader w-6 h-6"></span>
-        <span
-          v-if="message"
-          class="ml-2 text-sm text-gray-600 dark:text-gray-300"
+          :class="{ 'ml-2': variant === 'compact' }"
         >
           {{ message }}
         </span>
@@ -60,8 +54,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import anime from 'animejs';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useElementVisibility } from '@vueuse/core';
 
 const props = defineProps({
   variant: {
@@ -97,15 +91,51 @@ const letterT = ref(null);
 const letterH = ref(null);
 const letterY = ref(null);
 
+// Container ref for visibility detection
+const containerRef = ref(null);
+const isVisible = useElementVisibility(containerRef);
+
+// Dynamically import anime.js only when needed
+const anime = ref(null);
+
 // Animation timeline
 let firstTimeline;
 let secondTimeline;
 
+// Check for reduced motion preference
+const prefersReducedMotion = ref(
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false
+);
+
+// Watch for changes in reduced motion preference
+if (window.matchMedia) {
+  const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  mediaQuery.addEventListener('change', (e) => {
+    prefersReducedMotion.value = e.matches;
+  });
+}
+
 function initializeAnimation() {
-  if (!slashTop.value || !slashBottom.value) return;
+  if (!anime.value || !slashTop.value || !slashBottom.value) return;
+  
+  // Use simplified animations if reduced motion is preferred
+  if (prefersReducedMotion.value) {
+    // Simple fade-in for reduced motion
+    anime.value({
+      targets: [
+        slashTop.value, slashBottom.value, 
+        letterM.value, letterA.value, letterT.value, letterH.value, letterY.value,
+        bracketLeft.value, bracketRight.value
+      ],
+      opacity: [0, 1],
+      duration: 600,
+      easing: 'easeOutQuad'
+    });
+    return;
+  }
 
   // Continuous animations
-  secondTimeline = anime({
+  secondTimeline = anime.value({
     targets: [bracketLeft.value, bracketRight.value],
     opacity: [0.5, 1],
     duration: 1000,
@@ -115,7 +145,7 @@ function initializeAnimation() {
     autoplay: false
   });
   
-  firstTimeline = anime.timeline({
+  firstTimeline = anime.value.timeline({
     easing: 'easeOutExpo',
     autoplay: false
   });
@@ -139,7 +169,7 @@ function initializeAnimation() {
     targets: [letterM.value, letterA.value, letterT.value, letterH.value, letterY.value],
     opacity: [0, 1],
     translateY: [10, 0],
-    delay: anime.stagger(100),
+    delay: anime.value.stagger(100),
     duration: 400,
   }, '-=200')
 
@@ -156,12 +186,24 @@ function initializeAnimation() {
   firstTimeline.play();
 }
 
-onMounted(() => {
+// Watch for visibility changes to optimize animation initialization
+watch(isVisible, (visible) => {
+  if (visible && props.variant === 'expanded' && anime.value) {
+    initializeAnimation();
+  }
+});
+
+onMounted(async () => {
   if (props.variant === 'expanded') {
+    // Dynamically import anime.js only when expanded variant is used
+    anime.value = (await import('animejs')).default;
+    
     // Use requestAnimationFrame to ensure DOM is fully rendered
-    requestAnimationFrame(() => {
-      initializeAnimation();
-    });
+    if (isVisible.value) {
+      requestAnimationFrame(() => {
+        initializeAnimation();
+      });
+    }
   }
 });
 
@@ -180,6 +222,9 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .css-loader {
+  /* Use CSS variables for dynamic sizing */
+  width: var(--loader-size, 2rem);
+  height: var(--loader-size, 2rem);
   border-radius: 50%;
   display: inline-block;
   position: relative;
@@ -187,6 +232,9 @@ onBeforeUnmount(() => {
   border-color: #9ca3af #9ca3af transparent transparent;
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
+  /* Hardware acceleration */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .css-loader::after,
@@ -206,6 +254,9 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   animation: rotationBack 0.5s linear infinite;
   transform-origin: center center;
+  /* Hardware acceleration */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .css-loader::before {

@@ -1,16 +1,16 @@
 <template>
-  <div :class="containerClasses">
+  <div :class="'inline-flex items-center justify-center'">
     <!-- Inline SVG when svgContent is provided -->
     <div 
-      v-if="type === 'svg' && svgPath" 
+      v-if="type === 'svg' && path?.light" 
       class="inline-block"
       v-html="svgContent"
     ></div>
     
     <!-- Image/SVG from src when provided -->
     <img 
-      v-if="type === 'img' && src" 
-      :src="src" 
+      v-if="type === 'img' && (path?.light || path?.dark)" 
+      :src="isDark ? path.light : path.dark" 
       :alt="alt" 
       :class="imageClasses"
     />
@@ -48,37 +48,27 @@ const props = defineProps({
     default: "md",
     validator: (value) => ["sm", "md", "lg"].includes(value),
   },
-  src: {
-    type: String,
-    default: "",
-  },
-  svgPath: {
-    type: String,
-    default: "",
+  path: {
+    type: Object,
+    default: () => ({})
   },
   alt: {
     type: String,
     default: "Mathlly Logo",
   },
-  themeSensitive: {
-    type: Boolean,
-    default: false
-  }
 });
 
 const svgContent = ref('');
+const svgCache = new Map();
 
+const lightSvgContent = ref('');
+const darkSvgContent = ref('');
 // Size classes for the text logo
 const sizeClasses = {
   sm: "text-xl px-2 py-1",
   md: "text-2xl px-2.5 py-1.5",
   lg: "text-4xl px-5 py-3",
 };
-
-// Container classes
-const containerClasses = computed(() => [
-  'inline-flex items-center justify-center'
-]);
 
 // Image classes
 const imageClasses = computed(() => [
@@ -91,34 +81,37 @@ const imageClasses = computed(() => [
 ]);
 
 // Load SVG content if svgPath is provided
-const loadSvgContent = async () => {
-  if (!props.svgPath) return;
+const loadSvgContent = async (path) => {
+  if (!path) return;
   
+  if(svgCache.has(path)) return svgCache.get(path);
+
   try {
-    const response = await fetch(props.svgPath);
+    const response = await fetch(path);
     if (!response.ok) throw new Error('Failed to load SVG');
     
     let svg = await response.text();
     
-    // Add theme-sensitive classes if needed
-    if (props.themeSensitive) {
-      // Add dark mode classes to SVG paths and elements
-      svg = svg.replace(/<path/g, '<path class="dark:stroke-gray-200 dark:fill-gray-200"');
-      svg = svg.replace(/<circle/g, '<circle class="dark:stroke-gray-200 dark:fill-gray-200"');
-      svg = svg.replace(/<rect/g, '<rect class="dark:stroke-gray-200 dark:fill-gray-200"');
-      
-      // Add class to the SVG element itself
-      svg = svg.replace(/<svg/, '<svg class="text-gray-800 dark:text-gray-200"');
-    }
-    
     // Add size classes to SVG
     svg = svg.replace(/<svg/, `<svg class="${getSvgSizeClass()}"`);
     
-    svgContent.value = svg;
+    svgCache.set(path, svg);
+    return svg;
   } catch (error) {
     console.error('Error loading SVG:', error);
   }
 };
+
+const initSvgContent = async () => {
+  const light = props.path.light;
+  const dark = props.path.dark;
+
+  if (light) lightSvgContent.value = await loadSvgContent(light);
+
+  if (dark && dark !== light) darkSvgContent.value - await loadSvgContent(dark);
+
+  else if (dark) darkSvgContent.value = lightSvgContent.value;
+}
 
 // Get appropriate size class for SVG
 const getSvgSizeClass = () => {
@@ -129,11 +122,14 @@ const getSvgSizeClass = () => {
   }
 };
 
-// Watch for changes in svgPath or themeSensitive
-watch([() => props.svgPath, () => props.themeSensitive], loadSvgContent);
+// Watch for changes in SVG paths
+watch([() => props.path.light, () => props.path.dark], initSvgContent);
 
 // Load SVG on mount
-onMounted(loadSvgContent);
+onMounted(() => {
+  if(props.path.light || props.path.dark) {
+  initSvgContent()
+  }});
 </script>
 
 <style scoped>

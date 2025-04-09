@@ -5,7 +5,7 @@
     <!-- Custom header -->
     <template #header-actions>
     <div class="flex justify-between items-center">
-      <Logo class="absolute left-2"/>
+      <Logo type="text" class="absolute left-2" />
     </div>
     </template>
 
