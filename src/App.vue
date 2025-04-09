@@ -6,7 +6,7 @@
     </template>
     <template #fallback>
       <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
-        <loader variant="expanded" />
+        <loader variant="regular" />
       </div>
     </template>
   </Suspense>
@@ -24,6 +24,6 @@ const hasError = ref(false);
 onErrorCaptured((err) => {
   error.value = err;
   hasError.value = true;
-  return false; // Prevent error from propagating
+  return false;
 });
 </script>

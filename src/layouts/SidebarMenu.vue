@@ -188,7 +188,7 @@ const {
   position: "left",
   updateRoute: true,
   containerRef: sidebarElements,
-  hideIndicatorPaths: ["/settings", "/feedback", "/:pathMatch(.*)*"],
+  hideIndicatorPaths: ["/settings", "/feedback", "/error", "/:pathMatch(.*)*"],
   onNavigate: () => {
     if (props.isMobile) {
       closeSidebar()

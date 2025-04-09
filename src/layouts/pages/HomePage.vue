@@ -1,5 +1,5 @@
 <template>
-  <BasePage :showFooter="true" title="Home" mainClass="transition-all duration-300 mx-auto text-sm">
+  <BasePage :showFooter="true" title="Home" mainClass="transition-colors duration-300 mx-auto text-sm">
     <!-- Hero Section with Gradient Background -->
     <section
       class="pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">
@@ -185,7 +185,7 @@
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
               <RouterLink to="/calculator">
                 <Button variant="secondary"
-                  class="bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-gray-200 shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto">
+                  class="bg-white dark:bg-gray-100 text-indigo-600 dark:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-gray-200 shadow-md hover:shadow-lg transition-colors duration-300 w-full sm:w-auto">
                   <CalculatorIcon class="h-4 w-4" />
                   Try Mathlly Now
                 </Button>

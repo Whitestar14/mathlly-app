@@ -54,7 +54,7 @@ const error = ref(null)
 const hasError = ref(false)
 
 // --- Loading Logic ---
-const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000))
+const minLoadTime = new Promise(resolve => setTimeout(resolve, 1000))
 
 try {
   await Promise.all([
