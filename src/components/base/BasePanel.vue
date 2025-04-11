@@ -115,7 +115,7 @@
     <Transition name="slide-up">
       <div
         v-if="isMobile && position !== 'side' && isOpen"
-        class="fixed inset-x-0 bottom-0 z-30 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]"
+        class="fixed inset-x-0 bottom-0 z-20 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]"
       >
         <div class="panel-content h-full" :class="mainClass">
           <PanelContent

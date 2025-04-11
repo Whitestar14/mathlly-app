@@ -5,7 +5,7 @@
       </ContextMenuTrigger>
       <ContextMenuPortal>
         <ContextMenuContent
-          class="z-50 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 p-1 shadow-md"
+          class="z-20 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 p-1 shadow-md"
           :side-offset="sideOffset"
           :align="align"
         >

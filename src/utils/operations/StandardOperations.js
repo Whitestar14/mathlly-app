@@ -1,25 +1,42 @@
+/**
+ * Handles standard calculator operations
+ */
 export class StandardOperations {
+  /**
+   * Creates a new StandardOperations instance
+   * @param {Object} calculator - The calculator instance to operate on
+   */
   constructor(calculator) {
     this.calculator = calculator;
   }
 
+  /**
+   * Handles numeric input including decimal point
+   * @param {string} num - The number or decimal point to add
+   * @returns {Object} Updated input state and error message
+   */
   handleNumber(num) {
     if (this.calculator.input === "0" && num !== ".") {
       this.calculator.input = num;
-      return { input: this.calculator.input, error: "" };
+      return this.createResponse();
     }
 
     if (!this.validateNumberInput(num)) {
-      return { input: this.calculator.input, error: "" };
+      return this.createResponse();
     }
 
     this.calculator.input += num;
-    return { input: this.calculator.input, error: "" };
+    return this.createResponse();
   }
 
+  /**
+   * Handles arithmetic operator input
+   * @param {string} op - The operator to add (+, -, ×, ÷)
+   * @returns {Object} Updated input state and error message
+   */
   handleOperator(op) {
     const lastChar = this.calculator.input.trim().slice(-1);
-    const isLastCharOperator = ["+", "-", "×", "÷"].includes(lastChar);
+    const isLastCharOperator = this.isOperator(lastChar);
 
     if (
       op === "-" &&
@@ -27,23 +44,27 @@ export class StandardOperations {
       ["×", "÷", "+"].includes(lastChar)
     ) {
       this.calculator.input += ` ${op} `;
-      return { input: this.calculator.input, error: "" };
+      return this.createResponse();
     }
 
     this.calculator.input = isLastCharOperator
       ? this.calculator.input.slice(0, -3) + ` ${op} `
       : this.calculator.input + ` ${op} `;
 
-    return { input: this.calculator.input, error: "" };
+    return this.createResponse();
   }
 
+  /**
+   * Handles backspace operation
+   * @returns {Object} Updated input state and error message
+   */
   handleBackspace() {
     if (
       this.calculator.input === "0" ||
       this.calculator.input === "Error" ||
       this.calculator.input === "Overflow"
     ) {
-      return { input: this.calculator.input, error: "" };
+      return this.createResponse();
     }
 
     const operatorMatch = this.calculator.input.match(
@@ -55,9 +76,13 @@ export class StandardOperations {
       ? "0"
       : this.calculator.input.slice(0, -1);
 
-    return { input: this.calculator.input, error: "" };
+    return this.createResponse();
   }
 
+  /**
+   * Toggles the sign of the current number
+   * @returns {Object} Updated input state and error message
+   */
   handleToggleSign() {
     const currentInput = this.calculator.input;
     
@@ -72,9 +97,13 @@ export class StandardOperations {
         this.calculator.input = parts.join(" ").trim();
       }
     }
-    return { input: this.calculator.input, error: this.calculator.error };
+    return this.createResponse(this.calculator.error);
   }
 
+  /**
+   * Squares the current value
+   * @returns {Object} Updated input state and error message
+   */
   handleSquare() {
     return this.handleOperation((value) => {
       if (!Number.isFinite(value)) throw new Error("Overflow");
@@ -82,6 +111,10 @@ export class StandardOperations {
     });
   }
 
+  /**
+   * Calculates the square root of the current value
+   * @returns {Object} Updated input state and error message
+   */
   handleSquareRoot() {
     return this.handleOperation((value) => {
       if (value < 0)
@@ -90,6 +123,10 @@ export class StandardOperations {
     });
   }
 
+  /**
+   * Calculates the reciprocal (1/x) of the current value
+   * @returns {Object} Updated input state and error message
+   */
   handleReciprocal() {
     return this.handleOperation((value) => {
       if (value === 0) throw new Error("Cannot divide by zero");
@@ -97,10 +134,19 @@ export class StandardOperations {
     });
   }
 
+  /**
+   * Converts the current value to a percentage
+   * @returns {Object} Updated input state and error message
+   */
   handlePercentage() {
     return this.handleOperation((value) => value / 100);
   }
 
+  /**
+   * Generic handler for operations that transform the current value
+   * @param {Function} operation - Function that takes a number and returns a transformed number
+   * @returns {Object} Updated input state and error message
+   */
   handleOperation(operation) {
     try {
       const value = this.calculator.evaluateExpression(this.calculator.input);
@@ -109,7 +155,7 @@ export class StandardOperations {
         throw new Error("Overflow");
       }
       this.calculator.input = this.calculator.formatResult(result);
-      return { input: this.calculator.input, error: "" };
+      return this.createResponse();
     } catch (err) {
       if (err.message === "Overflow")
         return {
@@ -120,11 +166,38 @@ export class StandardOperations {
     }
   }
 
+  /**
+   * Validates if a number can be added to the current input
+   * @param {string} num - The number to validate
+   * @returns {boolean} Whether the number can be added
+   */
   validateNumberInput(num) {
     if (num === ".") {
       const parts = this.calculator.input.split(/[+\-×÷]+/);
       return !parts[parts.length - 1].includes(".");
     }
     return true;
+  }
+
+  /**
+   * Checks if a character is an operator
+   * @param {string} char - Character to check
+   * @returns {boolean} Whether the character is an operator
+   */
+  isOperator(char) {
+    // Import from CalculatorUtils
+    return ["+", "-", "×", "÷"].includes(char);
+  }
+
+  /**
+   * Creates a standardized response object
+   * @param {string} [error=""] - Optional error message
+   * @returns {Object} Standardized response with input and error
+   */
+  createResponse(error = "") {
+    return { 
+      input: this.calculator.input, 
+      error: error 
+    };
   }
 }

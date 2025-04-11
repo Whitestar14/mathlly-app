@@ -1,17 +1,17 @@
 <template>
-  <div class="group relative bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-6 shadow-sm hover:shadow-md transition-all">
+  <div class="relative bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-colors duration-300">
     <div class="flex items-center gap-2 mb-4">
-    <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 opacity-75 group-hover:opacity-100 transition-opacity">
+    <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
      <component
        :is="getFeatureIcon(icon)"
-       class="h-5 w-5"
+       class="h-6 w-6 text-indigo-600 dark:text-indigo-400"
      />
    </div>
-    <h3
-      class="text-lg font-mono font-medium tracking-tight"
+    <h4
+      class="font-medium text-lg"
     >
       {{ title }}
-    </h3>
+    </h4>
   </div>
     <p class="text-gray-600 dark:text-gray-300">
       {{ description }}
@@ -28,7 +28,10 @@ import {
   HistoryIcon,
   PaletteIcon,
   CodeIcon,
-  CloudIcon
+  CloudIcon,
+  HeartIcon,
+  ShieldCheckIcon,
+  SparklesIcon
 } from "lucide-vue-next";
 
 defineProps({
@@ -56,7 +59,10 @@ const getFeatureIcon = (iconName) => {
     'Code': CodeIcon,
     'Cloud': CloudIcon,
     'Binary': BinaryIcon,
-    'FunctionSquare': FunctionSquareIcon
+    'FunctionSquare': FunctionSquareIcon,
+    'Heart': HeartIcon,
+    'ShieldCheck': ShieldCheckIcon,
+    'Sparkles': SparklesIcon
   };
   
   return iconMap[iconName] || CalculatorIcon;

@@ -1,97 +1,153 @@
-// composables/useCalculatorState.js
-import { ref, computed } from 'vue';
+import { reactive, readonly, ref } from 'vue'
 
-export function useCalculatorState() {
-  const state = ref({
+// Define constants
+const ANIMATION_DURATION = 500;
+const DEFAULT_BASE = 'DEC';
+const DEFAULT_MODE = 'Standard';
+const BASES = ['DEC', 'BIN', 'HEX', 'OCT'];
+
+/**
+ * @typedef {Object} CalculatorState
+ * @property {string} input - Current input string
+ * @property {string} error - Current error message
+ * @property {boolean} isAnimating - Whether result animation is active
+ * @property {string} animatedResult - Result being animated
+ * @property {string} activeBase - Active base for programmer mode (DEC, HEX, BIN, OCT)
+ * @property {Object} displayValues - Display values for different bases
+ * @property {string} mode - Current calculator mode
+ */
+
+/**
+ * Creates initial state for calculator
+ * @param {string} mode - Calculator mode
+ * @returns {CalculatorState} Initial state
+ */
+function createInitialState(mode = DEFAULT_MODE) {
+  const initialDisplayValues = {};
+  
+  // Initialize display values for all bases
+  BASES.forEach(base => {
+    initialDisplayValues[base] = { input: '0', display: '0' };
+  });
+  
+  return {
     input: '0',
     error: '',
-    preview: '',
     isAnimating: false,
     animatedResult: '',
-    activeBase: 'DEC',
-    displayValues: {
-      HEX: { input: '0', display: '0' },
-      DEC: { input: '0', display: '0' },
-      OCT: { input: '0', display: '0' },
-      BIN: { input: '0', display: '0' },
-    },
-    currentExpression: '',
-  });
-
-  const getCurrentDisplayValue = computed(() => {
-    return state.value.displayValues[state.value.activeBase]?.input || '0';
-  });
-
-  const updateState = (newState) => {
-    state.value = {
-      ...state.value,
-      ...newState,
-    };
+    activeBase: DEFAULT_BASE,
+    displayValues: initialDisplayValues,
+    mode: mode
   };
+}
 
-  // Update useCalculatorState's updateDisplayValues
-  const updateDisplayValues = (values) => {
-    if (!values) return;
+/**
+ * Provides unified state management for calculator
+ * @param {string} initialMode - Initial calculator mode
+ * @returns {Object} Calculator state and methods
+ */
+export function useCalculatorState(initialMode) {
+  // Create a single reactive state object
+  const state = reactive(createInitialState(initialMode));
+  
+  // Store animation timeout reference for cleanup
+  const animationTimeout = ref(null);
 
-    const updatedDisplayValues = { ...state.value.displayValues };
-    Object.keys(values).forEach(base => {
-      updatedDisplayValues[base] = values[base];
+  /**
+   * Update state with partial updates
+   * @param {Partial<CalculatorState>} updates - Partial state updates
+   */
+  function updateState(updates) {
+    // Validate updates
+    if (updates.activeBase && !BASES.includes(updates.activeBase)) {
+      console.warn(`Invalid base: ${updates.activeBase}`);
+      delete updates.activeBase;
+    }
+    
+    Object.assign(state, updates);
+  }
+
+  /**
+   * Reset state to initial values
+   * @param {string} mode - Calculator mode
+   */
+  function resetState(mode = state.mode) {
+    // Clear any pending animation timeout
+    if (animationTimeout.value) {
+      clearTimeout(animationTimeout.value);
+      animationTimeout.value = null;
+    }
+    
+    // Reset to initial state
+    const initialState = createInitialState(mode);
+    Object.keys(initialState).forEach(key => {
+      state[key] = initialState[key];
     });
+  }
 
-    // Update both displayValues and input to ensure consistency
+  /**
+   * Set animation state
+   * @param {string} result - Result to animate
+   */
+  function setAnimation(result) {
+    // Clear any existing animation
+    if (animationTimeout.value) {
+      clearTimeout(animationTimeout.value);
+    }
+    
     updateState({
-      displayValues: updatedDisplayValues,
-      input: values[state.value.activeBase]?.input || state.value.input,
-    });
-  };
-
-  const setActiveBase = (base) => {
-    if (!['HEX', 'DEC', 'OCT', 'BIN'].includes(base)) return;
-    updateState({
-      activeBase: base,
-      input: state.value.displayValues[base]?.input || '0',
-    });
-  };
-
-  const setAnimation = (result) => {
-    updateState({
-      animatedResult: result,
       isAnimating: true,
+      animatedResult: result
     });
-    setTimeout(() => {
+    
+    // Auto-clear animation after duration
+    animationTimeout.value = setTimeout(() => {
       updateState({
         isAnimating: false,
-        animatedResult: '',
+        animatedResult: ''
       });
-    }, 500);
-  };
+      animationTimeout.value = null;
+    }, ANIMATION_DURATION);
+  }
 
-  const clearState = () => {
-    const defaultState = {
-      input: '0',
-      preview: '',
-      error: '',
-      displayValues: {
-        HEX: { input: '0', display: '0' },
-        DEC: { input: '0', display: '0' },
-        OCT: { input: '0', display: '0' },
-        BIN: { input: '0', display: '0' },
-      },
-      activeBase: 'DEC',
-      currentExpression: '',
-    };
+  /**
+   * Update display values for programmer mode
+   * @param {Object} values - New display values
+   */
+  function updateDisplayValues(values) {
+    const newValues = {};
+    
+    Object.keys(values).forEach(base => {
+      if (BASES.includes(base)) {
+        newValues[base] = { ...values[base] };
+      }
+    });
+    
+    updateState({
+      displayValues: newValues
+    });
+  }
 
-    // Reset state based on calculator mode
-    updateState(defaultState);
-  };
+  /**
+   * Set active base for programmer mode
+   * @param {string} base - New active base
+   */
+  function setActiveBase(base) {
+    if (BASES.includes(base)) {
+      updateState({
+        activeBase: base
+      });
+    } else {
+      console.warn(`Invalid base: ${base}`);
+    }
+  }
 
   return {
-    state,
-    getCurrentDisplayValue,
+    state: readonly(state),
     updateState,
-    updateDisplayValues,
-    setActiveBase,
+    resetState,
     setAnimation,
-    clearState,
+    updateDisplayValues,
+    setActiveBase
   };
 }

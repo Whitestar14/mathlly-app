@@ -22,7 +22,7 @@
       </div>
     </footer>
 
-    <div v-if="showVersion" class="fixed bottom-4 right-4 z-20">
+    <div v-if="showVersion" class="fixed bottom-4 right-4 z-10">
       <Badge :show-notch="true" type="version" :text="`v${version.versionInfo.full}`" />
     </div>
   </div>

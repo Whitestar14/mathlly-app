@@ -7,7 +7,7 @@
   }
 
   .calc-btn-grid {
-    @apply h-full min-h-[3rem];
+    @apply h-full min-h-8;
   }
 
   .calc-letter-btn,
