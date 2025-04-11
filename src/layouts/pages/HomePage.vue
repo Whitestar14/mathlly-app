@@ -43,7 +43,7 @@
           <div v-motion :initial="{ opacity: 0, scale: 0.9 }"
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
-            <Logo type="svg" :path="{light: '/icons/mathlly-light.svg'}" size="lg"
+            <BaseMedia type="svg" :svgPath="'/icons/mathlly.svg'" size="lg"
               class="relative hidden md:block scale-150 md:scale-[2.5] lg:scale-[3.5]" />
           </div>
         </div>
@@ -56,7 +56,7 @@
         <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
           class="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div v-for="stat in statistics" :key="stat.label"
-            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-600">
+            class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-700/50">
             <h3 class="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
               <CountUp :end-val="stat.value" :duration="2.5" :suffix="stat.suffix" />
             </h3>
@@ -96,7 +96,7 @@
         <h2 class="text-2xl md:text-3xl font-medium mb-10 text-center">Key Features</h2>
         <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, stagger: 0.1 }"
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FeatureCard v-for="feature in features" :key="feature.title" :icon="feature.icon" :title="feature.title"
+          <FeatureCard class="dark:!bg-gray-900/50 dark:!border-gray-700/50" v-for="feature in features" :key="feature.title" :icon="feature.icon" :title="feature.title"
             :description="feature.description" />
         </div>
       </div>
@@ -161,7 +161,7 @@
           <div class="relative z-5 p-8 md:p-12 text-center">
             <!-- Logo accent -->
             <div class="flex justify-center mb-6">
-              <Logo size="sm" :themeSensitive="true" />
+              <TextLogo size="sm" />
             </div>
 
             <!-- Title with monospace accent - improved for dark mode -->
@@ -226,23 +226,24 @@
 </template>
 
 <script setup>
-import { ref, defineComponent, h, onMounted } from 'vue'
+import { ref, defineComponent, h, onMounted } from 'vue';
 import {
-  ArrowRightIcon,
+  ArrowRightIcon, 
   CheckCircleIcon,
   CalculatorIcon,
   GithubIcon,
   AsteriskIcon
-} from 'lucide-vue-next'
-import { useTimeoutFn } from '@vueuse/core'
-import { useVersionStore } from '@/stores/version'
-import { RouterLink } from 'vue-router'
-import Logo from '@/components/base/BaseLogo.vue'
-import Button from '@/components/base/BaseButton.vue'
-import Badge from '@/components/base/BaseBadge.vue'
-import BasePage from "@/components/base/BasePage.vue"
-import FeatureCard from "@/components/cards/FeatureCard.vue"
-import WelcomeModal from "@/layouts/modals/WelcomeModal.vue"
+} from 'lucide-vue-next';
+import { useTimeoutFn } from '@vueuse/core';
+import { useVersionStore } from '@/stores/version';
+import { RouterLink } from 'vue-router';
+import TextLogo from '@/components/base/TextLogo.vue';
+import BaseMedia from '@/components/base/BaseMedia.vue';
+import Button from '@/components/base/BaseButton.vue';
+import Badge from '@/components/base/BaseBadge.vue';
+import BasePage from "@/components/base/BasePage.vue";
+import FeatureCard from "@/components/cards/FeatureCard.vue";
+import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
 
 // Simple CountUp component
 const CountUp = defineComponent({
@@ -253,33 +254,33 @@ const CountUp = defineComponent({
     suffix: { type: String, default: '' }
   },
   setup(props) {
-    const currentValue = ref(0)
-
+    const currentValue = ref(0);
+    
     onMounted(() => {
-      const startTime = Date.now()
-      const endTime = startTime + props.duration * 1000
-
+      const startTime = Date.now();
+      const endTime = startTime + props.duration * 1000;
+      
       const updateValue = () => {
-        const now = Date.now()
+        const now = Date.now();
         if (now >= endTime) {
-          currentValue.value = props.endVal
-          return
+          currentValue.value = props.endVal;
+          return;
         }
-
-        const elapsed = now - startTime
-        const progress = elapsed / (props.duration * 1000)
-        currentValue.value = Math.floor(progress * props.endVal)
-        requestAnimationFrame(updateValue)
-      }
-
-      updateValue()
-    })
-
-    return () => h('span', {}, `${currentValue.value}${props.suffix}`)
+        
+        const elapsed = now - startTime;
+        const progress = elapsed / (props.duration * 1000);
+        currentValue.value = Math.floor(progress * props.endVal);
+        requestAnimationFrame(updateValue);
+      };
+      
+      updateValue();
+    });
+    
+    return () => h('span', {}, `${currentValue.value}${props.suffix}`);
   }
-})
+});
 
-const version = useVersionStore()
+const version = useVersionStore();
 
 const quickTools = [
   {
@@ -303,13 +304,13 @@ const quickTools = [
     description: 'Comprehensive mathematical functions with visualization capabilities.',
     isNew: false
   }
-]
+];
 
 const statistics = [
   { label: 'Calculations Performed', value: 50000, suffix: '+' },
   { label: 'Active Users', value: 300, suffix: '+' },
   { label: 'Tools Available', value: 15, suffix: '+' }
-]
+];
 
 const features = [
   {
@@ -348,7 +349,7 @@ const features = [
     description:
       "Access your calculations and settings across all your devices.",
   },
-]
+];
 
 const reasons = [
   "Designed specifically for developers and programmers",
@@ -356,23 +357,23 @@ const reasons = [
   "Open-source and community-driven development",
   "Seamless integration with popular IDEs and text editors",
   "Extensive documentation and support resources",
-]
+];
 
-const showWelcomeModal = ref(false)
+const showWelcomeModal = ref(false);
 
 onMounted(() => {
   // Check if the welcome modal has been shown before
-  const hasShownWelcome = localStorage.getItem("mathlly-welcome-shown") === "true"
-
+  const hasShownWelcome = localStorage.getItem("mathlly-welcome-shown") === "true";
+  
   if (!hasShownWelcome) {
     // Add a delay before showing the modal
     useTimeoutFn(() => {
-      showWelcomeModal.value = true
-    }, 1000)
+      showWelcomeModal.value = true;
+    }, 1000);
   }
-})
+});
 
 const closeWelcomeModal = () => {
-  showWelcomeModal.value = false
-}
+  showWelcomeModal.value = false;
+};
 </script>

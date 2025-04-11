@@ -208,6 +208,20 @@
       @apply border-r-gray-800 dark:border-r-gray-100;
     }
   }
+
+  svg {
+    #logo-background {
+      @apply !fill-gray-100 dark:!fill-gray-800 !stroke-gray-200 dark:!stroke-gray-700
+    }
+
+    #logo-asterisk, #logo-slash {
+      @apply !fill-indigo-600 dark:!fill-indigo-400;
+    }
+
+    #logo-dot {
+      @apply !stroke-gray-700 dark:!stroke-gray-300;
+    }
+  }
 }
 
 @layer components {

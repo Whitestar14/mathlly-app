@@ -5,7 +5,7 @@
     <!-- Custom header -->
     <template #header-actions>
     <div class="flex justify-between items-center">
-      <Logo type="text" class="absolute left-2" />
+      <TextLogo class="absolute left-2" />
     </div>
     </template>
 
@@ -105,7 +105,7 @@ import {
 import { ref } from "vue"
 import { usePills } from "@/composables/usePills"
 import Badge from "@/components/base/BaseBadge.vue"
-import Logo from '@/components/base/BaseLogo.vue'
+import TextLogo from '@/components/base/TextLogo.vue'
 import BasePanel from "@/components/base/BasePanel.vue"
 import Indicator from "@/components/ui/PillIndicator.vue"
 const props = defineProps({
