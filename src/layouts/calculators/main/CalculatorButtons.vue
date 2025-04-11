@@ -3,18 +3,21 @@
   <Suspense>
     <!-- Main Content -->
     <template #default>
-      <Transition name="scale" mode="out-in">
-      <component 
-      :is="modeComponent" 
-      class="flex-auto"
-      :active-base="activeBase"
-        :input-length="inputLength"
-        :max-length="maxLength"
-        :has-memory="hasMemory"
-        @button-click="handleButtonClick"
-        @clear="handleClear"
-      />
-    </Transition>
+      <Transition
+        name="scale"
+        mode="out-in"
+      >
+        <component 
+          :is="modeComponent" 
+          class="flex-auto"
+          :active-base="activeBase"
+          :input-length="inputLength"
+          :max-length="maxLength"
+          :has-memory="hasMemory"
+          @button-click="handleButtonClick"
+          @clear="handleClear"
+        />
+      </Transition>
     </template>
     <!-- Loading State -->
     <template #fallback>

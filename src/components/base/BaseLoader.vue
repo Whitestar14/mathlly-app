@@ -1,11 +1,18 @@
 <template>
-  <div v-if="isActive" :class="containerClasses" class="relative h-full font-mono">
+  <div
+    v-if="isActive"
+    :class="containerClasses"
+    class="relative h-full font-mono"
+  >
     <!-- Expanded Loader (formerly macro) -->
     <template v-if="variant === 'expanded'">
       <div class="relative flex flex-col items-center justify-center gap-8">
         <div class="relative z-10 flex items-center justify-center">
           <div class="relative text-6xl inline-flex">
-            <span ref="bracketLeft" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">{</span>
+            <span
+              ref="bracketLeft"
+              class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0"
+            >{</span>
 
             <span class="inline-flex *:text-gray-800 *:dark:text-gray-100 *:opacity-0">
               <span ref="letterM">m</span>
@@ -14,16 +21,31 @@
               <span ref="letterH">h</span>
             </span>
             <span class="relative inline-flex items-center justify-center w-[1.2em] *:left-1/2 *:-translate-x-1/2 *:text-indigo-500 *:dark:text-indigo-400 *:font-black *:opacity-0">
-              <span ref="slashTop" class="top-0 origin-bottom">/</span>
-              <span ref="slashBottom" class="bottom-0 origin-top">/</span>
+              <span
+                ref="slashTop"
+                class="top-0 origin-bottom"
+              >/</span>
+              <span
+                ref="slashBottom"
+                class="bottom-0 origin-top"
+              >/</span>
             </span>
-            <span ref="letterY" class="text-gray-800 dark:text-gray-100 opacity-0">y</span>
+            <span
+              ref="letterY"
+              class="text-gray-800 dark:text-gray-100 opacity-0"
+            >y</span>
 
-            <span ref="bracketRight" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">}</span>
+            <span
+              ref="bracketRight"
+              class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0"
+            >}</span>
           </div>
         </div>
 
-        <div v-if="message" class="relative z-10 text-center">
+        <div
+          v-if="message"
+          class="relative z-10 text-center"
+        >
           <div class="text-sm text-gray-600 dark:text-gray-300">
             {{ message }}
           </div>
@@ -40,7 +62,7 @@
             '--loader-size': variant === 'compact' ? '1.5rem' : '2rem' 
           }"
           aria-label="Loading"
-        ></div>
+        />
         <span
           v-if="message"
           class="ml-3 text-sm text-gray-600 dark:text-gray-300"

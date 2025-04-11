@@ -17,9 +17,9 @@
         class="h-6 bg-gray-300 dark:bg-gray-600 w-px md:hidden group-has-[.rounded-none:hover]:h-8 transition-[height]"
       />
       <Button
+        v-tippy="{content: 'Copy to Clipboard', placement: 'right'}"
         variant="ghost"
         size="icon"
-        v-tippy="{content: 'Copy to Clipboard', placement: 'right'}"
         class="rounded-none hover:bg-gray-50 group-hover:bg-opacity-100"
         @click="copyToClipboard"
       >

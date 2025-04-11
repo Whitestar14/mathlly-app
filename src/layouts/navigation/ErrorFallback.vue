@@ -17,8 +17,8 @@
             isOffline
               ? 'You are offline'
               : error
-              ? 'An error occurred'
-              : 'Page failed to load'
+                ? 'An error occurred'
+                : 'Page failed to load'
           }}
         </h2>
         <p class="text-gray-600 dark:text-gray-400">
@@ -43,7 +43,10 @@
           <RefreshCwIcon class="h-4 w-4" />
           Try Again
         </Button>
-        <Button variant="primary" @click="router.push('/')">
+        <Button
+          variant="primary"
+          @click="router.push('/')"
+        >
           <HomeIcon class="h-4 w-4" />
           Home
         </Button>
@@ -62,8 +65,7 @@
           </summary>
           <pre
             class="mt-2 text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
-            >{{ error.stack }}</pre
-          >
+          >{{ error.stack }}</pre>
         </details>
       </div>
     </div>

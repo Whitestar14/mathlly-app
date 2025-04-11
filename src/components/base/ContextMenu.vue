@@ -1,19 +1,19 @@
 <template>
-    <ContextMenuRoot>
-      <ContextMenuTrigger asChild>
-        <slot name="trigger"></slot>
-      </ContextMenuTrigger>
-      <ContextMenuPortal>
-        <ContextMenuContent
-          class="z-20 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 p-1 shadow-md"
-          :side-offset="sideOffset"
-          :align="align"
-        >
-          <slot></slot>
-        </ContextMenuContent>
-      </ContextMenuPortal>
-    </ContextMenuRoot>
-  </template>
+  <ContextMenuRoot>
+    <ContextMenuTrigger as-child>
+      <slot name="trigger" />
+    </ContextMenuTrigger>
+    <ContextMenuPortal>
+      <ContextMenuContent
+        class="z-20 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 p-1 shadow-md"
+        :side-offset="sideOffset"
+        :align="align"
+      >
+        <slot />
+      </ContextMenuContent>
+    </ContextMenuPortal>
+  </ContextMenuRoot>
+</template>
   
   <script setup>
   import {

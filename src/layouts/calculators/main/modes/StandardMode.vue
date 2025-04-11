@@ -2,14 +2,14 @@
   <div class="flex flex-col gap-1">
     <div class="grid grid-cols-5 gap-1">
       <button
-  v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
-  :key="op"
-  class="calc-btn calc-memory-btn calc-btn-grid"
-  :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
-  @click="handleClick(op)"
->
-  {{ op }}
-</button>
+        v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
+        :key="op"
+        class="calc-btn calc-memory-btn calc-btn-grid"
+        :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
+        @click="handleClick(op)"
+      >
+        {{ op }}
+      </button>
     </div>
     
     <div class="grid grid-cols-4 gap-1 flex-grow">

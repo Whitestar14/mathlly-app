@@ -1,5 +1,8 @@
 <template>
-  <error-fallback v-if="hasError" :error="error" />
+  <error-fallback
+    v-if="hasError"
+    :error="error"
+  />
   <Suspense v-else>
     <template #default>
       <app-setup />

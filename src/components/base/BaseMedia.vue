@@ -8,9 +8,9 @@
     <div 
       v-if="type === 'svg' && svgContent" 
       class="inline-block"
-      v-html="svgContent"
       :aria-hidden="hideFromScreenReaders"
-    ></div>
+      v-html="svgContent"
+    />
     
     <!-- Image -->
     <img 
@@ -23,7 +23,7 @@
       :height="height"
       :aria-hidden="hideFromScreenReaders"
       @error="handleMediaError"
-    />
+    >
     
     <!-- Video -->
     <video
@@ -39,16 +39,26 @@
       :aria-hidden="hideFromScreenReaders"
       @error="handleMediaError"
     >
-      <source v-if="src" :src="src" :type="mimeType">
+      <source
+        v-if="src"
+        :src="src"
+        :type="mimeType"
+      >
       <slot name="fallback">
         <p>Your browser doesn't support this video format.</p>
       </slot>
     </video>
 
     <!-- Fallback content -->
-    <div v-else-if="showFallback" class="fallback">
+    <div
+      v-else-if="showFallback"
+      class="fallback"
+    >
       <slot name="fallback">
-        <div class="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md" :style="`width: ${width}px; height: ${height}px;`">
+        <div
+          class="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md"
+          :style="`width: ${width}px; height: ${height}px;`"
+        >
           <ImageIcon class="h-6 w-6 text-gray-400 dark:text-gray-600" />
         </div>
       </slot>
@@ -60,8 +70,6 @@
 import { computed, ref, watch, onMounted } from 'vue';
 import { ImageIcon } from 'lucide-vue-next';
 import { useTheme } from '@/composables/useTheme';
-
-const { isDark } = useTheme();
 
 const props = defineProps({
   type: {
@@ -148,6 +156,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['error', 'load']);
+
+const { isDark } = useTheme();
 
 const svgContent = ref('');
 const svgCache = new Map();

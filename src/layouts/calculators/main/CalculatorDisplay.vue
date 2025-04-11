@@ -1,23 +1,44 @@
 <template>
   <div class="flex flex-col h-full">
-    <div class="p-4 rounded-lg transition-colors duration-300 flex-1 relative flex items-end" :class="[
-      error
-        ? 'bg-destructive/10 dark:bg-destructive/20'
-        : 'transition-colors duration-300 bg-gray-100 dark:bg-gray-700',
-    ]">
+    <div
+      class="p-4 rounded-lg transition-colors duration-300 flex-1 relative flex items-end"
+      :class="[
+        error
+          ? 'bg-destructive/10 dark:bg-destructive/20'
+          : 'transition-colors duration-300 bg-gray-100 dark:bg-gray-700',
+      ]"
+    >
+      <ChevronScroll
+        :show-left-chevron="showLeftChevron"
+        :show-right-chevron="showRightChevron"
+        @scroll-to-previous="scrollToPrevious"
+        @scroll-to-next="scrollToNext"
+      />
 
-      <ChevronScroll :show-left-chevron="showLeftChevron" :show-right-chevron="showRightChevron"
-        @scroll-to-previous="scrollToPrevious" @scroll-to-next="scrollToNext" />
+      <ControlButtons
+        @open-history="$emit('open-history')"
+        @copy-to-clipboard="copyToClipboard"
+      />
 
-      <ControlButtons @open-history="$emit('open-history')"
-        @copy-to-clipboard="copyToClipboard" />
-
-      <MainDisplay ref="mainDisplay" :input="input" :preview="preview" :error="error" :is-animating="isAnimating"
-        :animated-result="animatedResult" :active-base="activeBase" :mode="mode" @scroll-update="handleScrollUpdate" />
+      <MainDisplay
+        ref="mainDisplay"
+        :input="input"
+        :preview="preview"
+        :error="error"
+        :is-animating="isAnimating"
+        :animated-result="animatedResult"
+        :active-base="activeBase"
+        :mode="mode"
+        @scroll-update="handleScrollUpdate"
+      />
     </div>
     <div class="flex-initial">
-      <BaseDisplay v-show="mode === 'Programmer'" :display-values="displayValues" :active-base="activeBase"
-      @base-change="$emit('base-change', $event)" />
+      <BaseDisplay
+        v-show="mode === 'Programmer'"
+        :display-values="displayValues"
+        :active-base="activeBase"
+        @base-change="$emit('base-change', $event)"
+      />
     </div>
   </div>
 </template>

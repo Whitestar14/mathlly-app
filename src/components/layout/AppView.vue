@@ -1,7 +1,16 @@
 <template>
-  <error-fallback v-if="hasError" :error="error" />
-  <router-view v-else v-slot="{ Component, route }">
-    <Transition name="fade" mode="out-in">
+  <error-fallback
+    v-if="hasError"
+    :error="error"
+  />
+  <router-view
+    v-else
+    v-slot="{ Component, route }"
+  >
+    <Transition
+      name="fade"
+      mode="out-in"
+    >
       <suspense>
         <template #default>
           <component 
@@ -27,6 +36,7 @@
 
 <script setup>
 import { ref, onErrorCaptured } from 'vue';
+import { RouterView } from 'vue-router';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 

@@ -1,45 +1,89 @@
 <template>
   <header
-    class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 min-h-14">
+    class="flex justify-center items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 min-h-14"
+  >
     <div class="container mx-auto flex justify-between items-center gap-2">
       <!-- Sidebar Toggle -->
       <div class="flex items-center justify-between">
-        <Button v-tippy="{ content: isSidebarOpen ? 'Close Sidebar': 'Open Sidebar', placement: 'right' }" variant="ghost"
-          size="icon" @click="$emit('toggle-sidebar')">
-          <PanelLeftIcon v-if="!isSidebarOpen" class="h-5 w-5" />
-          <PanelLeftCloseIcon v-else class="h-5 w-5" />
+        <Button
+          v-tippy="{ content: isSidebarOpen ? 'Close Sidebar': 'Open Sidebar', placement: 'right' }"
+          variant="ghost"
+          size="icon"
+          @click="$emit('toggle-sidebar')"
+        >
+          <PanelLeftIcon
+            v-if="!isSidebarOpen"
+            class="h-5 w-5"
+          />
+          <PanelLeftCloseIcon
+            v-else
+            class="h-5 w-5"
+          />
         </Button>
       </div>
 
       <!-- Mode Toggle and Theme Switch -->
       <div class="flex-grow flex justify-center sm:justify-end items-center">
         <div class="w-full sm:w-auto flex justify-end items-center space-x-4">
-
           <!-- Mode Toggler using SelectBar -->
-          <div v-if="currentRoute === '/calculator'" class="relative w-full min-w-36">
-            <Select v-model="selectedMode" :options="modes.map((mode) => ({ value: mode, label: mode }))" label=""
-              position="popper" placeholder="Select mode" />
+          <div
+            v-if="currentRoute === '/calculator'"
+            class="relative w-full min-w-36"
+          >
+            <Select
+              v-model="selectedMode"
+              :options="modes.map((mode) => ({ value: mode, label: mode }))"
+              label=""
+              position="popper"
+              placeholder="Select mode"
+            />
           </div>
 
           <div class="flex items-center justify-between gap-2">
             <!-- Keyboard Shortcuts -->
-            <Button v-if="!isMobile" v-tippy="{content: 'Keyboard Shortcuts'}" variant="ghost" size="icon" @click="openShortcutModal">
-                <Command class="h-5 w-5" />
-                <span class="sr-only">Keyboard Shortcuts</span>
+            <Button
+              v-if="!isMobile"
+              v-tippy="{content: 'Keyboard Shortcuts'}"
+              variant="ghost"
+              size="icon"
+              @click="openShortcutModal"
+            >
+              <Command class="h-5 w-5" />
+              <span class="sr-only">Keyboard Shortcuts</span>
             </Button>
 
-            <Button v-tippy="{ content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left' }" variant="ghost" size="icon" @click="$emit('toggle-menubar')">
-              <div v-if="!isMobile" class="rotate-180">
-                <PanelLeftIcon v-if="!isMenubarOpen" class="h-5 w-5" />
-                <PanelLeftCloseIcon v-else class="h-5 w-5" />
+            <Button
+              v-tippy="{ content: isMenubarOpen ? 'Close Menu': 'Open Menu', placement: 'left' }"
+              variant="ghost"
+              size="icon"
+              @click="$emit('toggle-menubar')"
+            >
+              <div
+                v-if="!isMobile"
+                class="rotate-180"
+              >
+                <PanelLeftIcon
+                  v-if="!isMenubarOpen"
+                  class="h-5 w-5"
+                />
+                <PanelLeftCloseIcon
+                  v-else
+                  class="h-5 w-5"
+                />
               </div>
-              <MoreVerticalIcon v-else class="h-5 w-5"/>
-          </Button>
-      </div>
+              <MoreVerticalIcon
+                v-else
+                class="h-5 w-5"
+              />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
-    <ShortcutGuide :open="isShortcutModalOpen" @update:open="isShortcutModalOpen = $event" />
+    <ShortcutGuide
+      :open="isShortcutModalOpen"
+      @update:open="isShortcutModalOpen = $event"
+    />
   </header>
 </template>
 

@@ -1,6 +1,9 @@
 <template>
   <div class="group relative">
-    <ContextMenu :side-offset="5" align="start">
+    <ContextMenu
+      :side-offset="5"
+      align="start"
+    >
       <template #trigger>
         <div
           class="rounded-lg bg-gray-100 dark:bg-gray-700 p-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
@@ -27,24 +30,36 @@
         </div>
       </template>
 
-      <ContextMenuItem class="context-menu-item" @click="$emit('select', item)">
+      <ContextMenuItem
+        class="context-menu-item"
+        @click="$emit('select', item)"
+      >
         <CheckIcon class="mr-2 h-4 w-4" />
         <span>Select Item</span>
       </ContextMenuItem>
 
-      <ContextMenuItem class="context-menu-item" @click="$emit('copy', item)">
+      <ContextMenuItem
+        class="context-menu-item"
+        @click="$emit('copy', item)"
+      >
         <CopyIcon class="mr-2 h-4 w-4" />
         <span>Copy Item</span>
       </ContextMenuItem>
 
-      <ContextMenuItem class="context-menu-item" @click="$emit('copy-json', item)">
+      <ContextMenuItem
+        class="context-menu-item"
+        @click="$emit('copy-json', item)"
+      >
         <CodeIcon class="mr-2 h-4 w-4" />
         <span>Copy as JSON</span>
       </ContextMenuItem>
 
       <ContextMenuSeparator class="h-px bg-gray-200 dark:bg-gray-700 my-1" />
 
-      <ContextMenuItem class="context-menu-item-danger" @click="$emit('delete', item.id)">
+      <ContextMenuItem
+        class="context-menu-item-danger"
+        @click="$emit('delete', item.id)"
+      >
         <TrashIcon class="mr-2 h-4 w-4" />
         <span>Delete Item</span>
       </ContextMenuItem>

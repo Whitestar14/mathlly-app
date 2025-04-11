@@ -10,12 +10,20 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
           <div class="space-y-4">
             <div>
-              <label for="precision"
-                class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Precision</label>
-              <Select v-model="localSettings.precision" :options="precisionOptions" />
+              <label
+                for="precision"
+                class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
+              >Precision</label>
+              <Select
+                v-model="localSettings.precision"
+                :options="precisionOptions"
+              />
             </div>
             <div class="flex items-center justify-between py-2">
-              <label for="useFractions" class="text-sm font-medium text-gray-700 dark:text-gray-300">Use
+              <label
+                for="useFractions"
+                class="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Use
                 Fractions</label>
               <Switch v-model="localSettings.useFractions" />
             </div>
@@ -25,7 +33,10 @@
                 Number Formatting
               </h3>
               <div class="flex items-center justify-between py-2">
-                <label for="useThousandsSeparator" class="text-sm text-gray-600 dark:text-gray-400">Use Thousands
+                <label
+                  for="useThousandsSeparator"
+                  class="text-sm text-gray-600 dark:text-gray-400"
+                >Use Thousands
                   Separator</label>
                 <Switch v-model="localSettings.useThousandsSeparator" />
               </div>
@@ -54,9 +65,15 @@
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <div>
-            <label for="mode" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Default
+            <label
+              for="mode"
+              class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
+            >Default
               Mode</label>
-            <Select v-model="localSettings.mode" :options="modeOptions" />
+            <Select
+              v-model="localSettings.mode"
+              :options="modeOptions"
+            />
           </div>
         </div>
       </section>
@@ -69,11 +86,20 @@
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
           <div>
-            <label for="theme" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Theme</label>
-            <Select v-model="localSettings.theme" :options="themeOptions" />
+            <label
+              for="theme"
+              class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
+            >Theme</label>
+            <Select
+              v-model="localSettings.theme"
+              :options="themeOptions"
+            />
           </div>
           <div class="flex items-center justify-between py-2">
-            <label for="borderless" class="text-sm font-medium text-gray-700 dark:text-gray-300">Disable
+            <label
+              for="borderless"
+              class="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >Disable
               Animations</label>
             <Switch v-model="localSettings.animationDisabled" />
           </div>
@@ -81,11 +107,17 @@
       </section>
 
       <div class="flex justify-end space-x-4 pt-4">
-        <Button variant="ghost" class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-          @click="goBack">
+        <Button
+          variant="ghost"
+          class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+          @click="goBack"
+        >
           Cancel
         </Button>
-        <Button variant="primary" @click="saveSettings">
+        <Button
+          variant="primary"
+          @click="saveSettings"
+        >
           Save Changes
         </Button>
       </div>

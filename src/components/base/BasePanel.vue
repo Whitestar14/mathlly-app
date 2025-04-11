@@ -36,13 +36,16 @@
           @close="onClose"
         >
           <template #default>
-            <slot></slot>
+            <slot />
           </template>
           <template #header-actions>
-            <slot name="header-actions"></slot>
+            <slot name="header-actions" />
           </template>
-          <template #footer v-if="$slots.footer">
-            <slot name="footer"></slot>
+          <template
+            v-if="$slots.footer"
+            #footer
+          >
+            <slot name="footer" />
           </template>
         </PanelContent>
       </div>
@@ -76,13 +79,16 @@
             @close="onClose"
           >
             <template #default>
-              <slot></slot>
+              <slot />
             </template>
             <template #header-actions>
-              <slot name="header-actions"></slot>
+              <slot name="header-actions" />
             </template>
-            <template #footer v-if="$slots.footer">
-              <slot name="footer"></slot>
+            <template
+              v-if="$slots.footer"
+              #footer
+            >
+              <slot name="footer" />
             </template>
           </PanelContent>
         </div>
@@ -117,7 +123,10 @@
         v-if="isMobile && position !== 'side' && isOpen"
         class="fixed inset-x-0 bottom-0 z-20 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]"
       >
-        <div class="panel-content h-full" :class="mainClass">
+        <div
+          class="panel-content h-full"
+          :class="mainClass"
+        >
           <PanelContent
             :title="title"
             :show-header="showHeader"
@@ -128,13 +137,16 @@
             @close="onClose"
           >
             <template #default>
-              <slot></slot>
+              <slot />
             </template>
             <template #header-actions>
-              <slot name="header-actions"></slot>
+              <slot name="header-actions" />
             </template>
-            <template #footer v-if="$slots.footer">
-              <slot name="footer"></slot>
+            <template
+              v-if="$slots.footer"
+              #footer
+            >
+              <slot name="footer" />
             </template>
           </PanelContent>
         </div>

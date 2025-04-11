@@ -20,14 +20,20 @@
       >
         <div class="flex justify-between items-start">
           <div class="pr-3">
-            <h3 class="font-medium" :class="getTitleClass(toast.type)">
+            <h3
+              class="font-medium"
+              :class="getTitleClass(toast.type)"
+            >
               {{ toast.title || getDefaultTitle(toast.type) }}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">
               {{ toast.message || toast.description }}
             </p>
           </div>
-          <div v-if="toast.dismissible !== false" class="absolute top-2 right-2 hidden md:block">
+          <div
+            v-if="toast.dismissible !== false"
+            class="absolute top-2 right-2 hidden md:block"
+          >
             <Button 
               size="sm" 
               variant="secondary" 

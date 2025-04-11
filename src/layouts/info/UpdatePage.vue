@@ -1,30 +1,52 @@
 <template>
-  <BasePage title="Updates" :showFooter="true">
+  <BasePage
+    title="Updates"
+    :show-footer="true"
+  >
     <!-- Hero Section -->
     <section class="mb-12 pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">
       <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative">
         <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div class="w-full md:w-2/3 flex justify-center flex-col text-center md:text-left space-y-6">
-            <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.2 } }"
-              class="self-center md:self-start mb-2">
-              <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
+            <div
+              v-motion
+              :initial="{ opacity: 0, y: 20 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 0.2 } }"
+              class="self-center md:self-start mb-2"
+            >
+              <Badge
+                type="version"
+                :text="`v${version.versionInfo.full}`"
+                :show-notch="true"
+              />
             </div>
 
-            <h1 v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.3 } }"
-              class="text-4xl md:text-5xl lg:text-6xl font-mono font-bold tracking-tight">
+            <h1
+              v-motion
+              :initial="{ opacity: 0, y: 20 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 0.3 } }"
+              class="text-4xl md:text-5xl lg:text-6xl font-mono font-bold tracking-tight"
+            >
               What's New in Mathlly
               <span class="block text-indigo-600 dark:text-indigo-400 mt-2">Continuous improvements</span>
             </h1>
 
-            <p v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.4 } }"
-              class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
+            <p
+              v-motion
+              :initial="{ opacity: 0, y: 20 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 0.4 } }"
+              class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start"
+            >
               We're constantly working to make Mathlly better. Check out our latest updates and upcoming features.
             </p>
           </div>
 
-          <div v-motion :initial="{ opacity: 0, scale: 0.9 }"
+          <div
+            v-motion
+            :initial="{ opacity: 0, scale: 0.9 }"
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
-            class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
+            class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0"
+          >
             <div class="relative hidden md:block">
               <SparklesIcon class="h-12 w-12 text-indigo-500/30 dark:text-indigo-400/30 absolute -top-6 -left-6 rotate-12" />
               <HistoryIcon class="h-32 w-32 text-indigo-500 dark:text-indigo-400" />
@@ -44,7 +66,7 @@
               <HistoryIcon class="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
             </div>
             <!-- This connects to the timeline line -->
-            <div class="absolute left-5 top-10 bottom-0 w-px h-12 bg-indigo-200 dark:bg-indigo-800/50"></div>
+            <div class="absolute left-5 top-10 bottom-0 w-px h-12 bg-indigo-200 dark:bg-indigo-800/50" />
           </div>
           <h3 class="text-xl font-medium tracking-tight ml-3">
             Release History
@@ -65,12 +87,16 @@
       
       <!-- Timeline Line -->
       <div class="relative">
-        <div class="absolute left-0 top-0 bottom-0 w-px bg-indigo-200 dark:bg-indigo-800/50 ml-5"></div>
+        <div class="absolute left-0 top-0 bottom-0 w-px bg-indigo-200 dark:bg-indigo-800/50 ml-5" />
         
         <div class="grid gap-8 pl-10">
-          <div v-for="update in filteredUpdates" :key="update.version" class="relative">
+          <div
+            v-for="update in filteredUpdates"
+            :key="update.version"
+            class="relative"
+          >
             <!-- Timeline dot -->
-            <div class="absolute -left-7 top-6 h-4 w-4 bg-indigo-400 dark:bg-indigo-500 rounded-full z-5 border-4 border-white dark:border-gray-900"></div>
+            <div class="absolute -left-7 top-6 h-4 w-4 bg-indigo-400 dark:bg-indigo-500 rounded-full z-5 border-4 border-white dark:border-gray-900" />
             
             <UpdateCard
               :version="update.version"
@@ -81,11 +107,14 @@
         </div>
       </div>
       
-      <div v-if="hasMoreUpdates" class="flex justify-center mt-8">
+      <div
+        v-if="hasMoreUpdates"
+        class="flex justify-center mt-8"
+      >
         <Button
           variant="outline" 
-          @click="showMoreUpdates"
           class="group"
+          @click="showMoreUpdates"
         >
           <ChevronDownIcon class="h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
           Load More Updates
@@ -110,7 +139,10 @@
             <div>
               <span class="text-sm text-gray-700 dark:text-gray-300">{{ feature }}</span>
               <div class="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
-                <div class="h-full bg-indigo-500/30 dark:bg-indigo-500/50 rounded-full" :style="`width: ${Math.floor(Math.random() * 90) + 10}%`"></div>
+                <div
+                  class="h-full bg-indigo-500/30 dark:bg-indigo-500/50 rounded-full"
+                  :style="`width: ${Math.floor(Math.random() * 90) + 10}%`"
+                />
               </div>
             </div>
           </li>

@@ -1,20 +1,41 @@
 <template>
   <main class="flex-grow flex">
     <div class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300">
-      <div class="grid grid-cols-1 h-full p-4 gap-1 mx-auto"
-        :class="state.mode === 'Programmer' ? 'grid-rows-[1fr_2fr]' : 'grid-rows-[1fr_2.5fr]'">
-        <calculator-display :input="state.input" :preview="preview" :error="state.error"
-          :is-animating="state.isAnimating" :animated-result="animatedResult" :active-base="state.activeBase"
-          :mode="state.mode" :display-values="state.displayValues" @open-history="toggleHistory"
-          @base-change="handleBaseChange" />
+      <div
+        class="grid grid-cols-1 h-full p-4 gap-1 mx-auto"
+        :class="state.mode === 'Programmer' ? 'grid-rows-[1fr_2fr]' : 'grid-rows-[1fr_2.5fr]'"
+      >
+        <calculator-display
+          :input="state.input"
+          :preview="preview"
+          :error="state.error"
+          :is-animating="state.isAnimating"
+          :animated-result="animatedResult"
+          :active-base="state.activeBase"
+          :mode="state.mode"
+          :display-values="state.displayValues"
+          @open-history="toggleHistory"
+          @base-change="handleBaseChange"
+        />
 
-        <calculator-buttons :mode="state.mode" :input-length="state.input.length" :max-length="maxInputLength"
-          :active-base="state.activeBase" :has-memory="hasMemoryValue" @button-click="handleButtonClick"
-          @clear="handleClear" />
+        <calculator-buttons
+          :mode="state.mode"
+          :input-length="state.input.length"
+          :max-length="maxInputLength"
+          :active-base="state.activeBase"
+          :has-memory="hasMemoryValue"
+          @button-click="handleButtonClick"
+          @clear="handleClear"
+        />
       </div>
     </div>
-    <history-panel :mode="state.mode" :is-mobile="isMobile" :is-open="isHistoryOpen" @update:is-open="toggleHistory"
-      @select-item="selectHistoryItem" />
+    <history-panel
+      :mode="state.mode"
+      :is-mobile="isMobile"
+      :is-open="isHistoryOpen"
+      @update:is-open="toggleHistory"
+      @select-item="selectHistoryItem"
+    />
   </main>
 </template>
 

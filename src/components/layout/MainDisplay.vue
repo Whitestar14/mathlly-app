@@ -2,38 +2,74 @@
   <div class="flex-grow h-full relative overflow-hidden">
     <div class="text-right text-xl font-bold font-mono text-gray-700 dark:text-gray-200">
       <!-- Result container -->
-      <div ref="resultContainer" class="absolute w-full transform-gpu" :class="{
-        'opacity-100': isAnimating,
-        'opacity-0': !isAnimating,
-      }">
+      <div
+        ref="resultContainer"
+        class="absolute w-full transform-gpu"
+        :class="{
+          'opacity-100': isAnimating,
+          'opacity-0': !isAnimating,
+        }"
+      >
         <div :class="displayClass">
           {{ animatedResult }}
         </div>
       </div>
 
       <!-- Input container -->
-      <div ref="inputContainer" class="absolute grid grid-rows-[1.5fr_1fr] w-full h-full transform-gpu" :class="{
-        'opacity-0': isAnimating,
-        'opacity-100': !isAnimating,
-      }">
+      <div
+        ref="inputContainer"
+        class="absolute grid grid-rows-[1.5fr_1fr] w-full h-full transform-gpu"
+        :class="{
+          'opacity-0': isAnimating,
+          'opacity-100': !isAnimating,
+        }"
+      >
         <!-- Display container -->
-        <div ref="displayContainer" :class="displayClass" aria-live="polite" aria-atomic="true">
-          <span v-for="(part, index) in formattedParts" :key="index">
-            <span v-if="part.type === 'text'" v-text="DisplayFormatter.formatDisplayContent(part.content)" />
-            <span v-else-if="part.type === 'open'" class="paren-open">{{ part.content }}</span>
-            <span v-else-if="part.type === 'close'" class="paren-close">{{ part.content }}</span>
-            <span v-else-if="part.type === 'ghost'" class="paren-ghost text-gray-400">{{ part.content }}</span>
+        <div
+          ref="displayContainer"
+          :class="displayClass"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <span
+            v-for="(part, index) in formattedParts"
+            :key="index"
+          >
+            <span
+              v-if="part.type === 'text'"
+              v-text="DisplayFormatter.formatDisplayContent(part.content)"
+            />
+            <span
+              v-else-if="part.type === 'open'"
+              class="paren-open"
+            >{{ part.content }}</span>
+            <span
+              v-else-if="part.type === 'close'"
+              class="paren-close"
+            >{{ part.content }}</span>
+            <span
+              v-else-if="part.type === 'ghost'"
+              class="paren-ghost text-gray-400"
+            >{{ part.content }}</span>
           </span>
         </div>
 
         <!-- Preview/Error container - use preview directly without additional formatting -->
-        <div v-if="preview && !error" ref="previewContainer"
+        <div
+          v-if="preview && !error"
+          ref="previewContainer"
           class="font-medium text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
-          aria-live="polite" aria-atomic="true">
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {{ preview }}
         </div>
-        <div v-if="error" class="font-medium text-red-500 overflow-x-auto whitespace-nowrap scrollbar-hide"
-          aria-live="assertive" aria-atomic="true">
+        <div
+          v-if="error"
+          class="font-medium text-red-500 overflow-x-auto whitespace-nowrap scrollbar-hide"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
           {{ error }}
         </div>
       </div>
