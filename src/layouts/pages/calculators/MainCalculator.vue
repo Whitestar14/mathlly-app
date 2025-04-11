@@ -4,7 +4,7 @@
       <div class="grid grid-cols-1 h-full p-4 gap-1 mx-auto"
         :class="state.mode === 'Programmer' ? 'grid-rows-[1fr_2fr]' : 'grid-rows-[1fr_2.5fr]'">
         <calculator-display :input="state.input" :preview="preview" :error="state.error"
-          :is-animating="state.isAnimating" :animated-result="state.animatedResult" :active-base="state.activeBase"
+          :is-animating="state.isAnimating" :animated-result="animatedResult" :active-base="state.activeBase"
           :mode="state.mode" :display-values="state.displayValues" @open-history="toggleHistory"
           @base-change="handleBaseChange" />
 
@@ -26,9 +26,7 @@ import { usePanel } from '@/composables/usePanel'
 import { useMemory } from '@/composables/useMemory'
 import { useInputValidation } from '@/composables/useValidation'
 import { useCalculatorState } from '@/composables/useCalculatorState'
-import { useCalculatorOperations } from '@/composables/useCalculatorOperations'
-import { usePreview } from '@/composables/usePreview'
-import { useCalculatorKeyboard } from '@/composables/useCalculatorKeyboard'
+import { useMainCalculator } from '@/composables/useMainCalculator'
 import { CalculatorFactory } from '@/services/factory/CalculatorFactory'
 import HistoryPanel from '@/layouts/pages/calculators/main/HistoryPanel.vue'
 import CalculatorDisplay from '@/layouts/pages/calculators/main/CalculatorDisplay.vue'
@@ -67,9 +65,6 @@ useTitle(computed(() => `${props.mode} Mode - Mathlly`))
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)
 const hasMemoryValue = computed(() => hasMemory(props.mode).value)
 
-// Setup preview calculation
-const { preview } = usePreview({ calculator, state })
-
 // History panel management
 const { addToHistory } = useHistory()
 const {
@@ -82,12 +77,14 @@ const {
 // Memory management
 const { hasMemory, handleMemoryOperation } = useMemory()
 
-// Setup calculator operations
+// Setup unified calculator functionality
 const {
   handleButtonClick,
   handleClear,
-  handleBaseChange
-} = useCalculatorOperations({
+  handleBaseChange,
+  preview,
+  animatedResult
+} = useMainCalculator({
   calculator,
   state,
   updateState,
@@ -95,15 +92,7 @@ const {
   updateDisplayValues,
   setActiveBase,
   addToHistory,
-  handleMemoryOperation
-})
-
-// Setup keyboard handling
-useCalculatorKeyboard({
-  mode: computed(() => state.mode),
-  activeBase: computed(() => state.activeBase),
-  handleButtonClick,
-  handleBaseChange,
+  handleMemoryOperation,
   toggleHistory,
   isValidForBase
 })

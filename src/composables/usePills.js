@@ -1,21 +1,21 @@
-import { ref, watch, nextTick, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, watch, nextTick, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import {
   useElementVisibility,
   useResizeObserver,
   useMutationObserver,
   useDebounceFn,
-} from "@vueuse/core";
+} from '@vueuse/core';
 
 /**
  * Style configuration for different indicator positions
  * @type {Object}
  */
 const STYLE_MAP = {
-  left: { dimension: "top", offset: "verticalOffset", align: "left" },
-  right: { dimension: "top", offset: "verticalOffset", align: "right" },
-  top: { dimension: "left", offset: "horizontalOffset", align: "top" },
-  bottom: { dimension: "left", offset: "horizontalOffset", align: "bottom" },
+  left: { dimension: 'top', offset: 'verticalOffset', align: 'left' },
+  right: { dimension: 'top', offset: 'verticalOffset', align: 'right' },
+  top: { dimension: 'left', offset: 'horizontalOffset', align: 'top' },
+  bottom: { dimension: 'left', offset: 'horizontalOffset', align: 'bottom' },
 };
 
 /**
@@ -39,8 +39,8 @@ export function usePills(options = {}) {
     onNavigate = null,
     verticalOffset = 7,
     horizontalOffset = 7,
-    position = "left",
-    defaultPill = "",
+    position = 'left',
+    defaultPill = '',
     updateRoute = true,
     hideIndicatorPaths = [],
     containerRef = null,
@@ -60,6 +60,7 @@ export function usePills(options = {}) {
   // Element visibility tracking
   const isElementVisible = useElementVisibility(activeElementRef);
 
+  const elementCache = new WeakMap();
   /**
    * Calculates the offset position for the indicator
    * @param {HTMLElement} element - The element to calculate offset for
@@ -68,12 +69,29 @@ export function usePills(options = {}) {
   const getOffset = (element) => {
     if (!element) return 0;
 
-    activeElementRef.value = element;
-    const isVertical = position === "left" || position === "right";
+    // Check cache first
+    if (elementCache.has(element)) {
+      const cached = elementCache.get(element);
+      // Only recalculate if element might have moved
+      if (Date.now() - cached.timestamp < 100) {
+        return cached.offset;
+      }
+    }
+
+    // Calculate offset
+    const isVertical = position === 'left' || position === 'right';
     const size = isVertical ? element.offsetHeight : element.offsetWidth;
     const offset = isVertical ? element.offsetTop : element.offsetLeft;
+    const result =
+      offset + size / 2 - (isVertical ? verticalOffset : horizontalOffset);
 
-    return offset + size / 2 - (isVertical ? verticalOffset : horizontalOffset);
+    // Cache result
+    elementCache.set(element, {
+      offset: result,
+      timestamp: Date.now(),
+    });
+
+    return result;
   };
 
   /**
@@ -127,7 +145,7 @@ export function usePills(options = {}) {
     // Only show indicator if element is visible
     showIndicator.value = isElementVisible.value;
     if (showIndicator.value) {
-      indicatorPosition.value = getOffset(element);
+        indicatorPosition.value = getOffset(element);
     }
   };
 
@@ -185,14 +203,14 @@ export function usePills(options = {}) {
     // Base style with position
     const result = {
       [style.dimension]: `${indicatorPosition.value}px`,
-      display: showIndicator.value ? "" : "none",
+      display: showIndicator.value ? '' : 'none',
     };
 
     // Add alignment if not left/top (which are default)
-    if (style.align === "right" || style.align === "bottom") {
-      result[style.align] = "0px";
+    if (style.align === 'right' || style.align === 'bottom') {
+      result[style.align] = '0px';
       // Set the opposite property to auto
-      result[style.dimension === "top" ? "left" : "top"] = "auto";
+      result[style.dimension === 'top' ? 'left' : 'top'] = 'auto';
     }
 
     return result;
@@ -211,7 +229,7 @@ export function usePills(options = {}) {
           if (activeElement) {
             updateIndicator(activeElement);
           } else {
-            console.log("[usePills] Element not found for path:", newPath);
+            console.log('[usePills] Element not found for path:', newPath);
           }
         });
       }
@@ -249,11 +267,16 @@ export function usePills(options = {}) {
   }
 
   // Set up mutation observer to handle DOM changes
-  useMutationObserver(document.body, optimize, {
-    childList: true,
-    subtree: true,
-    attributeFilter: ["class", "style", "hidden"],
-  });
+  useMutationObserver(
+    document.body,
+    optimize,
+    {
+      childList: true,
+      subtree: true,
+      attributeFilter: ['class', 'style', 'hidden'],
+    },
+    { passive: true }
+  );
 
   // Return the public API
   return {

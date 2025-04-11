@@ -26,11 +26,11 @@
           </span>
         </div>
 
-        <!-- Preview/Error container -->
+        <!-- Preview/Error container - use preview directly without additional formatting -->
         <div v-if="preview && !error" ref="previewContainer"
           class="font-medium text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
           aria-live="polite" aria-atomic="true">
-          {{ formattedPreview }}
+          {{ preview }}
         </div>
         <div v-if="error" class="font-medium text-red-500 overflow-x-auto whitespace-nowrap scrollbar-hide"
           aria-live="assertive" aria-atomic="true">
@@ -77,14 +77,6 @@ const formattedParts = computed(() => {
   const formatted = DisplayFormatter.format(props.input, { base: props.activeBase, mode: props.mode })
 
   return ParenthesesHighlighter.formatWithParentheses(formatted, parenthesesTracker.value)
-})
-
-const formattedPreview = computed(() => {
-  if (!props.preview) return ""
-  return DisplayFormatter.format(props.preview, {
-    base: props.activeBase,
-    mode: props.mode
-  })
 })
 
 const displayClass = computed(() => [

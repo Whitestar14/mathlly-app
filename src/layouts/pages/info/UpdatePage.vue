@@ -1,17 +1,37 @@
 <template>
   <BasePage title="Updates" :showFooter="true">
     <!-- Hero Section -->
-    <section class="mb-12 pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80 py-8 rounded-lg">
-      <div class="container mx-auto px-4 py-6 relative">
-        <h2 class="text-3xl md:text-4xl font-medium tracking-tight mb-4 font-mono">
-          What's New in Mathlly
-          <span class="block text-indigo-600 dark:text-indigo-400 text-xl md:text-2xl mt-2">
-            Continuous improvements for developers
-          </span>
-        </h2>
-        <p class="text-base max-w-2xl text-gray-600 dark:text-gray-400">
-          We're constantly working to make Mathlly better. Check out our latest updates and upcoming features.
-        </p>
+    <section class="mb-12 pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">
+      <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative">
+        <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          <div class="w-full md:w-2/3 flex justify-center flex-col text-center md:text-left space-y-6">
+            <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.2 } }"
+              class="self-center md:self-start mb-2">
+              <Badge type="version" :text="`v${version.versionInfo.full}`" :show-notch="true" />
+            </div>
+
+            <h1 v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.3 } }"
+              class="text-4xl md:text-5xl lg:text-6xl font-mono font-bold tracking-tight">
+              What's New in Mathlly
+              <span class="block text-indigo-600 dark:text-indigo-400 mt-2">Continuous improvements</span>
+            </h1>
+
+            <p v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 0.4 } }"
+              class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
+              We're constantly working to make Mathlly better. Check out our latest updates and upcoming features.
+            </p>
+          </div>
+
+          <div v-motion :initial="{ opacity: 0, scale: 0.9 }"
+            :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
+            class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0">
+            <div class="relative hidden md:block">
+              <SparklesIcon class="h-12 w-12 text-indigo-500/30 dark:text-indigo-400/30 absolute -top-6 -left-6 rotate-12" />
+              <HistoryIcon class="h-32 w-32 text-indigo-500 dark:text-indigo-400" />
+              <RocketIcon class="h-16 w-16 text-indigo-500/40 dark:text-indigo-400/40 absolute -bottom-4 -right-4 rotate-12" />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -102,16 +122,19 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { ClockIcon, HistoryIcon, ChevronDownIcon, RocketIcon } from 'lucide-vue-next';
+import { ClockIcon, HistoryIcon, ChevronDownIcon, RocketIcon, SparklesIcon } from 'lucide-vue-next';
 import { updates, upcomingFeatures } from '@/data/changelog';
+import { useVersionStore } from '@/stores/version';
 import UpdateCard from '@/components/cards/UpdateCard.vue';
 import BasePage from '@/components/base/BasePage.vue';
 import Button from '@/components/base/BaseButton.vue';
 import SelectBar from '@/components/ui/SelectBar.vue';
+import Badge from '@/components/base/BaseBadge.vue';
 
 const UPDATES_PER_PAGE = 5;
 const visibleCount = ref(UPDATES_PER_PAGE);
 const selectedFilter = ref('all');
+const version = useVersionStore();
 
 // Filter options
 const filters = [
