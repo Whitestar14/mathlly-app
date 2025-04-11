@@ -55,6 +55,7 @@
           @click="handleClick('backspace')"
         >
           <Delete class="w-6 h-6 mx-auto" />
+          <span class="sr-only">Backspace</span>
         </button>
 
         <button
