@@ -243,7 +243,7 @@ import Button from '@/components/base/BaseButton.vue';
 import Badge from '@/components/base/BaseBadge.vue';
 import BasePage from "@/components/base/BasePage.vue";
 import FeatureCard from "@/components/cards/FeatureCard.vue";
-import WelcomeModal from "@/layouts/modals/WelcomeModal.vue";
+import WelcomeModal from "@/components/ui/WelcomeModal.vue";
 
 // Simple CountUp component
 const CountUp = defineComponent({

@@ -14,9 +14,9 @@
 
 <script setup>
 import { ref, onErrorCaptured } from 'vue';
-import AppSetup from '@/components/AppSetup.vue';
+import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
-import ErrorFallback from '@/layouts/pages/ErrorFallback.vue';
+import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 
 const error = ref(null);
 const hasError = ref(false);

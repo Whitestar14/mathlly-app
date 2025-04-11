@@ -6,7 +6,7 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: () => import('@/layouts/pages/HomePage.vue'),
+    component: () => import('@/layouts/navigation/HomePage.vue'),
     meta: { transition: 'fade' }
   },
 
@@ -14,7 +14,7 @@ const routes = [
   {
     path: "/calculator",
     name: "Calculator",
-    component: () => import('@/layouts/pages/calculators/MainCalculator.vue'),
+    component: () => import('@/layouts/calculators/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' }
   },
 
@@ -22,7 +22,7 @@ const routes = [
   {
     path: "/tools/base64",
     name: "Base64",
-    component: () => import('@/layouts/pages/tools/Base64Tool.vue'),
+    component: () => import('@/layouts/tools/Base64Tool.vue'),
     meta: { transition: 'fade', group: 'tools' }
   },
 
@@ -30,13 +30,13 @@ const routes = [
   {
     path: "/info/update",
     name: "What's New",
-    component: () => import('@/layouts/pages/info/UpdatePage.vue'),
+    component: () => import('@/layouts/info/UpdatePage.vue'),
     meta: { transition: 'fade', group: 'information' }
   },
   {
     path: "/info/about",
     name: "About",
-    component: () => import('@/layouts/pages/info/AboutPage.vue'),
+    component: () => import('@/layouts/info/AboutPage.vue'),
     meta: { transition: 'fade', group: 'information' }
   },
 
@@ -44,13 +44,13 @@ const routes = [
   {
     path: "/settings",
     name: "Settings",
-    component: () => import('@/layouts/pages/utility/SettingsPage.vue'),
+    component: () => import('@/layouts/utility/SettingsPage.vue'),
     meta: { transition: 'fade', group: 'utility' }
   },
   {
     path: "/feedback",
     name: "Feedback",
-    component: () => import('@/layouts/pages/utility/FeedbackPage.vue'),
+    component: () => import('@/layouts/utility/FeedbackPage.vue'),
     meta: { transition: 'fade', group: 'utility' }
   },
 
@@ -58,7 +58,7 @@ const routes = [
   {
     path: "/error",
     name: "Error",
-    component: () => import('@/layouts/pages/ErrorFallback.vue'),
+    component: () => import('@/layouts/navigation/ErrorFallback.vue'),
     props: () => ({ error: routeError.value, path: routePath.value }),
     beforeEnter: (to, from, next) => {
       // Only allow access if there's an error
@@ -75,7 +75,7 @@ const routes = [
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
-    component: () => import('@/layouts/pages/NotFound.vue'),
+    component: () => import('@/layouts/navigation/NotFound.vue'),
     meta: { transition: 'fade' }
   }
 ];

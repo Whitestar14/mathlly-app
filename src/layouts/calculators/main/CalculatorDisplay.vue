@@ -25,8 +25,8 @@
 <script setup>
 import ChevronScroll from "@/components/ui/ChevronScroll.vue"
 import ControlButtons from "@/components/ui/ControlButtons.vue"
-import MainDisplay from "@/components/ui/MainDisplay.vue"
-import BaseDisplay from "@/components/ui/BaseDisplay.vue"
+import MainDisplay from "@/components/layout/MainDisplay.vue"
+import BaseDisplay from "@/components/layout/BaseDisplay.vue"
 import { computed, nextTick, ref, watch } from "vue"
 import { useToast } from "@/composables/useToast"
 import { useClipboard, useEventListener, useDebounceFn } from "@vueuse/core"

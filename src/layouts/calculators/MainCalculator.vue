@@ -28,9 +28,9 @@ import { useInputValidation } from '@/composables/useValidation'
 import { useCalculatorState } from '@/composables/useCalculatorState'
 import { useMainCalculator } from '@/composables/useMainCalculator'
 import { CalculatorFactory } from '@/services/factory/CalculatorFactory'
-import HistoryPanel from '@/layouts/pages/calculators/main/HistoryPanel.vue'
-import CalculatorDisplay from '@/layouts/pages/calculators/main/CalculatorDisplay.vue'
-import CalculatorButtons from '@/layouts/pages/calculators/main/CalculatorButtons.vue'
+import HistoryPanel from '@/layouts/calculators/main/HistoryPanel.vue'
+import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
+import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import { useSettingsStore } from '@/stores/settings'
 
 const props = defineProps({

@@ -27,7 +27,7 @@
 
 <script setup>
 import { ref, onErrorCaptured } from 'vue';
-import ErrorFallback from '@/layouts/pages/ErrorFallback.vue';
+import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 
 defineProps({

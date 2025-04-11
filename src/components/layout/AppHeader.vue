@@ -55,7 +55,7 @@ import { useRoute } from "vue-router"
 import { useSettingsStore } from "@/stores/settings"
 import { useKeyboard } from "@/composables/useKeyboard"
 import { useTheme } from "@/composables/useTheme"
-import ShortcutGuide from "@/layouts/modals/ShortcutGuide.vue"
+import ShortcutGuide from "@/components/ui/ShortcutGuide.vue"
 import Select from "@/components/ui/SelectBar.vue"
 import Button from "@/components/base/BaseButton.vue"
 
