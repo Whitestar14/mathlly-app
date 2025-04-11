@@ -108,16 +108,3 @@ const retry = () => {
   }
 };
 </script>
-
-<style scoped>
-/* Add the pattern-grid class from your HomePage if needed */
-.pattern-grid {
-  background-size: 40px 40px;
-  background-image: linear-gradient(
-      to right,
-      rgba(128, 128, 128, 0.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(to bottom, rgba(128, 128, 128, 0.05) 1px, transparent 1px);
-}
-</style>
