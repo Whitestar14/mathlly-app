@@ -41,7 +41,7 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
-import { useTitle } from '@vueuse/core'
+import { usePageTitle } from '@/composables/usePageTitle'
 import { useHistory } from '@/composables/useHistory'
 import { usePanel } from '@/composables/usePanel'
 import { useMemory } from '@/composables/useMemory'
@@ -80,7 +80,7 @@ const calculator = ref(CalculatorFactory.createCalculator(props.mode, props.sett
 provide('calculator', computed(() => calculator.value))
 
 // Set page title
-useTitle(computed(() => `${props.mode} Mode - Mathlly`))
+usePageTitle(computed(() => `${props.mode} Mode`))
 
 // Computed properties
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)

@@ -41,6 +41,7 @@
 
     <template #footer>
       <div class="space-y-1.5">
+        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3">Appearance</h3>
         <ToggleGroupRoot
           v-model="selectedTheme"
           type="single"

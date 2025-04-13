@@ -2,15 +2,18 @@ import { ref } from 'vue';
 
 export const routeError = ref(null);
 export const routePath = ref('');
+export const isHandlingError = ref(false); // Add this to track error state
 
 export function setRouteError(error, path) {
   routeError.value = error;
   routePath.value = path;
+  isHandlingError.value = true;
 }
 
 export function clearRouteError() {
   routeError.value = null;
   routePath.value = '';
+  isHandlingError.value = false;
 }
 
 export function setupRouteErrorHandling(router) {
@@ -57,6 +60,13 @@ export function setupRouteErrorHandling(router) {
     } catch (error) {
       setRouteError(error, to.fullPath);
       next('/error');
+    }
+  });
+  
+  // Ensure title is updated correctly after navigation
+  router.afterEach((to) => {
+    if (to.path !== '/error') {
+      clearRouteError();
     }
   });
 }
