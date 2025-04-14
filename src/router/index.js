@@ -1,10 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import {
-  setupRouteErrorHandling,
-  routeError,
-  routePath,
-  clearRouteError,
-} from './errorHandler';
+import { setupRouteErrorHandling, routeError, routePath } from './errorHandler';
 
 const routes = [
   // Home route
@@ -62,12 +57,22 @@ const routes = [
     path: '/error',
     name: 'Error',
     component: () => import('@/layouts/navigation/ErrorFallback.vue'),
-    props: () => ({ error: routeError.value, path: routePath.value }),
+    // Pass the reactive error state as props
+    props: () => ({
+      error: routeError.value, // Pass the reactive ref directly
+      path: routePath.value, // Pass the reactive ref directly
+      isRouteError: true, // Add a flag to distinguish router errors
+    }),
     beforeEnter: (to, from, next) => {
-      // Only allow access if there's an error
+      // Allow access only if there's actually a route error being handled
+      // Or if navigated directly for some reason (maybe show generic error)
       if (routeError.value) {
         next();
       } else {
+        // No active error, redirect home
+        console.warn(
+          'Direct access to /error page without active error. Redirecting.'
+        );
         next('/');
       }
     },
@@ -86,14 +91,7 @@ const router = createRouter({
   routes,
 });
 
-// Setup error handling
+// Setup centralized error handling
 setupRouteErrorHandling(router);
-
-// Clear error when navigating away from error page
-router.afterEach((to) => {
-  if (to.path !== '/error') {
-    clearRouteError();
-  }
-});
 
 export default router;

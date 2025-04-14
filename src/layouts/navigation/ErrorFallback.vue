@@ -1,105 +1,82 @@
 <template>
-  <BasePage title="Something went wrong" :showBackButton="true" :showFooter="true" mainClass="">
-    <div
-      class="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-white dark:bg-gray-800 transition-colors duration-300">
-      <div class="space-y-6 max-w-lg">
-        <!-- Error Code with Logo -->
-        <div class="relative">
-          <h1 class="text-9xl font-bold text-gray-200 dark:text-gray-700">
-            {{ isOffline ? 'OFF' : '500' }}
-          </h1>
-        </div>
-
-        <!-- Message -->
-        <div class="space-y-2">
-          <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
-            {{
-              isOffline
-                ? 'You are offline'
-                : error
-                  ? 'An error occurred'
-                  : 'Page failed to load'
-            }}
-          </h2>
-          <p class="text-gray-600 dark:text-gray-400">
-            {{
-              isOffline
-                ? 'Please check your internet connection and try again.'
-                : error?.message ||
-                'Something went wrong while loading this page.'
-            }}
-          </p>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 *:min-w-[120px]">
-          <Button variant="ghost" class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-            @click="retry">
-            <RefreshCwIcon class="h-4 w-4" />
-            Try Again
-          </Button>
-          <Button variant="primary" @click="router.push('/')">
-            <HomeIcon class="h-4 w-4" />
-            Home
-          </Button>
-        </div>
-
-        <!-- Technical Details -->
-        <div v-if="error?.stack && !isOffline"
-          class="mt-8 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-left overflow-auto border border-gray-200 dark:border-gray-700">
-          <details>
-            <summary class="cursor-pointer text-indigo-600 dark:text-indigo-400 font-medium">
-              Technical Details
-            </summary>
-            <pre class="mt-2 text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ error.stack }}</pre>
-          </details>
-        </div>
-      </div>
-    </div>
-  </BasePage>
+  <div class="min-h-screen flex flex-col items-center justify-center bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 p-4">
+    <h1 class="text-2xl font-bold mb-4">
+      {{ isRouteError ? 'Error Loading Page' : (isGlobalError ? 'Application Error' : 'An Error Occurred') }}
+    </h1>
+    <p v-if="path" class="mb-2">Could not load route: <code>{{ path }}</code></p>
+    <p class="mb-4">
+      {{ errorMessage }}
+    </p>
+    <pre v-if="errorDetails" class="bg-red-200 dark:bg-red-800 text-xs p-2 rounded overflow-auto max-w-lg mb-4">{{ errorDetails }}</pre>
+    <button @click="goHome" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 mr-2">Go Home</button>
+    <button v-if="isRouteError" @click="retryNavigation" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Retry</button>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { HomeIcon, RefreshCwIcon } from 'lucide-vue-next'
-import BasePage from '@/components/base/BasePage.vue'
-import Button from '@/components/base/BaseButton.vue'
-import { usePageTitle } from '@/composables/usePageTitle'
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { clearRouteError } from '@/router/errorHandler'; // Import clear function
 
 const props = defineProps({
   error: {
-    type: Error,
-    default: null
+    type: [Error, Object, String], // Can be an Error object or other types
+    default: null,
   },
-  path: {
+  path: { // Specific to route errors
     type: String,
-    default: ''
+    default: '',
+  },
+  isRouteError: { // Flag passed from /error route
+      type: Boolean,
+      default: false,
+  },
+   isGlobalError: { // Flag passed from App.vue's boundary
+      type: Boolean,
+      default: false,
   }
-})
+});
 
-const router = useRouter()
-const isOffline = ref(false)
+const router = useRouter();
 
-// Set the page title
-usePageTitle('Something went wrong')
+const errorMessage = computed(() => {
+  if (props.error instanceof Error) {
+    return props.error.message || 'No error message provided.';
+  }
+  if (typeof props.error === 'string') {
+      return props.error;
+  }
+  if (props.error?.message) {
+      return props.error.message;
+  }
+  return 'An unknown error occurred.';
+});
 
-onMounted(() => {
-  // Check if we're offline
-  isOffline.value = !navigator.onLine
+const errorDetails = computed(() => {
+    if (props.error instanceof Error && props.error.stack) {
+        // Keep details short in production?
+        // if (import.meta.env.PROD) return props.error.message;
+        return props.error.stack;
+    }
+    if (typeof props.error === 'object' && props.error !== null) {
+        return JSON.stringify(props.error, null, 2);
+    }
+    return ''; // No details for string errors
+});
 
-  // Listen for online/offline events
-  window.addEventListener('online', () => { isOffline.value = false })
-  window.addEventListener('offline', () => { isOffline.value = true })
-})
 
-const retry = () => {
-  if (props.path) {
-    router.replace(props.path)
-  } else if (router.options.history.state.back) {
-    router.back()
+const goHome = () => {
+  clearRouteError(); // Clear any router error state
+  router.push('/');
+};
+
+const retryNavigation = () => {
+  const retryPath = props.path || router.options.history.state.back; // Get path from prop or history
+  clearRouteError(); // Clear the error state *before* retrying
+  if (retryPath && retryPath !== '/error') {
+    router.push(retryPath); // Attempt to navigate again
   } else {
-    router.push('/')
+    router.push('/'); // Fallback to home if path is unknown
   }
-}
+};
 </script>

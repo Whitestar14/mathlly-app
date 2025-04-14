@@ -2,69 +2,72 @@ import { ref } from 'vue';
 
 export const routeError = ref(null);
 export const routePath = ref('');
-export const isHandlingError = ref(false); // Add this to track error state
+export const isHandlingError = ref(false);
 
 export function setRouteError(error, path) {
+  console.error(`[Router Error] Path: ${path}`, error); // Log the error for debugging
   routeError.value = error;
   routePath.value = path;
-  isHandlingError.value = true;
+  isHandlingError.value = true; // Indicate we are now in a router-handled error state
 }
 
 export function clearRouteError() {
-  routeError.value = null;
-  routePath.value = '';
-  isHandlingError.value = false;
+  if (routeError.value) {
+    // console.log('Clearing route error');
+    routeError.value = null;
+    routePath.value = '';
+    isHandlingError.value = false; // Clear the router error state
+  }
 }
 
 export function setupRouteErrorHandling(router) {
-  // Handle navigation errors
-  router.onError((error) => {
-    const pendingRoute = router.currentRoute.value.fullPath;
-    setRouteError(error, pendingRoute);
-    router.push('/error');
-  });
-
-  // Add navigation timeout handling
-  router.beforeResolve(async (to, from, next) => {
-    // Skip for error route
-    if (to.path === '/error') {
-      return next();
+  // --- Centralized Error Handling ---
+  router.onError((error, to) => {
+    // Avoid error loops if error occurs *while* navigating to /error
+    if (to.path === '/error' && routeError.value) {
+      console.warn(
+        'Router.onError triggered while already handling an error or navigating to /error. Preventing loop.'
+      );
+      return; // Prevent potential infinite loops
     }
 
-    // Set a timeout for route resolution
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Navigation timeout - page took too long to load'));
-      }, 10000); // 10 second timeout
-    });
+    // Check for specific error types if needed (e.g., chunk load)
+    const isChunkLoadError =
+      error.message &&
+      error.message.includes('Failed to fetch dynamically imported module');
+    const isOfflineError = !navigator.onLine; // Basic check
 
-    try {
-      // Race between route components loading and timeout
-      await Promise.race([
-        // This will resolve when all route components are loaded
-        router.resolve(to).matched.reduce(
-          (promise, record) => promise.then(() => {
-            // Load all components in the route
-            return Promise.all(
-              Object.values(record.components).map(comp => {
-                return typeof comp === 'function' ? comp() : Promise.resolve();
-              })
-            );
-          }),
-          Promise.resolve()
-        ),
-        timeoutPromise
-      ]);
-      
-      next();
-    } catch (error) {
-      setRouteError(error, to.fullPath);
-      next('/error');
+    // Enhance the error object or message if desired
+    let processedError = error;
+    if (isChunkLoadError) {
+      processedError = new Error(
+        `Failed to load page component. Please check your connection and try again. (${error.message})`
+      );
+    } else if (isOfflineError) {
+      processedError = new Error(
+        `You appear to be offline. Please check your connection. (${error.message})`
+      );
+    } else {
+      // Generic navigation error
+      processedError = new Error(
+        `Could not navigate to ${to.fullPath}. ${error.message}`
+      );
     }
+
+    setRouteError(
+      processedError,
+      to.fullPath || router.currentRoute.value.fullPath
+    );
+
+    // Redirect to a dedicated error page
+    // Use replace to avoid adding the failed navigation to history
+    router.replace({ path: '/error' });
   });
-  
-  // Ensure title is updated correctly after navigation
+
+  // --- Clear Error State on Successful Navigation ---
+  // Use afterEach as it runs after navigation is confirmed.
   router.afterEach((to) => {
+    // Clear the error state *unless* we just navigated *to* the error page
     if (to.path !== '/error') {
       clearRouteError();
     }
