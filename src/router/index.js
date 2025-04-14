@@ -57,15 +57,13 @@ const routes = [
     path: '/error',
     name: 'Error',
     component: () => import('@/layouts/navigation/ErrorFallback.vue'),
-    // Pass the reactive error state as props
     props: () => ({
       error: routeError.value, // Pass the reactive ref directly
       path: routePath.value, // Pass the reactive ref directly
       isRouteError: true, // Add a flag to distinguish router errors
     }),
     beforeEnter: (to, from, next) => {
-      // Allow access only if there's actually a route error being handled
-      // Or if navigated directly for some reason (maybe show generic error)
+      // Only allow direct access if there's an error
       if (routeError.value) {
         next();
       } else {
@@ -76,7 +74,7 @@ const routes = [
         next('/');
       }
     },
-    meta: { transition: 'fade' },
+    meta: { transition: 'fade', errorPage: true },
   },
   {
     path: '/:pathMatch(.*)*',

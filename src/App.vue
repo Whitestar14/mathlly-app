@@ -19,16 +19,11 @@
 import { ref, onErrorCaptured, provide } from 'vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
-import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue'; // Use the same component
+import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 
 const error = ref(null);
 const hasError = ref(false);
 
-// --- Global Error Boundary ---
-// This catches:
-// 1. Errors during AppSetup's async setup() execution.
-// 2. Errors thrown synchronously during AppSetup's render.
-// 3. Errors bubbling up from *any* descendant component that aren't caught lower down.
 onErrorCaptured((err, instance, info) => {
   console.error("[Global Error Boundary Caught]:", err, instance, info);
   error.value = err;
@@ -36,7 +31,6 @@ onErrorCaptured((err, instance, info) => {
   return false;
 });
 
-// Optional: Provide a way for deep children to trigger the global error boundary if needed
 provide('triggerGlobalError', (err) => {
   error.value = err;
   hasError.value = true;

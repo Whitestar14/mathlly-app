@@ -1,75 +1,79 @@
 import { ref } from 'vue';
+import { useOnline } from '@vueuse/core';
 
 export const routeError = ref(null);
 export const routePath = ref('');
 export const isHandlingError = ref(false);
+export const networkStatus = useOnline();
 
 export function setRouteError(error, path) {
-  console.error(`[Router Error] Path: ${path}`, error); // Log the error for debugging
+  console.error(`[Router Error] Path: ${path}`, error);
   routeError.value = error;
   routePath.value = path;
-  isHandlingError.value = true; // Indicate we are now in a router-handled error state
+  isHandlingError.value = true;
 }
 
 export function clearRouteError() {
   if (routeError.value) {
-    // console.log('Clearing route error');
     routeError.value = null;
     routePath.value = '';
-    isHandlingError.value = false; // Clear the router error state
+    isHandlingError.value = false;
   }
 }
 
 export function setupRouteErrorHandling(router) {
-  // --- Centralized Error Handling ---
   router.onError((error, to) => {
-    // Avoid error loops if error occurs *while* navigating to /error
-    if (to.path === '/error' && routeError.value) {
+    if (to.path === '/error' && isHandlingError.value) {
       console.warn(
         'Router.onError triggered while already handling an error or navigating to /error. Preventing loop.'
       );
-      return; // Prevent potential infinite loops
+      return;
     }
 
-    // Check for specific error types if needed (e.g., chunk load)
+    const currentPath = to.fullPath || router.currentRoute.value.fullPath;
+    const isCurrentlyOnline = networkStatus.value;
+    let processedError = error;
+
     const isChunkLoadError =
       error.message &&
-      error.message.includes('Failed to fetch dynamically imported module');
-    const isOfflineError = !navigator.onLine; // Basic check
+      (error.message.includes('Failed to fetch dynamically imported module') ||
+        error.message.includes('error loading dynamically imported module'));
 
-    // Enhance the error object or message if desired
-    let processedError = error;
-    if (isChunkLoadError) {
+    if (!isCurrentlyOnline) {
+      processedError = new Error(
+        `You appear to be offline. Please check your connection. (Original error: ${error.message})`
+      );
+      // Keep the original error accessible if needed, e.g., for stack trace
+      processedError.originalError = error;
+    } else if (isChunkLoadError) {
       processedError = new Error(
         `Failed to load page component. Please check your connection and try again. (${error.message})`
       );
-    } else if (isOfflineError) {
+      processedError.originalError = error;
+    } else if (!error.message) {
       processedError = new Error(
-        `You appear to be offline. Please check your connection. (${error.message})`
+        `An unknown error occurred while navigating to ${currentPath}.`
       );
-    } else {
-      // Generic navigation error
-      processedError = new Error(
-        `Could not navigate to ${to.fullPath}. ${error.message}`
-      );
+      processedError.originalError = error;
     }
 
-    setRouteError(
-      processedError,
-      to.fullPath || router.currentRoute.value.fullPath
-    );
-
-    // Redirect to a dedicated error page
-    // Use replace to avoid adding the failed navigation to history
+    // --- Set State and Redirect ---
+    setRouteError(processedError, currentPath);
     router.replace({ path: '/error' });
   });
 
-  // --- Clear Error State on Successful Navigation ---
-  // Use afterEach as it runs after navigation is confirmed.
   router.afterEach((to) => {
-    // Clear the error state *unless* we just navigated *to* the error page
-    if (to.path !== '/error') {
+    if (to.path !== '/error' && isHandlingError.value) {
       clearRouteError();
     }
+
+    let baseTitle = 'Mathlly';
+    if (to.meta?.title) {
+      baseTitle = to.meta.title;
+    } else if (to.name && typeof to.name === 'string') {
+      baseTitle = to.name;
+    }
+    document.title =
+      baseTitle !== 'Mathlly' ? `${baseTitle} - Mathlly` : baseTitle;
   });
 }

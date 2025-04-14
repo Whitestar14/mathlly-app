@@ -1,5 +1,11 @@
 <template>
-  <main class="flex-grow flex">
+  <BasePage 
+    :title="props.mode + ' Mode'" 
+    :show-header="false" 
+    :show-footer="false" 
+    main-class="flex"
+    :is-tool-layout="true"
+  >
     <div class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300">
       <div
         class="grid grid-cols-1 h-full p-4 gap-1 mx-auto"
@@ -36,12 +42,12 @@
       @update:is-open="toggleHistory"
       @select-item="selectHistoryItem"
     />
-  </main>
+  </BasePage>
 </template>
+
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
-import { usePageTitle } from '@/composables/usePageTitle'
 import { useHistory } from '@/composables/useHistory'
 import { usePanel } from '@/composables/usePanel'
 import { useMemory } from '@/composables/useMemory'
@@ -53,6 +59,7 @@ import HistoryPanel from '@/layouts/calculators/main/HistoryPanel.vue'
 import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import { useSettingsStore } from '@/stores/settings'
+import BasePage from '@/components/base/BasePage.vue'
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -78,9 +85,6 @@ const calculator = ref(CalculatorFactory.createCalculator(props.mode, props.sett
 
 // Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value))
-
-// Set page title
-usePageTitle(computed(() => `${props.mode} Mode`))
 
 // Computed properties
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)

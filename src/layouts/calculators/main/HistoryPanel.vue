@@ -148,7 +148,8 @@ import {
   ScrollAreaViewport,
 } from "radix-vue"
 
-import anime from "animejs"
+import anime from "animejs/lib/anime.min.js"
+
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
   isMobile: { type: Boolean, default: false },

@@ -33,10 +33,7 @@ defineProps({
 
 const emit = defineEmits(['settings-change', 'update:mode'])
 
-// Ensure minimum loading time of 1.2 seconds
-const minLoadTime = new Promise(resolve => setTimeout(resolve, 1200))
-
-await Promise.all([minLoadTime])
+await new Promise(resolve => setTimeout(resolve, 1200))
 
 // Handle settings changes from child components
 const handleSettingsChange = (newSettings) => {
