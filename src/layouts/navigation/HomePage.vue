@@ -321,7 +321,7 @@
               <Badge
                 type="version"
                 :text="`v${version.versionInfo.full}`"
-                :show-notch="true"
+                :show-notch="false"
               />
             </div>
           </div>

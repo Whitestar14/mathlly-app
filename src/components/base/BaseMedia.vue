@@ -299,7 +299,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Add any additional styling here */
 :deep(svg) {
   display: inline-block;
 }
