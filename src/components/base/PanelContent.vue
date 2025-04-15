@@ -11,19 +11,12 @@
       <div class="flex items-center gap-2 justify-between">
         <slot name="header-actions" />
         <Button
-          v-if="showCloseButton || isMobile || (showCloseButton && isMobile)"
+          v-if="isMobile"
           variant="ghost"
           size="icon"
           @click="$emit('close')"
         >
-          <XIcon
-            v-if="isMobile"
-            class="h-4 w-4"
-          />
-          <PanelRightIcon
-            v-else
-            class="h-5 w-5"
-          />
+          <XIcon class="h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -39,7 +32,7 @@
     <!-- Footer -->
     <div
       v-if="showFooter && $slots.footer"
-      class="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-3 min-h-14"
+      class="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-3 lg:min-h-14"
     >
       <slot name="footer" />
     </div>
@@ -47,7 +40,7 @@
 </template>
   
   <script setup>
-  import { XIcon, PanelRightIcon } from "lucide-vue-next"
+  import { XIcon } from "lucide-vue-next"
   import Button from "@/components/base/BaseButton.vue"
   
   defineProps({
@@ -55,7 +48,6 @@
     contentClass: { type: String, default: "" },
     showHeader: { type: Boolean, default: true },
     showFooter: { type: Boolean, default: true },
-    showCloseButton: { type: Boolean, default: true },
     isMobile: { type: Boolean, default: false },
   })
   

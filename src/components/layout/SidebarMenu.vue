@@ -4,10 +4,8 @@
     :is-mobile="isMobile"
     position="side"
     position-side="left"
-    width="64"
     :show-toggle="false"
     :show-header="true"
-    :show-close-button="false"
     :show-footer="true"
     @update:isOpen="closeSidebar"
   >

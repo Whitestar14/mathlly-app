@@ -39,7 +39,7 @@
       :mode="state.mode"
       :is-mobile="isMobile"
       :is-open="isHistoryOpen"
-      @update:is-open="toggleHistory"
+      @update:is-open="isHistoryOpen = $event"
       @select-item="selectHistoryItem"
     />
   </BasePage>
@@ -94,7 +94,6 @@ const hasMemoryValue = computed(() => hasMemory(props.mode).value)
 const { addToHistory } = useHistory()
 const {
   isOpen: isHistoryOpen,
-  close: closeHistory,
   toggle: toggleHistory,
   handleResize,
 } = usePanel('history-panel', props.isMobile)
@@ -161,7 +160,5 @@ const selectHistoryItem = ({ expression }) => {
 
   calculator.value.input = expression
   calculator.value.currentExpression = ''
-
-  closeHistory()
 }
 </script>

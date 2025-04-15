@@ -3,11 +3,8 @@
     :is-open="isOpen"
     :is-mobile="isMobile"
     :show-toggle="false"
-    :show-close-button="false"
     title="Menu"
     position="side"
-    width="64"
-    main-class="dark:bg-gray-900"
     @update:isOpen="closeMenu"
   >
     <!-- Content -->
