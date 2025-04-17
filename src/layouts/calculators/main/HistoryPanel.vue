@@ -1,6 +1,15 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" title="History" position-side="left" :max-height-ratio="0.8" :snap-threshold="0.4"
-    @update:is-open="setHistoryOpen">
+  <BasePanel 
+    ref="panelRef"
+    :is-open="isOpen" 
+    :is-mobile="isMobile" 
+    title="History" 
+    position-side="left" 
+    :max-height-ratio="0.8" 
+    :snap-threshold="0.4"
+    storage-key="history-panel"
+    @update:is-open="setHistoryOpen"
+  >
     <!-- Content -->
     <div class="flex-1 overflow-hidden relative">
       <!-- Scrollable Content Area -->
@@ -147,23 +156,30 @@ watch(
   },
 )
 
+const panelRef = ref(null);
+
 // Handle history item selection
 const handleSelectItem = (item) => {
-  if (isProgrammerMode.value) return
+  if (isProgrammerMode.value) return;
 
-  selectedItemId.value = item.id
+  selectedItemId.value = item.id;
   setTimeout(() => {
-    selectedItemId.value = null
-  }, 300)
+    selectedItemId.value = null;
+  }, 300);
 
   emit("select-item", {
     expression: item.expression.trim(),
     result: item.result,
-  })
+  });
 
-  // Always use animated close
-  emit("update:isOpen", false)
-}
+  // Use the panel's close method for animated closing
+  if (panelRef.value) {
+    panelRef.value.close();
+  } else {
+    // Fallback to direct emit if ref isn't available
+    emit("update:isOpen", false);
+  }
+};
 
 // Handle item deletion
 const handleDelete = async (id) => {

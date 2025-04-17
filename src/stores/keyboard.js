@@ -89,15 +89,6 @@ export const useKeyboardStore = defineStore("keyboard", () => {
       ")": { action: "input", payload: ")", description: "Close Parenthesis" },
     },
     programmer: {
-      "ctrl+1": { action: "setBase", payload: "HEX", description: "Hexadecimal" },
-      "ctrl+2": {
-        action: "setBase",
-        payload: "DEC",
-        description: "Decimal",
-      },
-      "ctrl+3": { action: "setBase", payload: "OCT", description: "Octal" },
-      "ctrl+4": { action: "setBase", payload: "BIN", description: "Binary" },
-
       a: { action: "input", payload: "A", description: "Hex A" },
       b: { action: "input", payload: "B", description: "Hex B" },
       c: { action: "input", payload: "C", description: "Hex C" },

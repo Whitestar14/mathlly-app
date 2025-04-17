@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref, onErrorCaptured, provide } from 'vue';
+import { ref, onErrorCaptured } from 'vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
@@ -30,10 +30,4 @@ onErrorCaptured((err, instance, info) => {
   hasError.value = true;
   return false;
 });
-
-provide('triggerGlobalError', (err) => {
-  error.value = err;
-  hasError.value = true;
-});
-
 </script>

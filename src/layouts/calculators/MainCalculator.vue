@@ -20,7 +20,7 @@
           :active-base="state.activeBase"
           :mode="state.mode"
           :display-values="state.displayValues"
-          @open-history="toggleHistory"
+          @open-history="openHistory"
           @base-change="handleBaseChange"
         />
 
@@ -49,7 +49,6 @@
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
 import { useHistory } from '@/composables/useHistory'
-import { usePanel } from '@/composables/usePanel'
 import { useMemory } from '@/composables/useMemory'
 import { useInputValidation } from '@/composables/useValidation'
 import { useCalculatorState } from '@/composables/useCalculatorState'
@@ -92,11 +91,20 @@ const hasMemoryValue = computed(() => hasMemory(props.mode).value)
 
 // History panel management
 const { addToHistory } = useHistory()
-const {
-  isOpen: isHistoryOpen,
-  toggle: toggleHistory,
-  handleResize,
-} = usePanel('history-panel', props.isMobile)
+// History panel management - simplified to just use a ref
+const isHistoryOpen = ref(false)
+
+// Function to open history panel
+const openHistory = () => {
+  isHistoryOpen.value = true
+  console.log('History opened')
+}
+
+// Function to toggle history panel
+const toggleHistory = () => {
+  isHistoryOpen.value = !isHistoryOpen.value
+  console.log('History toggled:', isHistoryOpen.value)
+}
 
 // Memory management
 const { hasMemory, handleMemoryOperation } = useMemory()
@@ -139,14 +147,6 @@ watch(
     }
   },
   { immediate: true }
-)
-
-// Watch for mobile state changes
-watch(
-  () => props.isMobile,
-  (newIsMobile) => {
-    handleResize(newIsMobile)
-  }
 )
 
 // Handle history item selection
