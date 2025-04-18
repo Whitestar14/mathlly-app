@@ -81,7 +81,7 @@ const {
 } = useCalculatorState(props.mode)
 
 // Create calculator instance using factory
-const calculator = ref(CalculatorFactory.createCalculator(props.mode, props.settings))
+const calculator = ref(CalculatorFactory.create(props.mode, props.settings))
 
 // Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value))
@@ -133,7 +133,7 @@ watch(
     if (!newMode) return
 
     resetState(newMode)
-    calculator.value = CalculatorFactory.createCalculator(newMode, props.settings)
+    calculator.value = CalculatorFactory.create(newMode, props.settings)
 
     if (newMode === 'Programmer') {
       setActiveBase('DEC')
