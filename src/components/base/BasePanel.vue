@@ -158,9 +158,10 @@
 </template>
 
 <script setup>
-import { onMounted, watch, nextTick } from 'vue';
+import { watch, nextTick } from 'vue';
 import { ArrowRightToLine } from 'lucide-vue-next';
 import { usePanelWithDrag } from '@/composables/usePanelWithDrag';
+import { useVModel } from '@vueuse/core';
 import Button from '@/components/base/BaseButton.vue';
 import PanelContent from '@/components/base/PanelContent.vue';
 
@@ -183,9 +184,12 @@ const props = defineProps({
 
 const emit = defineEmits(['update:isOpen']);
 
-// Use the unified panel composable
+// Use VueUse's useVModel for two-way binding
+const panelIsOpen = useVModel(props, 'isOpen', emit);
+
+// Use the unified panel composable with all options
 const {
-  isOpen: panelIsOpen,
+  isOpen,
   toggle,
   close,
   open,
@@ -201,11 +205,12 @@ const {
   maxHeightRatio: props.maxHeightRatio,
   snapThreshold: props.snapThreshold,
   draggable: props.draggable,
+  initialIsMobile: props.isMobile
 });
 
 // Sync with parent's isOpen prop
 watch(() => props.isOpen, (val) => {
-  if (val !== panelIsOpen.value) {
+  if (val !== isOpen.value) {
     if (val) {
       open(props.isMobile);
     } else {
@@ -215,15 +220,14 @@ watch(() => props.isOpen, (val) => {
 }, { immediate: true });
 
 // Sync panel state back to parent
-watch(panelIsOpen, (val) => {
+watch(isOpen, (val) => {
   if (val !== props.isOpen) {
-    emit('update:isOpen', val);
+    panelIsOpen.value = val;
   }
 });
 
 // Watch for changes in isMobile prop
 watch(() => props.isMobile, (newIsMobile) => {
-  // Handle device type change
   handleResize(newIsMobile);
 });
 
@@ -231,15 +235,17 @@ const onOpen = () => open(props.isMobile);
 const onClose = () => close(props.isMobile);
 const onToggle = () => toggle(props.isMobile);
 
-onMounted(() => {
-  if (props.isMobile && props.isOpen && props.draggable) {
-    nextTick(() => {
-      setupDraggable();
-    });
-  }
-});
+// Setup draggable when component is mounted and conditions are met
+watch([() => props.isMobile, () => isOpen.value, () => props.draggable], 
+  ([isMobile, open, draggable]) => {
+    if (isMobile && open && draggable) {
+      nextTick(setupDraggable);
+    }
+  }, 
+  { immediate: true }
+);
 
-// Expose the panel API to parent components via defineExpose
+// Expose the panel API to parent components
 defineExpose({
   close: onClose,
   open: onOpen,

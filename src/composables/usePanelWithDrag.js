@@ -3,37 +3,28 @@ import { useLocalStorage, useEventListener } from '@vueuse/core';
 import { useDraggable } from './useDraggable';
 
 /**
- * Unified panel composable that combines usePanel and useDraggable
- * 
- * @param {Object} options - Configuration options
- * @param {string} options.storageKey - Key for storing panel state in localStorage
- * @param {boolean} [options.defaultDesktopState=true] - Default open state for desktop view
- * @param {number} [options.maxHeightRatio=0.8] - Maximum height ratio for mobile panels
- * @param {number} [options.snapThreshold=0.3] - Threshold for snapping panel closed
- * @param {boolean} [options.draggable=true] - Option to enable draggable panel utility
- * @returns {Object} Unified panel management API
+ * Unified panel composable that combines panel state management and draggable functionality
  */
 export function usePanelWithDrag(options = {}) {
   const {
-    storageKey,
+    storageKey = 'panel',
     defaultDesktopState = true,
     maxHeightRatio = 0.8,
     snapThreshold = 0.3,
     draggable = true,
     maxHeight,
+    initialIsMobile = false
   } = options;
 
-  // Panel state management
+  // Panel state management with localStorage persistence
   const preferences = useLocalStorage(`${storageKey}-preferences`, {
     desktop: { isOpen: defaultDesktopState },
     mobile: { isOpen: false },
   });
 
-  // Use the initial isMobile value for initialization only
-  const initialIsMobile = options.isMobile || false;
-  const isOpen = ref(
-    initialIsMobile ? false : preferences.value.desktop.isOpen
-  );
+  // Current panel state
+  const isOpen = ref(initialIsMobile ? false : preferences.value.desktop.isOpen);
+  const currentIsMobile = ref(initialIsMobile);
 
   // References for draggable functionality
   const handle = ref(null);
@@ -46,29 +37,26 @@ export function usePanelWithDrag(options = {}) {
     }
   };
 
-  // Initialize draggable functionality only if enabled
-  let draggableApi = null;
-
-  if (draggable) {
-    draggableApi = useDraggable({
-      panel,
-      handle,
-      isOpen,
-      onClose: () => {
-        isOpen.value = false;
-        updatePreferences(true);
-      },
-      maxHeightRatio,
-      snapThreshold,
-      maxHeight,
-    });
-  }
+  // Initialize draggable functionality
+  const draggableApi = draggable ? useDraggable({
+    panel,
+    handle,
+    isOpen,
+    onClose: () => {
+      isOpen.value = false;
+      updatePreferences(currentIsMobile.value);
+    },
+    maxHeightRatio,
+    snapThreshold,
+    maxHeight,
+  }) : null;
 
   /**
    * Closes the panel
-   * @param {boolean} isMobile - Current mobile state
    */
-  const close = async (isMobile) => {
+  const close = async (isMobile = currentIsMobile.value) => {
+    currentIsMobile.value = isMobile;
+    
     if (isMobile && draggable && draggableApi) {
       // If we're on mobile with draggable enabled, use animated close
       await draggableApi.animateClose();
@@ -81,9 +69,9 @@ export function usePanelWithDrag(options = {}) {
 
   /**
    * Opens the panel
-   * @param {boolean} isMobile - Current mobile state
    */
-  const open = async (isMobile) => {
+  const open = async (isMobile = currentIsMobile.value) => {
+    currentIsMobile.value = isMobile;
     isOpen.value = true;
     updatePreferences(isMobile);
 
@@ -100,9 +88,8 @@ export function usePanelWithDrag(options = {}) {
 
   /**
    * Toggles the panel open/closed state
-   * @param {boolean} isMobile - Current mobile state
    */
-  const toggle = (isMobile) => {
+  const toggle = (isMobile = currentIsMobile.value) => {
     if (isOpen.value) {
       close(isMobile);
     } else {
@@ -112,11 +99,12 @@ export function usePanelWithDrag(options = {}) {
 
   /**
    * Handles responsive behavior when screen size changes
-   * @param {boolean} isMobile - Current mobile state
    */
   const handleResize = (isMobile) => {
+    currentIsMobile.value = isMobile;
+    
     if (draggable && draggableApi) {
-    updatePanelDimensions();
+      updatePanelDimensions();
     }
 
     if (isMobile) {
@@ -126,14 +114,14 @@ export function usePanelWithDrag(options = {}) {
     }
   };
 
-  // Function to set up draggable (wrapper around draggableApi.setupDraggable)
+  // Function to set up draggable
   const setupDraggable = () => {
     if (draggable && draggableApi) {
       draggableApi.setupDraggable();
     }
   };
 
-  // Function to update panel dimensions (wrapper around draggableApi.updatePanelDimensions)
+  // Function to update panel dimensions
   const updatePanelDimensions = () => {
     if (draggable && draggableApi) {
       draggableApi.updatePanelDimensions();
@@ -141,13 +129,13 @@ export function usePanelWithDrag(options = {}) {
   };
 
   // Add escape key handler to close panel
-  useEventListener('keydown', (e) => {
+  const escapeListener = useEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOpen.value) {
-      close(options.isMobile || false);
+      close();
     }
   });
 
-  // Create a base API that's always returned
+  // Create a unified API
   const baseApi = {
     // Panel state
     isOpen,
@@ -156,33 +144,28 @@ export function usePanelWithDrag(options = {}) {
     open,
     handleResize,
 
-    // References (needed even without draggable for consistent API)
+    // References
     panel,
     handle,
 
-    // Functions that may or may not use draggableApi
+    // Functions
     setupDraggable,
     updatePanelDimensions,
-  };
-
-  // If draggable is enabled, add the draggable API
-  if (draggable && draggableApi) {
-    return {
-      ...baseApi,
-      // Draggable elements
-      isDragging: draggableApi.isDragging,
-      translateY: draggableApi.translateY,
-      panelHeight: draggableApi.panelHeight,
-      maxPanelHeight: draggableApi.maxPanelHeight,
-    };
-  }
-
-  // If draggable is disabled, return placeholders for consistent API
-  return {
-    ...baseApi,
+    
+    // Default values for non-draggable mode
     isDragging: ref(false),
     translateY: ref(0),
-    panelHeight: 500, // Default height for non-draggable panels
+    panelHeight: ref(500),
     maxPanelHeight: computed(() => 0),
   };
+
+  // If draggable is enabled, add the draggable API properties
+  if (draggable && draggableApi) {
+    baseApi.isDragging = draggableApi.isDragging;
+    baseApi.translateY = draggableApi.translateY;
+    baseApi.panelHeight = draggableApi.panelHeight;
+    baseApi.maxPanelHeight = draggableApi.maxPanelHeight;
+  }
+
+  return baseApi;
 }
