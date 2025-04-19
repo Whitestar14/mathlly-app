@@ -8,6 +8,7 @@
     :max-height-ratio="0.8" 
     :snap-threshold="0.4"
     storage-key="history-panel"
+    :draggable="true"
     @update:is-open="setHistoryOpen"
   >
     <!-- Content -->

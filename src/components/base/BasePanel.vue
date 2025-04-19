@@ -111,7 +111,7 @@
 
     <!-- Mobile Panel -->
     <div
-      v-if="isMobile && position !== 'side' && isOpen"
+      v-show="isMobile && position !== 'side' && isOpen"
       class="fixed inset-x-0 z-20"
     >
       <div
@@ -129,7 +129,7 @@
           class="w-full absolute h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-manipulation"
           :class="{ 'cursor-grabbing': isDragging }"
         >
-          <div class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+          <div v-if="draggable" class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
         </div>
 
         <div class="panel-content h-full" :class="mainClass">
@@ -178,6 +178,7 @@ const props = defineProps({
   maxHeightRatio: { type: Number, default: 0.8 },
   snapThreshold: { type: Number, default: 0.3 },
   storageKey: { type: String, default: 'panel' },
+  draggable: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:isOpen']);
@@ -193,22 +194,22 @@ const {
   isDragging,
   panelHeight,
   translateY,
-  setupDraggable,
+  handleResize,
+  setupDraggable
 } = usePanelWithDrag({
   storageKey: props.storageKey,
-  isMobile: props.isMobile,
   maxHeightRatio: props.maxHeightRatio,
   snapThreshold: props.snapThreshold,
-  emit,
+  draggable: props.draggable,
 });
 
 // Sync with parent's isOpen prop
 watch(() => props.isOpen, (val) => {
   if (val !== panelIsOpen.value) {
     if (val) {
-      open();
+      open(props.isMobile);
     } else {
-      close();
+      close(props.isMobile);
     }
   }
 }, { immediate: true });
@@ -221,23 +222,20 @@ watch(panelIsOpen, (val) => {
 });
 
 // Watch for changes in isMobile prop
-watch(() => props.isMobile, (newIsMobile, oldIsMobile) => {
-  if (newIsMobile && !oldIsMobile && panelIsOpen.value) {
-    // If we're switching to mobile and panel is open, 
-    // ensure draggable is set up
+watch(() => props.isMobile, (newIsMobile) => {
+  // Handle device type change
+  handleResize(newIsMobile);
+});
+
+const onOpen = () => open(props.isMobile);
+const onClose = () => close(props.isMobile);
+const onToggle = () => toggle(props.isMobile);
+
+onMounted(() => {
+  if (props.isMobile && props.isOpen && props.draggable) {
     nextTick(() => {
       setupDraggable();
     });
-  }
-});
-
-const onOpen = () => open();
-const onClose = () => close();
-const onToggle = () => toggle();
-
-onMounted(() => {
-  if (props.isMobile) {
-    setupDraggable();
   }
 });
 

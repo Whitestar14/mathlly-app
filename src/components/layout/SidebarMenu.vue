@@ -7,6 +7,7 @@
     :show-toggle="false"
     :show-header="true"
     :show-footer="true"
+    :draggable="false"
     @update:isOpen="closeSidebar"
   >
     <!-- Custom header -->

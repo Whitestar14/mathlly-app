@@ -1,16 +1,16 @@
-import { ref, computed, watch, nextTick } from 'vue';
-import { useWindowSize, useLocalStorage, useEventListener } from '@vueuse/core';
+import { ref, computed, nextTick } from 'vue';
+import { useLocalStorage, useEventListener } from '@vueuse/core';
+import { useDraggable } from './useDraggable';
 
 /**
  * Unified panel composable that combines usePanel and useDraggable
  * 
  * @param {Object} options - Configuration options
  * @param {string} options.storageKey - Key for storing panel state in localStorage
- * @param {boolean} options.isMobile - Whether the current view is mobile
  * @param {boolean} [options.defaultDesktopState=true] - Default open state for desktop view
  * @param {number} [options.maxHeightRatio=0.8] - Maximum height ratio for mobile panels
  * @param {number} [options.snapThreshold=0.3] - Threshold for snapping panel closed
- * @param {Function} [options.emit] - Optional emit function for v-model support
+ * @param {boolean} [options.draggable=true] - Option to enable draggable panel utility
  * @returns {Object} Unified panel management API
  */
 export function usePanelWithDrag(options = {}) {
@@ -19,17 +19,9 @@ export function usePanelWithDrag(options = {}) {
     defaultDesktopState = true,
     maxHeightRatio = 0.8,
     snapThreshold = 0.3,
-    emit,
+    draggable = true,
     maxHeight,
   } = options;
-
-  // Create a reactive reference to isMobile that can be updated
-  const isMobile = ref(options.isMobile || false);
-  
-  // Watch for changes to the isMobile option
-  watch(() => options.isMobile, (newIsMobile) => {
-    isMobile.value = newIsMobile;
-  }, { immediate: true });
 
   // Panel state management
   const preferences = useLocalStorage(`${storageKey}-preferences`, {
@@ -37,267 +29,160 @@ export function usePanelWithDrag(options = {}) {
     mobile: { isOpen: false },
   });
 
-  const isOpen = ref(isMobile.value ? false : preferences.value.desktop.isOpen);
-  const deviceContext = computed(() => isMobile.value ? 'mobile' : 'desktop');
-
-  // Draggable panel state
-  let minHeight = 200;
-  let panelHeight = 500;
-  const handle = ref(null);
-  const panel = ref(null);
-  const isDragging = ref(false);
-  const translateY = ref(0);
-  const startY = ref(0);
-  const { height: windowHeight } = useWindowSize();
-
-  const maxPanelHeight = computed(() =>
-    Math.min(windowHeight.value * maxHeightRatio, maxHeight || Infinity)
+  // Use the initial isMobile value for initialization only
+  const initialIsMobile = options.isMobile || false;
+  const isOpen = ref(
+    initialIsMobile ? false : preferences.value.desktop.isOpen
   );
 
-  // Update panel dimensions based on actual element
-  const updatePanelDimensions = () => {
-    if (panel.value) {
-      panelHeight = panel.value.offsetHeight || 500;
-      minHeight = Math.min(200, panelHeight * 0.4);
-    }
-  };
+  // References for draggable functionality
+  const handle = ref(null);
+  const panel = ref(null);
 
   // Update persistent preferences
-  const updatePreferences = () => {
-    if (!isMobile.value) {
+  const updatePreferences = (isMobile) => {
+    if (!isMobile) {
       preferences.value.desktop.isOpen = isOpen.value;
     }
   };
 
-  // Helper to animate slide-out, then emit close
-  function animateClose() {
-    // Make sure we have the correct panel height
-    updatePanelDimensions();
-    
-    translateY.value = panelHeight;
-    return new Promise(resolve => {
-      setTimeout(() => {
+  // Initialize draggable functionality only if enabled
+  let draggableApi = null;
+
+  if (draggable) {
+    draggableApi = useDraggable({
+      panel,
+      handle,
+      isOpen,
+      onClose: () => {
         isOpen.value = false;
-        updatePreferences();
-        if (emit) emit('update:isOpen', false);
-        resolve();
-      }, 300);
+        updatePreferences(true);
+      },
+      maxHeightRatio,
+      snapThreshold,
+      maxHeight,
     });
   }
 
   /**
-   * Closes the panel with animation on mobile
+   * Closes the panel
+   * @param {boolean} isMobile - Current mobile state
    */
-  const close = async () => {
-    console.log("Close function is called with isMobile", isMobile.value);
-    if (isMobile.value) {
-      // Make sure panel dimensions are up to date
-      updatePanelDimensions();
-      
-      // Only animate if not already at final position
-      if (translateY.value !== panelHeight) {
-        await animateClose();
-      } else {
-        isOpen.value = false;
-        updatePreferences();
-        if (emit) emit('update:isOpen', false);
-      }
+  const close = async (isMobile) => {
+    if (isMobile && draggable && draggableApi) {
+      // If we're on mobile with draggable enabled, use animated close
+      await draggableApi.animateClose();
     } else {
+      // Otherwise, just close immediately
       isOpen.value = false;
-      updatePreferences();
-      if (emit) emit('update:isOpen', false);
+      updatePreferences(isMobile);
     }
   };
 
   /**
    * Opens the panel
+   * @param {boolean} isMobile - Current mobile state
    */
-  const open = () => {
+  const open = async (isMobile) => {
     isOpen.value = true;
-    updatePreferences();
-    
-    if (isMobile.value) {
-      // When opening on mobile, ensure draggable is set up after DOM update
-      nextTick(() => {
-        setupDraggable();
-      });
+    updatePreferences(isMobile);
+
+    if (isMobile && draggable && draggableApi) {
+      // When opening on mobile with draggable enabled, wait for panel to be in DOM
+      await nextTick();
+      // Then animate the panel in
+      draggableApi.animateOpen();
+
+      // Set up draggable after animation completes
+      setupDraggable();
     }
   };
 
   /**
    * Toggles the panel open/closed state
+   * @param {boolean} isMobile - Current mobile state
    */
-  const toggle = () => {
+  const toggle = (isMobile) => {
     if (isOpen.value) {
-      close();
+      close(isMobile);
     } else {
-      open();
+      open(isMobile);
     }
   };
 
   /**
    * Handles responsive behavior when screen size changes
-   * @param {boolean} newIsMobile - Whether the view is now mobile
+   * @param {boolean} isMobile - Current mobile state
    */
-  const handleResize = (newIsMobile) => {
-    if (newIsMobile) {
+  const handleResize = (isMobile) => {
+    if (draggable && draggableApi) {
+    updatePanelDimensions();
+    }
+
+    if (isMobile) {
       isOpen.value = false;
     } else {
       isOpen.value = preferences.value.desktop.isOpen;
     }
   };
 
-  // Draggable functionality
-  let moveListener = null;
-  let upListener = null;
-
-  const onPointerDown = (e) => {
-    if (!handle.value) return;
-    
-    if (e.type === 'touchstart') {
-      startY.value = e.touches[0].clientY;
-    } else {
-      startY.value = e.clientY;
-    }
-    
-    isDragging.value = true;
-    document.body.style.overflow = 'hidden';
-
-    moveListener = (ev) => onPointerMove(ev);
-    upListener = (ev) => onPointerUp(ev);
-
-    window.addEventListener('touchmove', moveListener, { passive: false });
-    window.addEventListener('mousemove', moveListener, { passive: false });
-    window.addEventListener('touchend', upListener, { passive: false });
-    window.addEventListener('mouseup', upListener, { passive: false });
-  };
-
-  const onPointerMove = (e) => {
-    if (!isDragging.value) return;
-    
-    let currentY;
-    if (e.type === 'touchmove') {
-      currentY = e.touches[0].clientY;
-    } else {
-      currentY = e.clientY;
-    }
-    
-    let deltaY = currentY - startY.value;
-    translateY.value = Math.max(0, Math.min(deltaY, maxPanelHeight.value - minHeight));
-    e.preventDefault();
-  };
-
-  const onPointerUp = () => {
-    if (!isDragging.value) return;
-    
-    isDragging.value = false;
-    document.body.style.overflow = '';
-    
-    if (translateY.value > panelHeight * snapThreshold) {
-      animateClose();
-    } else {
-      translateY.value = 0;
-    }
-    
-    window.removeEventListener('touchmove', moveListener);
-    window.removeEventListener('mousemove', moveListener);
-    window.removeEventListener('touchend', upListener);
-    window.removeEventListener('mouseup', upListener);
-    moveListener = null;
-    upListener = null;
-  };
-
-  /**
-   * Sets up the draggable behavior for the panel handle
-   */
+  // Function to set up draggable (wrapper around draggableApi.setupDraggable)
   const setupDraggable = () => {
-    if (!handle.value) return;
-    
-    // Update panel dimensions first
-    updatePanelDimensions();
-    
-    // Clean up existing listeners
-    handle.value.removeEventListener('touchstart', onPointerDown);
-    handle.value.removeEventListener('mousedown', onPointerDown);
-    
-    // Add new listeners
-    handle.value.addEventListener('touchstart', onPointerDown, { passive: false });
-    handle.value.addEventListener('mousedown', onPointerDown, { passive: false });
+    if (draggable && draggableApi) {
+      draggableApi.setupDraggable();
+    }
   };
 
-  // Watch for panel open/close to reset translateY and panelHeight
-  watch(isOpen, (newValue, oldValue) => {
-    if (newValue) {
-      // Panel is opening: start off-screen, then animate in
-      updatePanelDimensions();
-      const height = Math.max(minHeight, Math.min(panelHeight, maxPanelHeight.value));
-      translateY.value = height; // Start off-screen
-      
-      setTimeout(() => {
-        translateY.value = 0; // Animate in
-      }, 10);
-      
-      if (isMobile.value) {
-        nextTick(() => {
-          setupDraggable();
-        });
-      }
-    } else if (oldValue) {
-      translateY.value = panelHeight;
+  // Function to update panel dimensions (wrapper around draggableApi.updatePanelDimensions)
+  const updatePanelDimensions = () => {
+    if (draggable && draggableApi) {
+      draggableApi.updatePanelDimensions();
     }
-  }, { immediate: true });
-
-  // Watch for mobile state changes
-  watch(isMobile, (newIsMobile, oldIsMobile) => {
-    handleResize(newIsMobile);
-    
-    // When switching to mobile, ensure draggable is set up
-    if (newIsMobile && !oldIsMobile && isOpen.value) {
-      nextTick(() => {
-        setupDraggable();
-      });
-    }
-  });
+  };
 
   // Add escape key handler to close panel
   useEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOpen.value) {
-      close();
+      close(options.isMobile || false);
     }
   });
 
-  // Deprecated methods for backward compatibility
-  const closeWithAnimation = () => {
-    console.warn('closeWithAnimation is deprecated, use close() instead');
-    return close();
-  };
-
-  const requestAnimatedClose = () => {
-    console.warn('requestAnimatedClose is deprecated, use close() instead');
-    return close();
-  };
-
-  return {
+  // Create a base API that's always returned
+  const baseApi = {
     // Panel state
     isOpen,
     toggle,
     close,
     open,
     handleResize,
-    deviceContext,
-    
-    // Draggable elements
-    handle,
+
+    // References (needed even without draggable for consistent API)
     panel,
-    isDragging,
-    panelHeight,
-    translateY,
-    maxPanelHeight,
+    handle,
+
+    // Functions that may or may not use draggableApi
     setupDraggable,
     updatePanelDimensions,
-    
-    // Deprecated API (for backward compatibility)
-    closeWithAnimation,
-    requestAnimatedClose
+  };
+
+  // If draggable is enabled, add the draggable API
+  if (draggable && draggableApi) {
+    return {
+      ...baseApi,
+      // Draggable elements
+      isDragging: draggableApi.isDragging,
+      translateY: draggableApi.translateY,
+      panelHeight: draggableApi.panelHeight,
+      maxPanelHeight: draggableApi.maxPanelHeight,
+    };
+  }
+
+  // If draggable is disabled, return placeholders for consistent API
+  return {
+    ...baseApi,
+    isDragging: ref(false),
+    translateY: ref(0),
+    panelHeight: 500, // Default height for non-draggable panels
+    maxPanelHeight: computed(() => 0),
   };
 }

@@ -1,36 +1,72 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed, onUnmounted, watch } from 'vue';
 import { useWindowSize } from '@vueuse/core';
 
-export function useDraggablePanel(options = {}) {
+export function useDraggable(options = {}) {
   const {
-    isOpen: isOpenGetter = () => false,
+    panel,
+    handle,
+    isOpen,
+    onClose,
     maxHeightRatio = 0.8,
     snapThreshold = 0.3,
-    emit,
+    maxHeight,
   } = options;
 
+  // Draggable panel state
   let minHeight = 200;
   let panelHeight = 500;
-  const handle = ref(null);
-  const panel = ref(null);
   const isDragging = ref(false);
   const translateY = ref(0);
   const startY = ref(0);
   const { height: windowHeight } = useWindowSize();
 
   const maxPanelHeight = computed(() =>
-    Math.min(windowHeight.value * maxHeightRatio, options.maxHeight || Infinity)
+    Math.min(windowHeight.value * maxHeightRatio, maxHeight || Infinity)
   );
 
+  // Update panel dimensions based on actual element
+  const updatePanelDimensions = () => {
+    if (panel.value) {
+      panelHeight = panel.value.offsetHeight || 500;
+      minHeight = Math.min(200, panelHeight * 0.4);
+    }
+  };
+
+  // Helper to animate slide-out, then emit close
+  function animateClose() {    
+    translateY.value = panelHeight;
+    return new Promise(resolve => {
+      setTimeout(() => {
+        if (onClose) onClose();
+        resolve();
+      }, 300);
+    });
+  }
+
+  // Helper to animate slide-in
+  function animateOpen() {    
+    // First set to off-screen position
+    translateY.value = panelHeight;
+    
+    // Then animate in after a short delay to ensure the initial position is applied
+    setTimeout(() => {
+      translateY.value = 0; // Animate in
+    }, 50)
+  }
+
+  // Draggable functionality
   let moveListener = null;
   let upListener = null;
 
   const onPointerDown = (e) => {
+    if (!handle.value) return;
+    
     if (e.type === 'touchstart') {
       startY.value = e.touches[0].clientY;
     } else {
       startY.value = e.clientY;
     }
+    
     isDragging.value = true;
     document.body.style.overflow = 'hidden';
 
@@ -45,41 +81,31 @@ export function useDraggablePanel(options = {}) {
 
   const onPointerMove = (e) => {
     if (!isDragging.value) return;
+    
     let currentY;
     if (e.type === 'touchmove') {
       currentY = e.touches[0].clientY;
     } else {
       currentY = e.clientY;
     }
+    
     let deltaY = currentY - startY.value;
-    // Clamp translateY between 0 and maxPanelHeight
     translateY.value = Math.max(0, Math.min(deltaY, maxPanelHeight.value - minHeight));
     e.preventDefault();
   };
 
-  // Helper to animate slide-out, then emit close
-  function animateClose() {
-    translateY.value = panelHeight;
-    // Allow animation to complete before emitting
-    return new Promise(resolve => {
-      setTimeout(() => {
-        if (emit) emit('update:isOpen', false);
-        resolve();
-      }, 300);
-    });
-  }
-
   const onPointerUp = () => {
     if (!isDragging.value) return;
+    
     isDragging.value = false;
     document.body.style.overflow = '';
-    // If dragged more than snapThreshold, animate close
+    
     if (translateY.value > panelHeight * snapThreshold) {
       animateClose();
     } else {
       translateY.value = 0;
     }
-    // Remove listeners
+    
     window.removeEventListener('touchmove', moveListener);
     window.removeEventListener('mousemove', moveListener);
     window.removeEventListener('touchend', upListener);
@@ -88,46 +114,60 @@ export function useDraggablePanel(options = {}) {
     upListener = null;
   };
 
+  /**
+   * Sets up the draggable behavior for the panel handle
+   */
   const setupDraggable = () => {
-    if (!handle.value) return;
+    if (!handle.value) {
+      console.warn('Draggable handle not found');
+      return;
+    }
+    
+    // Clean up existing listeners
     handle.value.removeEventListener('touchstart', onPointerDown);
     handle.value.removeEventListener('mousedown', onPointerDown);
+    
+    // Add new listeners
     handle.value.addEventListener('touchstart', onPointerDown, { passive: false });
     handle.value.addEventListener('mousedown', onPointerDown, { passive: false });
   };
 
-  // Watch for panel open/close to reset translateY and panelHeight
-  watch(isOpenGetter, (newValue, oldValue) => {
-    if (newValue) {
-      // Panel is opening: start off-screen, then animate in
-      const height = Math.max(minHeight, Math.min(panelHeight, maxPanelHeight.value));
-      translateY.value = height; // Start off-screen
-      setTimeout(() => {
-        translateY.value = 0; // Animate in
-      }, 10);
-      setTimeout(() => setupDraggable(), 0);
-    } else if (oldValue) {
-      translateY.value = panelHeight;
-    }
-  }, { immediate: true });
-
-  // Expose a method for parent to trigger animated close (for close button/backdrop)
-  async function requestAnimatedClose() {
-    if (translateY.value === panelHeight) {
-      if (emit) emit('update:isOpen', false);
-    } else {
-      await animateClose();
-    }
+  // Watch for panel open state changes
+  if (isOpen) {
+    watch(isOpen, (newValue) => {
+      if (newValue) {
+        // Panel is opening - prepare for animation
+        updatePanelDimensions();
+      }
+    });
   }
 
+  // Clean up event listeners when component is unmounted
+  onUnmounted(() => {
+    if (handle.value) {
+      handle.value.removeEventListener('touchstart', onPointerDown);
+      handle.value.removeEventListener('mousedown', onPointerDown);
+    }
+    
+    if (moveListener) {
+      window.removeEventListener('touchmove', moveListener);
+      window.removeEventListener('mousemove', moveListener);
+    }
+    
+    if (upListener) {
+      window.removeEventListener('touchend', upListener);
+      window.removeEventListener('mouseup', upListener);
+    }
+  });
+
   return {
-    handle,
-    panel,
     isDragging,
-    panelHeight,
     translateY,
+    panelHeight,
     maxPanelHeight,
     setupDraggable,
-    requestAnimatedClose
+    updatePanelDimensions,
+    animateClose,
+    animateOpen
   };
 }
