@@ -169,10 +169,9 @@ const handleProcess = () => {
       currentTab.value === "encode" ? btoa(input.value) : atob(input.value);
   } catch (error) {
     toast({
-      title: "Error",
+      type: "error",
       description: `Invalid ${currentTab.value === "encode" ? "text" : "Base64"
         } input`,
-      variant: "destructive",
     });
   }
 };
@@ -196,7 +195,7 @@ const pasteFromClipboard = async () => {
     input.value = text;
   } catch (err) {
     toast({
-      title: "Error",
+      type: "error",
       description: "Failed to paste from clipboard",
       variant: "destructive",
     });
