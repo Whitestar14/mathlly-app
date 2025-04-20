@@ -1,5 +1,5 @@
-import { ref, computed, nextTick } from 'vue';
-import { useLocalStorage, useEventListener } from '@vueuse/core';
+import { ref, computed, nextTick, watch } from 'vue';
+import { useLocalStorage } from '@vueuse/core';
 import { useDraggable } from './useDraggable';
 
 /**
@@ -22,17 +22,20 @@ export function usePanelWithDrag(options = {}) {
     mobile: { isOpen: false },
   });
 
-  // Current panel state
-  const isOpen = ref(initialIsMobile ? false : preferences.value.desktop.isOpen);
+  // Current device context
   const currentIsMobile = ref(initialIsMobile);
+  const deviceContext = computed(() => currentIsMobile.value ? 'mobile' : 'desktop');
+
+  // Initialize panel state from stored preferences based on device type
+  const isOpen = ref(initialIsMobile ? false : preferences.value.desktop.isOpen);
 
   // References for draggable functionality
   const handle = ref(null);
   const panel = ref(null);
 
-  // Update persistent preferences
-  const updatePreferences = (isMobile) => {
-    if (!isMobile) {
+  // Update persistent preferences for the current device type
+  const updatePreferences = () => {
+    if (!currentIsMobile.value) {
       preferences.value.desktop.isOpen = isOpen.value;
     }
   };
@@ -44,7 +47,7 @@ export function usePanelWithDrag(options = {}) {
     isOpen,
     onClose: () => {
       isOpen.value = false;
-      updatePreferences(currentIsMobile.value);
+      updatePreferences();
     },
     maxHeightRatio,
     snapThreshold,
@@ -63,7 +66,7 @@ export function usePanelWithDrag(options = {}) {
     } else {
       // Otherwise, just close immediately
       isOpen.value = false;
-      updatePreferences(isMobile);
+      updatePreferences();
     }
   };
 
@@ -73,7 +76,7 @@ export function usePanelWithDrag(options = {}) {
   const open = async (isMobile = currentIsMobile.value) => {
     currentIsMobile.value = isMobile;
     isOpen.value = true;
-    updatePreferences(isMobile);
+    updatePreferences();
 
     if (isMobile && draggable && draggableApi) {
       // When opening on mobile with draggable enabled, wait for panel to be in DOM
@@ -100,17 +103,18 @@ export function usePanelWithDrag(options = {}) {
   /**
    * Handles responsive behavior when screen size changes
    */
-  const handleResize = (isMobile) => {
-    currentIsMobile.value = isMobile;
+  const handleResize = (newIsMobile) => {
+      currentIsMobile.value = newIsMobile;
+      
+      // Load the appropriate state for the new device type
+      if (newIsMobile) {
+        isOpen.value = false;
+      } else {
+        isOpen.value = preferences.value.desktop.isOpen;
+      }
     
     if (draggable && draggableApi) {
       updatePanelDimensions();
-    }
-
-    if (isMobile) {
-      isOpen.value = false;
-    } else {
-      isOpen.value = preferences.value.desktop.isOpen;
     }
   };
 
@@ -128,11 +132,9 @@ export function usePanelWithDrag(options = {}) {
     }
   };
 
-  // Add escape key handler to close panel
-  const escapeListener = useEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen.value) {
-      close();
-    }
+  // Watch for changes in the open state to update preferences
+  watch(isOpen, () => {
+    updatePreferences();
   });
 
   // Create a unified API
@@ -143,6 +145,7 @@ export function usePanelWithDrag(options = {}) {
     close,
     open,
     handleResize,
+    deviceContext,
 
     // References
     panel,
