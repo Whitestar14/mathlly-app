@@ -8,6 +8,7 @@
     :show-header="true"
     :show-footer="true"
     :draggable="false"
+    storage-key="sidebar"
     @update:isOpen="closeSidebar"
   >
     <!-- Custom header -->

@@ -26,7 +26,7 @@ import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
 import { useSettingsStore } from "@/stores/settings"
 import { useKeyboard } from "@/composables/useKeyboard"
-import { usePanel } from "@/composables/usePanel"
+import { usePanelUnified } from "@/composables/usePanelUnified"
 import MainMenu from "@/components/layout/MainMenu.vue"
 import AppHeader from "@/components/layout/AppHeader.vue"
 import SidebarMenu from "@/components/layout/SidebarMenu.vue"
@@ -51,19 +51,29 @@ deviceStore.initializeDeviceInfo()
 const settings = settingsStore
 const mode = computed(() => settingsStore.activeMode)
 
+// Use the unified panel composable for sidebar
 const {
   isOpen: isSidebarOpen,
   toggle: toggleSidebar,
   close: closeSidebar,
   handleResize: handleSidebarResize,
-} = usePanel('sidebar', deviceStore.isMobile)
+} = usePanelUnified({
+  storageKey: 'sidebar',
+  initialIsMobile: deviceStore.isMobile,
+  defaultDesktopState: true
+})
 
+// Use the unified panel composable for menu
 const {
   isOpen: isMenubarOpen,
   toggle: toggleMenubar,
   close: closeMenubar,
   handleResize: handleMenubarResize,
-} = usePanel('menu', deviceStore.isMobile, false)
+} = usePanelUnified({
+  storageKey: 'menu',
+  initialIsMobile: deviceStore.isMobile,
+  defaultDesktopState: false
+})
 
 const updateMode = async (newMode) => {
   settingsStore.setCurrentMode(newMode)
@@ -86,14 +96,6 @@ watch(
   }
 )
 
-// Close panels on mobile route change
-watch(router.currentRoute, () => {
-  if (deviceStore.isMobile) {
-    closeSidebar()
-    closeMenubar()
-  }
-})
-
 // --- Keyboard Shortcuts ---
 useKeyboard("global", {
   toggleSidebar: toggleSidebar,
@@ -106,5 +108,4 @@ useKeyboard("global", {
 onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
-
 </script>

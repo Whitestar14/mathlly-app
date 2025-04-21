@@ -5,6 +5,8 @@
     :show-toggle="false"
     title="Menu"
     position="side"
+    position-side="right"
+    storage-key="menu"
     @update:isOpen="closeMenu"
   >
     <!-- Content -->

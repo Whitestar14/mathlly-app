@@ -9,7 +9,7 @@
     :snap-threshold="0.4"
     storage-key="history-panel"
     :draggable="true"
-    @update:is-open="setHistoryOpen"
+    @update:is-open="$emit('update:isOpen', $event)"
   >
     <!-- Content -->
     <div class="flex-1 overflow-hidden relative">
@@ -223,12 +223,6 @@ const copyAsJson = (item) => {
     description: "The calculation has been copied in JSON format",
   })
 }
-
-// Set history open state
-const setHistoryOpen = (val) => {
-  emit("update:isOpen", val)
-}
-
 </script>
 
 <style scoped>

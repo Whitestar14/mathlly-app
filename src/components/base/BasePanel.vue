@@ -160,7 +160,7 @@
 <script setup>
 import { watch, nextTick } from 'vue';
 import { ArrowRightToLine } from 'lucide-vue-next';
-import { usePanelWithDrag } from '@/composables/usePanelWithDrag';
+import { usePanelUnified } from '@/composables/usePanelUnified';
 import { useVModel } from '@vueuse/core';
 import Button from '@/components/base/BaseButton.vue';
 import PanelContent from '@/components/base/PanelContent.vue';
@@ -200,8 +200,9 @@ const {
   translateY,
   handleResize,
   setupDraggable
-} = usePanelWithDrag({
+} = usePanelUnified({
   storageKey: props.storageKey,
+  defaultDesktopState: props.isOpen,
   maxHeightRatio: props.maxHeightRatio,
   snapThreshold: props.snapThreshold,
   draggable: props.draggable,
