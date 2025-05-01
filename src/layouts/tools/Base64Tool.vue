@@ -16,8 +16,8 @@
           <div
             v-for="tab in tabs"
             :key="tab.value"
-            :data-path="tab.value"
             ref="tabElements"
+            :data-path="tab.value"
             class="px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer"
             :class="[
               currentTab === tab.value

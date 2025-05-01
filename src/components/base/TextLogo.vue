@@ -1,20 +1,19 @@
 <template>
-    <kbd
-      :class="[
-        'font-medium monospace pointer-events-none',
-        'bg-gray-100 dark:bg-gray-800',
-        'text-gray-800 dark:text-gray-200',
-        'border border-gray-200 dark:border-gray-700 rounded-md shadow-sm',
-        sizeClasses[size],
-      ]"
-      :aria-hidden="hideFromScreenReaders"
-    >
-      {math<span
-        class="text-indigo-400 font-black dark:text-indigo-600 inline-block mx-0.5"
-        >//</span
-      >y}
-    </kbd>
-  </template>
+  <kbd
+    :class="[
+      'font-medium monospace pointer-events-none',
+      'bg-gray-100 dark:bg-gray-800',
+      'text-gray-800 dark:text-gray-200',
+      'border border-gray-200 dark:border-gray-700 rounded-md shadow-sm',
+      sizeClasses[size],
+    ]"
+    :aria-hidden="hideFromScreenReaders"
+  >
+    {math<span
+      class="text-indigo-400 font-black dark:text-indigo-600 inline-block mx-0.5"
+    >//</span>y}
+  </kbd>
+</template>
   
   <script setup>
  defineProps({

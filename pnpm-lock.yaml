@@ -20,9 +20,6 @@ importers:
       core-js:
         specifier: ^3.39.0
         version: 3.39.0
-      decimal.js:
-        specifier: ^10.4.3
-        version: 10.4.3
       dexie:
         specifier: ^4.0.10
         version: 4.0.10

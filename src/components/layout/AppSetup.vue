@@ -10,25 +10,17 @@
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
 
-      <error-fallback v-if="hasError" :error="error" />
-      <suspense v-else>
-        <template #default>
-          <app-view :mode="mode" :settings="settings" :is-mobile="deviceStore.isMobile"
-            @settings-change="updateSettings" @update:mode="updateMode" />
-        </template>
-        <template #fallback>
-          <loader variant="regular" />
-        </template>
-      </suspense>
+      <app-view :mode="mode" :settings="settings" :is-mobile="deviceStore.isMobile" @settings-change="updateSettings"
+        @update:mode="updateMode" />
     </div>
 
     <main-menu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
+    <toast :is-mobile="deviceStore.isMobile" />
   </div>
-  <toast :is-mobile="deviceStore.isMobile" />
 </template>
 
 <script setup>
-import { onUnmounted, computed, watch, ref, onErrorCaptured } from "vue"
+import { onUnmounted, computed, watch } from "vue"
 import { useRouter } from "vue-router"
 import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
@@ -39,29 +31,20 @@ import MainMenu from "@/components/layout/MainMenu.vue"
 import AppHeader from "@/components/layout/AppHeader.vue"
 import SidebarMenu from "@/components/layout/SidebarMenu.vue"
 import AppView from "@/components/layout/AppView.vue"
-import Loader from "@/components/base/BaseLoader.vue"
 import Toast from "@/components/feedback/BaseToast.vue"
-import ErrorFallback from "@/layouts/navigation/ErrorFallback.vue"
 
 const router = useRouter()
 const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
-const error = ref(null)
-const hasError = ref(false)
 
 // --- Loading Logic ---
-const minLoadTime = new Promise(resolve => setTimeout(resolve, 1000))
+const minLoadTime = new Promise(resolve => setTimeout(resolve, 1000)) // Keep minimum load time for UX
 
-try {
-  await Promise.all([
-    minLoadTime,
-    settingsStore.loadSettings(),
-    router.isReady(),
-  ])
-} catch (err) {
-  error.value = err
-  hasError.value = true
-}
+await Promise.all([
+  minLoadTime,
+  settingsStore.loadSettings(),
+  router.isReady(),
+])
 
 deviceStore.initializeDeviceInfo()
 
@@ -83,26 +66,16 @@ const {
 } = usePanel('menu', deviceStore.isMobile, false)
 
 const updateMode = async (newMode) => {
-  try {
-    settingsStore.setCurrentMode(newMode)
-  } catch (err) {
-    error.value = err
-    hasError.value = true
-  }
+  settingsStore.setCurrentMode(newMode)
 }
 
 const updateSettings = async (newSettings) => {
-  try {
-    if (newSettings.mode !== settingsStore.mode) {
-      await settingsStore.setDefaultMode(newSettings.mode)
-    }
-    const settingsToSave = { ...newSettings }
-    delete settingsToSave.mode
-    await settingsStore.saveSettings(settingsToSave)
-  } catch (err) {
-    error.value = err
-    hasError.value = true
+  if (newSettings.mode !== settingsStore.mode) {
+    await settingsStore.setDefaultMode(newSettings.mode)
   }
+  const settingsToSave = { ...newSettings }
+  delete settingsToSave.mode
+  await settingsStore.saveSettings(settingsToSave)
 }
 
 watch(
@@ -134,10 +107,4 @@ onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
 
-// Capture any errors
-onErrorCaptured((err) => {
-  error.value = err
-  hasError.value = true
-  return false // Prevent error from propagating
-})
 </script>

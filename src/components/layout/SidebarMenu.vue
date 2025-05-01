@@ -1,71 +1,122 @@
 <template>
-  <BasePanel :is-open="isOpen" :is-mobile="isMobile" position="side" position-side="left" width="64"
-    :show-toggle="false" :show-header="true" :show-close-button="false" :show-footer="true" @update:isOpen="closeSidebar">
-
+  <BasePanel
+    :is-open="isOpen"
+    :is-mobile="isMobile"
+    position="side"
+    position-side="left"
+    width="64"
+    :show-toggle="false"
+    :show-header="true"
+    :show-close-button="false"
+    :show-footer="true"
+    @update:isOpen="closeSidebar"
+  >
     <!-- Custom header -->
     <template #header-actions>
-    <div class="flex justify-between items-center">
-      <TextLogo class="absolute left-2" />
-    </div>
+      <div class="flex justify-between items-center">
+        <TextLogo class="absolute left-2" />
+      </div>
     </template>
 
     <!-- Main content -->
 
-      <!-- Navigation content -->
-      <div class="flex-1 overflow-y-auto">
-        <NavigationMenuRoot>
-          <NavigationMenuList class="px-3 py-2 space-y-6">
-            <Indicator :position="indicatorStyle"/>
-            <div v-for="category in categories" :key="category.title" class="space-y-2">
-              <h2 class="px-3 text-xs font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">
-                {{ category.title }}
-              </h2>
-              <div class="space-y-0.5">
-                <NavigationMenuItem v-for="item in category.items" ref="sidebarElements" :key="item.path" class="space-y-0.5">
-                  <NavigationMenuLink :active="currentPill === item.path" as-child>
-                    <button :data-path="item.path" :class="[
+    <!-- Navigation content -->
+    <div class="flex-1 overflow-y-auto">
+      <NavigationMenuRoot>
+        <NavigationMenuList class="px-3 py-2 space-y-6">
+          <Indicator :position="indicatorStyle" />
+          <div
+            v-for="category in categories"
+            :key="category.title"
+            class="space-y-2"
+          >
+            <h2 class="px-3 text-xs font-medium text-gray-500/90 dark:text-gray-400/90 uppercase tracking-wider">
+              {{ category.title }}
+            </h2>
+            <div class="space-y-0.5">
+              <NavigationMenuItem
+                v-for="item in category.items"
+                ref="sidebarElements"
+                :key="item.path"
+                class="space-y-0.5"
+              >
+                <NavigationMenuLink
+                  :active="currentPill === item.path"
+                  as-child
+                >
+                  <button
+                    :data-path="item.path"
+                    :class="[
                       menuItemClasses,
                       currentPill === item.path
                         ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
                         : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300',
                       item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
-                    ]" @click="handleItemClick($event, item)">
-                      <component :is="item.icon" class="h-4 w-4 shrink-0 transition-colors" :class="currentPill === item.path
+                    ]"
+                    @click="handleItemClick($event, item)"
+                  >
+                    <component
+                      :is="item.icon"
+                      class="h-4 w-4 shrink-0 transition-colors"
+                      :class="currentPill === item.path
                         ? 'text-indigo-600 dark:text-indigo-400'
                         : 'text-gray-500/80 dark:text-gray-500/80'
-                        " />
-                      <span>{{ item.name }}</span>
-                      <Badge v-if="item.comingSoon" type="soon" class="opacity-75" />
-                      <Badge v-if="item.isNew" type="new" class="opacity-75" />
-                    </button>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              </div>
+                      "
+                    />
+                    <span>{{ item.name }}</span>
+                    <Badge
+                      v-if="item.comingSoon"
+                      type="soon"
+                      class="opacity-75"
+                    />
+                    <Badge
+                      v-if="item.isNew"
+                      type="new"
+                      class="opacity-75"
+                    />
+                  </button>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
             </div>
-          </NavigationMenuList>
-        </NavigationMenuRoot>
-      </div>
+          </div>
+        </NavigationMenuList>
+      </NavigationMenuRoot>
+    </div>
 
     <!-- Footer -->
     <template #footer>
       <div class="grid grid-cols-2 gap-2 mb-2">
-        <NavigationMenuRoot v-for="item in ['settings', 'feedback']" :key="item">
+        <NavigationMenuRoot
+          v-for="item in ['settings', 'feedback']"
+          :key="item"
+        >
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuLink :active="currentPill === `/${item}`" as-child>
-                <button v-tippy="{
-                  content:
-                    item === 'settings' ? 'Settings' : 'Send Feedback',
-                }" :data-path="`/${item}`" :class="[
+              <NavigationMenuLink
+                :active="currentPill === `/${item}`"
+                as-child
+              >
+                <button
+                  v-tippy="{
+                    content:
+                      item === 'settings' ? 'Settings' : 'Send Feedback',
+                  }"
+                  :data-path="`/${item}`"
+                  :class="[
                     'flex w-full items-center justify-center gap-2 rounded-md p-2 text-sm transition-colors',
                     currentPill === `/${item}`
                       ? 'bg-gray-100 text-indigo-600 dark:bg-gray-800 dark:text-indigo-400'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
-                  ]" @click="handleFooterItemClick($event, `/${item}`)">
-                  <component :is="item === 'settings'
-                    ? Settings2Icon
-                    : MessageSquareIcon
-                    " class="h-5 w-5" />
+                  ]"
+                  @click="handleFooterItemClick($event, `/${item}`)"
+                >
+                  <component
+                    :is="item === 'settings'
+                      ? Settings2Icon
+                      : MessageSquareIcon
+                    "
+                    class="h-5 w-5"
+                  />
                   <span class="block md:hidden capitalize">{{
                     item
                   }}</span>

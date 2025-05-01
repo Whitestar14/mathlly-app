@@ -1,5 +1,8 @@
 <template>
-  <error-fallback v-if="hasError" :error="error" />
+  <error-fallback
+    v-if="hasError"
+    :error="error"
+    :is-global-error="true" />
   <Suspense v-else>
     <template #default>
       <app-setup />
@@ -13,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref, onErrorCaptured } from 'vue';
+import { ref, onErrorCaptured, provide } from 'vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
@@ -21,9 +24,16 @@ import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 const error = ref(null);
 const hasError = ref(false);
 
-onErrorCaptured((err) => {
+onErrorCaptured((err, instance, info) => {
+  console.error("[Global Error Boundary Caught]:", err, instance, info);
   error.value = err;
   hasError.value = true;
   return false;
 });
+
+provide('triggerGlobalError', (err) => {
+  error.value = err;
+  hasError.value = true;
+});
+
 </script>
