@@ -1,5 +1,15 @@
 export const updates = [
   {
+    version: '0.11.10',
+    date: 'May 1, 2025',
+    features: [
+      'Improved error messages for dynamic situations and unexpected events',
+      'Removed unnecessary `decimal.js` dependency (math.js is a much more capable, robust wrapper)',
+      'Enhanced SEO and open graph meta properties including social banner',
+      'Standardized the use of `BasePage` in non-tool display page'
+    ]
+  },
+  {
     version: '0.11.9',
     date: 'April 11, 2025',
     features: [
