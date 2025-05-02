@@ -14,109 +14,51 @@
         class="fixed inset-0 dark:bg-black/40 backdrop-blur-sm z-20 transition-colors duration-300"
         :class="draggable ? [isDragging ? 'dark:bg-black/20' : ''] : ''"
         aria-hidden="true"
-        @click="onClose"
+        @click="close()"
       />
     </Transition>
 
     <!-- Side Panel -->
-    <Transition :name="position === 'left' ? 'slide-left' : 'slide-right'">
-      <div
-        v-if="type === 'side' && isOpen"
-        class="side-panel-container"
-        :class="[
-          isMobile ? 'w-full' : `w-64`,
-          position === 'left' ? 'left-0' : 'right-0',
-          !isMobile && position === 'left' ? 'border-r' : '',
-          !isMobile && position === 'right' ? 'border-l' : '',
-          'border-gray-200 dark:border-gray-700',
-        ]"
-      >
-        <PanelContent
-          :title="title"
-          :show-header="showHeader"
-          :show-footer="showFooter"
-          :content-class="contentClass"
-          :is-mobile="isMobile"
-          @close="onClose"
-        >
-          <template #default>
-            <slot />
-          </template>
-          <template #header-actions>
-            <slot name="header-actions" />
-          </template>
-          <template v-if="$slots.footer" #footer>
-            <slot name="footer" />
-          </template>
-        </PanelContent>
-      </div>
-    </Transition>
+    <SidePanel
+      v-if="type === 'side'"
+      :is-open="isOpen"
+      :is-mobile="isMobile"
+      :position="position"
+      :title="title"
+      :show-header="showHeader"
+      :show-footer="showFooter"
+      :content-class="contentClass"
+      :main-class="mainClass"
+      @close="close()"
+    >
+      <template #default><slot /></template>
+      <template #header-actions><slot name="header-actions" /></template>
+      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+    </SidePanel>
 
     <!-- Desktop Panel -->
-    <Transition name="slide-out">
-      <div
-        v-if="!isMobile && type !== 'side'"
-        class="desktop-panel"
-        :class="[
-          'transition-[width] duration-300 ease-in-out bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-          isOpen ? 'w-64' : 'w-10',
-          position === 'left' ? 'border-l' : 'border-r',
-        ]"
-      >
-        <div
-          class="panel-content absolute inset-y-0 right-0 transition-opacity duration-300 max-h-[100vh]"
-          :class="[
-            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
-            mainClass,
-          ]"
-        >
-          <PanelContent
-            :title="title"
-            :show-header="showHeader"
-            :show-footer="showFooter"
-            :content-class="contentClass"
-            :is-mobile="isMobile"
-            @close="onClose"
-          >
-            <template #default>
-              <slot />
-            </template>
-            <template #header-actions>
-              <slot name="header-actions" />
-            </template>
-            <template v-if="$slots.footer" #footer>
-              <slot name="footer" />
-            </template>
-          </PanelContent>
-        </div>
-
-        <!-- Toggle button (desktop only) -->
-        <div v-if="showToggle">
-          <Button
-            v-tippy="{
-              content: isOpen ? 'Hide Panel' : 'Show Panel',
-              placement: 'left',
-            }"
-            variant="outline"
-            size="icon"
-            :class="[
-              'shadow-sm absolute left-0 bottom-0 -translate-y-1/3 pointer-events-auto',
-              !isOpen ? '-translate-x-1/2 left-1/2' : 'translate-x-1/4',
-            ]"
-            @click="onToggle"
-          >
-            <ArrowRightToLine
-              class="h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-300"
-              :class="{ 'rotate-180': isOpen }"
-            />
-          </Button>
-        </div>
-      </div>
-    </Transition>
+    <DesktopPanel
+      v-else-if="!isMobile"
+      :is-open="isOpen"
+      :position="position"
+      :title="title"
+      :show-header="showHeader"
+      :show-footer="showFooter"
+      :content-class="contentClass"
+      :main-class="mainClass"
+      :show-toggle="showToggle"
+      @close="close()"
+      @toggle="toggle()"
+    >
+      <template #default><slot /></template>
+      <template #header-actions><slot name="header-actions" /></template>
+      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+    </DesktopPanel>
 
     <!-- Mobile Panel -->
+    <div v-else-if="isMobile">
     <div
-      v-show="isMobile && type !== 'side' && isOpen"
+      v-show="isOpen"
       class="fixed inset-x-0 z-20"
     >
       <div
@@ -125,7 +67,7 @@
         :style="{
           height: `${panelHeight}px`,
           transform: `translateY(${translateY}px)`,
-          transition: isDragging ? 'none' : 'transform 0.3s ease',
+          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.74,-0.11, 0.53, 0.9)',
         }"
       >
         <!-- Draggable Handle -->
@@ -133,6 +75,7 @@
           ref="handle"
           class="w-full absolute h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-manipulation"
           :class="{ 'cursor-grabbing': isDragging }"
+          aria-label="Drag handle to resize panel"
         >
           <div v-if="draggable" class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
         </div>
@@ -144,7 +87,7 @@
             :show-footer="showFooter"
             :content-class="contentClass"
             :is-mobile="isMobile"
-            @close="onClose"
+            @close="close()"
           >
             <template #default>
               <slot />
@@ -159,20 +102,43 @@
         </div>
       </div>
     </div>
+    </div>
+
+    <!-- <BottomPanel
+      v-else-if="isMobile"
+      :is-open="isOpen"
+      :is-mobile="isMobile"
+      :title="title"
+      :show-header="showHeader"
+      :show-footer="showFooter"
+      :content-class="contentClass"
+      :main-class="mainClass"
+      :draggable="draggable"
+      :panel-height="panelHeight ?? 0"
+      :translate-y="translateY ?? 0"
+      :is-dragging="isDragging ?? false"
+      :panel="panel" 
+      :handle="handle"
+      @close="close()"
+    >
+      <template #default><slot /></template>
+      <template #header-actions><slot name="header-actions" /></template>
+      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+    </BottomPanel> -->
+
   </div>
 </template>
 
 <script setup>
-import { watch } from 'vue';
-import { ArrowRightToLine } from 'lucide-vue-next';
-import { Panel } from '@/composables/usePanelUnified';
-import { useVModel } from '@vueuse/core';
-import Button from '@/components/base/BaseButton.vue';
+import { usePanel } from '@/composables/usePanelUnified';
+import SidePanel from '@/components/panel/SidePanel.vue';
+import DesktopPanel from '@/components/panel/DesktopPanel.vue';
+// Fix this integration later
+// import BottomPanel from '@/components/panel/BottomPanel.vue';
 import PanelContent from '@/components/base/PanelContent.vue';
 
 const props = defineProps({
-  isOpen: { type: Boolean, default: false },
-  isMobile: { type: Boolean, default: false },
+  id: { type: String, required: true },
   showToggle: { type: Boolean, default: true },
   showHeader: { type: Boolean, default: true },
   showFooter: { type: Boolean, default: true },
@@ -185,62 +151,27 @@ const props = defineProps({
   snapThreshold: { type: Number, default: 0.3 },
   storageKey: { type: String, default: 'panel' },
   draggable: { type: Boolean, default: false },
+  defaultDesktopState: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['update:isOpen']);
-
-// Use VueUse's useVModel for two-way binding
-const panelIsOpen = useVModel(props, 'isOpen', emit);
-
-// Use the unified panel composable with all options
 const {
   isOpen,
+  isMobile,
   toggle,
   close,
-  open,
   handle,
   panel,
   isDragging,
   panelHeight,
   translateY
-} = Panel({
-  storageKey: props.storageKey,
-  defaultDesktopState: props.isOpen,
+} = usePanel(props.id, {
+  storageKey: props.id || props.storageKey,
+  initialIsMobile: props.isMobile,
+  defaultDesktopState: props.defaultDesktopState,
   maxHeightRatio: props.maxHeightRatio,
   snapThreshold: props.snapThreshold,
-  draggable: props.draggable,
-  initialIsMobile: props.isMobile
-});
-
-// Sync with parent's isOpen prop
-watch(() => props.isOpen, (val) => {
-  if (val !== isOpen.value) {
-    if (val) {
-      open();
-    } else {
-      close();
-    }
-  }
-}, { immediate: true });
-
-// Sync panel state back to parent
-watch(isOpen, (val) => {
-  if (val !== props.isOpen) {
-    panelIsOpen.value = val;
-  }
-});
-
-const onOpen = () => open();
-const onClose = () => close();
-const onToggle = () => toggle();
-
-// Expose the panel API to parent components
-defineExpose({
-  close: onClose,
-  open: onOpen,
-  toggle: onToggle,
-  isOpen
-});
+  draggable: props.draggable
+}, true);
 </script>
 
 <style scoped>

@@ -5,7 +5,9 @@
     :is-global-error="true" />
   <Suspense v-else>
     <template #default>
-      <app-setup />
+      <PanelProvider>
+        <app-setup />
+      </PanelProvider>
     </template>
     <template #fallback>
       <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
@@ -18,6 +20,7 @@
 <script setup>
 import { ref, onErrorCaptured } from 'vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
+import PanelProvider from '@/components/panel/PanelProvider.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 

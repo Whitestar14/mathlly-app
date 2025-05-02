@@ -1,17 +1,13 @@
 <template>
   <BasePanel 
-    ref="panelRef"
-    :is-open="isOpen" 
-    :is-mobile="isMobile" 
-    title="History" 
+    title="History"
     id="history-panel"
-    type="desktop"
-    position="left" 
+    type="drawer"
+    position="left"
     :max-height-ratio="0.8" 
     :snap-threshold="0.4"
-    storage-key="history-panel"
     :draggable="true"
-    @update:is-open="$emit('update:isOpen', $event)"
+    :default-desktop-state="false"
   >
     <!-- Content -->
     <div class="flex-1 overflow-hidden relative">
@@ -71,31 +67,30 @@
         </Button>
       </div>
     </template>
-
-
   </BasePanel>
-      <!-- Clear confirmation modal -->
-    <BaseModal :open="showClearConfirmation" description="confirmation-dialog"
-      @update:open="showClearConfirmation = $event">
-      <template #title>
-        <div class="flex items-center">
-          <AlertTriangleIcon class="h-5 w-5 text-red-500 dark:text-gray-300 mr-2" />
-          Clear History
-        </div>
-      </template>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Are you sure you want to clear all history items? This action cannot
-        be undone.
-      </p>
-      <div class="flex justify-end space-x-2">
-        <Button variant="outline" class="dark:text-gray-300 transition-colors" @click="showClearConfirmation = false">
-          Cancel
-        </Button>
-        <Button variant="destructive" @click="handleClear">
-          Clear All
-        </Button>
+  
+  <!-- Clear confirmation modal -->
+  <BaseModal :open="showClearConfirmation" description="confirmation-dialog"
+    @update:open="showClearConfirmation = $event">
+    <template #title>
+      <div class="flex items-center">
+        <AlertTriangleIcon class="h-5 w-5 text-red-500 dark:text-gray-300 mr-2" />
+        Clear History
       </div>
-    </BaseModal>
+    </template>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      Are you sure you want to clear all history items? This action cannot
+      be undone.
+    </p>
+    <div class="flex justify-end space-x-2">
+      <Button variant="outline" class="dark:text-gray-300 transition-colors" @click="showClearConfirmation = false">
+        Cancel
+      </Button>
+      <Button variant="destructive" @click="handleClear">
+        Clear All
+      </Button>
+    </div>
+  </BaseModal>
 </template>
 
 <script setup>
@@ -112,12 +107,12 @@ import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewpor
 
 // Props and emits
 const props = defineProps({
-  isOpen: { type: Boolean, default: false },
-  isMobile: { type: Boolean, default: false },
   mode: { type: String, default: "Standard" },
+  isMobile: { type: Boolean, default: false},
+  isOpen: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(["select-item", "update:isOpen"])
+const emit = defineEmits(["select-item", "history-close"])
 
 const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryItem.vue"))
 
@@ -159,8 +154,6 @@ watch(
   },
 )
 
-const panelRef = ref(null);
-
 // Handle history item selection
 const handleSelectItem = (item) => {
   if (isProgrammerMode.value) return;
@@ -175,13 +168,8 @@ const handleSelectItem = (item) => {
     result: item.result,
   });
 
-  // Use the panel's close method for animated closing
-  if (panelRef.value) {
-    panelRef.value.close();
-  } else {
-    // Fallback to direct emit if ref isn't available
-    emit("update:isOpen", false);
-  }
+  // Close the panel
+  emit('history-close');
 };
 
 // Handle item deletion

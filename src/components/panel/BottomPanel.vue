@@ -28,7 +28,7 @@
             :show-footer="showFooter"
             :content-class="contentClass"
             :is-mobile="isMobile"
-            @close="onClose"
+            @close="$emit('close')"
           >
             <template #default>
               <slot />
@@ -52,6 +52,7 @@ import PanelContent from '@/components/base/PanelContent.vue';
 defineProps({
   // State & Content Props
   isOpen: { type: Boolean, default: false },
+  isMobile: { type: Boolean, default: false },
   title: { type: String, default: '' },
   showHeader: { type: Boolean, default: true },
   showFooter: { type: Boolean, default: true },
@@ -66,8 +67,8 @@ defineProps({
 
   // Refs passed from parent (usePanel)
   // These props expect actual Vue Ref objects (Ref<HTMLElement | null>)
-  panelRef: { type: [Object, Function], default: null }, // Accept Ref object or function
-  handleRef: { type: [Object, Function], default: null }, // Accept Ref object or function
+  panel: { type: [Object, Function], default: null }, // Accept Ref object or function
+  handle: { type: [Object, Function], default: null }, // Accept Ref object or function
 });
 
 // --- Emits ---

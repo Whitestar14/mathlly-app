@@ -38,8 +38,8 @@
     <history-panel
       :mode="state.mode"
       :is-mobile="isMobile"
-      :is-open="isHistoryOpen"
-      @update:is-open="isHistoryOpen = $event"
+      :is-open="history.isOpen"
+      @history-close="history.close()"
       @select-item="selectHistoryItem"
     />
   </BasePage>
@@ -59,7 +59,7 @@ import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import { useSettingsStore } from '@/stores/settings'
 import BasePage from '@/components/base/BasePage.vue'
-
+import { usePanel } from '@/composables/usePanelUnified'
 const props = defineProps({
   mode: { type: String, required: true },
   settings: { type: Object, required: true },
@@ -91,18 +91,11 @@ const hasMemoryValue = computed(() => hasMemory(props.mode).value)
 
 // History panel management
 const { addToHistory } = useHistory()
-// History panel management - simplified to just use a ref
-const isHistoryOpen = ref(false)
 
-// Function to open history panel
-const openHistory = () => {
-  isHistoryOpen.value = true
-}
+const history = usePanel('history-panel')
 
-// Function to toggle history panel
-const toggleHistory = () => {
-  isHistoryOpen.value = !isHistoryOpen.value
-}
+const openHistory = () => history.open()
+const toggleHistory = () => history.toggle()
 
 // Memory management
 const { hasMemory, handleMemoryOperation } = useMemory()
