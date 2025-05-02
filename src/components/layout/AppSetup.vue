@@ -3,10 +3,7 @@
     'animation-disabled': settings.animationDisabled,
   }">
     <sidebar-menu :is-open="isSidebarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeSidebar" />
-    <div class="flex flex-col flex-grow duration-300" :class="[
-      !deviceStore.isMobile && isSidebarOpen ? 'pl-64' : '',
-      !deviceStore.isMobile && isMenubarOpen ? 'pr-64' : ''
-    ]">
+    <div class="flex flex-col flex-grow duration-300" :class="mainContentClasses">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
 
@@ -20,13 +17,12 @@
 </template>
 
 <script setup>
-import { onUnmounted, computed, watch } from "vue"
+import { onUnmounted, computed, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
 import { useSettingsStore } from "@/stores/settings"
 import { useKeyboard } from "@/composables/useKeyboard"
-import { Panel } from "@/composables/usePanelUnified"
 import MainMenu from "@/components/layout/MainMenu.vue"
 import AppHeader from "@/components/layout/AppHeader.vue"
 import SidebarMenu from "@/components/layout/SidebarMenu.vue"
@@ -52,28 +48,30 @@ const settings = settingsStore
 const mode = computed(() => settingsStore.activeMode)
 
 // Use the unified panel composable for sidebar
-const {
-  isOpen: isSidebarOpen,
-  toggle: toggleSidebar,
-  close: closeSidebar,
-  handleResize: handleSidebarResize,
-} = Panel({
-  storageKey: 'sidebar',
-  initialIsMobile: deviceStore.isMobile,
-  defaultDesktopState: true
-})
+const isSidebarOpen = ref(false);
+const isMenubarOpen = ref(false);
 
-// Use the unified panel composable for menu
-const {
-  isOpen: isMenubarOpen,
-  toggle: toggleMenubar,
-  close: closeMenubar,
-  handleResize: handleMenubarResize,
-} = Panel({
-  storageKey: 'menu',
-  initialIsMobile: deviceStore.isMobile,
-  defaultDesktopState: false
-})
+const closeSidebar = () => isSidebarOpen.value = false;
+const closeMenubar = () => isMenubarOpen.value = false;
+
+const toggleSidebar = () => isSidebarOpen.value = !isSidebarOpen.value;
+const toggleMenubar = () => isMenubarOpen.value = !isMenubarOpen.value;
+
+const mainContentClasses = computed(() => {
+  const classes = [];
+  
+  // Add padding for sidebar when open on desktop
+  if (!deviceStore.isMobile && isSidebarOpen.value) {
+    classes.push('pl-64');
+  }
+  
+  // Add padding for menu when open on desktop
+  if (!deviceStore.isMobile && isMenubarOpen.value) {
+    classes.push('pr-64');
+  }
+  
+  return classes;
+});
 
 const updateMode = async (newMode) => {
   settingsStore.setCurrentMode(newMode)
@@ -88,18 +86,10 @@ const updateSettings = async (newSettings) => {
   await settingsStore.saveSettings(settingsToSave)
 }
 
-watch(
-  () => deviceStore.isMobile,
-  (newIsMobile) => {
-    handleSidebarResize(newIsMobile)
-    handleMenubarResize(newIsMobile)
-  }
-)
-
 // --- Keyboard Shortcuts ---
 useKeyboard("global", {
-  toggleSidebar: toggleSidebar,
-  toggleMenubar: toggleMenubar,
+  toggleSidebar,
+  toggleMenubar,
   toggleFullscreen: () => {
     useFullscreen(document.documentElement).toggle()
   },

@@ -2,13 +2,14 @@
   <BasePanel
     :is-open="isOpen"
     :is-mobile="isMobile"
-    position="side"
-    position-side="left"
+    type="side"
+    id="sidebar"
+    position="left"
     :show-toggle="false"
     :show-header="true"
     :show-footer="true"
     :draggable="false"
-    storage-key="sidebar"
+    :default-desktop-state="true"
     @update:isOpen="closeSidebar"
   >
     <!-- Custom header -->

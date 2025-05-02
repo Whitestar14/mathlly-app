@@ -1,7 +1,11 @@
 <template>
   <div
     class="panel-container"
-    :class="{ mobile: isMobile, 'panel-side': position === 'side' }"
+    :class="{
+      'panel-mobile': isMobile,
+      'panel-side': type === 'side',
+      'panel-bottom': isMobile && type !== 'side',
+    }"
   >
     <!-- Backdrop (mobile only) -->
     <Transition name="fade">
@@ -15,15 +19,15 @@
     </Transition>
 
     <!-- Side Panel -->
-    <Transition :name="positionSide === 'left' ? 'slide-left' : 'slide-right'">
+    <Transition :name="position === 'left' ? 'slide-left' : 'slide-right'">
       <div
-        v-if="position === 'side' && isOpen"
+        v-if="type === 'side' && isOpen"
         class="side-panel-container"
         :class="[
           isMobile ? 'w-full' : `w-64`,
-          positionSide === 'left' ? 'left-0' : 'right-0',
-          !isMobile && positionSide === 'left' ? 'border-r' : '',
-          !isMobile && positionSide === 'right' ? 'border-l' : '',
+          position === 'left' ? 'left-0' : 'right-0',
+          !isMobile && position === 'left' ? 'border-r' : '',
+          !isMobile && position === 'right' ? 'border-l' : '',
           'border-gray-200 dark:border-gray-700',
         ]"
       >
@@ -51,12 +55,12 @@
     <!-- Desktop Panel -->
     <Transition name="slide-out">
       <div
-        v-if="!isMobile && position !== 'side'"
+        v-if="!isMobile && type !== 'side'"
         class="desktop-panel"
         :class="[
           'transition-[width] duration-300 ease-in-out bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
           isOpen ? 'w-64' : 'w-10',
-          positionSide === 'left' ? 'border-l' : 'border-r',
+          position === 'left' ? 'border-l' : 'border-r',
         ]"
       >
         <div
@@ -112,7 +116,7 @@
 
     <!-- Mobile Panel -->
     <div
-      v-show="isMobile && position !== 'side' && isOpen"
+      v-show="isMobile && type !== 'side' && isOpen"
       class="fixed inset-x-0 z-20"
     >
       <div
@@ -175,8 +179,8 @@ const props = defineProps({
   title: { type: String, default: '' },
   mainClass: { type: String, default: '' },
   contentClass: { type: String, default: '' },
+  type: { type: String, default: 'right' },
   position: { type: String, default: 'right' },
-  positionSide: { type: String, default: 'right' },
   maxHeightRatio: { type: Number, default: 0.8 },
   snapThreshold: { type: Number, default: 0.3 },
   storageKey: { type: String, default: 'panel' },
@@ -198,8 +202,7 @@ const {
   panel,
   isDragging,
   panelHeight,
-  translateY,
-  handleResize
+  translateY
 } = Panel({
   storageKey: props.storageKey,
   defaultDesktopState: props.isOpen,
@@ -227,11 +230,6 @@ watch(isOpen, (val) => {
   }
 });
 
-// Watch for changes in isMobile prop
-watch(() => props.isMobile, (newIsMobile) => {
-  handleResize(newIsMobile);
-});
-
 const onOpen = () => open();
 const onClose = () => close();
 const onToggle = () => toggle();
@@ -240,16 +238,18 @@ const onToggle = () => toggle();
 defineExpose({
   close: onClose,
   open: onOpen,
-  toggle: onToggle
+  toggle: onToggle,
+  isOpen
 });
 </script>
 
 <style scoped>
+/* Scoped styles for the BasePanel wrapper */
 .panel-container {
   @apply relative z-20 flex flex-col flex-initial;
 }
 
-.panel-container.mobile {
+.panel-container.panel-mobile {
   display: contents;
 }
 

@@ -2,10 +2,11 @@
   <BasePanel
     :is-open="isOpen"
     :is-mobile="isMobile"
+    id="menu"
     :show-toggle="false"
     title="Menu"
-    position="side"
-    position-side="right"
+    type="side"
+    position="right"
     storage-key="menu"
     @update:isOpen="closeMenu"
   >

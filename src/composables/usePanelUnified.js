@@ -151,6 +151,7 @@ export function Panel(options = {}) {
 
   watch(isOpen, updatePreferences);
 
+  watch(currentIsMobile, handleResize);
   const _panel = {
     isOpen: isOpenDebounced,
     _isOpenRaw: isOpen,
