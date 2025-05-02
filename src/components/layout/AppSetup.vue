@@ -26,7 +26,7 @@ import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
 import { useSettingsStore } from "@/stores/settings"
 import { useKeyboard } from "@/composables/useKeyboard"
-import { usePanelUnified } from "@/composables/usePanelUnified"
+import { Panel } from "@/composables/usePanelUnified"
 import MainMenu from "@/components/layout/MainMenu.vue"
 import AppHeader from "@/components/layout/AppHeader.vue"
 import SidebarMenu from "@/components/layout/SidebarMenu.vue"
@@ -57,7 +57,7 @@ const {
   toggle: toggleSidebar,
   close: closeSidebar,
   handleResize: handleSidebarResize,
-} = usePanelUnified({
+} = Panel({
   storageKey: 'sidebar',
   initialIsMobile: deviceStore.isMobile,
   defaultDesktopState: true
@@ -69,7 +69,7 @@ const {
   toggle: toggleMenubar,
   close: closeMenubar,
   handleResize: handleMenubarResize,
-} = usePanelUnified({
+} = Panel({
   storageKey: 'menu',
   initialIsMobile: deviceStore.isMobile,
   defaultDesktopState: false

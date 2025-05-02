@@ -1,31 +1,53 @@
 import { ref, computed, nextTick, watch } from 'vue';
-import { useLocalStorage, useEventListener } from '@vueuse/core';
+import { useLocalStorage, refDebounced } from '@vueuse/core';
 import { useDraggable } from './useDraggable';
 
 /**
- * Unified panel composable that combines all panel functionality
- * @param {Object} options - Configuration options
- * @param {string} options.storageKey - Key for storing panel state in localStorage
- * @param {boolean} options.defaultDesktopState - Default open state for desktop view
- * @param {boolean} options.initialIsMobile - Whether the current view is mobile
- * @param {boolean} options.draggable - Whether the panel should be draggable (mobile only)
- * @param {number} options.maxHeightRatio - Maximum height as ratio of viewport (mobile only)
- * @param {number} options.snapThreshold - Threshold for snapping panel (mobile only)
- * @param {number} options.maxHeight - Maximum height in pixels (mobile only)
- * @returns {Object} Panel management API
+ * Unified panel composable managing state, persistence, responsiveness, and dragging.
+ * @param {object} options - Configuration options.
+ * @param {string} options.storageKey - Key for localStorage persistence.
+ * @param {boolean} [options.defaultDesktopState=true] - Default open state on desktop.
+ * @param {boolean} options.initialIsMobile - Initial mobile state.
+ * @param {boolean} [options.draggable=false] - Enable mobile bottom sheet dragging.
+ * @param {number} [options.maxHeightRatio=0.8] - Max height ratio for mobile draggable panel.
+ * @param {number} [options.snapThreshold=0.3] - Snap threshold for mobile draggable panel.
+ * @param {number} [options.maxHeight] - Optional fixed max height in pixels for mobile draggable panel.
+ * @returns {object} Panel management API.
  */
-export function usePanelUnified(options = {}) {
+export function Panel(options = {}) {
   const {
-    storageKey = 'panel',
-    defaultDesktopState = true,
+    storageKey,
+    defaultDesktopState = false,
+    initialIsMobile = false,
+    draggable = false,
     maxHeightRatio = 0.8,
     snapThreshold = 0.3,
-    draggable = false,
     maxHeight,
-    initialIsMobile = false
   } = options;
 
-  // Panel state management with localStorage persistence
+  if (!storageKey) {
+    console.error('usePanel requires a storageKey option.');
+    // Return a dummy API to prevent further errors
+    return {
+      isOpen: ref(false),
+      isMobile: ref(initialIsMobile),
+      isDragging: ref(false),
+      translateY: ref(0),
+      panelHeight: ref(0),
+      maxPanelHeight: ref(0),
+      handle: ref(null),
+      panel: ref(null),
+      open: () => {},
+      close: () => {},
+      toggle: () => {},
+      handleResize: () => {},
+      setupDraggable: () => {},
+      updatePanelDimensions: () => {},
+    };
+  }
+
+  // --- State Persistence ---
+  // Use localStorage to remember open state per device type
   const preferences = useLocalStorage(`${storageKey}-preferences`, {
     desktop: { isOpen: defaultDesktopState },
     mobile: { isOpen: false },
@@ -35,163 +57,118 @@ export function usePanelUnified(options = {}) {
   const currentIsMobile = ref(initialIsMobile);
   const deviceContext = computed(() => currentIsMobile.value ? 'mobile' : 'desktop');
 
-// Initialize panel state from stored preferences based on device type
-const isOpen = ref(initialIsMobile 
-  ? preferences.value.mobile.isOpen 
-  : preferences.value.desktop.isOpen);
-  
+  // Initialize panel state from stored preferences based on device type
+  const isOpen = ref(preferences.value[deviceContext.value].isOpen);
+  const isOpenDebounced = refDebounced(isOpen, 30);
+
   // References for draggable functionality
   const handle = ref(null);
   const panel = ref(null);
 
-  // Update persistent preferences for the current device type
+  /**
+   * Updates the persisted preferences based on the current isOpen state and device type.
+   */
   const updatePreferences = () => {
-    // Update preferences based on current device context
-    if (currentIsMobile.value) {
-      preferences.value[deviceContext.value].isOpen = isOpen.value;
-    }
+    preferences.value[deviceContext.value].isOpen = isOpen.value;
   };
 
-  // Initialize draggable functionality if enabled
+  // Initialize draggable composable only if enabled
   const draggableApi = draggable ? useDraggable({
-    panel,
-    handle,
-    isOpen,
-    onClose: () => {
-      isOpen.value = false;
-      updatePreferences();
-    },
-    maxHeightRatio,
-    snapThreshold,
-    maxHeight,
+    panel, handle, isOpen, // Pass the raw isOpen ref
+    maxHeightRatio, snapThreshold, maxHeight,
   }) : null;
 
+
   /**
-   * Closes the panel
-   * @param {boolean} isMobile - Whether to close in mobile context
+   * Closes the panel, handling animations if applicable.
+   * @param {boolean} [isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
    */
   const close = async (isMobile = currentIsMobile.value) => {
-    currentIsMobile.value = isMobile;
-    
-    if (isMobile && draggable && draggableApi) {
-      // If we're on mobile with draggable enabled, use animated close
-      await draggableApi.animateClose();
+    currentIsMobile.value = isMobile; // Ensure internal mobile state is current
+
+    if (isMobile && draggable && draggableApi?.animateClose) {
+      // Use animated close for draggable mobile panels
+      await draggableApi.animateClose(); // This should set isOpen.value = false internally
     } else {
-      // Otherwise, just close immediately
+      // Close immediately for non-draggable or desktop panels
       isOpen.value = false;
-      updatePreferences();
     }
   };
 
   /**
-   * Opens the panel
-   * @param {boolean} isMobile - Whether to open in mobile context
+   * Opens the panel, handling animations and draggable setup if applicable.
+   * @param {boolean} [isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
    */
   const open = async (isMobile = currentIsMobile.value) => {
     currentIsMobile.value = isMobile;
     isOpen.value = true;
-    updatePreferences();
 
     if (isMobile && draggable && draggableApi) {
-      // When opening on mobile with draggable enabled, wait for panel to be in DOM
+      // Wait for the panel element to be rendered/visible
       await nextTick();
-      // Then animate the panel in
-      draggableApi.animateOpen();
+      draggableApi.animateOpen?.();
 
-      // Set up draggable after animation completes
-      setupDraggable();
+      const success = draggableApi.setupDraggable?.();
+      if (!success) console.warn(`[usePanelUnified ${storageKey}]: Draggable setup failed (handle likely not found).`);
     }
   };
 
   /**
-   * Toggles the panel open/closed state
-   * @param {boolean} isMobile - Whether to toggle in mobile context
+   * Toggles the panel's open/closed state.
+   * @param {boolean} [isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
    */
   const toggle = (isMobile = currentIsMobile.value) => {
-    if (isOpen.value) {
-      close(isMobile);
-    } else {
-      open(isMobile);
+    isOpen.value ? close(isMobile) : open(isMobile);
+  };
+
+  /**
+   * Handles responsive changes, updating state and draggable elements.
+   * @param {boolean} newIsMobile - The new mobile state.
+   */
+  const handleResize = (newIsMobile) => {
+    if (currentIsMobile.value === newIsMobile) return;
+      currentIsMobile.value = newIsMobile;
+      
+    isOpen.value = newIsMobile ? false : preferences.value.desktop.isOpen;
+    updatePreferences();
+
+    // Update draggable dimensions if applicable
+    if (draggable && draggableApi) {
+       nextTick(updatePanelDimensions);
     }
   };
 
   /**
-   * Handles responsive behavior when screen size changes
-   * @param {boolean} newIsMobile - Whether the view is now mobile
+   * Sets up the draggable event listeners and initial state.
+   * Called internally by `open` or potentially externally if needed after manual DOM manipulation.
    */
-  const handleResize = (newIsMobile) => {
-    currentIsMobile.value = newIsMobile;
-    
-    // Load the appropriate state for the new device type
-    if (newIsMobile) {
-      isOpen.value = false;
-    } else {
-      isOpen.value = preferences.value.desktop.isOpen;
-    }
-  
-    if (draggable && draggableApi) {
-      updatePanelDimensions();
-    }
-  };
+  const setupDraggable = () => draggableApi?.setupDraggable?.();
 
-  // Function to set up draggable
-  const setupDraggable = () => {
-    if (draggable && draggableApi) {
-      draggableApi.setupDraggable();
-    }
-  };
+  /**
+   * Recalculates panel dimensions, useful after resize or content changes.
+   */
+  const updatePanelDimensions = () => draggableApi?.updatePanelDimensions?.();
 
-  // Function to update panel dimensions
-  const updatePanelDimensions = () => {
-    if (draggable && draggableApi) {
-      draggableApi.updatePanelDimensions();
-    }
-  };
+  watch(isOpen, updatePreferences);
 
-  // Watch for changes in the open state to update preferences
-  watch(isOpen, () => {
-    updatePreferences();
-  });
-
-  // Add escape key handler to close panel (from usePanel.js)
-  useEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen.value) {
-      close();
-    }
-  });
-
-  // Create a unified API
-  const api = {
-    // Panel state
-    isOpen,
-    toggle,
-    close,
-    open,
-    handleResize,
-    deviceContext,
-
-    // References
+  const _panel = {
+    isOpen: isOpenDebounced,
+    _isOpenRaw: isOpen,
+    isMobile: currentIsMobile,
     panel,
     handle,
+    open,
+    close,
+    toggle,
+    handleResize,
+    _setupDraggable: setupDraggable,
+    _updatePanelDimensions: updatePanelDimensions,
 
-    // Functions
-    setupDraggable,
-    updatePanelDimensions,
-    
-    // Default values for non-draggable mode
-    isDragging: ref(false),
-    translateY: ref(0),
-    panelHeight: ref(500),
-    maxPanelHeight: computed(() => 0),
+    isDragging: draggableApi?.isDragging ?? ref(false),
+    translateY: draggableApi?.translateY ?? ref(0),
+    panelHeight: draggableApi?.panelHeight ?? ref(0),
+    maxPanelHeight: draggableApi?.maxPanelHeight ?? computed(() => 0),
   };
 
-  // If draggable is enabled, add the draggable API properties
-  if (draggable && draggableApi) {
-    api.isDragging = draggableApi.isDragging;
-    api.translateY = draggableApi.translateY;
-    api.panelHeight = draggableApi.panelHeight;
-    api.maxPanelHeight = draggableApi.maxPanelHeight;
-  }
-
-  return api;
+  return _panel;
 }

@@ -1,12 +1,22 @@
 import { ref, computed, onUnmounted, watch } from 'vue';
 import { useWindowSize } from '@vueuse/core';
 
+/**
+ * Composable for creating draggable bottom sheet panels
+ * @param {Object} options - Configuration options
+ * @param {import('vue').Ref<HTMLElement>} options.panel - Ref to the panel element
+ * @param {import('vue').Ref<HTMLElement>} options.handle - Ref to the drag handle element
+ * @param {import('vue').Ref<boolean>} options.isOpen - Ref to control panel open state
+ * @param {number} [options.maxHeightRatio=0.8] - Maximum height as ratio of viewport height
+ * @param {number} [options.snapThreshold=0.3] - Threshold for snapping open/closed
+ * @param {number} [options.maxHeight] - Optional fixed max height in pixels
+ * @returns {Object} Draggable API
+ */
 export function useDraggable(options = {}) {
   const {
     panel,
     handle,
     isOpen,
-    onClose,
     maxHeightRatio = 0.8,
     snapThreshold = 0.3,
     maxHeight,
@@ -18,44 +28,51 @@ export function useDraggable(options = {}) {
   const isDragging = ref(false);
   const translateY = ref(0);
   const startY = ref(0);
+  const isSetup = ref(false); 
   const { height: windowHeight } = useWindowSize();
 
   const maxPanelHeight = computed(() =>
-    Math.min(windowHeight.value * maxHeightRatio, maxHeight || Infinity)
+    Math.min(windowHeight.value * maxHeightRatio, maxHeight || 600)
   );
 
-  // Update panel dimensions based on actual element
+  /**
+   * Recalculates panel dimensions, useful after resize or content changes.
+   */
   const updatePanelDimensions = () => {
     if (!panel.value) return;
     
-    panelHeight.value = panel.value.offsetHeight || 500;
+    panelHeight.value = Math.max(windowHeight.value * maxHeightRatio, panel.value.offsetHeight);
     minHeight.value = Math.min(200, panelHeight.value * 0.4);
   };
 
-  // Helper to animate slide-out, then emit close
+  /**
+   * Animates the panel to closed position
+   */
   function animateClose() {    
     translateY.value = panelHeight.value;
     return new Promise(resolve => {
       setTimeout(() => {
-        if (onClose) onClose();
+        isOpen.value = false;
         resolve();
-      }, 300);
+      }, 150);
     });
   }
 
-  // Helper to animate slide-in
-  function animateOpen() {    
-    // First set to off-screen position
+  /**
+   * Animates the panel to open position
+   */
+  const animateOpen = () => {
+    if (!panel.value) return;
     translateY.value = panelHeight.value;
     
     // Then animate in after a short delay to ensure the initial position is applied
     setTimeout(() => {
       translateY.value = 0; // Animate in
-    }, 50);
+    }, 300);
   }
 
   // Event handlers
-  const onPointerDown = (e) => {
+  const onTouchStart = (e) => {
     if (!handle.value) return;
     
     startY.value = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
@@ -63,13 +80,11 @@ export function useDraggable(options = {}) {
     document.body.style.overflow = 'hidden';
     
     // Add move and up listeners when dragging starts
-    window.addEventListener('touchmove', onPointerMove, { passive: false });
-    window.addEventListener('mousemove', onPointerMove, { passive: false });
-    window.addEventListener('touchend', onPointerUp, { passive: false });
-    window.addEventListener('mouseup', onPointerUp, { passive: false });
+    window.addEventListener('touchmove', onTouchMove, { passive: false }); 
+    window.addEventListener('touchend', onTouchEnd, { passive: false }); 
   };
 
-  const onPointerMove = (e) => {
+  const onTouchMove = (e) => {
     if (!isDragging.value) return;
     
     const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
@@ -78,7 +93,7 @@ export function useDraggable(options = {}) {
     e.preventDefault();
   };
 
-  const onPointerUp = () => {
+  const onTouchEnd = () => {
     if (!isDragging.value) return;
     
     isDragging.value = false;
@@ -91,54 +106,53 @@ export function useDraggable(options = {}) {
     }
     
     // Remove move and up listeners when dragging ends
-    window.removeEventListener('touchmove', onPointerMove);
-    window.removeEventListener('mousemove', onPointerMove);
-    window.removeEventListener('touchend', onPointerUp);
-    window.removeEventListener('mouseup', onPointerUp);
+    window.removeEventListener('touchmove', onTouchMove); 
+    window.removeEventListener('touchend', onTouchEnd); 
   };
 
-  // Setup draggable behavior
+  /**
+   * Sets up the draggable event listeners and initial state.
+   */
   const setupDraggable = () => {
-    if (!handle.value) {
-      console.warn('Draggable handle not found');
-      return;
+    if (isSetup.value) return true;
+
+    if (!panel.value || !handle.value) {
+      console.warn('[useDraggable] setupDraggable failed: Handle/Panel ref is not a valid DOM element.', {
+        panel: panel.value,
+        handle: handle.value
+      });
+      return false;
     }
-    
-    // Clean up existing listeners first
-    cleanupDraggable();
-    
-    // Add new listeners
-    handle.value.addEventListener('touchstart', onPointerDown, { passive: false });
-    handle.value.addEventListener('mousedown', onPointerDown, { passive: false });
+
+    cleanup();
+    updatePanelDimensions();
+
+    // Add new listeners (use passive: false to allow preventDefault in handlers)
+    handle.value.addEventListener('touchstart', onTouchStart, { passive: false }); 
+
+    return true; // Indicate success
   };
   
   // Clean up all event listeners
-  const cleanupDraggable = () => {
+  const cleanup = () => {
     if (handle.value) {
-      handle.value.removeEventListener('touchstart', onPointerDown);
-      handle.value.removeEventListener('mousedown', onPointerDown);
+      handle.value.removeEventListener('touchstart', onTouchStart); 
+      panel.value._draggableCleanup = cleanup;
     }
     
-    window.removeEventListener('touchmove', onPointerMove);
-    window.removeEventListener('mousemove', onPointerMove);
-    window.removeEventListener('touchend', onPointerUp);
-    window.removeEventListener('mouseup', onPointerUp);
+    window.removeEventListener('touchmove', onTouchMove); 
+    window.removeEventListener('touchend', onTouchEnd); 
+    isSetup.value = true;
+    return true;
   };
 
   // Watch for panel open state changes
   if (isOpen) {
-    watch(isOpen, (newValue) => {
-      if (newValue) {
-        // Panel is opening - prepare for animation
-        updatePanelDimensions();
-      }
-    });
+    watch(isOpen, updatePanelDimensions);
   }
   
   // Clean up event listeners when component is unmounted
-  onUnmounted(() => {
-    cleanupDraggable();
-  });
+  onUnmounted(() => cleanup());
 
   return {
     isDragging,
@@ -146,9 +160,8 @@ export function useDraggable(options = {}) {
     panelHeight,
     maxPanelHeight,
     setupDraggable,
-    cleanupDraggable,
     updatePanelDimensions,
+    animateOpen,
     animateClose,
-    animateOpen
   };
 }

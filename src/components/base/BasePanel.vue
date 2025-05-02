@@ -6,8 +6,9 @@
     <!-- Backdrop (mobile only) -->
     <Transition name="fade">
       <div
-        v-show="isMobile && isOpen && position !== 'side'"
-        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20"
+        v-show="isMobile && isOpen"
+        class="fixed inset-0 dark:bg-black/40 backdrop-blur-sm z-20 transition-colors duration-300"
+        :class="draggable ? [isDragging ? 'dark:bg-black/20' : ''] : ''"
         aria-hidden="true"
         @click="onClose"
       />
@@ -158,9 +159,9 @@
 </template>
 
 <script setup>
-import { watch, nextTick } from 'vue';
+import { watch } from 'vue';
 import { ArrowRightToLine } from 'lucide-vue-next';
-import { usePanelUnified } from '@/composables/usePanelUnified';
+import { Panel } from '@/composables/usePanelUnified';
 import { useVModel } from '@vueuse/core';
 import Button from '@/components/base/BaseButton.vue';
 import PanelContent from '@/components/base/PanelContent.vue';
@@ -198,9 +199,8 @@ const {
   isDragging,
   panelHeight,
   translateY,
-  handleResize,
-  setupDraggable
-} = usePanelUnified({
+  handleResize
+} = Panel({
   storageKey: props.storageKey,
   defaultDesktopState: props.isOpen,
   maxHeightRatio: props.maxHeightRatio,
@@ -213,9 +213,9 @@ const {
 watch(() => props.isOpen, (val) => {
   if (val !== isOpen.value) {
     if (val) {
-      open(props.isMobile);
+      open();
     } else {
-      close(props.isMobile);
+      close();
     }
   }
 }, { immediate: true });
@@ -232,19 +232,9 @@ watch(() => props.isMobile, (newIsMobile) => {
   handleResize(newIsMobile);
 });
 
-const onOpen = () => open(props.isMobile);
-const onClose = () => close(props.isMobile);
-const onToggle = () => toggle(props.isMobile);
-
-// Setup draggable when component is mounted and conditions are met
-watch([() => props.isMobile, () => isOpen.value, () => props.draggable], 
-  ([isMobile, open, draggable]) => {
-    if (isMobile && open && draggable) {
-      nextTick(setupDraggable);
-    }
-  }, 
-  { immediate: true }
-);
+const onOpen = () => open();
+const onClose = () => close();
+const onToggle = () => toggle();
 
 // Expose the panel API to parent components
 defineExpose({
