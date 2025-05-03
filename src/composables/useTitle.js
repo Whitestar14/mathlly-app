@@ -18,15 +18,6 @@ const titleHistory = ref([]);
  * @param {string} [title=''] - Initial title to set for the page
  * @returns {PageTitleReturn} Object containing title management utilities
  */
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { isHandlingError } from '@/router/errorHandler';
-
-/** @type {import('vue').Ref<string>} */
-const lastTitle = ref('');
-/** @type {import('vue').Ref<string>} */
-const currentTitle = ref('Mathlly');
-
 export function useTitle(title = '') {
   const route = useRoute();
   const titleRef = ref(title);
