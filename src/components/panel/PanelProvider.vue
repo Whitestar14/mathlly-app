@@ -4,7 +4,7 @@
   
   <script setup>
   import { watch, onMounted } from 'vue';
-  import { createPanelContext } from '@/composables/usePanelUnified';
+  import { createPanelContext } from '@/composables/usePanel';
   import { useDeviceStore } from '@/stores/device';
   
   // Get the device store instance

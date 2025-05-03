@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { usePanel } from '@/composables/usePanelUnified';
+import { usePanel } from '@/composables/usePanel';
 import SidePanel from '@/components/panel/SidePanel.vue';
 import DesktopPanel from '@/components/panel/DesktopPanel.vue';
 // Fix this integration later
@@ -188,62 +188,14 @@ const {
   display: contents;
 }
 
-.desktop-panel {
-  @apply relative flex flex-col flex-auto overflow-hidden;
-}
-
-@media (max-width: 768px) {
-  .desktop-panel {
-    display: none !important;
-  }
-}
-
 .panel-content {
   @apply flex flex-col w-full;
 }
 
-.side-panel-container {
-  @apply overflow-hidden h-screen flex flex-col fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900 transition-transform;
-}
-
-/* Side panel animations - Left side */
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-left-enter-from,
-.slide-left-leave-to {
-  transform: translateX(-100%);
-}
-
-.slide-left-enter-to,
-.slide-left-leave-from {
-  transform: translateX(0%);
-}
-
-/* Side panel animations - Right side */
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-right-enter-from,
-.slide-right-leave-to {
-  transform: translateX(100%);
-}
-
-.slide-right-enter-to,
-.slide-right-leave-from {
-  transform: translateX(0%);
-}
-
-/* Fade animation for backdrop */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

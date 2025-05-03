@@ -59,7 +59,7 @@ import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import { useSettingsStore } from '@/stores/settings'
 import BasePage from '@/components/base/BasePage.vue'
-import { usePanel } from '@/composables/usePanelUnified'
+import { usePanel } from '@/composables/usePanel'
 const props = defineProps({
   mode: { type: String, required: true },
   settings: { type: Object, required: true },

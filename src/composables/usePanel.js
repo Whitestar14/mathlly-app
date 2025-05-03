@@ -1,6 +1,6 @@
 import { ref, computed, nextTick, watch, provide, inject, reactive, readonly, onUnmounted } from 'vue';
 import { useLocalStorage, refDebounced } from '@vueuse/core';
-import { useDraggable } from './useDraggable';
+import { useDraggable } from '../utils/misc/useDraggable';
 
 /**
  * Unified panel composable managing state, persistence, responsiveness, and dragging.
