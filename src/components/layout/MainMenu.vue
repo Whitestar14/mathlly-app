@@ -1,11 +1,10 @@
 <template>
   <BasePanel
-    :is-open="isOpen"
-    :is-mobile="isMobile"
-    :show-toggle="false"
-    title="Menu"
-    position="side"
-    @update:isOpen="closeMenu"
+  id="menu"
+  type="side"
+  title="Menu"
+  position="right"
+  :show-toggle="false"
   >
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
@@ -80,20 +79,6 @@ import {
   ToggleGroupItem
 } from "radix-vue"
 import { onMounted } from 'vue'
-
-defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
-  },
-  isMobile: {
-    type: Boolean,
-    default: true,
-  },
-})
-
-const emit = defineEmits(["update:isOpen"])
-const closeMenu = () => emit('update:isOpen', false)
 
 const { selectedTheme, isDark } = useTheme()
 

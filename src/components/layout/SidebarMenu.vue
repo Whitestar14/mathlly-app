@@ -1,13 +1,13 @@
 <template>
   <BasePanel
-    :is-open="isOpen"
-    :is-mobile="isMobile"
-    position="side"
-    position-side="left"
-    :show-toggle="false"
-    :show-header="true"
-    :show-footer="true"
-    @update:isOpen="closeSidebar"
+  id="sidebar"
+  type="side"
+  position="left"
+  :show-toggle="false"
+  :show-header="true"
+  :show-footer="true"
+  :draggable="false"
+  :default-desktop-state="true"
   >
     <!-- Custom header -->
     <template #header-actions>
@@ -158,17 +158,13 @@ import TextLogo from '@/components/base/TextLogo.vue'
 import BasePanel from "@/components/base/BasePanel.vue"
 import Indicator from "@/components/ui/PillIndicator.vue"
 const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false,
-  },
   isMobile: {
     type: Boolean,
     default: false,
   },
 })
 
-const emit = defineEmits(["update:isOpen"])
+const emit = defineEmits(["sidebar-close"]);
 
 defineOptions({
   name: "SidebarMenu",
@@ -240,7 +236,7 @@ const {
   hideIndicatorPaths: ["/settings", "/feedback", "/error", "/:pathMatch(.*)*"],
   onNavigate: () => {
     if (props.isMobile) {
-      closeSidebar()
+      emit('sidebar-close');
     }
   },
 })
@@ -253,8 +249,6 @@ const handleItemClick = (event, item) => {
 const handleFooterItemClick = (event, path) => {
   handleNavigation(path, null)
 }
-
-const closeSidebar = () => emit("update:isOpen", false)
 
 const menuItemClasses = [
   "w-full flex items-center gap-2.5",
