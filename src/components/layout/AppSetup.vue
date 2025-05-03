@@ -5,7 +5,7 @@
     <sidebar-menu :is-mobile="deviceStore.isMobile" @sidebar-close="sidebarPanel.close()" />
     <div class="flex flex-col flex-grow duration-300" :class="mainContentClasses">
       <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="sidebarPanel.isOpen" :is-menubar-open="menuPanel.isOpen"
-        @toggle-sidebar="sidebarPanel.toggle()" @toggle-menubar="menuPanel.toggle()" />
+        @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
 
       <app-view :mode="mode" :settings="settings" :is-mobile="deviceStore.isMobile" @settings-change="updateSettings"
         @update:mode="updateMode" />
@@ -81,10 +81,17 @@ const updateSettings = async (newSettings) => {
   await settingsStore.saveSettings(settingsToSave)
 }
 
-// --- Keyboard Shortcuts ---
-useKeyboard("global", {
-  toggleSidebar: sidebarPanel.toggle(),
-  toggleMenubar: menuPanel.toggle(),
+const toggleSidebar = () => {
+  sidebarPanel.toggle();
+}
+
+const toggleMenubar = () => {
+  menuPanel.toggle();
+}
+
+  useKeyboard("global", {
+  toggleSidebar,
+  toggleMenubar,
   toggleFullscreen: () => {
     useFullscreen(document.documentElement).toggle()
   },

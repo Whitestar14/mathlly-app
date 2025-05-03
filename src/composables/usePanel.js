@@ -1,5 +1,5 @@
 import { ref, computed, nextTick, watch, provide, inject, reactive, readonly, onUnmounted } from 'vue';
-import { useLocalStorage, refDebounced } from '@vueuse/core';
+import { useLocalStorage } from '@vueuse/core';
 import { useDraggable } from '../utils/misc/useDraggable';
 
 /**
@@ -58,8 +58,7 @@ export function createPanel(options = {}) {
   const deviceContext = computed(() => currentIsMobile.value ? 'mobile' : 'desktop');
 
   // Initialize panel state from stored preferences based on device type
-  const isOpen = ref(preferences.value[deviceContext.value].isOpen);
-  const isOpenDebounced = refDebounced(isOpen, 30);
+  const isOpen = ref(currentIsMobile.value ? false : preferences.value.desktop.isOpen);
 
   // References for draggable functionality
   const handle = ref(null);
@@ -147,8 +146,7 @@ export function createPanel(options = {}) {
 
   watch(currentIsMobile, handleResize);
   const api = {
-    isOpen: isOpenDebounced,
-    _isOpenRaw: isOpen,
+    isOpen,
     isMobile: currentIsMobile,
     panel,
     handle,
@@ -193,7 +191,7 @@ export function createPanelContext() {
      */
     registerPanel(id, options = {}) {
       if (!state.panels[id]) {
-        const panel = createPanel({...options, storageKey: options.storageKey || id, initialIsMobile: state.isMobile});
+        const panel = createPanel({...options, initialIsMobile: state.isMobile});
         // Store in the renamed state property
         state.panels[id] = panel;
         state.options[id] = options;
@@ -255,24 +253,6 @@ export function createPanelContext() {
      */
     getInstance(id) {
       return state.panels[id];
-    },
-
-    /**
-     * Updates options for an existing panel instance
-     * @param {string} id - Panel identifier
-     * @param {object} options - New options to apply
-     */
-    updatePanelOptions(id, options) {
-      // Use the renamed state property
-      const instance = state.panels[id];
-      if (instance) {
-        // Call an update method if usePanelUnified provides one
-        if (typeof instance.updateOptions === 'function') {
-          instance.updateOptions(options);
-        } else {
-          console.warn(`Panel "${id}" does not have an updateOptions method.`);
-        }
-      }
     },
 
     /**
@@ -341,10 +321,11 @@ export function usePanelContext() {
  * Returns a stable API object that dynamically accesses the underlying panel's state/methods.
  * @param {string} id - The unique identifier for the panel.
  * @param {object} [options={}] - Configuration options for the panel.
+ * @param {boolean} [api=false] - Determines returning api getters or default setup object
  * @returns {object} A stable panel API object.
  */
 export function usePanel(id, options = {}, api = false) {
-  // if (!id) console.warn("usePanel() requires an id");
+  if (!id) console.warn("usePanel() requires an id");
 
   const { state, actions } = usePanelContext();
   const hasRegistrationOptions = Object.keys(options).length > 0;
@@ -373,13 +354,13 @@ export function usePanel(id, options = {}, api = false) {
 
       // Methods directly call the corresponding method on the instance if it exists
       open: () => {
-        actions.provide(id, 'open');
+        actions.openPanel(id);
       },
       close: () => {
-        actions.provide(id, 'close');
+        actions.closePanel(id);
       },
       toggle: () => {
-        actions.provide(id, 'toggle');
+        actions.togglePanel(id);
       }
     };
   } else if (!hasRegistrationOptions && !state.panels[id]) {

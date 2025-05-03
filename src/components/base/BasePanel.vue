@@ -4,7 +4,6 @@
     :class="{
       'panel-mobile': isMobile,
       'panel-side': type === 'side',
-      'panel-bottom': isMobile && type !== 'side',
     }"
   >
     <!-- Backdrop (mobile only) -->
@@ -57,10 +56,7 @@
 
     <!-- Mobile Panel -->
     <div v-else-if="isMobile">
-    <div
-      v-show="isOpen"
-      class="fixed inset-x-0 z-20"
-    >
+    <div v-show="isOpen" class="fixed inset-x-0 z-20">
       <div
         ref="panel"
         class="bg-white dark:bg-gray-800 rounded-t-xl fixed inset-x-0 bottom-0 overflow-hidden"
@@ -154,6 +150,13 @@ const props = defineProps({
   defaultDesktopState: { type: Boolean, default: false }
 });
 
+const options = {
+  storageKey: props.id || props.storageKey,
+  defaultDesktopState: props.defaultDesktopState,
+  maxHeightRatio: props.maxHeightRatio,
+  snapThreshold: props.snapThreshold,
+  draggable: props.draggable
+}
 const {
   isOpen,
   isMobile,
@@ -164,14 +167,7 @@ const {
   isDragging,
   panelHeight,
   translateY
-} = usePanel(props.id, {
-  storageKey: props.id || props.storageKey,
-  initialIsMobile: props.isMobile,
-  defaultDesktopState: props.defaultDesktopState,
-  maxHeightRatio: props.maxHeightRatio,
-  snapThreshold: props.snapThreshold,
-  draggable: props.draggable
-}, true);
+} = usePanel(props.id, options, true);
 </script>
 
 <style scoped>

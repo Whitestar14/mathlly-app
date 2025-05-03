@@ -4,7 +4,7 @@
         v-if="isOpen"
         class="side-panel-container"
         :class="[
-          isMobile ? 'w-full' : `w-64`,
+          isMobile ? 'w-full' : 'w-64',
           position === 'left' ? 'left-0' : 'right-0',
           !isMobile && position === 'left' ? 'border-r' : '',
           !isMobile && position === 'right' ? 'border-l' : '',
@@ -52,7 +52,7 @@
   
   <style scoped>
   .side-panel-container {
-    @apply overflow-hidden h-screen flex flex-col fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900 transition-transform;
+    @apply overflow-hidden h-screen flex flex-col fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900;
   }
   
   /* Side panel animations - Left side */
