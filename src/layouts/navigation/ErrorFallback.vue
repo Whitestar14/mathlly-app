@@ -35,22 +35,22 @@
           :disabled="isRetrying || (isOffline && !networkStatus)" :aria-label="isOffline ? 'Retry Connection' : 'Try Loading Page Again'
             ">
           <template v-if="isRetrying">
-            <LoaderIcon class="h-4 w-4 animate-spin mr-2" />
+            <LoaderIcon class="h-4 w-4 animate-spin" />
             Retrying...
           </template>
           <template v-else>
-            <RefreshCwIcon class="h-4 w-4 mr-2" />
+            <RefreshCwIcon class="h-4 w-4" />
             {{ isOffline ? 'Retry Connection' : 'Try Again' }}
           </template>
         </Button>
         <Button variant="primary" @click="goHome" :disabled="isRetrying">
-          <HomeIcon class="h-4 w-4 mr-2" />
+          <HomeIcon class="h-4 w-4" />
           Go Home
         </Button>
       </div>
 
       <div v-if="errorStack && !isOffline"
-        class="mt-8 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-left overflow-auto border border-gray-200 dark:border-gray-700 max-h-60">
+        class="mt-8 p-4 bg-gray-50 dark:bg-gray-900 ml-auto mr-auto max-w-[90vw] rounded-lg text-left overflow-auto border border-gray-200 dark:border-gray-700 max-h-60">
         <details>
           <summary class="cursor-pointer text-indigo-600 dark:text-indigo-400 font-medium text-sm">
             Technical Details
@@ -152,7 +152,7 @@ const errorCode = computed(() => {
 })
 
 const messageTitle = computed(() => {
-  if (isOffline.value) return 'You Are Offline'
+  if (isOffline.value) return 'You are offline';
   if (
     errorMessage.value &&
     !errorMessage.value.includes('(') &&
@@ -160,10 +160,10 @@ const messageTitle = computed(() => {
   ) {
     return errorMessage.value
   }
-  if (props.isRouteError) return 'Page Load Failed'
-  if (props.isGlobalError) return 'Application Malfunctioned'
-  return 'Something Went Wrong'
-})
+  if (props.isRouteError) return 'Page load failed';
+  if (props.isGlobalError) return 'Application malfunctioned';
+  return 'Something went wrong';
+});
 
 const messageBody = computed(() => {
   if (isOffline.value)
