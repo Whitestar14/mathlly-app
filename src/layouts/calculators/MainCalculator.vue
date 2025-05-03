@@ -48,6 +48,7 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
+import { useTitle } from '@/composables/useTitle'
 import { useHistory } from '@/composables/useHistory'
 import { usePanel } from '@/composables/usePanel'
 import { useMemory } from '@/composables/useMemory'
@@ -85,6 +86,9 @@ const calculator = ref(CalculatorFactory.createCalculator(props.mode, props.sett
 
 // Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value))
+
+// Set page title
+useTitle(computed(() => `${props.mode} Mode`))
 
 // Computed properties
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)

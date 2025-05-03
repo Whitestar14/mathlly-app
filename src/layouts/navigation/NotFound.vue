@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { usePageTitle } from '@/composables/usePageTitle';
+import { useTitle } from '@/composables/useTitle';
 import { useRouter } from 'vue-router';
 import { ArrowLeft, Home } from 'lucide-vue-next';
 import Button from "@/components/base/BaseButton.vue";
@@ -54,7 +54,7 @@ defineOptions({
   name: 'NotFound'
 });
 
-usePageTitle("404 - Not Found")
+useTitle("404 - Not Found")
 
 const router = useRouter();
 </script>
