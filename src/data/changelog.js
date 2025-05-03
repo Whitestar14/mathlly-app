@@ -1,5 +1,17 @@
 export const updates = [
   {
+    version: '0.11.11',
+    date: 'May 3, 2025',
+    features: [
+      '@milestone: Implemented a robust panel system with a clearer, simpler API for performance improvements',
+      'Removed redundant code across codebase for easier maintenance and a smaller bundle size',
+      'Ensured consistency in button appearance for mobile/desktop dynamics to avoid prop drilling',
+      'Improved toast navigation color scheme for an easier description of information',
+      'Fixed not being able to use backspace in the Base64Tool',
+      'Improved Error pages to consistency use the BasePage composable and improve typography',
+    ]
+  },
+  {
     version: '0.11.10',
     date: 'May 1, 2025',
     features: [
