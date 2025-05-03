@@ -17,7 +17,7 @@ const lastTitle = ref('');
 /** @type {import('vue').Ref<string>} */
 const currentTitle = ref('Mathlly');
 
-export function usePageTitle(title = '') {
+export function useTitle(title = '') {
   const route = useRoute();
   const titleRef = ref(title);
 

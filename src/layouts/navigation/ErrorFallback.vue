@@ -65,7 +65,7 @@ import { useRouter } from 'vue-router'
 import { HomeIcon, RefreshCwIcon } from 'lucide-vue-next'
 import BasePage from '@/components/base/BasePage.vue'
 import Button from '@/components/base/BaseButton.vue'
-import { usePageTitle } from '@/composables/usePageTitle'
+import { useTitle } from '@/composables/useTitle'
 
 const props = defineProps({
   error: {
@@ -82,7 +82,7 @@ const router = useRouter()
 const isOffline = ref(false)
 
 // Set the page title
-usePageTitle('Something went wrong')
+useTitle('Something went wrong')
 
 onMounted(() => {
   // Check if we're offline
