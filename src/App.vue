@@ -5,7 +5,9 @@
     :is-global-error="true" />
   <Suspense v-else>
     <template #default>
-      <app-setup />
+      <PanelProvider>
+        <app-setup />
+      </PanelProvider>
     </template>
     <template #fallback>
       <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
@@ -16,8 +18,9 @@
 </template>
 
 <script setup>
-import { ref, onErrorCaptured, provide } from 'vue';
+import { ref, onErrorCaptured } from 'vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
+import PanelProvider from '@/components/panel/PanelProvider.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 
@@ -30,10 +33,4 @@ onErrorCaptured((err, instance, info) => {
   hasError.value = true;
   return false;
 });
-
-provide('triggerGlobalError', (err) => {
-  error.value = err;
-  hasError.value = true;
-});
-
 </script>
