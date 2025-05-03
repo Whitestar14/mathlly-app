@@ -11,7 +11,7 @@ export class CalculatorFactory {
    * @param {Object} settings - Calculator settings
    * @returns {Object} Calculator instance
    */
-  static createCalculator(mode, settings) {
+  static create(mode, settings) {
     switch (mode) {
       case 'Standard':
         return new StandardCalculator(settings)

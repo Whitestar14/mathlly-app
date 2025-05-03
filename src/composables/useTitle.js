@@ -18,7 +18,7 @@ const titleHistory = ref([]);
  * @param {string} [title=''] - Initial title to set for the page
  * @returns {PageTitleReturn} Object containing title management utilities
  */
-export function usePageTitle(title = '') {
+export function useTitle(title = '') {
   const route = useRoute();
   const titleRef = ref(title);
 

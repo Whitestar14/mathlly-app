@@ -37,7 +37,7 @@ import { useVersionStore } from '@/stores/version'
 import { ArrowLeftIcon } from 'lucide-vue-next'
 import Button from '@/components/base/BaseButton.vue'
 import Badge from '@/components/base/BaseBadge.vue'
-import { usePageTitle } from '@/composables/usePageTitle'
+import { useTitle } from '@/composables/useTitle'
 
 const props = defineProps({
   title: {
@@ -74,7 +74,7 @@ const router = useRouter()
 const version = useVersionStore()
 
 // Use our custom title management
-usePageTitle(props.title)
+useTitle(props.title)
 
 const goBack = () => {
   router.go(-1)

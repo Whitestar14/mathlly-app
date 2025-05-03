@@ -2,25 +2,22 @@
   <div class="min-h-screen flex bg-background dark:bg-background-dark duration-300" :class="{
     'animation-disabled': settings.animationDisabled,
   }">
-    <sidebar-menu :is-open="isSidebarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeSidebar" />
-    <div class="flex flex-col flex-grow duration-300" :class="[
-      !deviceStore.isMobile && isSidebarOpen ? 'pl-64' : '',
-      !deviceStore.isMobile && isMenubarOpen ? 'pr-64' : ''
-    ]">
-      <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="isSidebarOpen" :is-menubar-open="isMenubarOpen"
+    <sidebar-menu :is-mobile="deviceStore.isMobile" @sidebar-close="sidebarPanel.close()" />
+    <div class="flex flex-col flex-grow duration-300" :class="mainContentClasses">
+      <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="sidebarPanel.isOpen" :is-menubar-open="menuPanel.isOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
 
       <app-view :mode="mode" :settings="settings" :is-mobile="deviceStore.isMobile" @settings-change="updateSettings"
         @update:mode="updateMode" />
     </div>
 
-    <main-menu :is-open="isMenubarOpen" :is-mobile="deviceStore.isMobile" @update:isOpen="closeMenubar" />
+    <main-menu />
     <toast :is-mobile="deviceStore.isMobile" />
   </div>
 </template>
 
 <script setup>
-import { onUnmounted, computed, watch } from "vue"
+import { onUnmounted, computed } from "vue"
 import { useRouter } from "vue-router"
 import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
@@ -38,12 +35,12 @@ const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
 
 // --- Loading Logic ---
-const minLoadTime = new Promise(resolve => setTimeout(resolve, 1000)) // Keep minimum load time for UX
+const minLoadTime = new Promise(resolve => setTimeout(resolve, 1500)) // Keep minimum load time for UX
 
 await Promise.all([
-  minLoadTime,
   settingsStore.loadSettings(),
   router.isReady(),
+  minLoadTime,
 ])
 
 deviceStore.initializeDeviceInfo()
@@ -51,19 +48,25 @@ deviceStore.initializeDeviceInfo()
 const settings = settingsStore
 const mode = computed(() => settingsStore.activeMode)
 
-const {
-  isOpen: isSidebarOpen,
-  toggle: toggleSidebar,
-  close: closeSidebar,
-  handleResize: handleSidebarResize,
-} = usePanel('sidebar', deviceStore.isMobile)
+// Use the panel context for sidebar and menu
+const sidebarPanel = usePanel('sidebar')
+const menuPanel = usePanel('menu')
 
-const {
-  isOpen: isMenubarOpen,
-  toggle: toggleMenubar,
-  close: closeMenubar,
-  handleResize: handleMenubarResize,
-} = usePanel('menu', deviceStore.isMobile, false)
+const mainContentClasses = computed(() => {
+  const classes = [];
+  
+  // Add padding for sidebar when open on desktop
+  if (!deviceStore.isMobile && sidebarPanel.isOpen) {
+    classes.push('pl-64');
+  }
+  
+  // Add padding for menu when open on desktop
+  if (!deviceStore.isMobile && menuPanel.isOpen) {
+    classes.push('pr-64');
+  }
+  
+  return classes;
+});
 
 const updateMode = async (newMode) => {
   settingsStore.setCurrentMode(newMode)
@@ -78,26 +81,17 @@ const updateSettings = async (newSettings) => {
   await settingsStore.saveSettings(settingsToSave)
 }
 
-watch(
-  () => deviceStore.isMobile,
-  (newIsMobile) => {
-    handleSidebarResize(newIsMobile)
-    handleMenubarResize(newIsMobile)
-  }
-)
+const toggleSidebar = () => {
+  sidebarPanel.toggle();
+}
 
-// Close panels on mobile route change
-watch(router.currentRoute, () => {
-  if (deviceStore.isMobile) {
-    closeSidebar()
-    closeMenubar()
-  }
-})
+const toggleMenubar = () => {
+  menuPanel.toggle();
+}
 
-// --- Keyboard Shortcuts ---
-useKeyboard("global", {
-  toggleSidebar: toggleSidebar,
-  toggleMenubar: toggleMenubar,
+  useKeyboard("global", {
+  toggleSidebar,
+  toggleMenubar,
   toggleFullscreen: () => {
     useFullscreen(document.documentElement).toggle()
   },
@@ -106,5 +100,4 @@ useKeyboard("global", {
 onUnmounted(() => {
   deviceStore.destroyDeviceInfo()
 })
-
 </script>

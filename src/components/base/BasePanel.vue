@@ -1,140 +1,89 @@
 <template>
   <div
     class="panel-container"
-    :class="{ mobile: isMobile, 'panel-side': position === 'side' }"
+    :class="{
+      'panel-mobile': isMobile,
+      'panel-side': type === 'side',
+    }"
   >
     <!-- Backdrop (mobile only) -->
     <Transition name="fade">
       <div
-        v-show="isMobile && isOpen && position !== 'side'"
-        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20"
+        v-show="isMobile && isOpen"
+        class="fixed inset-0 dark:bg-black/40 backdrop-blur-sm z-20 transition-colors duration-300"
+        :class="draggable ? [isDragging ? 'dark:bg-black/20' : ''] : ''"
         aria-hidden="true"
-        @click="onClose"
+        @click="close()"
       />
     </Transition>
 
     <!-- Side Panel -->
-    <Transition :name="positionSide === 'left' ? 'slide-left' : 'slide-right'">
-      <div
-        v-if="position === 'side' && isOpen"
-        class="side-panel-container"
-        :class="[
-          isMobile ? 'w-full' : `w-${width}`,
-          positionSide === 'left' ? 'left-0' : 'right-0',
-          !isMobile && positionSide === 'left' ? 'border-r' : '',
-          !isMobile && positionSide === 'right' ? 'border-l' : '',
-          'border-gray-200 dark:border-gray-700',
-        ]"
-      >
-        <PanelContent
-          :title="title"
-          :show-header="showHeader"
-          :show-footer="showFooter"
-          :show-close-button="showCloseButton"
-          :content-class="contentClass"
-          :is-mobile="isMobile"
-          @close="onClose"
-        >
-          <template #default>
-            <slot />
-          </template>
-          <template #header-actions>
-            <slot name="header-actions" />
-          </template>
-          <template
-            v-if="$slots.footer"
-            #footer
-          >
-            <slot name="footer" />
-          </template>
-        </PanelContent>
-      </div>
-    </Transition>
+    <SidePanel
+      v-if="type === 'side'"
+      :is-open="isOpen"
+      :is-mobile="isMobile"
+      :position="position"
+      :title="title"
+      :show-header="showHeader"
+      :show-footer="showFooter"
+      :content-class="contentClass"
+      :main-class="mainClass"
+      @close="close()"
+    >
+      <template #default><slot /></template>
+      <template #header-actions><slot name="header-actions" /></template>
+      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+    </SidePanel>
 
     <!-- Desktop Panel -->
-    <Transition name="slide-out">
-      <div
-        v-if="!isMobile && position !== 'side'"
-        class="desktop-panel"
-        :class="[
-          'transition-[width] duration-300 ease-in-out border-gray-200 dark:border-gray-700',
-          isOpen ? 'w-[18.5rem]' : 'w-10',
-          positionSide === 'left' ? 'border-l' : 'border-r',
-        ]"
-      >
-        <div
-          class="panel-content absolute inset-y-0 right-0 bg-white dark:bg-gray-800 transition-opacity duration-300 max-h-[100vh]"
-          :class="[
-            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
-            mainClass,
-          ]"
-        >
-          <PanelContent
-            :title="title"
-            :show-header="showHeader"
-            :show-footer="showFooter"
-            :show-close-button="showCloseButton"
-            :content-class="contentClass"
-            :is-mobile="isMobile"
-            @close="onClose"
-          >
-            <template #default>
-              <slot />
-            </template>
-            <template #header-actions>
-              <slot name="header-actions" />
-            </template>
-            <template
-              v-if="$slots.footer"
-              #footer
-            >
-              <slot name="footer" />
-            </template>
-          </PanelContent>
-        </div>
-
-        <!-- Toggle button (desktop only) -->
-        <div v-if="showToggle">
-          <Button
-            v-tippy="{
-              content: isOpen ? 'Hide Panel' : 'Show Panel',
-              placement: 'left',
-            }"
-            variant="outline"
-            size="icon"
-            :class="[
-              'shadow-sm absolute left-0 bottom-0 -translate-y-1/3 pointer-events-auto',
-              !isOpen ? '-translate-x-1/2 left-1/2' : 'translate-x-1/4',
-            ]"
-            @click="onToggle"
-          >
-            <ChevronRightIcon
-              class="h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-300"
-              :class="{ 'rotate-180': isOpen }"
-            />
-          </Button>
-        </div>
-      </div>
-    </Transition>
+    <DesktopPanel
+      v-else-if="!isMobile"
+      :is-open="isOpen"
+      :position="position"
+      :title="title"
+      :show-header="showHeader"
+      :show-footer="showFooter"
+      :content-class="contentClass"
+      :main-class="mainClass"
+      :show-toggle="showToggle"
+      @close="close()"
+      @toggle="toggle()"
+    >
+      <template #default><slot /></template>
+      <template #header-actions><slot name="header-actions" /></template>
+      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+    </DesktopPanel>
 
     <!-- Mobile Panel -->
-    <Transition name="slide-up">
+    <div v-else-if="isMobile">
+    <div v-show="isOpen" class="fixed inset-x-0 z-20">
       <div
-        v-if="isMobile && position !== 'side' && isOpen"
-        class="fixed inset-x-0 bottom-0 z-20 rounded-t-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 max-h-[80vh] h-[600px]"
+        ref="panel"
+        class="bg-white dark:bg-gray-800 rounded-t-xl fixed inset-x-0 bottom-0 overflow-hidden"
+        :style="{
+          height: `${panelHeight}px`,
+          transform: `translateY(${translateY}px)`,
+          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.74,-0.11, 0.53, 0.9)',
+        }"
       >
+        <!-- Draggable Handle -->
         <div
-          class="panel-content h-full"
-          :class="mainClass"
+          ref="handle"
+          class="w-full absolute h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-manipulation"
+          :class="{ 'cursor-grabbing': isDragging }"
+          aria-label="Drag handle to resize panel"
         >
+          <div v-if="draggable" class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+        </div>
+
+        <div class="panel-content h-full" :class="mainClass">
           <PanelContent
             :title="title"
             :show-header="showHeader"
             :show-footer="showFooter"
-            :show-close-button="showCloseButton"
             :content-class="contentClass"
             :is-mobile="isMobile"
-            @close="onClose"
+            @close="close()"
           >
             <template #default>
               <slot />
@@ -142,59 +91,92 @@
             <template #header-actions>
               <slot name="header-actions" />
             </template>
-            <template
-              v-if="$slots.footer"
-              #footer
-            >
+            <template v-if="$slots.footer" #footer>
               <slot name="footer" />
             </template>
           </PanelContent>
         </div>
       </div>
-    </Transition>
+    </div>
+    </div>
+
+    <!-- <BottomPanel
+      v-else-if="isMobile"
+      :is-open="isOpen"
+      :is-mobile="isMobile"
+      :title="title"
+      :show-header="showHeader"
+      :show-footer="showFooter"
+      :content-class="contentClass"
+      :main-class="mainClass"
+      :draggable="draggable"
+      :panel-height="panelHeight ?? 0"
+      :translate-y="translateY ?? 0"
+      :is-dragging="isDragging ?? false"
+      :panel="panel" 
+      :handle="handle"
+      @close="close()"
+    >
+      <template #default><slot /></template>
+      <template #header-actions><slot name="header-actions" /></template>
+      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+    </BottomPanel> -->
+
   </div>
 </template>
 
 <script setup>
-import { ChevronRightIcon } from 'lucide-vue-next';
-import Button from '@/components/base/BaseButton.vue';
+import { usePanel } from '@/composables/usePanel';
+import SidePanel from '@/components/panel/SidePanel.vue';
+import DesktopPanel from '@/components/panel/DesktopPanel.vue';
+// Fix this integration later
+// import BottomPanel from '@/components/panel/BottomPanel.vue';
 import PanelContent from '@/components/base/PanelContent.vue';
 
 const props = defineProps({
-  isOpen: { type: Boolean, default: false },
-  isMobile: { type: Boolean, default: false },
+  id: { type: String, required: true },
   showToggle: { type: Boolean, default: true },
   showHeader: { type: Boolean, default: true },
   showFooter: { type: Boolean, default: true },
-  showCloseButton: { type: Boolean, default: true },
   title: { type: String, default: '' },
-  width: { type: String, default: '64' },
   mainClass: { type: String, default: '' },
   contentClass: { type: String, default: '' },
+  type: { type: String, default: 'right' },
   position: { type: String, default: 'right' },
-  positionSide: { type: String, default: 'right' },
+  maxHeightRatio: { type: Number, default: 0.8 },
+  snapThreshold: { type: Number, default: 0.3 },
+  storageKey: { type: String, default: 'panel' },
+  draggable: { type: Boolean, default: false },
+  defaultDesktopState: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['update:isOpen']);
-
-const onOpen = () => emit('update:isOpen', true);
-const onClose = () => emit('update:isOpen', false);
-
-const onToggle = () => {
-  props.isOpen === true ? onClose() : onOpen();
-};
+const options = {
+  storageKey: props.id || props.storageKey,
+  defaultDesktopState: props.defaultDesktopState,
+  maxHeightRatio: props.maxHeightRatio,
+  snapThreshold: props.snapThreshold,
+  draggable: props.draggable
+}
+const {
+  isOpen,
+  isMobile,
+  toggle,
+  close,
+  handle,
+  panel,
+  isDragging,
+  panelHeight,
+  translateY
+} = usePanel(props.id, options, true);
 </script>
 
 <style scoped>
+/* Scoped styles for the BasePanel wrapper */
 .panel-container {
-  position: relative;
-  z-index: 20;
-  display: flex;
-  flex: 0 1 auto;
-  flex-direction: column;
+  @apply relative z-20 flex flex-col flex-initial;
 }
 
-.panel-container.mobile {
+.panel-container.panel-mobile {
   display: contents;
 }
 
@@ -202,74 +184,16 @@ const onToggle = () => {
   display: contents;
 }
 
-.desktop-panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .desktop-panel {
-    display: none !important;
-  }
-}
-
 .panel-content {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+  @apply flex flex-col w-full;
 }
 
-.side-panel-container {
-  @apply fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900 transition-transform;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
 }
-
-/* Mobile panel animations */
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
-}
-
-/* Side panel animations - Left side */
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-left-enter-from,
-.slide-left-leave-to {
-  transform: translateX(-100%);
-}
-
-.slide-left-enter-to,
-.slide-left-leave-from {
-  transform: translateX(0%);
-}
-
-/* Side panel animations - Right side */
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-right-enter-from,
-.slide-right-leave-to {
-  transform: translateX(100%);
-}
-
-.slide-right-enter-to,
-.slide-right-leave-from {
-  transform: translateX(0%);
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

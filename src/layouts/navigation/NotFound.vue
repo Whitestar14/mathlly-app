@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-white dark:bg-gray-800 transition-colors duration-300">
+  <BasePage title="Not Found" :showHeader="false" :showFooter="false" mainClass="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-white dark:bg-gray-800">
     <div class="space-y-6 max-w-lg">
       <!-- Error Code -->
       <div class="relative">
@@ -27,7 +27,6 @@
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 *:min-w-[120px]">
         <Button
           variant="ghost"
-          class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
           @click="router.back()"
         >
           <ArrowLeft class="h-4 w-4" />
@@ -42,19 +41,20 @@
         </Button>
       </div>
     </div>
-  </div>
+</BasePage>
 </template>
 
 <script setup>
-import { usePageTitle } from '@/composables/usePageTitle';
+import { useTitle } from '@/composables/useTitle';
 import { useRouter } from 'vue-router';
 import { ArrowLeft, Home } from 'lucide-vue-next';
 import Button from "@/components/base/BaseButton.vue";
+import BasePage from '@/components/base/BasePage.vue';
 defineOptions({
   name: 'NotFound'
 });
 
-usePageTitle("404 - Not Found")
+useTitle("404 - Not Found")
 
 const router = useRouter();
 </script>

@@ -1,15 +1,6 @@
 <template>
   <div class="container mx-auto p-6">
     <div class="max-w-6xl mx-auto space-y-6">
-      <div class="space-y-1">
-        <h1 class="text-2xl font-medium text-gray-900 dark:text-gray-100">
-          Base64 Encoder/Decoder
-        </h1>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          Convert text to Base64 and vice versa
-        </p>
-      </div>
-
       <div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 relative">
           <Indicator :position="indicatorStyle" />                   
@@ -169,10 +160,9 @@ const handleProcess = () => {
       currentTab.value === "encode" ? btoa(input.value) : atob(input.value);
   } catch (error) {
     toast({
-      title: "Error",
+      type: "error",
       description: `Invalid ${currentTab.value === "encode" ? "text" : "Base64"
         } input`,
-      variant: "destructive",
     });
   }
 };
@@ -196,7 +186,7 @@ const pasteFromClipboard = async () => {
     input.value = text;
   } catch (err) {
     toast({
-      title: "Error",
+      type: "error",
       description: "Failed to paste from clipboard",
       variant: "destructive",
     });

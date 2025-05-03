@@ -20,7 +20,7 @@
           :active-base="state.activeBase"
           :mode="state.mode"
           :display-values="state.displayValues"
-          @open-history="toggleHistory"
+          @open-history="openHistory"
           @base-change="handleBaseChange"
         />
 
@@ -38,8 +38,8 @@
     <history-panel
       :mode="state.mode"
       :is-mobile="isMobile"
-      :is-open="isHistoryOpen"
-      @update:is-open="toggleHistory"
+      :is-open="history.isOpen"
+      @history-close="history.close()"
       @select-item="selectHistoryItem"
     />
   </BasePage>
@@ -48,8 +48,8 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
+import { useTitle } from '@/composables/useTitle'
 import { useHistory } from '@/composables/useHistory'
-import { usePanel } from '@/composables/usePanel'
 import { useMemory } from '@/composables/useMemory'
 import { useInputValidation } from '@/composables/useValidation'
 import { useCalculatorState } from '@/composables/useCalculatorState'
@@ -60,7 +60,7 @@ import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import { useSettingsStore } from '@/stores/settings'
 import BasePage from '@/components/base/BasePage.vue'
-
+import { usePanel } from '@/composables/usePanel'
 const props = defineProps({
   mode: { type: String, required: true },
   settings: { type: Object, required: true },
@@ -81,10 +81,13 @@ const {
 } = useCalculatorState(props.mode)
 
 // Create calculator instance using factory
-const calculator = ref(CalculatorFactory.createCalculator(props.mode, props.settings))
+const calculator = ref(CalculatorFactory.create(props.mode, props.settings))
 
 // Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value))
+
+// Set page title
+useTitle(computed(() => `${props.mode} Mode`))
 
 // Computed properties
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)
@@ -92,12 +95,11 @@ const hasMemoryValue = computed(() => hasMemory(props.mode).value)
 
 // History panel management
 const { addToHistory } = useHistory()
-const {
-  isOpen: isHistoryOpen,
-  close: closeHistory,
-  toggle: toggleHistory,
-  handleResize,
-} = usePanel('history-panel', props.isMobile)
+
+const history = usePanel('history-panel')
+
+const openHistory = () => history.open()
+const toggleHistory = () => history.toggle()
 
 // Memory management
 const { hasMemory, handleMemoryOperation } = useMemory()
@@ -133,21 +135,13 @@ watch(
     if (!newMode) return
 
     resetState(newMode)
-    calculator.value = CalculatorFactory.createCalculator(newMode, props.settings)
+    calculator.value = CalculatorFactory.create(newMode, props.settings)
 
     if (newMode === 'Programmer') {
       setActiveBase('DEC')
     }
   },
   { immediate: true }
-)
-
-// Watch for mobile state changes
-watch(
-  () => props.isMobile,
-  (newIsMobile) => {
-    handleResize(newIsMobile)
-  }
 )
 
 // Handle history item selection
@@ -161,7 +155,5 @@ const selectHistoryItem = ({ expression }) => {
 
   calculator.value.input = expression
   calculator.value.currentExpression = ''
-
-  closeHistory()
 }
 </script>
