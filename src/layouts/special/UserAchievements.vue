@@ -10,6 +10,10 @@ const props = defineProps({
   apocalypseMode: {
     type: Boolean,
     default: false
+  },
+  themeClasses: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -85,26 +89,22 @@ function generateAchievements() {
 </script>
 
 <template>
-  <div
-    :class="`p-4 rounded-lg border animate-slide-up ${
-      apocalypseMode ? 'bg-red-950 border-red-900' : 'bg-zinc-900 border-emerald-900'
-    }`"
-  >
+  <div>
     <h3 class="text-lg font-semibold mb-3 flex items-center">
       <Trophy class="w-4 h-4 mr-2" />
       Developer Achievements
     </h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="grid grid-cols-1 gap-3">
       <div
         v-for="achievement in achievements"
         :key="achievement.id"
         :class="`p-3 rounded-md border ${
           achievement.unlocked
             ? apocalypseMode
-              ? 'border-red-800 bg-red-900/20'
-              : 'border-emerald-800 bg-emerald-900/20'
-            : 'border-zinc-800 bg-zinc-900/50 opacity-60'
+              ? 'border-red-200 dark:border-red-800 bg-red-100/20 dark:bg-red-900/20'
+              : 'border-indigo-200 dark:border-indigo-800 bg-indigo-100/20 dark:bg-indigo-900/20'
+            : 'border-gray-200 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-900/50 opacity-60'
         }`"
       >
         <div class="flex items-center justify-between mb-1">
@@ -115,37 +115,14 @@ function generateAchievements() {
           </h4>
           <span
             :class="`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-              achievement.unlocked
-                ? apocalypseMode
-                  ? 'bg-red-800 text-white'
-                  : 'bg-emerald-800 text-white'
-                : 'border border-zinc-700 text-zinc-400'
+            achievement.unlocked ? apocalypseMode ? 'bg-red-200 dark:bg-red-800 text-gray-950 dark:text-white' : 'bg-indigo-200 dark:bg-indigo-800 text-gray-950 dark:text-white' : 'border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400'
             }`"
           >
             {{ achievement.unlocked ? "Unlocked" : "Locked" }}
           </span>
         </div>
-        <p class="text-xs text-zinc-400">{{ achievement.description }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ achievement.description }}</p>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out forwards;
-  animation-delay: 0.4s;
-  opacity: 0;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

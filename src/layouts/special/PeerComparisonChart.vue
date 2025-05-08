@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { BarChart3 } from 'lucide-vue-next'
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
@@ -15,6 +15,10 @@ const props = defineProps({
   apocalypseMode: {
     type: Boolean,
     default: false
+  },
+  themeClasses: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -25,22 +29,22 @@ const chartData = computed(() => {
   const userBurnout = Math.min(100, props.age * 3)
 
   return {
-    labels: ['You', 'Peer 1', 'Peer 2', 'Peer 3', '10x Dev'],
+    labels: ['You', 'Startup CTO', 'CS Graduate', 'Tech Lead', '10x Dev'],
     datasets: [
       {
         label: 'Confidence',
         data: [userConfidence, 65, 85, 45, 95],
-        backgroundColor: props.apocalypseMode ? '#ef4444' : '#10b981',
+        backgroundColor: props.apocalypseMode ? '#ef4444' : '#6366f1',
       },
       {
         label: 'Actual Skill',
         data: [userSkill, 70, 55, 80, 90],
-        backgroundColor: props.apocalypseMode ? '#b91c1c' : '#047857',
+        backgroundColor: props.apocalypseMode ? '#b91c1c' : '#4f46e5',
       },
       {
         label: 'Burnout Level',
         data: [userBurnout, 50, 75, 30, 85],
-        backgroundColor: props.apocalypseMode ? '#7f1d1d' : '#064e3b',
+        backgroundColor: props.apocalypseMode ? '#7f1d1d' : '#4338ca',
       }
     ]
   }
@@ -55,32 +59,32 @@ const chartOptions = computed(() => {
         beginAtZero: true,
         max: 100,
         ticks: {
-          color: props.apocalypseMode ? '#f87171' : '#6ee7b7'
+          color: props.apocalypseMode ? '#f87171' : '#a5b4fc'
         },
         grid: {
-          color: props.apocalypseMode ? '#4b0f0f' : '#1f3a2e'
+          color: props.apocalypseMode ? '#4b0f0f' : '#312e81'
         }
       },
       x: {
         ticks: {
-          color: props.apocalypseMode ? '#f87171' : '#6ee7b7'
+          color: props.apocalypseMode ? '#f87171' : '#a5b4fc'
         },
         grid: {
-          color: props.apocalypseMode ? '#4b0f0f' : '#1f3a2e'
+          color: props.apocalypseMode ? '#4b0f0f' : '#312e81'
         }
       }
     },
     plugins: {
       legend: {
         labels: {
-          color: props.apocalypseMode ? '#f87171' : '#6ee7b7'
+          color: props.apocalypseMode ? '#f87171' : '#a5b4fc'
         }
       },
       tooltip: {
-        backgroundColor: props.apocalypseMode ? 'rgba(127, 29, 29, 0.8)' : 'rgba(6, 78, 59, 0.8)',
+        backgroundColor: props.apocalypseMode ? 'rgba(127, 29, 29, 0.8)' : 'rgba(67, 56, 202, 0.8)',
         titleColor: '#ffffff',
         bodyColor: '#ffffff',
-        borderColor: props.apocalypseMode ? '#b91c1c' : '#047857',
+        borderColor: props.apocalypseMode ? '#b91c1c' : '#4f46e5',
         borderWidth: 1
       }
     }
@@ -89,11 +93,7 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div
-    :class="`p-4 rounded-lg border animate-slide-up ${
-      apocalypseMode ? 'bg-red-950 border-red-900' : 'bg-zinc-900 border-emerald-900'
-    }`"
-  >
+  <div>
     <h3 class="text-lg font-semibold mb-3 flex items-center">
       <BarChart3 class="w-4 h-4 mr-2" />
       Peer Comparison
@@ -103,27 +103,8 @@ const chartOptions = computed(() => {
       <Bar :data="chartData" :options="chartOptions" />
     </div>
 
-    <div class="mt-2 text-xs text-zinc-500 text-center italic">
+    <div class="mt-2 text-xs text-gray-600 dark:text-gray-500 text-center italic">
       *Data scientifically made up for maximum emotional damage
     </div>
   </div>
 </template>
-
-<style scoped>
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out forwards;
-  animation-delay: 0.5s;
-  opacity: 0;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

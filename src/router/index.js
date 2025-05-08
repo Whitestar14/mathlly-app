@@ -77,7 +77,7 @@ const routes = [
     meta: { transition: 'fade', errorPage: true },
   },
     {
-      path: "/special/doom",
+      path: "/doom",
       component: () => import("@/layouts/special/DoomChart.vue"),
       meta: { type: 'seasonal' },
     },

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { ScrollText, Clock } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -10,6 +10,10 @@ const props = defineProps({
   apocalypseMode: {
     type: Boolean,
     default: false
+  },
+  themeClasses: {
+    type: Object,
+    default: () => {}
   }
 })
 
@@ -59,39 +63,31 @@ function toggleQuest(id) {
 </script>
 
 <template>
-  <div
-    :class="`p-4 rounded-lg border animate-slide-up ${
-      apocalypseMode ? 'bg-red-950 border-red-900' : 'bg-zinc-900 border-emerald-900'
-    }`"
-  >
+  <div class="p-4 rounded-lg animate-slide-up">
     <h3 class="text-lg font-semibold mb-3 flex items-center">
       <ScrollText class="w-4 h-4 mr-2" />
       Developer Quest Log
     </h3>
 
     <ul class="space-y-3">
-      <li v-for="quest in quests" :key="quest.id" class="flex items-start">
+      <li v-for="quest in quests" :key="quest.id" class="flex items-start p-3 rounded-md">
         <input
           :id="quest.id"
           type="checkbox"
           :checked="quest.completed"
           @change="toggleQuest(quest.id)"
-          :class="`mr-2 mt-1 h-4 w-4 rounded border ${
-            apocalypseMode
-              ? 'border-red-700 checked:bg-red-700'
-              : 'border-emerald-700 checked:bg-emerald-700'
-          }`"
+          :class="`mr-2 mt-1 h-4 w-4 rounded border ${themeClasses.check}`"
         />
         <div class="grid gap-1">
           <label
             :for="quest.id"
-            :class="`text-sm font-medium leading-none ${
+            :class="`text-sm font-medium leading-none text-gray-700 dark:text-gray-300 ${
               quest.completed ? 'line-through opacity-70' : ''
             }`"
           >
             {{ quest.task }}
           </label>
-          <div class="flex items-center text-xs text-zinc-400">
+          <div class="flex items-center text-xs text-gray-600 dark:text-gray-400">
             <Clock class="w-3 h-3 mr-1" />
             <span>{{ quest.timeEstimate }} years remaining</span>
           </div>

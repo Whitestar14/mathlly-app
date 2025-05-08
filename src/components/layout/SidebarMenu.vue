@@ -221,8 +221,8 @@ const categories = ref([
         description: "Encode and decode Base64 strings",
       },
       {
-        name: "DoomChart",
-        path: "/special/doom",
+        name: "Doom Chart",
+        path: "/doom",
         icon: Skull,
         seasonal: true,
         description: "Calculate your developer expiration date",
