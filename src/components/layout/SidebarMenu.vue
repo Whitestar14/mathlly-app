@@ -72,6 +72,11 @@
                       type="new"
                       class="opacity-75"
                     />
+                    <Badge
+                    v-if="item.seasonal"
+                    type="special"
+                    class="opacity-75"
+                    />
                   </button>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -144,6 +149,7 @@ import {
   LineChartIcon,
   ArrowRightLeftIcon,
   Binary,
+  Skull,
 } from "lucide-vue-next"
 import {
   NavigationMenuItem,
@@ -213,6 +219,13 @@ const categories = ref([
         icon: Binary,
         isNew: true,
         description: "Encode and decode Base64 strings",
+      },
+      {
+        name: "Doom Chart",
+        path: "/doom",
+        icon: Skull,
+        seasonal: true,
+        description: "Calculate your developer expiration date",
       },
     ],
   },
