@@ -176,7 +176,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
    */
   function isValidInput(key) {
     // Normalize the key to handle special cases
-    const normalizedKey = key.toLowerCase();
+    const normalizedKey = key?.toLowerCase?.();
 
     // Always allow common keys
     if (COMMON_KEYS.includes(normalizedKey)) return true;

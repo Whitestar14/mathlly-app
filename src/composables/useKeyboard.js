@@ -38,7 +38,7 @@ export function useKeyboard(initialContext = 'global', handlers) {
     if (event.metaKey) combo.push('meta');
     
     // Normalize key name
-    const key = keyboardStore.normalizeKey(event.key.toLowerCase());
+    const key = keyboardStore.normalizeKey(event.key?.toLowerCase?.());
     combo.push(key);
     
     return combo.join('+');
@@ -63,7 +63,7 @@ export function useKeyboard(initialContext = 'global', handlers) {
       isProcessing.value = true;
       
       const combo = getKeyCombo(event);
-      const singleKey = keyboardStore.normalizeKey(event.key.toLowerCase());
+      const singleKey = keyboardStore.normalizeKey(event.key?.toLowerCase?.());
 
       // Log debug information if enabled
       if (keyboardStore.debug || debugMode.value) {
