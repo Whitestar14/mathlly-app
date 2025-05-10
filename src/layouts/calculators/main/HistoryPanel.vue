@@ -122,7 +122,7 @@ const { onBeforeEnter, onEnter, onLeave, setInitialLoad } = useHistoryAnimation(
 const { toast } = useToast()
 const { copy } = useClipboard()
 
-// Local state
+// Local state 
 const selectedItemId = ref(null)
 const showClearConfirmation = ref(false)
 

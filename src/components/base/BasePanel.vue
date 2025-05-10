@@ -1,6 +1,6 @@
 <template>
   <div
-    class="panel-container"
+    class="relative z-20 flex flex-col flex-initial"
     :class="{
       'panel-mobile': isMobile,
       'panel-side': type === 'side',
@@ -10,8 +10,8 @@
     <Transition name="fade">
       <div
         v-show="isMobile && isOpen"
-        class="fixed inset-0 dark:bg-black/40 backdrop-blur-sm z-20 transition-colors duration-300"
-        :class="draggable ? [isDragging ? 'dark:bg-black/20' : ''] : ''"
+        class="fixed inset-0 backdrop-blur-sm z-20 transition-colors duration-300"
+        :class="draggable ? [isDragging ? 'bg-black/20' : 'bg-black/40'] : ''"
         aria-hidden="true"
         @click="close()"
       />
@@ -19,7 +19,7 @@
 
     <!-- Side Panel -->
     <SidePanel
-      v-if="type === 'side'"
+      v-if="type === 'side' && !isMobile"
       :is-open="isOpen"
       :is-mobile="isMobile"
       :position="position"
@@ -55,15 +55,16 @@
     </DesktopPanel>
 
     <!-- Mobile Panel -->
-    <div v-else-if="isMobile">
+    <div v-if="isMobile">
     <div v-show="isOpen" class="fixed inset-x-0 z-20">
       <div
         ref="panel"
-        class="bg-white dark:bg-gray-800 rounded-t-xl fixed inset-x-0 bottom-0 overflow-hidden"
+        class="bg-white dark:bg-gray-900 fixed inset-x-0 bottom-0 overflow-hidden"
+        :class="maxHeightRatio === 1 && !isDragging ? 'rounded-none' : 'transition-[rounded] duration-300 rounded-t-xl'"
         :style="{
           height: `${panelHeight}px`,
           transform: `translateY(${translateY}px)`,
-          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.74,-0.11, 0.53, 0.9)',
+          transition: isDragging ? '' : 'transform 0.3s ease-out',
         }"
       >
         <!-- Draggable Handle -->
@@ -73,7 +74,7 @@
           :class="{ 'cursor-grabbing': isDragging }"
           aria-label="Drag handle to resize panel"
         >
-          <div v-if="draggable" class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+          <div v-if="draggable" class="w-10 h-1 pb-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
         </div>
 
         <div class="panel-content h-full" :class="mainClass">
@@ -172,10 +173,6 @@ const {
 
 <style scoped>
 /* Scoped styles for the BasePanel wrapper */
-.panel-container {
-  @apply relative z-20 flex flex-col flex-initial;
-}
-
 .panel-container.panel-mobile {
   display: contents;
 }

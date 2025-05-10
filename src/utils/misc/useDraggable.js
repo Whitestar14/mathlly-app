@@ -42,7 +42,7 @@ export function useDraggable(options = {}) {
     if (!panel.value) return;
     
     panelHeight.value = Math.max(windowHeight.value * maxHeightRatio, panel.value.offsetHeight);
-    minHeight.value = Math.min(200, panelHeight.value * 0.4);
+    minHeight.value = Math.min(200, panelHeight.value * 0.2);
   };
 
   /**
@@ -54,7 +54,7 @@ export function useDraggable(options = {}) {
       setTimeout(() => {
         isOpen.value = false;
         resolve();
-      }, 150);
+      }, 300);
     });
   }
 
@@ -68,7 +68,7 @@ export function useDraggable(options = {}) {
     // Then animate in after a short delay to ensure the initial position is applied
     setTimeout(() => {
       translateY.value = 0; // Animate in
-    }, 300);
+    }, 50);
   }
 
   // Event handlers
@@ -136,8 +136,7 @@ export function useDraggable(options = {}) {
   // Clean up all event listeners
   const cleanup = () => {
     if (handle.value) {
-      handle.value.removeEventListener('touchstart', onTouchStart); 
-      panel.value._draggableCleanup = cleanup;
+      handle.value.removeEventListener('touchstart', onTouchStart);
     }
     
     window.removeEventListener('touchmove', onTouchMove); 
@@ -147,10 +146,13 @@ export function useDraggable(options = {}) {
   };
 
   // Watch for panel open state changes
-  if (isOpen) {
-    watch(isOpen, updatePanelDimensions);
-  }
-  
+  watch(isOpen, (newValue) => {
+    if (newValue) {
+      // Panel is opening - prepare for animation
+      updatePanelDimensions();
+    }
+  });
+
   // Clean up event listeners when component is unmounted
   onUnmounted(() => cleanup());
 
