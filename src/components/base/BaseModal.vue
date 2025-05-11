@@ -20,7 +20,6 @@
     >
       <DialogContent
         class="fixed inset-0 flex items-center justify-center p-4 z-30"
-        aria-describedby="modal"
       >
         <div
           class="relative w-full max-w-md max-h-[85vh] overflow-y-auto transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl"

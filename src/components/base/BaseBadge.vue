@@ -72,9 +72,9 @@ const badgeText = computed(() => {
     :class="[badgeClasses, { 'animate-pulse': shouldPulse }]"
   >
     <span 
-      v-if="showNotch" 
-      aria-label="notch" 
+      v-if="showNotch"
       class="h-2 w-2 rounded-full mr-2"
+      aria-hidden="true" 
       :class="notchColorClass"
     />
     {{ props.text || badgeText || getBadgeProps?.text }}
