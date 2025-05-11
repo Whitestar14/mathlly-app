@@ -79,6 +79,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useElementVisibility } from '@vueuse/core';
+import { useAnimation } from '@/composables/useAnimation';
 
 const props = defineProps({
   variant: {
@@ -118,16 +119,6 @@ const letterY = ref(null);
 const containerRef = ref(null);
 const isVisible = useElementVisibility(containerRef);
 
-watch(isVisible, (newIsVisible, oldIsVisible) => {
-  console.log("visibility changed from", oldIsVisible, "to", newIsVisible)
-} )
-// Dynamically import anime.js only when needed
-const anime = ref(null);
-
-// Animation timeline
-let firstTimeline;
-let secondTimeline;
-
 // Check for reduced motion preference
 const prefersReducedMotion = ref(
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false
@@ -141,108 +132,45 @@ if (window.matchMedia) {
   });
 }
 
-function initializeAnimation() {
-  if (!anime.value || !slashTop.value || !slashBottom.value) return;
-  
-  // Use simplified animations if reduced motion is preferred
-  if (prefersReducedMotion.value) {
-    // Simple fade-in for reduced motion
-    anime.value({
-      targets: [
-        slashTop.value, slashBottom.value, 
-        letterM.value, letterA.value, letterT.value, letterH.value, letterY.value,
-        bracketLeft.value, bracketRight.value
-      ],
-      opacity: [0, 1],
-      duration: 600,
-      easing: 'easeOutQuad'
-    });
-    return;
-  }
+// Use our animation composable
+const { createLogoAnimation } = useAnimation();
 
-  // Continuous animations
-  secondTimeline = anime.value({
-    targets: [bracketLeft.value, bracketRight.value],
-    opacity: [0.5, 1],
-    duration: 1000,
-    loop: true,
-    direction: 'alternate',
-    easing: 'easeInOutSine',
-    autoplay: false
-  });
-  
-  firstTimeline = anime.value.timeline({
-    easing: 'easeOutExpo',
-    autoplay: false
-  });
-
-  // Slashes animation with better timing
-  firstTimeline.add({
-    targets: slashTop.value,
-    translateY: ['-100%', '0%'],
-    opacity: [0, 1],
-    duration: 600,
-  })
-  .add({
-    targets: slashBottom.value,
-    translateY: ['100%', '0%'],
-    opacity: [0, 1],
-    duration: 600,
-  }, '-=400')
-
-  // Individual letters stagger animation
-  .add({
-    targets: [letterM.value, letterA.value, letterT.value, letterH.value, letterY.value],
-    opacity: [0, 1],
-    translateY: [10, 0],
-    delay: anime.value.stagger(100),
-    duration: 400,
-  }, '-=200')
-
-  // Brackets animation
-  .add({
-    targets: [bracketLeft.value, bracketRight.value],
-    opacity: [0, 0.5],
-    translateX: (el, i) => [(i === 0 ? -20 : 20), 0],
-    duration: 400,
-    complete: () => secondTimeline.play()
-  }, '-=200');
-
-  // Play the animation
-  firstTimeline.play();
-}
+// Create the logo animation
+const { playAnimation, stopAnimation } = createLogoAnimation({
+  elements: {
+    slashTop,
+    slashBottom,
+    bracketLeft,
+    bracketRight,
+    letterM,
+    letterA,
+    letterT,
+    letterH,
+    letterY
+  },
+  prefersReducedMotion,
+  isVisible
+});
 
 // Watch for visibility changes to optimize animation initialization
 watch(isVisible, (visible) => {
-  if (visible && props.variant === 'expanded' && anime.value) {
-    initializeAnimation();
+  if (visible && props.variant === 'expanded') {
+    playAnimation();
   }
 });
 
-onMounted(async () => {
-  if (props.variant === 'expanded') {
-    // Dynamically import anime.js only when expanded variant is used
-    anime.value = (await import('animejs')).default;
-    
+onMounted(() => {
+  if (props.variant === 'expanded' && isVisible.value) {
     // Use requestAnimationFrame to ensure DOM is fully rendered
-    if (isVisible.value) {
-      requestAnimationFrame(() => {
-        initializeAnimation();
-      });
-    }
+    requestAnimationFrame(() => {
+      playAnimation();
+    });
   }
 });
 
 onBeforeUnmount(() => {
   // Clean up animations to prevent memory leaks
-  if (firstTimeline) {
-    firstTimeline.pause();
-    firstTimeline = null;
-  }
-  if (secondTimeline) {
-    secondTimeline.pause();
-    secondTimeline = null;
-  }
+  stopAnimation();
 });
 </script>
 

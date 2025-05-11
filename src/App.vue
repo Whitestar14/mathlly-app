@@ -11,7 +11,7 @@
     </template>
     <template #fallback>
       <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
-        <loader variant="regular" />
+        <loader variant="expanded" />
       </div>
     </template>
   </Suspense>

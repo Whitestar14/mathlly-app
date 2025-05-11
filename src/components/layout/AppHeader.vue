@@ -150,7 +150,7 @@ const openShortcutModal = () => {
 }
 
 useKeyboard("global", {
-  openShortcutModal: () => openShortcutModal(),
-  toggleTheme: () => toggleTheme(),
+  toggleTheme,
+  openShortcutModal,
 })
 </script>
