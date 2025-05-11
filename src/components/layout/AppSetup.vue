@@ -35,7 +35,7 @@ const deviceStore = useDeviceStore()
 const settingsStore = useSettingsStore()
 
 // --- Loading Logic ---
-const minLoadTime = new Promise(resolve => setTimeout(resolve, 1500)) // Keep minimum load time for UX
+const minLoadTime = new Promise(resolve => setTimeout(resolve, 10500)) // Keep minimum load time for UX
 
 await Promise.all([
   settingsStore.loadSettings(),
