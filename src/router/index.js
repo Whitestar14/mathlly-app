@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useSettingsStore } from '@/stores/settings'
 import { setupRouteErrorHandling, routeError, routePath } from './errorHandler';
 
 const routes = [
@@ -96,5 +97,21 @@ const router = createRouter({
 
 // Setup centralized error handling
 setupRouteErrorHandling(router);
+
+// Track last visited page
+router.afterEach((to) => {
+  // Skip tracking for certain pages
+  const skipTracking = [
+    'Error', 
+    'NotFound', 
+    'Settings', 
+    'Home'
+  ];
+  
+  if (!to.meta.errorPage && !skipTracking.includes(to.name)) {
+    const settingsStore = useSettingsStore();
+    settingsStore.updateLastVisitedPath(to.fullPath);
+  }
+});
 
 export default router;
