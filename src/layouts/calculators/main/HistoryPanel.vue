@@ -96,6 +96,7 @@
 <script setup>
 import { ref, computed, watch, defineAsyncComponent } from "vue"
 import { TrashIcon, AlertTriangleIcon } from "lucide-vue-next"
+import anime from 'animejs/lib/anime.min.js';
 import Button from "@/components/base/BaseButton.vue"
 import BaseModal from "@/components/base/BaseModal.vue"
 import BasePanel from "@/components/base/BasePanel.vue"
@@ -118,7 +119,7 @@ const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryIt
 
 // Composables
 const { historyItems, deleteItem, clearAll, loadHistory } = useHistory()
-const { onBeforeEnter, onEnter, onLeave, setInitialLoad } = useHistoryAnimation()
+const { onBeforeEnter, onEnter, onLeave, setInitialLoad } = useHistoryAnimation(anime)
 const { toast } = useToast()
 const { copy } = useClipboard()
 
@@ -213,6 +214,7 @@ const copyAsJson = (item) => {
     description: "The calculation has been copied in JSON format",
   })
 }
+
 </script>
 
 <style scoped>

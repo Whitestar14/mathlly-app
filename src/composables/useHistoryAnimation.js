@@ -1,12 +1,12 @@
 import { ref } from 'vue';
-import anime from 'animejs';
 
 /**
  * Composable for managing history item animations
  *
  * @returns {Object} Animation handlers
  */
-export function useHistoryAnimation() {
+export function useHistoryAnimation(instance) {
+  const anime = instance;
   const isInitialLoad = ref(true);
 
   /**
