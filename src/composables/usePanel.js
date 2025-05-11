@@ -1,6 +1,6 @@
 import { ref, computed, nextTick, watch, provide, inject, reactive, readonly, onUnmounted } from 'vue';
 import { useLocalStorage } from '@vueuse/core';
-import { useDraggable } from '../utils/misc/useDraggable';
+import { useDraggable } from '@/utils/misc/useDraggable';
 
 /**
  * Unified panel composable managing state, persistence, responsiveness, and dragging.
@@ -35,6 +35,7 @@ export function createPanel(options = {}) {
       translateY: ref(0),
       panelHeight: ref(0),
       maxPanelHeight: ref(0),
+      isExpanded: ref(false),
       handle: ref(null),
       panel: ref(null),
       open: () => {},
@@ -50,7 +51,7 @@ export function createPanel(options = {}) {
   // Use localStorage to remember open state per device type
   const preferences = useLocalStorage(`${storageKey}-preferences`, {
     desktop: { isOpen: defaultDesktopState },
-    mobile: { isOpen: false },
+    mobile: { isOpen: false, isExpanded: false },
   });
 
   // Current device context
@@ -59,6 +60,9 @@ export function createPanel(options = {}) {
 
   // Initialize panel state from stored preferences based on device type
   const isOpen = ref(currentIsMobile.value ? false : preferences.value.desktop.isOpen);
+  
+  // New expanded state for mobile panels
+  const isExpanded = ref(currentIsMobile.value ? preferences.value.mobile.isExpanded : false);
 
   // References for draggable functionality
   const handle = ref(null);
@@ -69,14 +73,21 @@ export function createPanel(options = {}) {
    */
   const updatePreferences = () => {
     preferences.value[deviceContext.value].isOpen = isOpen.value;
+    if (currentIsMobile.value) {
+      preferences.value.mobile.isExpanded = isExpanded.value;
+    }
   };
 
   // Initialize draggable composable only if enabled
   const draggableApi = draggable ? useDraggable({
-    panel, handle, isOpen, // Pass the raw isOpen ref
-    maxHeightRatio, snapThreshold, maxHeight,
+    panel, 
+    handle, 
+    isOpen,
+    isExpanded,
+    maxHeightRatio,
+    snapThreshold, 
+    maxHeight,
   }) : null;
-
 
   /**
    * Closes the panel, handling animations if applicable.
@@ -92,6 +103,9 @@ export function createPanel(options = {}) {
       // Close immediately for non-draggable or desktop panels
       isOpen.value = false;
     }
+    
+    // Always reset expanded state when closing
+    setTimeout(() => isExpanded.value = false, 100);
   };
 
   /**
@@ -112,28 +126,50 @@ export function createPanel(options = {}) {
     }
   };
 
-  /**
-   * Toggles the panel's open/closed state.
-   * @param {boolean} [isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
-   */
-  const toggle = (isMobile = currentIsMobile.value) => {
+/**
+ * Toggles the panel's open/closed state or expanded state.
+ * @param {object} [options] - Options object.
+ * @param {boolean} [options.expanded] - If true, toggles expanded state; otherwise toggles open/close.
+ * @param {boolean} [options.isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
+ */
+const toggle = (options = {}) => {
+  const { expanded = false, isMobile = currentIsMobile.value } = options;
+  if (expanded) {
+    if (!currentIsMobile.value || !isOpen.value) return;
+    isExpanded.value = !isExpanded.value;
+    if (draggableApi) {
+      nextTick(() => {
+        updatePanelDimensions();
+      });
+    }
+    updatePreferences();
+  } else {
     isOpen.value ? close(isMobile) : open(isMobile);
-  };
-
+  }
+};
   /**
    * Handles responsive changes, updating state and draggable elements.
    * @param {boolean} newIsMobile - The new mobile state.
    */
   const handleResize = (newIsMobile) => {
     if (currentIsMobile.value === newIsMobile) return;
-      currentIsMobile.value = newIsMobile;
+    currentIsMobile.value = newIsMobile;
       
     isOpen.value = newIsMobile ? false : preferences.value.desktop.isOpen;
+    
+    // Reset expanded state when switching to desktop
+    if (!newIsMobile) {
+      isExpanded.value = false;
+    } else {
+      // Restore expanded state when switching to mobile
+      isExpanded.value = preferences.value.mobile.isExpanded;
+    }
+    
     updatePreferences();
 
     // Update draggable dimensions if applicable
     if (draggable && draggableApi) {
-       nextTick(updatePanelDimensions);
+      nextTick(updatePanelDimensions);
     }
   };
 
@@ -142,12 +178,19 @@ export function createPanel(options = {}) {
    */
   const updatePanelDimensions = () => draggableApi?.updatePanelDimensions?.();
 
-  watch(isOpen, updatePreferences);
+  // Watch for state changes to update preferences
+  watch(
+    [isOpen, isExpanded, currentIsMobile],
+    () => {
+      updatePreferences();
+      handleResize(currentIsMobile.value);
+    }
+  );
 
-  watch(currentIsMobile, handleResize);
   const api = {
     isOpen,
     isMobile: currentIsMobile,
+    isExpanded,
     panel,
     handle,
     open,
@@ -333,7 +376,8 @@ export function usePanel(id, options = {}, api = false) {
   let panel = reactive({});
   // --- Registration / Update Logic ---
   if (hasRegistrationOptions && !state.panels[id] && api) {
-    panel = actions.registerPanel(id, options);
+    const panelInstance = actions.registerPanel(id, options);
+    panel = panelInstance;
   } else if (hasRegistrationOptions && state.panels[id]) {
     panel = actions.getInstance(id);
     console.warn("Panel", id, "already registered. Using existing instance.")
@@ -344,6 +388,9 @@ export function usePanel(id, options = {}, api = false) {
       },
       get isMobile() {
         return state.isMobile;
+      },
+      get isExpanded() {
+        return actions.provide(id, "isExpanded", false);
       },
       get panels() {
         return state.panels;

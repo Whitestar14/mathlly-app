@@ -56,73 +56,66 @@
 
     <!-- Mobile Panel -->
     <div v-if="isMobile">
-    <div v-show="isOpen" class="fixed inset-x-0 z-20">
-      <div
-        ref="panel"
-        class="bg-white dark:bg-gray-900 fixed inset-x-0 bottom-0 overflow-hidden"
-        :class="maxHeightRatio === 1 && !isDragging ? 'rounded-none' : 'transition-[rounded] duration-300 rounded-t-xl'"
-        :style="{
-          height: `${panelHeight}px`,
-          transform: `translateY(${translateY}px)`,
-          transition: isDragging ? '' : 'transform 0.3s ease-out',
-        }"
-      >
-        <!-- Draggable Handle -->
+      <div v-show="isOpen" class="fixed inset-x-0 z-20">
         <div
-          ref="handle"
-          class="w-full absolute h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-manipulation"
-          :class="{ 'cursor-grabbing': isDragging }"
-          aria-label="Drag handle to resize panel"
+          ref="panel"
+          class="bg-white dark:bg-gray-900 fixed inset-x-0 bottom-0 overflow-hidden"
+          :class="[
+            isExpanded || maxHeightRatio === 1 ? 'rounded-none' : 'transition-[rounded] duration-300 rounded-t-xl'
+          ]"
+          :style="{
+            height: `${panelHeight}px`,
+            transform: `translateY(${translateY}px)`,
+            transition: isDragging ? '' : 'transform 0.3s ease-out, height 0.3s ease-out',
+          }"
         >
-          <div v-if="draggable" class="w-10 h-1 pb-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
-        </div>
-
-        <div class="panel-content h-full" :class="mainClass">
-          <PanelContent
-            :title="title"
-            :show-header="showHeader"
-            :show-footer="showFooter"
-            :content-class="contentClass"
-            :is-mobile="isMobile"
-            @close="close()"
+          <!-- Expand/Minimize Button -->
+          <button
+            v-if="draggable && !(maxHeightRatio === 1)"
+            class="absolute right-12 top-3.5 p-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            @click="toggle({expanded: true})"
+            aria-label="Toggle panel expansion"
           >
-            <template #default>
-              <slot />
-            </template>
-            <template #header-actions>
-              <slot name="header-actions" />
-            </template>
-            <template v-if="$slots.footer" #footer>
-              <slot name="footer" />
-            </template>
-          </PanelContent>
+            <Maximize2 v-if="!isExpanded" class="w-4 h-4" />
+            <Minimize2 v-else class="w-4 h-4" />
+          </button>
+
+          <!-- Draggable Handle - Hide when expanded -->
+          <div
+            ref="handle"
+            class="w-full absolute h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-manipulation"
+            :class="[
+              { 'cursor-grabbing': isDragging },
+              isExpanded || maxHeightRatio === 1 ? 'pointer-events-none opacity-0' : ''
+            ]"
+            aria-label="Drag handle to resize panel"
+          >
+            <div v-if="draggable" class="w-10 h-1 pb-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+          </div>
+
+          <div class="panel-content h-full" :class="mainClass">
+            <PanelContent
+              :title="title"
+              :show-header="showHeader"
+              :show-footer="showFooter"
+              :content-class="contentClass"
+              :is-mobile="isMobile"
+              @close="close()"
+            >
+              <template #default>
+                <slot />
+              </template>
+              <template #header-actions>
+                <slot name="header-actions" />
+              </template>
+              <template v-if="$slots.footer" #footer>
+                <slot name="footer" />
+              </template>
+            </PanelContent>
+          </div>
         </div>
       </div>
     </div>
-    </div>
-
-    <!-- <BottomPanel
-      v-else-if="isMobile"
-      :is-open="isOpen"
-      :is-mobile="isMobile"
-      :title="title"
-      :show-header="showHeader"
-      :show-footer="showFooter"
-      :content-class="contentClass"
-      :main-class="mainClass"
-      :draggable="draggable"
-      :panel-height="panelHeight ?? 0"
-      :translate-y="translateY ?? 0"
-      :is-dragging="isDragging ?? false"
-      :panel="panel" 
-      :handle="handle"
-      @close="close()"
-    >
-      <template #default><slot /></template>
-      <template #header-actions><slot name="header-actions" /></template>
-      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
-    </BottomPanel> -->
-
   </div>
 </template>
 
@@ -130,9 +123,8 @@
 import { usePanel } from '@/composables/usePanel';
 import SidePanel from '@/components/panel/SidePanel.vue';
 import DesktopPanel from '@/components/panel/DesktopPanel.vue';
-// Fix this integration later
-// import BottomPanel from '@/components/panel/BottomPanel.vue';
 import PanelContent from '@/components/base/PanelContent.vue';
+import { Maximize2, Minimize2 } from 'lucide-vue-next';
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -161,6 +153,7 @@ const options = {
 const {
   isOpen,
   isMobile,
+  isExpanded,
   toggle,
   close,
   handle,
