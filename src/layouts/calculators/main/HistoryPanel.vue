@@ -214,7 +214,6 @@ const copyAsJson = (item) => {
     description: "The calculation has been copied in JSON format",
   })
 }
-
 </script>
 
 <style scoped>

@@ -2,6 +2,7 @@
   <div
     v-if="isActive"
     :class="containerClasses"
+    ref="containerRef"
     class="relative h-full font-mono"
   >
     <!-- Expanded Loader (formerly macro) -->
@@ -117,6 +118,9 @@ const letterY = ref(null);
 const containerRef = ref(null);
 const isVisible = useElementVisibility(containerRef);
 
+watch(isVisible, (newIsVisible, oldIsVisible) => {
+  console.log("visibility changed from", oldIsVisible, "to", newIsVisible)
+} )
 // Dynamically import anime.js only when needed
 const anime = ref(null);
 
