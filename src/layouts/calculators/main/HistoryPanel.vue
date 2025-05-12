@@ -96,7 +96,6 @@
 <script setup>
 import { ref, computed, watch, defineAsyncComponent } from "vue"
 import { TrashIcon, AlertTriangleIcon } from "lucide-vue-next"
-import anime from 'animejs/lib/anime.min.js';
 import Button from "@/components/base/BaseButton.vue"
 import BaseModal from "@/components/base/BaseModal.vue"
 import BasePanel from "@/components/base/BasePanel.vue"

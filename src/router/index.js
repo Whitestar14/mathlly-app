@@ -1,33 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useSettingsStore } from '@/stores/settings'
-import { setupRouteErrorHandling, routeError, routePath } from './errorHandler';
+import { useSettingsStore } from '@/stores/settings';
+// Import clearRouteError and isHandlingError as they are needed in beforeEach
+import { setupRouteErrorHandling, routeError, routePath, clearRouteError, isHandlingError } from './errorHandler';
 
 const routes = [
-  // Home route
+  // ... your existing routes ...
   {
     path: '/',
     name: 'Home',
     component: () => import('@/layouts/navigation/HomePage.vue'),
     meta: { transition: 'fade' },
   },
-
-  // Calculator routes
   {
     path: '/calculator',
     name: 'Calculator',
     component: () => import('@/layouts/calculators/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' },
   },
-
-  // Tools routes
   {
     path: '/tools/base64',
     name: 'Base64',
     component: () => import('@/layouts/tools/Base64Tool.vue'),
     meta: { transition: 'fade', group: 'tools' },
   },
-
-  // Information routes
   {
     path: '/info/update',
     name: "What's New",
@@ -40,8 +35,6 @@ const routes = [
     component: () => import('@/layouts/info/AboutPage.vue'),
     meta: { transition: 'fade', group: 'information' },
   },
-
-  // Utility routes
   {
     path: '/settings',
     name: 'Settings',
@@ -59,29 +52,27 @@ const routes = [
     name: 'Error',
     component: () => import('@/layouts/navigation/ErrorFallback.vue'),
     props: () => ({
-      error: routeError.value, // Pass the reactive ref directly
-      path: routePath.value, // Pass the reactive ref directly
-      isRouteError: true, // Add a flag to distinguish router errors
+      error: routeError.value,
+      path: routePath.value,
+      isRouteError: true,
     }),
     beforeEnter: (to, from, next) => {
-      // Only allow direct access if there's an error
       if (routeError.value) {
         next();
       } else {
-        // No active error, redirect home
         console.warn(
-          'Direct access to /error page without active error. Redirecting.'
+          'Direct access to /error page without active error. Redirecting to home.'
         );
         next('/');
       }
     },
     meta: { transition: 'fade', errorPage: true },
   },
-    {
-      path: "/doom",
-      component: () => import("@/layouts/special/DoomChart.vue"),
-      meta: { type: 'seasonal' },
-    },
+  {
+    path: "/doom",
+    component: () => import("@/layouts/special/DoomChart.vue"),
+    meta: { type: 'seasonal' },
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
@@ -95,19 +86,36 @@ const router = createRouter({
   routes,
 });
 
-// Setup centralized error handling
+// --- BEGIN PROPOSED FIX ---
+// Add this beforeEach guard BEFORE setupRouteErrorHandling
+router.beforeEach((to, from, next) => {
+  // If navigating away from the error page to a different page,
+  // and an error was actively being handled.
+  if (from.path === '/error' && to.path !== '/error' && isHandlingError.value) {
+    console.log(
+      `[Router.beforeEach] Navigating from /error to ${to.fullPath}. Clearing previous route error optimistically.`
+    );
+    // Clear the error state. If the upcoming navigation to 'to.path' fails,
+    // router.onError (from setupRouteErrorHandling) will catch it and set a new error.
+    // If 'to.path' loads successfully (e.g., from cache), it won't be affected by the old error state.
+    clearRouteError();
+  }
+  next();
+});
+// --- END PROPOSED FIX ---
+
+// Setup centralized error handling (this registers router.onError and router.afterEach)
 setupRouteErrorHandling(router);
 
 // Track last visited page
 router.afterEach((to) => {
-  // Skip tracking for certain pages
   const skipTracking = [
-    'Error', 
-    'NotFound', 
-    'Settings', 
+    'Error',
+    'NotFound',
+    'Settings',
     'Home'
   ];
-  
+
   if (!to.meta.errorPage && !skipTracking.includes(to.name)) {
     const settingsStore = useSettingsStore();
     settingsStore.updateLastVisitedPath(to.fullPath);

@@ -163,13 +163,6 @@ const router = useRouter();
 
 const settingsStore = useSettingsStore();
 
-// Add this to the script section
-const startupOptions = [
-  { value: 'home', label: 'Home Page' },
-  { value: 'calculator', label: 'Calculator' },
-  { value: 'last-visited', label: 'Last Visited Page' },
-];
-
 const localSettings = ref({
   precision: settingsStore.precision,
   useFractions: settingsStore.useFractions,
@@ -209,6 +202,12 @@ const themeOptions = [
   { value: "system", label: "System" },
 ];
 
+const startupOptions = [
+  { value: 'home', label: 'Home Page' },
+  { value: 'calculator', label: 'Calculator' },
+  { value: 'last-visited', label: 'Last Visited Page' },
+];
+
 onMounted(async () => {
   await settingsStore.loadSettings();
 
@@ -222,7 +221,7 @@ onMounted(async () => {
     theme: settingsStore.theme,
     mode: settingsStore.mode,
     animationDisabled: settingsStore.animationDisabled,
-    rememberLastPage: settingsStore.rememberLastPage, // Add this lin
+    startupNavigation: settingsStore.startupNavigation,
   };
 });
 

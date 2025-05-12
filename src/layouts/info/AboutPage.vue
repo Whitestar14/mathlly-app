@@ -14,7 +14,7 @@
           </span>
         </h2>
 
-        <p class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400">
+        <p class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
           Started as a developer's side project, Mathlly has grown into a community-driven platform 
           that pushes the boundaries of development tools.
         </p>
