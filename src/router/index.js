@@ -85,7 +85,8 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  fallback: ErrorFallback
+  fallback: ErrorFallback,
+  
 });
 
 // --- BEGIN PROPOSED FIX ---

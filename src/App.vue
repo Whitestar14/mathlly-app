@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { shallowRef, ref, onErrorCaptured, onMounted, onBeforeMount } from 'vue';
+import { shallowRef, ref, onErrorCaptured, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSettingsStore } from '@/stores/settings';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
@@ -56,8 +56,8 @@ const redirect = async () => {
   }
 }
 
-onBeforeMount(redirect);
 onMounted(async () => {
   await settingsStore.loadSettings();
+  redirect();
 });
 </script>

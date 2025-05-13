@@ -15,14 +15,22 @@ module.exports = defineConfig({
     manifestOptions: require('./public/manifest.json'),
     workboxPluginMode: 'GenerateSW',
     workboxOptions: {
-      skipWaiting: false,
-      clientsClaim: true,
-      exclude: [/\.map$/, /_redirects/, /version-info\.json$/],
+      skipWaiting: false, // Keeps new SW waiting for user to update
+      clientsClaim: true,  // Allows SW to control clients once activated
       
-      // Navigation fallback
-      navigateFallback: './public/index.html',
+      exclude: [ // Excludes these from precaching
+        /\.map$/, 
+        /_redirects/, 
+        /version-info\.json$/
+      ],
       
-      // Cache strategies
+      navigateFallback: '/index.html', // For SPA routing
+      
+      navigateFallbackDenylist: [
+        /^\/_/,
+        /\/[^/?]+\.[^/]+$/,
+      ],
+      
       runtimeCaching: [
         {
           urlPattern: /\.(?:png|jpg|jpeg|svg|gif|woff2|woff|ttf|eot)$/,
@@ -63,6 +71,7 @@ module.exports = defineConfig({
           handler: 'NetworkFirst',
           options: {
             cacheName: 'pages-cache',
+            networkTimeoutSeconds: 3,
             expiration: {
               maxEntries: 50,
               maxAgeSeconds: 60 * 60 * 24 * 30,
