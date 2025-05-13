@@ -15,9 +15,9 @@ module.exports = defineConfig({
     manifestOptions: require('./public/manifest.json'),
     workboxPluginMode: 'GenerateSW',
     workboxOptions: {
-      skipWaiting: true,
+      skipWaiting: false,
       clientsClaim: true,
-      exclude: [/\.map$/, /_redirects/],
+      exclude: [/\.map$/, /_redirects/, /version-info\.json$/],
       
       // Navigation fallback
       navigateFallback: '/index.html',
