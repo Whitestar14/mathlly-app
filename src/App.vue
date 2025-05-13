@@ -16,7 +16,6 @@
     </template>
   </Suspense>
   <UpdateNotification />
-  <OfflineIndicator />
 </template>
 
 <script setup>
@@ -28,7 +27,6 @@ import PanelProvider from '@/components/panel/PanelProvider.vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import UpdateNotification from '@/components/ui/UpdateNotification.vue';
-import OfflineIndicator from '@/components/ui/OfflineIndicator.vue';
 
 const error = ref(null);
 const hasError = shallowRef(false);

@@ -95,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import {
   RefreshCwIcon,
   XIcon,
@@ -110,46 +110,44 @@ import BaseButton from '@/components/base/BaseButton.vue';
 const versionStore = useVersionStore();
 const showNotification = ref(false);
 const showDetails = ref(false);
-const latestVersion = ref(''); // From changelog/version-info.json for display
-const updateFeatures = ref([]); // From changelog/version-info.json for display
+const latestVersion = ref('');
+const updateFeatures = ref([]);
 const currentVersion = computed(() => versionStore.versionInfo.full);
 
 // Store the service worker registration object when an update is available
 const serviceWorkerRegistration = ref(null);
 
 // Fetches details like version number and features for display in the notification
-const fetchLatestVersionDetailsForDisplay = async () => {
+const fetchLatestVersion = async () => {
   try {
-    // This can still be from your 'updates' array or a fetch to version-info.json
-    // For simplicity, assuming 'updates' is populated correctly.
     if (updates.length > 0) {
       latestVersion.value = updates[0]?.version || '';
       updateFeatures.value = updates[0]?.features || [];
     } else {
       // Fallback or fetch if 'updates' isn't immediately available
-      // const response = await fetch('/version-info.json?t=' + new Date().getTime());
-      // if (!response.ok) throw new Error('Failed to fetch version-info.json');
-      // const versionData = await response.json();
-      // latestVersion.value = versionData.full || '';
-      // const updateEntry = updates.find(u => u.version === latestVersion.value.replace(/^v/, ''));
-      // updateFeatures.value = updateEntry?.features || [];
-      console.log('UpdateNotification: No changelog updates found or fetched for display.');
+      const response = await fetch('/version-info.json?t=' + new Date().getTime());
+      if (!response.ok) throw new Error('Failed to fetch version-info.json');
+      const versionData = await response.json();
+      latestVersion.value = versionData.full || '';
+      const updateEntry = updates.find(u => u.version === latestVersion.value.replace(/^v/, ''));
+      updateFeatures.value = updateEntry?.features || [];
     }
   } catch (error) {
-    console.error('UpdateNotification: Failed to fetch version info for display:', error);
+    console.error('Failed to fetch version info for display:', error);
   }
 };
 
-const handleServiceWorkerUpdateAvailable = (event) => {
-  console.log('UpdateNotification: Event "sw-update-available" received.', event.detail);
-  // No need to check registration.waiting here again, main.js already did.
-  // The event should only be dispatched for valid update scenarios now.
+const toggleDetails = () => {
+  showDetails.value = !showDetails.value;
+};
+
+const handleWorkerUpdate = (event) => {
   if (event.detail) {
       serviceWorkerRegistration.value = event.detail;
       showNotification.value = true;
-      // fetchLatestVersionDetailsForDisplay(); // Fetch display details
+      fetchLatestVersion(); // Fetch display details
   } else {
-      console.warn('UpdateNotification: "sw-update-available" received without detail.');
+      console.warn('"sw-update-available" received without detail.');
   }
 };
 
@@ -159,12 +157,9 @@ const refreshApp = () => {
 
   if (registration && registration.waiting) {
     const worker = registration.waiting;
-    console.log('UpdateNotification: User clicked "Update Now". Checking waiting worker state:', worker.state);
-
     // Add a listener for state change ONCE, right before sending skipWaiting
     worker.addEventListener('statechange', (event) => {
       if (event.target.state === 'activated') {
-        console.log('UpdateNotification: Waiting worker activated via statechange. Reloading.');
         window.location.reload();
       }
     }, { once: true }); // Use { once: true } to auto-remove listener
@@ -172,28 +167,21 @@ const refreshApp = () => {
 
     // Check state *before* sending message
     if (worker.state === 'installed') {
-        console.log('UpdateNotification: Sending SKIP_WAITING to waiting worker.');
         worker.postMessage({ type: 'SKIP_WAITING' });
-        // Don't reload immediately here. Wait for the 'activated' state change
-        // or a timeout fallback.
     } else {
-        // If worker somehow activated before SKIP_WAITING could be sent
-        console.warn(`UpdateNotification: Waiting worker state is already "${worker.state}". Attempting reload directly.`);
+        console.warn(`Waiting worker state is already "${worker.state}". Attempting reload directly.`);
         window.location.reload();
     }
 
-    // Fallback timeout: If statechange doesn't fire within a few seconds
     setTimeout(() => {
-        // Check if page is already reloading (e.g. statechange fired)
         if (!window.location.reloading) { // Simple flag to avoid multiple reloads
-             console.warn('UpdateNotification: Timeout waiting for activation. Forcing reload.');
              window.location.reloading = true; // Set flag
              window.location.reload();
         }
-    }, 3000); // 3 second timeout
+    }, 3000);
 
   } else {
-    console.warn('UpdateNotification: "Update Now" clicked, but no valid waiting service worker found. Forcing reload.');
+    console.warn('"Update Now" clicked, but no valid waiting service worker found. Forcing reload.');
     window.location.reload();
   }
 };
@@ -203,52 +191,40 @@ const dismissUpdate = () => {
   showNotification.value = false;
   if (latestVersion.value) { // Use the displayed version from changelog
     localStorage.setItem('dismissed-version', latestVersion.value);
-    console.log('UpdateNotification: User dismissed update for version:', latestVersion.value);
   }
 };
 
-// Checks for updates to the SW (by calling registration.update()) and version-info.json
 const periodicUpdateCheck = () => {
-  console.log('UpdateNotification: Performing periodic update check.');
-  // 1. Trigger SW update check
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready.then(registration => {
-      console.log('UpdateNotification: Calling registration.update() for SW check.');
       registration.update(); // This tells the browser to check the server for a new SW script
     }).catch(error => {
-      console.error('UpdateNotification: Error getting SW registration for update check:', error);
+      console.error('Error getting SW registration for update check:', error);
     });
   }
 
-  // 2. Check version-info.json (mainly for display or as a secondary trigger if needed)
-  // This logic can be more elaborate if you want it to also show the notification
-  // independently of the SW 'sw-update-available' event.
-  // For now, it primarily serves to get 'latestVersion' for display if SW update occurs.
-  fetchLatestVersionDetailsForDisplay().then(() => {
+  fetchLatestVersion().then(() => {
     const current = currentVersion.value.replace(/^v/, '');
     const latest = latestVersion.value.replace(/^v/, '');
     if (latest && current && latest !== current) {
       const dismissedVersion = localStorage.getItem('dismissed-version');
       if (dismissedVersion !== latestVersion.value && !showNotification.value) {
-        // Potentially show notification here too if SW hasn't already,
-        // but ensure `refreshApp` can handle cases where there's no `serviceWorkerRegistration.value.waiting`.
-        console.log('UpdateNotification: Version mismatch from version-info.json. Current:', current, 'Latest:', latest);
-        // To avoid conflicts, only let SW event show the button that calls SKIP_WAITING.
-        // If showing notification here, its "update" action might just be a reload.
+        console.log('Version mismatch from version-info.json. Current:', current, 'Latest:', latest);
+        showNotification.value = true;
       }
     }
   });
 };
 
 onMounted(() => {
-  window.addEventListener('sw-update-available', handleServiceWorkerUpdateAvailable);
+  window.addEventListener('sw-update-available', handleWorkerUpdate);
   periodicUpdateCheck(); // Initial check still useful
-  // const updateInterval = setInterval(periodicUpdateCheck, 60 * 60 * 1000);
+  const updateInterval = setInterval(periodicUpdateCheck, 60 * 60 * 1000);
 
-  // onUnmounted(() => {
-  //   clearInterval(updateInterval);
-  //   window.removeEventListener('sw-update-available', handleServiceWorkerUpdateAvailable);
-  // });
+  onUnmounted(() => {
+    clearInterval(updateInterval);
+    window.removeEventListener('sw-update-available', handleWorkerUpdate);
+  });
 });
 </script>
 

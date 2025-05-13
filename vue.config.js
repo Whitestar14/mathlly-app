@@ -20,11 +20,10 @@ module.exports = defineConfig({
       exclude: [/\.map$/, /_redirects/, /version-info\.json$/],
       
       // Navigation fallback
-      navigateFallback: '/index.html',
+      navigateFallback: './public/index.html',
       
       // Cache strategies
       runtimeCaching: [
-        // Cache static assets
         {
           urlPattern: /\.(?:png|jpg|jpeg|svg|gif|woff2|woff|ttf|eot)$/,
           handler: 'CacheFirst',
@@ -32,11 +31,10 @@ module.exports = defineConfig({
             cacheName: 'static-assets',
             expiration: {
               maxEntries: 100,
-              maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              maxAgeSeconds: 60 * 60 * 24 * 30 * 12,
             },
           },
         },
-        // Cache CSS and JS
         {
           urlPattern: /\.(?:js|css)$/,
           handler: 'StaleWhileRevalidate',
@@ -44,11 +42,10 @@ module.exports = defineConfig({
             cacheName: 'static-resources',
             expiration: {
               maxEntries: 100,
-              maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              maxAgeSeconds: 60 * 60 * 24 * 30,
             },
           },
         },
-        // Cache API requests
         {
           urlPattern: /^https:\/\/api\./,
           handler: 'NetworkFirst',
@@ -57,11 +54,10 @@ module.exports = defineConfig({
             networkTimeoutSeconds: 10,
             expiration: {
               maxEntries: 50,
-              maxAgeSeconds: 60 * 60 * 24, // 1 day
+              maxAgeSeconds: 60 * 60 * 24 * 3,
             },
           },
         },
-        // Cache other pages
         {
           urlPattern: /\/(?!api)/,
           handler: 'NetworkFirst',
@@ -69,7 +65,7 @@ module.exports = defineConfig({
             cacheName: 'pages-cache',
             expiration: {
               maxEntries: 50,
-              maxAgeSeconds: 60 * 60 * 24, // 1 day
+              maxAgeSeconds: 60 * 60 * 24 * 30,
             },
           },
         },

@@ -3,34 +3,21 @@
       <!-- Desktop version - just a colored dot -->
       <div 
         v-if="!isMobile"
-        class="fixed bottom-4 left-4 z-50 h-2 w-2 rounded-full shadow-md transition-all duration-300"
-        :class="networkStatus ? 'bg-emerald-600 dark:bg-emerald-300' : 'bg-rose-600 dark:bg-rose-300'"
-        v-tippy="{ content: networkStatus ? 'Online' : 'Offline', placement: 'right' }"
-      />
-  
-      <!-- Mobile version - full badge with text -->
-      <BaseBadge
-        v-if="!networkStatus && isMobile"
-        type="special"
-        text="Offline"
-        showNotch
-        class="fixed bottom-4 left-4 z-50 animate-slide-in"
-      />
-      <BaseBadge
-        v-if="showOnline && isMobile"
-        type="new"
-        text="Online"
-        showNotch
-        class="fixed bottom-4 left-4 z-50 animate-slide-in"
-      />
+        class="transition-all duration-300"
+        :class="networkStatus ? 'text-emerald-600 dark:text-emerald-300' : 'text-gray-600 dark:text-rose-300'"
+        v-tippy="{ content: networkStatus ? 'Connected' : 'Not connected. Some functionality may not be available', placement: 'bottom' }"
+      >
+      <span v-if="networkStatus"><Wifi class="h-5 w-5"/></span>
+      <span v-else><WifiOff class="h-5 w-5"/></span>
+      </div>
     </div>
   </template>
   
   <script setup>
   import { networkStatus } from '@/router/errorHandler';
   import { ref, watch, computed } from 'vue';
+  import { Wifi, WifiOff } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
-  import BaseBadge from '@/components/base/BaseBadge.vue';
   
   const showOnline = ref(false);
   const { width } = useWindowSize();
