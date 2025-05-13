@@ -9,6 +9,41 @@ import "@/assets/css/main.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('SW registered:', registration.scope);
+        
+        // Handle updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New content is available, show update notification
+              const event = new CustomEvent('sw-update-available');
+              window.dispatchEvent(event);
+            }
+          });
+        });
+      })
+      .catch(error => {
+        console.error('SW registration failed:', error);
+      });
+  });
+  
+  // Listen for controller change to reload the page
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+}
+
 const app = createApp(App);
 const pinia = createPinia(); 
 

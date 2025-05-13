@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useSettingsStore } from '@/stores/settings';
+import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 // Import clearRouteError and isHandlingError as they are needed in beforeEach
 import { setupRouteErrorHandling, routeError, routePath, clearRouteError, isHandlingError } from './errorHandler';
 
@@ -50,7 +51,7 @@ const routes = [
   {
     path: '/error',
     name: 'Error',
-    component: () => import('@/layouts/navigation/ErrorFallback.vue'),
+    component: ErrorFallback,
     props: () => ({
       error: routeError.value,
       path: routePath.value,
@@ -84,6 +85,7 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  fallback: ErrorFallback
 });
 
 // --- BEGIN PROPOSED FIX ---
