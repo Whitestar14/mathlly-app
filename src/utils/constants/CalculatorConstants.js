@@ -337,25 +337,6 @@ export const CalculatorUtils = {
   },
   
   /**
-   * Check if a character is a valid digit for a specific base
-   * 
-   * @param {string} char - Character to check
-   * @param {string} base - Base to check against
-   * @returns {boolean} True if character is valid for base
-   */
-  isValidDigitForBase(char, base) {
-    if (!char || char.length !== 1) return false;
-    
-    switch(base) {
-      case 'BIN': return /[01]/.test(char);
-      case 'OCT': return /[0-7]/.test(char);
-      case 'DEC': return /[0-9]/.test(char);
-      case 'HEX': return /[0-9A-Fa-f]/i.test(char);
-      default: return false;
-    }
-  },
-  
-  /**
    * Convert between bases with error handling
    * 
    * @param {string|number} value - Value to convert

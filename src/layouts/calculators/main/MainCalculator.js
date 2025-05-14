@@ -7,7 +7,7 @@ import { DisplayFormatter } from '@/services/display/DisplayFormatter'
  * @param {Object} options - Calculator options and dependencies
  * @returns {Object} Calculator operations, preview, and keyboard handlers
  */
-export function useMainCalculator({
+export function Manager({
   calculator,
   state,
   updateState,
