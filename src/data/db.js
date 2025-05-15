@@ -2,7 +2,7 @@ import Dexie from "dexie";
 
 const db = new Dexie('mathlly-db');
 
-db.version(3).stores({
+db.version(4).stores({
   history: '++id,timestamp',
   settings: 'id'
 }).upgrade(tx => {
@@ -33,7 +33,6 @@ db.version(3).stores({
         },
         startup: {
           navigation: settings.startupNavigation || 'home',
-          lastVisitedPath: settings.lastVisitedPath || '/',
         }
       };
       
@@ -74,7 +73,6 @@ db.on("ready", async () => {
       },
       startup: {
         navigation: 'home',
-        lastVisitedPath: '/',
       }
     });
   }

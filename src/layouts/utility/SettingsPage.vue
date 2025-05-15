@@ -4,8 +4,11 @@ import { useRouter } from "vue-router";
 import { SearchIcon, CircleHelp } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settings";
 import { filterByQuery } from "@/utils/misc/queryFilter";
+import { DEFAULT_SETTINGS } from "@/stores/settings"
 import { useToast } from "@/composables/useToast";
+import { cloneDeep } from "@/utils/misc/objectUtils";
 import BasePage from "@/components/base/BasePage.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
 import Select from "@/components/ui/SelectBar.vue";
 import Switch from "@/components/ui/ToggleBar.vue";
 import Button from "@/components/base/BaseButton.vue";
@@ -15,6 +18,7 @@ const router = useRouter();
 const settingsStore = useSettingsStore();
 const { toast } = useToast();
 const searchQuery = ref('');
+const showUnsavedChangesModal = ref(false);
 
 const settingsManifest = [
   { id: 'display', title: 'Display Settings', icon: 'MonitorIcon', keywords: ['precision', 'decimal places', 'fractions', 'syntax highlighting', 'number formatting', 'thousands separator', 'comma', 'binary', 'hexadecimal', 'octal', 'font', 'appearance'] },
@@ -31,58 +35,34 @@ const isRendered = (sectionId) => {
   return filteredManifest.value.some(section => section.id === sectionId);
 };
 
-// Create a schema for the local settings that matches our nested structure
-const settingsSchema = {
+// Single source of truth - get settings directly from the store
+const localSettings = ref(cloneDeep(DEFAULT_SETTINGS));
+
+// Create a snapshot of the current store state
+const storeSnapshot = computed(() => ({
   display: {
-    precision: 2,
-    useFractions: false,
+    precision: settingsStore.display.precision,
+    useFractions: settingsStore.display.useFractions,
     formatting: {
-      useThousandsSeparator: true,
-      formatBinary: true,
-      formatHexadecimal: true,
-      formatOctal: true,
+      useThousandsSeparator: settingsStore.display.formatting.useThousandsSeparator,
+      formatBinary: settingsStore.display.formatting.formatBinary,
+      formatHexadecimal: settingsStore.display.formatting.formatHexadecimal,
+      formatOctal: settingsStore.display.formatting.formatOctal,
     },
-    syntaxHighlighting: true,
+    syntaxHighlighting: settingsStore.display.syntaxHighlighting,
   },
   calculator: {
-    mode: 'Standard',
+    mode: settingsStore.calculator.mode,
   },
   appearance: {
-    theme: 'system',
-    animationDisabled: false,
+    theme: settingsStore.appearance.theme,
+    animationDisabled: settingsStore.appearance.animationDisabled,
+    checkForUpdates: settingsStore.appearance.checkForUpdates,
   },
   startup: {
-    navigation: 'home',
+    navigation: settingsStore.startup.navigation,
   }
-};
-
-const localSettings = ref({...settingsSchema});
-
-const storeSnapshot = computed(() => {
-  return {
-    display: {
-      precision: settingsStore.display.precision,
-      useFractions: settingsStore.display.useFractions,
-      formatting: {
-        useThousandsSeparator: settingsStore.display.formatting.useThousandsSeparator,
-        formatBinary: settingsStore.display.formatting.formatBinary,
-        formatHexadecimal: settingsStore.display.formatting.formatHexadecimal,
-        formatOctal: settingsStore.display.formatting.formatOctal,
-      },
-      syntaxHighlighting: settingsStore.display.syntaxHighlighting,
-    },
-    calculator: {
-      mode: settingsStore.calculator.mode,
-    },
-    appearance: {
-      theme: settingsStore.appearance.theme,
-      animationDisabled: settingsStore.appearance.animationDisabled,
-    },
-    startup: {
-      navigation: settingsStore.startup.navigation,
-    }
-  };
-});
+}));
 
 const hasChanges = computed(() => {
   return JSON.stringify(localSettings.value) !== JSON.stringify(storeSnapshot.value);
@@ -96,38 +76,24 @@ const startupOptions = [{ value: 'home', label: 'Home' }, { value: 'calculator',
 onMounted(async () => {
   await settingsStore.loadSettings();
   
-  // Initialize local settings from store
-  localSettings.value = {
-    display: {
-      precision: settingsStore.display.precision,
-      useFractions: settingsStore.display.useFractions,
-      formatting: {
-        useThousandsSeparator: settingsStore.display.formatting.useThousandsSeparator,
-        formatBinary: settingsStore.display.formatting.formatBinary,
-        formatHexadecimal: settingsStore.display.formatting.formatHexadecimal,
-        formatOctal: settingsStore.display.formatting.formatOctal,
-      },
-      syntaxHighlighting: settingsStore.display.syntaxHighlighting,
-    },
-    calculator: {
-      mode: settingsStore.calculator.mode,
-    },
-    appearance: {
-      theme: settingsStore.appearance.theme,
-      animationDisabled: settingsStore.appearance.animationDisabled,
-    },
-    startup: {
-      navigation: settingsStore.startup.navigation,
-    }
-  };
+  localSettings.value = cloneDeep(storeSnapshot.value);
 });
 
 const goBack = () => {
   if (hasChanges.value) {
-    if (confirm("You have unsaved changes. Are you sure you want to leave?")) router.go(-1);
+    showUnsavedChangesModal.value = true; // Show modal instead of confirm dialog
   } else {
     router.go(-1);
   }
+};
+
+const confirmNavigation = () => {
+  showUnsavedChangesModal.value = false;
+  router.go(-1);
+};
+
+const cancelNavigation = () => {
+  showUnsavedChangesModal.value = false;
 };
 
 const saveSettings = async () => {
@@ -137,19 +103,19 @@ const saveSettings = async () => {
   }
   
   try {
-    // Set default mode first (special handling)
-    await settingsStore.setDefaultMode(localSettings.value.calculator.mode);
-    
-    // Save all settings
     await settingsStore.saveSettings(localSettings.value);
     
     toast({ 
       type: "success", 
       title: "Settings saved", 
-      message: "Your preferences have been updated successfully." 
+      message: "Your preferences have been updated successfully." ,
+      duration: 5000,
+      dismissible: true 
     });
     
-    goBack();
+    localSettings.value = cloneDeep(storeSnapshot.value);
+
+    router.go(-1);
   } catch (error) {
     toast({ 
       type: "error", 
@@ -366,6 +332,21 @@ const saveSettings = async () => {
             </div>
             <Switch v-model="localSettings.appearance.animationDisabled" />
           </div>
+
+          <div class="flex items-center justify-between py-2">
+            <div class="max-w-[80%]">
+              <div class="flex items-center gap-2">
+                <label
+                  for="checkForUpdates"
+                  class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >Check for Updates</label>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Automatically check for new updates in the background
+              </p>
+            </div>
+            <Switch v-model="localSettings.appearance.checkForUpdates" />
+          </div>
         </div>
       </Collapsible>
       
@@ -374,7 +355,26 @@ const saveSettings = async () => {
         <p class="text-sm text-gray-500 dark:text-gray-500">Try a different search term.</p>
       </div>
 
-      <div class="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-gray-50 dark:bg-gray-900 py-4 border-t border-gray-200 dark:border-gray-700">
+    <BaseModal v-model:open="showUnsavedChangesModal">
+      <template #title>Unsaved Changes</template>
+      
+      <div class="mb-6">
+        <p class="text-gray-700 dark:text-gray-300">
+          You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.
+        </p>
+      </div>
+      
+      <div class="flex justify-end space-x-3">
+        <Button variant="outline" @click="cancelNavigation">
+          Stay on Page
+        </Button>
+        <Button variant="destructive" @click="confirmNavigation">
+          Discard Changes
+        </Button>
+      </div>
+    </BaseModal>
+
+      <div class="flex justify-end space-x-4 bg-gray-50 dark:bg-gray-900 py-4 border-t border-gray-200 dark:border-gray-700">
         <Button variant="ghost" @click="goBack">Cancel</Button>
         <Button variant="primary" @click="saveSettings" :disabled="!hasChanges">Save Changes</Button>
       </div>

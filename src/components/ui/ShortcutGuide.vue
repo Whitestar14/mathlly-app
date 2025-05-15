@@ -1,7 +1,7 @@
 <template>
   <BaseModal
-    :open="open"
-    @update:open="$emit('update:open', $event)"
+    :open="modelValue"
+    @update:open="$emit('update:modelValue', $event)"
   >
     <template #title>
       <div class="flex items-center">
@@ -99,10 +99,10 @@ import { usePills } from "@/composables/usePills";
 import Indicator from "@/components/ui/PillIndicator.vue";
 
 defineProps({
-  open: Boolean,
+  modelValue: Boolean, // Changed from 'open' to 'modelValue' for v-model support
 });
 
-defineEmits(["update:open"]);
+defineEmits(['update:modelValue']); // Add emits for v-model
 
 const tabElements = ref([]);
 const shortcutGroups = {

@@ -7,10 +7,10 @@ export class DisplayFormatter {
     const {
       base = "DEC",
       mode = "Standard",
-      useThousandsSeparator = settings.useThousandsSeparator,
-      formatBinary = settings.formatBinary,
-      formatHexadecimal = settings.formatHexadecimal,
-      formatOctal = settings.formatOctal,
+      useThousandsSeparator = settings.display_formatting_useThousandsSeparator,
+      formatBinary = settings.display_formatting_formatBinary,
+      formatHexadecimal = settings.display_formatting_formatHexadecimal,
+      formatOctal = settings.display_formatting_formatOctal,
     } = options;
 
     if (!value) return "0";

@@ -7,11 +7,14 @@
     }"
   >
     <!-- Backdrop (mobile only) -->
-    <Transition name="fade">
+    <Transition :name="!animationDisabled ? 'fade' : ''">
       <div
         v-show="isMobile && isOpen"
-        class="fixed inset-0 backdrop-blur-sm z-20 transition-colors duration-300"
-        :class="draggable ? [isDragging ? 'bg-black/20' : 'bg-black/40'] : ''"
+        class="fixed inset-0 z-20"
+        :class="[
+          draggable ? [isDragging ? 'bg-black/20' : 'bg-black/40'] : '',
+          !animationDisabled ? 'backdrop-blur-sm transition-colors duration-300' : 'bg-black/50'
+        ]"
         aria-hidden="true"
         @click="close()"
       />
@@ -61,12 +64,13 @@
           ref="panel"
           class="bg-white dark:bg-gray-900 fixed inset-x-0 bottom-0 overflow-hidden"
           :class="[
-            isExpanded || maxHeightRatio === 1 ? 'rounded-none' : 'transition-[rounded] duration-300 rounded-t-xl'
+            isExpanded || maxHeightRatio === 1 ? 'rounded-none' : 
+            !animationDisabled ? 'transition-[rounded] duration-300 rounded-t-xl' : 'rounded-t-xl'
           ]"
           :style="{
             height: `${panelHeight}px`,
             transform: `translateY(${translateY}px)`,
-            transition: isDragging ? '' : 'transform 0.3s ease-out, height 0.3s ease-out',
+            transition: isDragging ? '' : !animationDisabled ? 'transform 0.3s ease-out, height 0.3s ease-out' : '',
           }"
         >
           <!-- Expand/Minimize Button -->
@@ -120,6 +124,8 @@
 </template>
 
 <script setup>
+import { useSettingsStore } from '@/stores/settings';
+import { computed } from 'vue';
 import { usePanel } from '@/composables/usePanel';
 import SidePanel from '@/components/panel/SidePanel.vue';
 import DesktopPanel from '@/components/panel/DesktopPanel.vue';
@@ -142,6 +148,9 @@ const props = defineProps({
   draggable: { type: Boolean, default: false },
   defaultDesktopState: { type: Boolean, default: false }
 });
+
+const settingsStore = useSettingsStore();
+const animationDisabled = computed(() => settingsStore.appearance.animationDisabled);
 
 const options = {
   storageKey: props.id || props.storageKey,

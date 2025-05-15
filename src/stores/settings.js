@@ -6,10 +6,12 @@ import {
   merge,
   set, 
   flattenObject,
+  unflattenObject,
+  isNestedStructure
 } from '@/utils/misc/objectUtils';
 
 // Define a nested settings schema
-const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS = {
   id: 1,
   display: {
     precision: 4,
@@ -36,6 +38,7 @@ const DEFAULT_SETTINGS = {
   appearance: {
     theme: 'system',
     animationDisabled: false,
+    checkForUpdates: true, // <--- Add this line
   },
   startup: {
     navigation: 'home', // Options: 'home', 'calculator', 'last-visited'
@@ -47,8 +50,6 @@ export const useSettingsStore = defineStore('settings', {
   state: () => ({
     // Flatten the settings for backward compatibility
     ...flattenObject(DEFAULT_SETTINGS),
-    // Keep track of current mode separately
-    currentMode: null
   }),
 
   getters: {
@@ -57,10 +58,6 @@ export const useSettingsStore = defineStore('settings', {
     calculator: (state) => createSettingsProxy(state, 'calculator'),
     appearance: (state) => createSettingsProxy(state, 'appearance'),
     startup: (state) => createSettingsProxy(state, 'startup'),
-    
-    // Backward compatibility getters
-    defaultMode: (state) => state.calculator_mode || 'Standard',
-    activeMode: (state) => state.currentMode === null ? state.calculator_mode : state.currentMode
   },
 
   actions: {
@@ -77,48 +74,54 @@ export const useSettingsStore = defineStore('settings', {
           // If no settings exist, save defaults
           await this.saveSettings(DEFAULT_SETTINGS);
         }
-        // Initialize currentMode as null to use default mode
-        this.currentMode = null;
       } catch (error) {
         console.error('Error loading settings:', error);
         Object.assign(this, flattenObject(DEFAULT_SETTINGS));
-        this.currentMode = null;
       }
     },
 
-    async saveSettings(newSettings) {
-      try {
-        // Get current settings from DB
-        const currentSettings = await db.settings.get(1);
-        
-        // Create a deep copy of the default settings
-        const baseSettings = cloneDeep(DEFAULT_SETTINGS);
-        
-        // Merge in this order: defaults <- current DB settings <- new settings
-        const settingsToSave = merge(
-          {},
-          baseSettings,
-          currentSettings || {},
-          newSettings
-        );
-        
-        // Ensure ID is preserved
-        settingsToSave.id = 1;
-        
-        // Save to database
-        if (!currentSettings) {
-          await db.settings.add(settingsToSave);
-        } else {
-          await db.settings.update(1, settingsToSave);
-        }
-        
-        // Update store state (flattened for backward compatibility)
-        Object.assign(this, flattenObject(settingsToSave));
-      } catch (error) {
-        console.error('Error saving settings:', error);
-        throw error; // Propagate error to UI for handling
-      }
-    },
+// Only showing the relevant parts to modify
+
+async saveSettings(newSettings) {
+  try {
+    // Get current settings from DB
+    const currentSettings = await db.settings.get(1);
+    
+    // Create a deep copy of the default settings
+    const baseSettings = cloneDeep(DEFAULT_SETTINGS);
+    
+    // If newSettings is in nested format, flatten it for backward compatibility
+    const flattenedNewSettings = isNestedStructure(newSettings) 
+      ? flattenObject(newSettings) 
+      : newSettings;
+    
+    // Merge in this order: defaults <- current DB settings <- new settings
+    const settingsToSave = merge(
+      {},
+      baseSettings,
+      currentSettings || {},
+      isNestedStructure(newSettings) ? newSettings : unflattenObject(flattenedNewSettings)
+    );
+    
+    // Ensure ID is preserved
+    settingsToSave.id = 1;
+    
+    // Save to database
+    if (!currentSettings) {
+      await db.settings.add(settingsToSave);
+    } else {
+      await db.settings.update(1, settingsToSave);
+    }
+    
+    // Update store state (flattened for backward compatibility)
+    Object.assign(this, flattenObject(settingsToSave));
+    
+    return true; // Indicate success
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    throw error; // Propagate error to UI for handling
+  }
+},
 
     // Update a specific nested setting
     async updateSetting(path, value) {
@@ -143,17 +146,6 @@ export const useSettingsStore = defineStore('settings', {
         console.error(`Error updating setting at path ${path}:`, error);
         throw error;
       }
-    },
-
-    setCurrentMode(mode) {
-      // Only set currentMode if it differs from default mode
-      this.currentMode = mode !== this.calculator_mode ? mode : null;
-    },
-
-    async setDefaultMode(mode) {
-      await this.updateSetting('calculator.mode', mode);
-      // Reset currentMode when default mode changes
-      this.currentMode = null;
     },
 
     // Update the last visited path

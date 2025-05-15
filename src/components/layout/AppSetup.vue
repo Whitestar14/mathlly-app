@@ -5,9 +5,9 @@
     <sidebar-menu :is-mobile="device.isMobile" @sidebar-close="sidebarPanel.close()" />
     <div class="flex flex-col flex-grow duration-300" :class="mainContentClasses">
       <app-header :is-mobile="device.isMobile" :is-sidebar-open="sidebarPanel.isOpen" :is-menubar-open="menuPanel.isOpen"
-        @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
+        @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" @update:mode="handleModeChange" />
 
-      <app-view :mode="mode" :settings="settings" :is-mobile="device.isMobile" />
+      <app-view :mode="currentMode" :settings="settings" :is-mobile="device.isMobile" />
     </div>
 
     <main-menu />
@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { onUnmounted, computed } from "vue"
+import { onUnmounted, computed, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
@@ -44,7 +44,12 @@ await Promise.all([
 
 device.initializeDeviceInfo()
 
-const mode = computed(() => settings.activeMode)
+const currentMode = ref(settings.calculator?.mode || 'Standard')
+
+// Handle mode changes from AppHeader
+const handleModeChange = (newMode) => {
+  currentMode.value = newMode
+}
 
 // Use the panel context for sidebar and menu
 const sidebarPanel = usePanel('sidebar')

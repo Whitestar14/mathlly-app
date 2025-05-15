@@ -70,8 +70,7 @@
   </BasePanel>
   
   <!-- Clear confirmation modal -->
-  <BaseModal :open="showClearConfirmation" description="confirmation-dialog"
-    @update:open="showClearConfirmation = $event">
+  <BaseModal v-model:open="showClearConfirmation" description="confirmation-dialog">
     <template #title>
       <div class="flex items-center">
         <AlertTriangleIcon class="h-5 w-5 text-red-500 dark:text-gray-300 mr-2" />

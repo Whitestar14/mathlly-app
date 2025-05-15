@@ -20,6 +20,7 @@
 
 <script setup>
 import { shallowRef, ref, onErrorCaptured, onMounted } from 'vue';
+import { hasError } from "@/router/errorHandler"
 import { useRouter } from 'vue-router';
 import { useSettingsStore } from '@/stores/settings';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
@@ -29,7 +30,6 @@ import Loader from '@/components/base/BaseLoader.vue';
 import UpdateNotification from '@/components/ui/UpdateNotification.vue';
 
 const error = ref(null);
-const hasError = shallowRef(false);
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const navigationComplete = shallowRef(false);

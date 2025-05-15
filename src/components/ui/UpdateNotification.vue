@@ -95,7 +95,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { useIntervalFn, useEventListener } from '@vueuse/core'; // Import VueUse composables
 import {
   RefreshCwIcon,
   XIcon,
@@ -104,10 +105,12 @@ import {
   CheckIcon
 } from 'lucide-vue-next';
 import { useVersionStore } from '@/stores/version';
+import { useSettingsStore } from '@/stores/settings';
 import { updates } from '@/data/changelog';
 import BaseButton from '@/components/base/BaseButton.vue';
 
 const versionStore = useVersionStore();
+const settingsStore = useSettingsStore();
 const showNotification = ref(false);
 const showDetails = ref(false);
 const latestVersion = ref('');
@@ -116,6 +119,9 @@ const currentVersion = computed(() => versionStore.versionInfo.full);
 
 // Store the service worker registration object when an update is available
 const serviceWorkerRegistration = ref(null);
+
+// Check if updates are enabled in settings
+const updatesEnabled = computed(() => settingsStore.appearance?.checkForUpdates !== false);
 
 // Fetches details like version number and features for display in the notification
 const fetchLatestVersion = async () => {
@@ -143,13 +149,54 @@ const toggleDetails = () => {
 
 const handleWorkerUpdate = (event) => {
   if (event.detail) {
-      serviceWorkerRegistration.value = event.detail;
-      showNotification.value = true;
-      fetchLatestVersion(); // Fetch display details
+    serviceWorkerRegistration.value = event.detail;
+    showNotification.value = true;
+    fetchLatestVersion(); // Fetch display details
   } else {
-      console.warn('"sw-update-available" received without detail.');
+    console.warn('"sw-update-available" received without detail.');
   }
 };
+
+const periodicUpdateCheck = () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.update(); // This tells the browser to check the server for a new SW script
+    }).catch(error => {
+      console.error('Error getting SW registration for update check:', error);
+    });
+  }
+
+  fetchLatestVersion().then(() => {
+    const current = currentVersion.value.replace(/^v/, '');
+    const latest = latestVersion.value.replace(/^v/, '');
+    if (latest && current && latest !== current) {
+      const dismissedVersion = localStorage.getItem('dismissed-version');
+      if (dismissedVersion !== latestVersion.value && !showNotification.value) {
+        console.log('Version mismatch from version-info.json. Current:', current, 'Latest:', latest);
+        showNotification.value = true;
+      }
+    }
+  });
+};
+
+const { pause, resume } = useIntervalFn(periodicUpdateCheck, 60 * 60 * 1000, { 
+  immediate: false, 
+  immediateCallback: false
+});
+
+watch(updatesEnabled, (newValue) => {
+  if (newValue) {
+    // Run an initial check and then resume the interval
+    periodicUpdateCheck();
+    resume();
+  } else {
+    // Pause the interval when updates are disabled
+    pause();
+  }
+});
+
+// Use VueUse's useEventListener for cleaner event handling
+useEventListener(window, 'sw-update-available', handleWorkerUpdate);
 
 const refreshApp = () => {
   showNotification.value = false; // Hide notification
@@ -163,7 +210,6 @@ const refreshApp = () => {
         window.location.reload();
       }
     }, { once: true }); // Use { once: true } to auto-remove listener
-
 
     // Check state *before* sending message
     if (worker.state === 'installed') {
@@ -193,40 +239,8 @@ const dismissUpdate = () => {
     localStorage.setItem('dismissed-version', latestVersion.value);
   }
 };
-
-const periodicUpdateCheck = () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-      registration.update(); // This tells the browser to check the server for a new SW script
-    }).catch(error => {
-      console.error('Error getting SW registration for update check:', error);
-    });
-  }
-
-  fetchLatestVersion().then(() => {
-    const current = currentVersion.value.replace(/^v/, '');
-    const latest = latestVersion.value.replace(/^v/, '');
-    if (latest && current && latest !== current) {
-      const dismissedVersion = localStorage.getItem('dismissed-version');
-      if (dismissedVersion !== latestVersion.value && !showNotification.value) {
-        console.log('Version mismatch from version-info.json. Current:', current, 'Latest:', latest);
-        showNotification.value = true;
-      }
-    }
-  });
-};
-
-onMounted(() => {
-  window.addEventListener('sw-update-available', handleWorkerUpdate);
-  periodicUpdateCheck(); // Initial check still useful
-  const updateInterval = setInterval(periodicUpdateCheck, 60 * 60 * 1000);
-
-  onUnmounted(() => {
-    clearInterval(updateInterval);
-    window.removeEventListener('sw-update-available', handleWorkerUpdate);
-  });
-});
 </script>
+
 
 <style scoped>
 .animate-spin-slow {

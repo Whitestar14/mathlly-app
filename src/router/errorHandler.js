@@ -4,21 +4,24 @@ import { useOnline } from '@vueuse/core';
 export const routeError = ref(null);
 export const routePath = ref('');
 export const isHandlingError = ref(false);
+export const hasError = ref(false);
 export const networkStatus = useOnline();
 
 export function setRouteError(error, path) {
   console.error(`[Router Error] Path: ${path}`, error);
   routeError.value = error;
   routePath.value = path;
+  hasError.value = true;
   isHandlingError.value = true;
 }
 
 export function clearRouteError() {
   if (routeError.value) {
     routeError.value = null;
-    routePath.value = '';
+    routePath.value = '';  
     isHandlingError.value = false;
   }
+  hasError.value = false;
 }
 
 export function setupRouteErrorHandling(router) {

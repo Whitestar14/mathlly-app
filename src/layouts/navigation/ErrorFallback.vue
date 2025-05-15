@@ -136,7 +136,7 @@ const extractedErrorMessage = computed(() => {
     return err.message
       .replace(/^(Error: )?Failed to fetch dynamically imported module:.*/i, 'Could not load page resources.')
       .replace(/^(Error: )?error loading dynamically imported module/i, 'Could not load page components.')
-      .replace(/\$\$Original error:.*?\$\$/g, '') // Remove custom original error markers if any
+      .replace(/\$\$Original error:.*?\$\$/g, '')
       .trim()
   }
   if (typeof err === 'string') {
@@ -159,9 +159,8 @@ const pageTitle = computed(() => {
 
 const visualErrorCode = computed(() => {
   if (isOffline.value) return 'OFF'
-
   const err = effectiveError.value
-  if (!err) return props.isRouteError ? '503' : '500' // Default if no specific error
+  if (!err) return props.isRouteError || props.isGlobalError ? '503' : '500' // Adjusted default
 
   const msg = (err.message || '').toLowerCase()
   if (msg.includes('timeout')) return '408'
@@ -208,7 +207,6 @@ const errorTitleToDisplay = computed(() => {
 
 const errorMessageToDisplay = computed(() => {
   if (isOffline.value) return 'Please check your internet connection. We will attempt to reconnect automatically.'
-
   switch (visualErrorCode.value) {
     case '404':
       return `We couldn't find the page at ${props.path ? `\`${props.path}\`` : 'the requested URL'}. Please check the address or go back.`
@@ -230,8 +228,8 @@ const errorMessageToDisplay = computed(() => {
 })
 
 const canAttemptRetry = computed(() => {
-  return props.isRouteError || isOffline.value
-})
+  return props.isRouteError || isOffline.value || props.isGlobalError;
+});
 
 const navigateToHome = () => {
   if (isManualRetrying.value) return
@@ -239,6 +237,7 @@ const navigateToHome = () => {
   clearRouteError()
   router.push('/').catch((err) => {
     console.error('ErrorFallback: Failed to navigate home:', err)
+    toast({ type: 'error', message: 'Could not navigate to home. Please try again.'})
   })
 }
 
@@ -246,39 +245,47 @@ async function handleManualRetry() {
   if (isManualRetrying.value) return
 
   isManualRetrying.value = true
-  manualRetryFeedbackMessage.value = ''; 
+  manualRetryFeedbackMessage.value = '';
   cancelAutomaticRetry()
 
   if (isOffline.value) {
     toast({
       type: 'warning',
-      message: 'Still offline. Please check your connection',
+      message: 'Still offline. Please check your connection.',
     })
     setTimeout(() => {
         isManualRetrying.value = false;
     }, 1500);
+    if (props.isRouteError || props.isGlobalError || (routeError.value && Object.keys(routeError.value).length > 0)) {
+        startAutomaticRetry();
+    }
     return
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 300))
+  await new Promise((resolve) => setTimeout(resolve, 300)) // UX delay
+
   clearRouteError()
 
   try {
     const targetPath = props.path || router.currentRoute.value.redirectedFrom?.fullPath || router.options.history.state.back || '/'
+    console.log(`ErrorFallback: Attempting to re-navigate to: ${targetPath}`)
     await router.replace(targetPath)
   } catch (err) {
     console.error('ErrorFallback: Error during manual retry navigation attempt:', err)
   } finally {
     setTimeout(() => {
       isManualRetrying.value = false
-    }, 200)
+    }, 200) // Delay to prevent rapid clicks
   }
 }
 
-// Start the automatic retry process when offline
 function startAutomaticRetry() {
-  if (!isOffline.value || autoRetryActive.value) return;
+  if (!isOffline.value || autoRetryActive.value) {
+    // console.log('ErrorFallback: Auto-retry not started (already online or already active).');
+    return
+  }
 
+  console.log(`ErrorFallback: Starting automatic retry countdown (${AUTO_RETRY_INITIAL_DELAY_SECONDS}s)`)
   autoRetryActive.value = true
   autoRetryCountdownTime.value = AUTO_RETRY_INITIAL_DELAY_SECONDS
   manualRetryFeedbackMessage.value = '';
@@ -287,8 +294,9 @@ function startAutomaticRetry() {
 
   autoRetryTimerId = setInterval(() => {
     if (!isOffline.value) {
+      console.log('ErrorFallback: Network reconnected during auto-retry countdown.')
       cancelAutomaticRetry()
-      if (props.isRouteError || routeError.value) {
+      if (props.isRouteError || props.isGlobalError || (routeError.value && Object.keys(routeError.value).length > 0)) {
          manualRetryFeedbackMessage.value = 'Reconnected! Attempting to reload...';
          handleManualRetry()
       }
@@ -296,8 +304,9 @@ function startAutomaticRetry() {
     }
 
     if (autoRetryCountdownTime.value <= 1) {
-      cancelAutomaticRetry() 
-      handleManualRetry() 
+      console.log('ErrorFallback: Auto-retry countdown finished. Attempting retry...')
+      cancelAutomaticRetry()
+      handleManualRetry()
     } else {
       autoRetryCountdownTime.value--
     }
@@ -317,20 +326,24 @@ watch(networkStatus, (currentStatus, previousStatus) => {
   const isNowOnline = currentStatus; // Assuming networkStatus directly gives boolean
   const wasPreviouslyOnline = previousStatus;
 
-  manualRetryFeedbackMessage.value = ''; // Clear feedback on any network change
+  manualRetryFeedbackMessage.value = '';
 
   if (!isNowOnline) {
-    if (props.isRouteError || props.isGlobalError || routeError.value) {
-        startAutomaticRetry()
+    console.log('ErrorFallback: Network status is OFFLINE.');
+    if (props.isRouteError || props.isGlobalError || (routeError.value && Object.keys(routeError.value).length > 0)) {
+        console.log('ErrorFallback: Error present while offline, starting auto-retry.');
+        startAutomaticRetry();
     }
   } else {
-    cancelAutomaticRetry()
-    if (wasPreviouslyOnline === false && (props.isRouteError || routeError.value)) {
+    cancelAutomaticRetry(); 
+
+    if (wasPreviouslyOnline === false && (props.isRouteError || props.isGlobalError || (routeError.value && Object.keys(routeError.value).length > 0))) {
+      console.log('ErrorFallback: Came back online with a pending error, attempting automatic reload.');
       manualRetryFeedbackMessage.value = 'Connection restored! Attempting to reload page...';
-      handleManualRetry()
+      handleManualRetry();
     }
   }
-}, { immediate: false }) 
+}, { immediate: true }); 
 
 onUnmounted(() => {
   cancelAutomaticRetry()

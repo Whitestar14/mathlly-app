@@ -28,15 +28,16 @@
         <div class="w-full sm:w-auto flex justify-end items-center space-x-4">
           <!-- Mode Toggler using SelectBar -->
           <div
-            v-if="currentRoute === '/calculator'"
+            v-if="route.path === '/calculator'"
             class="relative w-full min-w-36"
           >
             <Select
-              v-model="selectedMode"
-              :options="modes.map((mode) => ({ value: mode, label: mode }))"
+              v-model="currentMode"
+              :options="availableModes"
               label=""
               position="popper"
               placeholder="Select mode"
+              @update:modelValue="onModeChange"
             />
           </div>
 
@@ -82,14 +83,13 @@
       </div>
     </div>
     <ShortcutGuide
-      :open="isShortcutModalOpen"
-      @update:open="isShortcutModalOpen = $event"
+      v-model="isShortcutModalOpen"
     />
   </header>
 </template>
 
 <script setup>
-import { computed, watch, ref } from "vue"
+import { shallowRef } from "vue"
 import {
   Command,
   PanelLeftIcon,
@@ -97,7 +97,7 @@ import {
   MoreVerticalIcon
 } from "lucide-vue-next"
 import { useRoute } from "vue-router"
-import { useSettingsStore } from "@/stores/settings"
+import { useSettingsStore } from '@/stores/settings'
 import { useKeyboard } from "@/composables/useKeyboard"
 import { useTheme } from "@/composables/useTheme"
 import ShortcutGuide from "@/components/ui/ShortcutGuide.vue"
@@ -122,31 +122,26 @@ defineProps({
 
 const emit = defineEmits(["update:mode", "toggle-sidebar", "toggle-menubar"])
 
-const settings = useSettingsStore()
+const availableModes = [
+  { value: 'Standard', label: 'Standard' },
+  { value: 'Scientific', label: 'Scientific' },
+  { value: 'Programmer', label: 'Programmer' }
+];
+
 const route = useRoute()
-const currentRoute = ref(route.path)
-const modes = ['Standard', 'Scientific', 'Programmer']
-const isShortcutModalOpen = ref(false)
+const isShortcutModalOpen = shallowRef(false)
 
 const { toggleTheme } = useTheme()
 
-const selectedMode = computed({
-  get: () => settings.activeMode,
-  set: (newMode) => {
-    // Only update current mode, not default mode
-    settings.setCurrentMode(newMode)
-    emit("update:mode", newMode)
-  },
-})
+const onModeChange = (newMode) => {
+  emit("update:mode", newMode)
+  currentMode.value = newMode;
+  return newMode;
+}
 
-watch(
-  () => route.path,
-  (newPath) => {
-    currentRoute.value = newPath
-  },
-  { immediate: true }
-)
+const settingsStore = useSettingsStore();
 
+const currentMode = shallowRef(settingsStore.calculator.mode);
 const openShortcutModal = () => {
   isShortcutModalOpen.value = true
 }
