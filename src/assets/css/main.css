@@ -72,10 +72,6 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
-
-    .animation-disabled * {
-      @apply !animate-none !duration-0;
-    }
   }
 
   :root {
@@ -123,7 +119,10 @@
 
   /* Settings toggle classes */
   .animation-disabled * {
-    @apply !animate-none !duration-0;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 
   textarea {
@@ -168,7 +167,7 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors *:disabled:opacity-50 disabled:pointer-events-none focus-colors;
+    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors disabled:opacity-50 disabled:pointer-events-none focus-colors;
   }
 
   .btn-primary {

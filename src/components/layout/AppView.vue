@@ -4,11 +4,8 @@
       <component :is="Component" v-bind="shouldPassComponent(route.path) ? {
         mode,
         settings,
-        'is-mobile': isMobile
-      } : {}" v-on="shouldPassComponent(route.path) ? {
-              'settings-change': handleSettingsChange,
-              'update:mode': handleModeUpdate
-            } : {}" />
+        isMobile
+      } : {}" />
     </Transition>
   </router-view>
 </template>
@@ -31,19 +28,7 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['settings-change', 'update:mode'])
-
 await new Promise(resolve => setTimeout(resolve, 1200))
-
-// Handle settings changes from child components
-const handleSettingsChange = (newSettings) => {
-  emit('settings-change', newSettings)
-}
-
-// Handle mode updates from child components
-const handleModeUpdate = (newMode) => {
-  emit('update:mode', newMode)
-}
 
 /**
  * Determines if props and event listeners should be passed to the current route component

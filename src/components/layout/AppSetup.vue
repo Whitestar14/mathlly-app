@@ -1,14 +1,13 @@
 <template>
   <div class="min-h-screen flex bg-background dark:bg-background-dark duration-300" :class="{
-    'animation-disabled': settings.animationDisabled,
+    'animation-disabled': settings.appearance.animationDisabled,
   }">
     <sidebar-menu :is-mobile="device.isMobile" @sidebar-close="sidebarPanel.close()" />
     <div class="flex flex-col flex-grow duration-300" :class="mainContentClasses">
       <app-header :is-mobile="device.isMobile" :is-sidebar-open="sidebarPanel.isOpen" :is-menubar-open="menuPanel.isOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
 
-      <app-view :mode="mode" :settings="settings" :is-mobile="device.isMobile" @settings-change="updateSettings"
-        @update:mode="updateMode" />
+      <app-view :mode="mode" :settings="settings" :is-mobile="device.isMobile" />
     </div>
 
     <main-menu />
@@ -64,19 +63,6 @@ const mainContentClasses = computed(() => {
   
   return classes;
 });
-
-const updateMode = async (newMode) => {
-  settings.setCurrentMode(newMode)
-}
-
-const updateSettings = async (newSettings) => {
-  if (newSettings.mode !== settings.mode) {
-    await settings.setDefaultMode(newSettings.mode)
-  }
-  const settingsToSave = { ...newSettings }
-  delete settingsToSave.mode
-  await settings.saveSettings(settingsToSave)
-}
 
   useKeyboard("global", {
   toggleSidebar,

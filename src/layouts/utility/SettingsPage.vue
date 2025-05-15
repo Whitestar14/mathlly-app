@@ -180,7 +180,7 @@ const saveSettings = async () => {
         v-if="isRendered('display')"
         id="display"
         title="Display Settings" 
-        icon="MonitorIcon"
+        icon="Monitor"
         :defaultOpen="true" 
       >
         <div class="space-y-6">
@@ -221,7 +221,7 @@ const saveSettings = async () => {
                   >Syntax Highlighting</label>
                   <CircleHelp
                     class="h-4 w-4 cursor-help"
-                    v-tippy="{ content: 'This is an experimental feature that may affect performance on complex calculations', placement: 'top', onShow() { return true } }"
+                    v-tippy="{ content: 'Experimental feature. Performance may be affected on complex calculations', placement: 'top', onShow() { return true } }"
                   />
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -286,7 +286,7 @@ const saveSettings = async () => {
         v-if="isRendered('calculator')"
         id="calculator"
         title="Calculator Mode" 
-        icon="CalculatorIcon"
+        icon="Calculator"
         :defaultOpen="true"
       >
         <div>
@@ -308,7 +308,7 @@ const saveSettings = async () => {
         v-if="isRendered('startup')"
         id="startup"
         title="Startup Preferences" 
-        icon="PowerIcon"
+        icon="Power"
         :defaultOpen="true"
       >
         <div>
@@ -330,7 +330,7 @@ const saveSettings = async () => {
         v-if="isRendered('themes')"
         id="themes"
         title="Themes & Preferences" 
-        icon="PaletteIcon"
+        icon="Palette"
         :defaultOpen="true"
       >
         <div class="space-y-4">
@@ -350,10 +350,16 @@ const saveSettings = async () => {
           
           <div class="flex items-center justify-between py-2">
             <div class="max-w-[80%]">
-              <label
-                for="animationDisabled"
-                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Disable Animations</label>
+              <div class="flex items-center gap-2">
+                  <label
+                    for="animationDisabled"
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >Disable Animation</label>
+                  <CircleHelp
+                    class="h-4 w-4 cursor-help"
+                    v-tippy="{ content: 'May experience thrashing and flashes during transitions. Backdrops will be disabled.', placement: 'top', onShow() { return true } }"
+                  />
+                </div>
               <p class="text-xs text-gray-500 dark:text-gray-400">
                 Turn off animations for improved performance or reduced motion
               </p>

@@ -1,7 +1,7 @@
 <template>
   <div 
     class="fixed z-30 bottom-4 right-4 h-auto w-80" 
-    :class="{ '-translate-x-1/2 left-1/2 pointer-events-none right-auto': isMobile }"
+    :class="{ '-translate-x-1/2 left-1/2 right-auto': isMobile }"
     >
     <TransitionGroup 
     name="toast-transition" 

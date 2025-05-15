@@ -36,7 +36,7 @@
             :key="index"
           >
             <template v-if="part.type === 'text'">
-              <template v-if="settingsStore.syntaxHighlighting">
+              <template v-if="settingsStore.display.syntaxHighlighting">
                 <span
                   v-for="(token, tokenIndex) in highlightSyntax(part.content)"
                   :key="`${index}-${tokenIndex}`"

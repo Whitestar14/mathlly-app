@@ -32,12 +32,9 @@ export function useTheme() {
    * @type {import('vue').ComputedRef<string>}
    */
   const selectedTheme = computed({
-    get: () => settings.theme,
+    get: () => settings.appearance.theme,
     set: async (newTheme) => {
-      await settings.saveSettings({
-        ...settings.$state,
-        theme: newTheme,
-      });
+      await settings.updateSetting('appearance.theme', newTheme);
     },
   });
 
@@ -77,10 +74,7 @@ export function useTheme() {
    */
   const toggleTheme = async () => {
     const newTheme = isDark.value ? THEME_OPTIONS.LIGHT : THEME_OPTIONS.DARK;
-    await settings.saveSettings({
-      ...settings.$state,
-      theme: newTheme,
-    });
+    await settings.updateSetting('appearance.theme', newTheme);
   };
 
   /**
@@ -90,10 +84,7 @@ export function useTheme() {
    */
   const setTheme = async (newTheme) => {
     if (Object.values(THEME_OPTIONS).includes(newTheme)) {
-      await settings.saveSettings({
-        ...settings.$state,
-        theme: newTheme,
-      });
+      await settings.updateSetting('appearance.theme', newTheme);
     } else {
       console.warn(`Invalid theme: ${newTheme}. Valid options are: ${Object.values(THEME_OPTIONS).join(', ')}`);
     }

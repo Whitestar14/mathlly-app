@@ -1,116 +1,15 @@
 // settings.js (Pinia Store)
-// settings.js (Pinia Store)
 import { defineStore } from 'pinia';
 import db from '@/data/db';
-
-// Custom utility functions instead of lodash
-/**
- * Deep clone an object
- * @param {Object} obj - Object to clone
- * @returns {Object} Cloned object
- */
-function cloneDeep(obj) {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-  
-  const clone = Array.isArray(obj) ? [] : {};
-  
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      clone[key] = cloneDeep(obj[key]);
-    }
-  }
-  
-  return clone;
-}
-
-/**
- * Deep merge objects
- * @param {Object} target - Target object
- * @param {...Object} sources - Source objects
- * @returns {Object} Merged object
- */
-function merge(target, ...sources) {
-  if (!sources.length) return target;
-  const source = sources.shift();
-
-  if (isObject(target) && isObject(source)) {
-    for (const key in source) {
-      if (isObject(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: {} });
-        merge(target[key], source[key]);
-      } else {
-        Object.assign(target, { [key]: source[key] });
-      }
-    }
-  }
-
-  return merge(target, ...sources);
-}
-
-/**
- * Check if value is an object
- * @param {*} item - Value to check
- * @returns {boolean} True if object
- */
-function isObject(item) {
-  return (item && typeof item === 'object' && !Array.isArray(item));
-}
-
-/**
- * Get a value from an object by path
- * @param {Object} obj - Object to get value from
- * @param {string} path - Path to value (e.g. 'a.b.c')
- * @param {*} defaultValue - Default value if path not found
- * @returns {*} Value at path or default value
- */
-function get(obj, path, defaultValue = undefined) {
-  const keys = path.split('.');
-  let result = obj;
-  
-  for (const key of keys) {
-    if (result === undefined || result === null) {
-      return defaultValue;
-    }
-    result = result[key];
-  }
-  
-  return result === undefined ? defaultValue : result;
-}
-
-/**
- * Set a value in an object by path
- * @param {Object} obj - Object to set value in
- * @param {string} path - Path to set value at (e.g. 'a.b.c')
- * @param {*} value - Value to set
- * @returns {Object} Modified object
- */
-function set(obj, path, value) {
-  if (!obj || typeof obj !== 'object') {
-    return obj;
-  }
-  
-  const keys = path.split('.');
-  let current = obj;
-  
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i];
-    if (current[key] === undefined) {
-      current[key] = {};
-    } else if (typeof current[key] !== 'object') {
-      current[key] = {};
-    }
-    current = current[key];
-  }
-  
-  current[keys[keys.length - 1]] = value;
-  return obj;
-}
+import { 
+  cloneDeep, 
+  merge,
+  set, 
+  flattenObject,
+} from '@/utils/misc/objectUtils';
 
 // Define a nested settings schema
 const DEFAULT_SETTINGS = {
-  // Rest of the code remains the same
   id: 1,
   display: {
     precision: 4,
@@ -147,7 +46,7 @@ const DEFAULT_SETTINGS = {
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     // Flatten the settings for backward compatibility
-    ...flattenSettings(DEFAULT_SETTINGS),
+    ...flattenObject(DEFAULT_SETTINGS),
     // Keep track of current mode separately
     currentMode: null
   }),
@@ -160,8 +59,8 @@ export const useSettingsStore = defineStore('settings', {
     startup: (state) => createSettingsProxy(state, 'startup'),
     
     // Backward compatibility getters
-    defaultMode: (state) => state.calculator?.mode || 'Standard',
-    activeMode: (state) => state.currentMode === null ? state.calculator?.mode : state.currentMode
+    defaultMode: (state) => state.calculator_mode || 'Standard',
+    activeMode: (state) => state.currentMode === null ? state.calculator_mode : state.currentMode
   },
 
   actions: {
@@ -173,7 +72,7 @@ export const useSettingsStore = defineStore('settings', {
           const mergedSettings = merge({}, DEFAULT_SETTINGS, settings);
           
           // Update state with merged settings (flattened for backward compatibility)
-          Object.assign(this, flattenSettings(mergedSettings));
+          Object.assign(this, flattenObject(mergedSettings));
         } else {
           // If no settings exist, save defaults
           await this.saveSettings(DEFAULT_SETTINGS);
@@ -182,7 +81,7 @@ export const useSettingsStore = defineStore('settings', {
         this.currentMode = null;
       } catch (error) {
         console.error('Error loading settings:', error);
-        Object.assign(this, flattenSettings(DEFAULT_SETTINGS));
+        Object.assign(this, flattenObject(DEFAULT_SETTINGS));
         this.currentMode = null;
       }
     },
@@ -214,7 +113,7 @@ export const useSettingsStore = defineStore('settings', {
         }
         
         // Update store state (flattened for backward compatibility)
-        Object.assign(this, flattenSettings(settingsToSave));
+        Object.assign(this, flattenObject(settingsToSave));
       } catch (error) {
         console.error('Error saving settings:', error);
         throw error; // Propagate error to UI for handling
@@ -248,7 +147,7 @@ export const useSettingsStore = defineStore('settings', {
 
     setCurrentMode(mode) {
       // Only set currentMode if it differs from default mode
-      this.currentMode = mode !== this.calculator?.mode ? mode : null;
+      this.currentMode = mode !== this.calculator_mode ? mode : null;
     },
 
     async setDefaultMode(mode) {
@@ -268,15 +167,15 @@ export const useSettingsStore = defineStore('settings', {
 
     // Get the startup path based on settings
     getStartupPath() {
-      switch (this.startup?.navigation) {
+      switch (this.startup_navigation) {
         case 'calculator':
           return '/calculator';
         case 'last-visited':
           // Only use last visited if it's a valid path (not home or error)
-          return (this.startup?.lastVisitedPath && 
-                 this.startup?.lastVisitedPath !== '/' && 
-                 !this.startup?.lastVisitedPath.includes('error'))
-            ? this.startup.lastVisitedPath
+          return (this.startup_lastVisitedPath && 
+                 this.startup_lastVisitedPath !== '/' && 
+                 !this.startup_lastVisitedPath.includes('error'))
+            ? this.startup_lastVisitedPath
             : '/calculator'; // Fallback to calculator if no valid last path
         case 'home':
         default:
@@ -343,33 +242,4 @@ function createSettingsProxy(state, section) {
   };
   
   return new Proxy({}, handler);
-}
-
-/**
- * Flattens a nested settings object for backward compatibility
- * @param {Object} settings - The nested settings object
- * @returns {Object} A flattened object with underscore-separated keys
- */
-function flattenSettings(settings) {
-  const result = {};
-  
-  function flatten(obj, prefix = '') {
-    for (const key in obj) {
-      if (key === 'id') {
-        result[key] = obj[key];
-        continue;
-      }
-      
-      const newPrefix = prefix ? `${prefix}_${key}` : key;
-      
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
-        flatten(obj[key], newPrefix);
-      } else {
-        result[newPrefix] = obj[key];
-      }
-    }
-  }
-  
-  flatten(settings);
-  return result;
 }

@@ -48,8 +48,6 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
-import { useSettingsStore } from '@/stores/settings'
-import { useTitle } from '@/composables/useTitle'
 import { useHistory } from '@/composables/useHistory'
 import { useMemory } from '@/composables/useMemory'
 import { usePanel } from '@/composables/usePanel'
@@ -67,10 +65,10 @@ const props = defineProps({
   isMobile: { type: Boolean, required: true },
 })
 
+const { addToHistory } = useHistory()
+const { hasMemory, handleMemoryOperation } = useMemory()
 const { isValidForBase } = useInputValidation()
-const settings = useSettingsStore()
 
-// Create unified calculator state
 const {
   state,
   updateState,
@@ -80,40 +78,27 @@ const {
   setActiveBase
 } = useCalculatorState(props.mode)
 
-// Create calculator instance using factory
 const calculator = ref(CalculatorFactory.create(props.mode, props.settings))
-
-// Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value))
 
-// Set page title
-useTitle(computed(() => `${props.mode} Mode`))
-
-// Computed properties
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)
 const hasMemoryValue = computed(() => hasMemory(props.mode).value)
-
-// History panel management
-const { addToHistory } = useHistory()
 
 const history = usePanel('history-panel')
 
 const openHistory = () => history.open()
 const toggleHistory = () => history.toggle()
 
-// Memory management
-const { hasMemory, handleMemoryOperation } = useMemory()
 
-// Setup unified calculator functionality
 const {
-  handleButtonClick,
-  handleClear,
-  handleBaseChange,
   preview,
-  animatedResult
+  animatedResult,
+  handleClear,
+  handleButtonClick,
+  handleBaseChange,
 } = Manager({
-  calculator,
   state,
+  calculator,
   updateState,
   setAnimation,
   updateDisplayValues,
@@ -125,21 +110,15 @@ const {
 })
 
 onMounted(async () => {
-  await settings.loadSettings()
+  await props.settings.loadSettings();
 })
 
-// Watch for mode changes
-watch(
-  () => props.mode,
-  (newMode) => {
-    if (!newMode) return
-
+watch(() => props.mode, (newMode) => {
+  if (!newMode) return;
     resetState(newMode)
     calculator.value = CalculatorFactory.create(newMode, props.settings)
 
-    if (newMode === 'Programmer') {
-      setActiveBase('DEC')
-    }
+    if (newMode === 'Programmer') setActiveBase('DEC');
   },
   { immediate: true }
 )
@@ -148,10 +127,7 @@ watch(
 const selectHistoryItem = ({ expression }) => {
   if (state.mode === 'Programmer') return
 
-  updateState({
-    input: expression,
-    error: ''
-  })
+  updateState({input: expression, error: ''})
 
   calculator.value.input = expression
   calculator.value.currentExpression = ''

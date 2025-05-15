@@ -11,7 +11,7 @@
           <div class="flex items-center space-x-3">
             <component 
               v-if="icon" 
-              :is="resolvedIcon" 
+              :is="getFeatureIcon(icon)" 
               class="h-5 w-5 text-indigo-600 dark:text-indigo-400" 
               :class="iconClass"
               aria-hidden="true"
@@ -36,17 +36,16 @@
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue';
+  import { ref } from 'vue';
   import { 
     CollapsibleRoot, 
     CollapsibleTrigger, 
     CollapsibleContent 
   } from 'radix-vue';
-  import { ChevronDownIcon } from 'lucide-vue-next';
-  import * as LucideIcons from 'lucide-vue-next';
+  import { MonitorIcon, CalculatorIcon, PowerIcon, PaletteIcon, ChevronDownIcon } from 'lucide-vue-next';
   
   const props = defineProps({
-    id: { // Still useful for keys or other identification
+    id: {
       type: String,
       required: true
     },
@@ -60,7 +59,7 @@
     },
     defaultOpen: {
       type: Boolean,
-      default: true // Let's default to open for settings sections
+      default: true
     },
     customClass: String,
     headerClass: String,
@@ -70,10 +69,16 @@
   
   const isOpen = ref(props.defaultOpen);
 
-  const resolvedIcon = computed(() => {
-    if (!props.icon) return null;
-    return LucideIcons[props.icon] || LucideIcons.SettingsIcon; // Fallback icon
-  });
+  const getFeatureIcon = (iconName) => {
+  const iconMap = {
+    'Calculator': CalculatorIcon,
+    'Palette': PaletteIcon,
+    'Monitor': MonitorIcon,
+    'Power': PowerIcon
+  };
+  
+  return iconMap[iconName] || CalculatorIcon;
+};
 
   </script>
   
