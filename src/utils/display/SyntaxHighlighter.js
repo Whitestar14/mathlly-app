@@ -29,6 +29,13 @@ export class SyntaxHighlighter {
     for (let i = 0; i < text.length; i++) {
       const char = text[i], nextChar = text[i + 1];
 
+      // Handle decimal point
+      if (char === '.') {
+        pushToken();
+        tokens.push({ type: 'decimal', content: '.' });
+        continue;
+      }
+
       // Handle shift operators
       if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) {
         pushToken();
@@ -64,11 +71,12 @@ export class SyntaxHighlighter {
    * Determines the type of a token based on predefined patterns and constants
    * @param {string} token - The token to classify
    * @returns {{type: string, content: string}} Object containing the token type and content
-   * @property {string} type - One of: 'number', 'operator', 'programmer-operator', 'function', 'text'
+   * @property {string} type - One of: 'number', 'operator', 'programmer-operator', 'function', 'decimal', 'text'
    * @property {string} content - The original token content
    */
   static classifyToken(token) {
     const { REGEX, BUTTON_TYPES } = CalculatorConstants;
+    if (token === '.') return { type: 'decimal', content: token };
     if (REGEX.NUMBER.test(token)) return { type: 'number', content: token };
     if (BUTTON_TYPES.OPERATORS.includes(token)) return { type: 'operator', content: token };
     if (BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token)) return { type: 'programmer-operator', content: token };

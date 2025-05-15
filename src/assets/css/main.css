@@ -185,6 +185,10 @@
     @apply text-pink-700 dark:text-pink-300;
   }
 
+  .syntax-decimal {
+    @apply text-rose-600 dark:text-rose-300 font-bold;
+  }
+
   .syntax-text {
     @apply text-gray-800 dark:text-gray-200;
   }
