@@ -1,5 +1,69 @@
 export const updates = [
   {
+    version: '0.11.11',
+    date: 'May 3, 2025',
+    features: [
+      '@milestone: Implemented a robust panel system with a clearer, simpler API for performance improvements',
+      'Removed redundant code across codebase for easier maintenance and a smaller bundle size',
+      'Ensured consistency in button appearance for mobile/desktop dynamics to avoid prop drilling',
+      'Improved toast navigation color scheme for an easier description of information',
+      'Fixed not being able to use backspace in the Base64Tool',
+      'Improved Error pages to consistency use the BasePage composable and improve typography',
+    ]
+  },
+  {
+    version: '0.11.10',
+    date: 'May 1, 2025',
+    features: [
+      'Improved error messages for dynamic situations and unexpected events',
+      'Removed unnecessary `decimal.js` dependency (math.js is a much more capable, robust wrapper)',
+      'Enhanced SEO and open graph meta properties including social banner',
+      'Standardized the use of `BasePage` in non-tool display page'
+    ]
+  },
+  {
+    version: '0.11.9',
+    date: 'April 11, 2025',
+    features: [
+      '@milestone: Mathlly now supports basic Progressive Web Application capabilities, functions and SEO',
+      'Added error handling fallback to PWA-support to gracefully handle offline, 404 and timeout errors',
+      'Scaled interface to efficiently take up available client screen space',
+      'Added support for users who prefer reduced motion and made subtle color changes across app to improve contrast ratios',
+      'Fixed universal scrollbar consistency issues',
+      'Improved initial loader performance by requesting animejs only when required',
+      'Removed the ambiguous BaseLogo for TextLogo and BaseMedia for a clearer distinction of responsibilities',
+      'Refined z-indices of components with a max index of 50 for finer control over stack',
+      'Added reusable pattern utilities to to global stylesheet',
+      'Improved app keyboard support for accessibility controls and the `meta` key on macOS',
+      'Reduced code redundancy by reusing components in applicable cases and scenarios',
+      'Composed the Pill Indicator to an isolated component and added comprehensive JSDocs to components',
+      'Reorganized elements and items in codebase for better description and responsibility overview',
+      'Prevented unnecessary state changes and mutation with debounce function in composables',
+      'Added consistent memory support to Standard and Programmer Modes',
+      'Consolidated `mathlly-icon` to a single svg to reduce bundle size and manage accordingly in global styles',
+      'Repurposed and redesigned Update and About Page accordingly to ensure app language consistency',
+      'Extensively refractored calculator logic files to improve performance and added comprehensive JSDocs',
+      'Unified calculator operations (preview, keyboard and calculator logic) in the dedicated `useMainCalculator.js`',
+      'Improved performance by only animating specific composited elements and properties'
+    ]
+  },
+  {
+    version: '0.11.8',
+    date: 'March 29, 2025',
+    features: [
+      '@milestone: Fixed Panels in app behave predictably',
+      'Enhanced `BaseLogo.vue` by extending theme-sensitive mathlly logos to Home Page banner',
+      'Removed redundant code across preset scripts and component files coupled with codebase refractoring',
+      'Renamed a few components for semantic consistency and for better responsibility description',
+      'Redesigned main calculator interface to absolve to taking all available client viewport across devices',
+      'Implemented a simpler, softer on system resources loader system to improve performance',
+      'Generalized `BaseBadge.vue` component to support notching',
+      'Introduced dynamic font sizing for mobile/desktop responsiveness',
+      'Improved general app performance by fixing pill logic issues and leveraging vueuse composables',
+      'What\'s New Page interface was refined for better interactability',
+    ]
+  },
+  {
     version: '0.11.7',
     date: 'March 23, 2025',
     features: [

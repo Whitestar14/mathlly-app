@@ -6,13 +6,14 @@
   :show-toggle="false"
   :show-header="true"
   :show-footer="true"
-  :draggable="false"
+  :draggable="true"
+  :max-height-ratio="1"
   :default-desktop-state="true"
   >
     <!-- Custom header -->
     <template #header-actions>
       <div class="flex justify-between items-center">
-        <TextLogo class="absolute left-2" />
+        <TextLogo :clipped="isMobile ? true : false" size="sm" class="absolute left-2" />
       </div>
     </template>
 
@@ -44,12 +45,13 @@
                 >
                   <button
                     :data-path="item.path"
+                    :disabled="item.comingSoon ?? false"
                     :class="[
                       menuItemClasses,
                       currentPill === item.path
                         ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
-                        : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300',
-                      item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
+                        : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300 disabled:hover:!bg-inherit disabled:hover:text-gray-700/90 disabled:dark:hover:text-gray-400/90',
+                      item.comingSoon ? 'opacity-50' : '',
                     ]"
                     @click="handleItemClick($event, item)"
                   >
@@ -71,6 +73,11 @@
                       v-if="item.isNew"
                       type="new"
                       class="opacity-75"
+                    />
+                    <Badge
+                    v-if="item.seasonal"
+                    type="special"
+                    class="opacity-75"
                     />
                   </button>
                 </NavigationMenuLink>
@@ -144,6 +151,7 @@ import {
   LineChartIcon,
   ArrowRightLeftIcon,
   Binary,
+  Skull,
 } from "lucide-vue-next"
 import {
   NavigationMenuItem,
@@ -213,6 +221,13 @@ const categories = ref([
         icon: Binary,
         isNew: true,
         description: "Encode and decode Base64 strings",
+      },
+      {
+        name: "Doom Chart",
+        path: "/doom",
+        icon: Skull,
+        seasonal: true,
+        description: "Calculate your developer expiration date",
       },
     ],
   },

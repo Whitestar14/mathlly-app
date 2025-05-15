@@ -53,32 +53,14 @@
 @layer base {
   /* Global definitions */
   @font-face {
-    font-family: 'Geist Mono';
-    src: url(../fonts/GeistMonoVF.woff2);
+    font-family: 'Reddit Mono';
+    src: url(/public/fonts/RedditMono.ttf);
     font-display: swap;
   }
 
   @font-face {
     font-family: 'Geist';
-    src: url(../fonts/GeistVF.woff2);
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Reddit Mono';
-    src: url(../fonts/RedditMono.ttf);
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Inter';
-    src: url(../fonts/Inter.ttf);
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Apple Sans';
-    src: url(../fonts/SFUIText-Regular.otf);
+    src: url(/public/fonts/GeistVF.woff2);
     font-display: swap;
   }
 
@@ -110,7 +92,11 @@
   }
 
   p {
-    @apply text-sm;
+    @apply text-[0.95rem];
+  }
+
+  a, input {
+    @apply focus-colors;
   }
 
   /* Scrollbar styles - Updated */
@@ -190,7 +176,7 @@
 
   /* VueTippy custom tooltip styles */
   .tippy-box[data-theme~='custom'] {
-    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-800 text-gray-100 p-1 rounded-lg;
+    @apply text-xs dark:bg-gray-100 bg-gray-800 dark:text-gray-800 text-gray-100 p-0.5 rounded-lg;
 
     &[data-placement^='top'] > .tippy-arrow::before {
       @apply border-t-gray-800 dark:border-t-gray-100;
@@ -226,8 +212,7 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors focus-visible:outline-none 
-    focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors *:disabled:opacity-50 disabled:pointer-events-none focus-colors;
   }
 
   .btn-primary {
@@ -251,7 +236,7 @@
   }
 
   .btn-link {
-    @apply text-primary dark:text-primary-dark underline-offset-4 hover:underline;
+    @apply text-primary dark:text-primary-light underline-offset-4 hover:underline;
   }
 
   .btn-default-size {
@@ -325,5 +310,9 @@
   
   .z-5 {
     z-index: 5;
+  }
+
+  .focus-colors {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-indigo-500 dark:focus:ring-indigo-300
   }
 }
