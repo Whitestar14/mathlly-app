@@ -30,7 +30,6 @@ const classes = {[variantClass.value]: true, [sizeClass.value]: true, 'btn': tru
     :type="type"
     :disabled="disabled"
     :class="classes"
-    aria-label="button"
   >
     <slot />
   </button>

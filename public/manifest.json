@@ -74,8 +74,7 @@
         "sizes": "1280x720",
         "type": "image/png",
         "platform": "wide",
-        "form_factor": "wide",
-        "label": "Calculator Screen"
+        "label": "Calculator Mode"
       },
       {
         "src": "screenshots/programmer-mode.png",
@@ -119,7 +118,6 @@
         "text": "text",
         "url": "url"
       }
-    },
-    "offline_enabled": true
+    }
   }
   

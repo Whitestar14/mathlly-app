@@ -1,7 +1,7 @@
 <template>
     <Transition name="slide-out">
       <div
-        class="relative md:flex flex-col flex-auto overflow-hidden hidden"
+        class="desktop-panel"
         :class="[
           'transition-[width] duration-300 ease-in-out bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
           isOpen ? 'w-64' : 'w-10',
@@ -79,7 +79,17 @@
   defineEmits(['close', 'toggle']);
   </script>
   
-  <style scoped>  
+  <style scoped>
+  .desktop-panel {
+    @apply relative flex flex-col flex-auto overflow-hidden;
+  }
+  
+  @media (max-width: 768px) {
+    .desktop-panel {
+      display: none !important;
+    }
+  }
+  
   .panel-content {
     @apply flex flex-col w-full;
   }

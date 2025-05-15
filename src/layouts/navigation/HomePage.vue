@@ -347,9 +347,9 @@
 
     <!-- Welcome Modal -->
     <welcome-modal
-      :open="showWelcomeModal"
-      @update:open="showWelcomeModal = $event"
-      @close="showWelcomeModal = false"
+      :is-open="showWelcomeModal"
+      @update:is-open="showWelcomeModal = $event"
+      @close="closeWelcomeModal"
     />
   </BasePage>
 </template>
@@ -501,4 +501,8 @@ onMounted(() => {
     }, 1000);
   }
 });
+
+const closeWelcomeModal = () => {
+  showWelcomeModal.value = false;
+};
 </script>

@@ -9,17 +9,9 @@
     ]"
     :aria-hidden="hideFromScreenReaders"
   >
-  <span v-if="!clipped">
     {math<span
-      class="dark:text-indigo-400 font-black text-indigo-600 inline-block mx-0.5"
+      class="text-indigo-400 font-black dark:text-indigo-600 inline-block mx-0.5"
     >//</span>y}
-  </span>
-  <span v-else>
-    {<span
-      class="dark:text-indigo-400 font-black text-indigo-600 inline-block mx-0.5"
-    >//</span>}
-  </span>
-    
   </kbd>
 </template>
   
@@ -29,10 +21,6 @@
       type: String,
       default: "md",
       validator: (value) => ["sm", "md", "lg", "xl"].includes(value),
-    },
-    clipped: {
-      type: Boolean,
-      default: false
     },
     hideFromScreenReaders: {
       type: Boolean,

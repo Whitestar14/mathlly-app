@@ -1,7 +1,7 @@
 <template>
   <BaseModal 
-    :open="open"
-    @update:open="$emit('update:open', $event)"
+    :open="isOpen"
+    @update:open="$emit('update:isOpen', $event)"
   >
     <template #title>
       Welcome to Mathlly Beta
@@ -69,13 +69,13 @@ import { ref } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 
 defineProps({
-  open: {
+  isOpen: {
     type: Boolean,
     required: true,
   },
 });
 
-const emit = defineEmits(["update:open", "close"]);
+const emit = defineEmits(["update:isOpen", "close"]);
 
 const features = [
   "This is a beta version and some features might be experimental",

@@ -7,7 +7,6 @@ import { useWindowSize } from '@vueuse/core';
  * @param {import('vue').Ref<HTMLElement>} options.panel - Ref to the panel element
  * @param {import('vue').Ref<HTMLElement>} options.handle - Ref to the drag handle element
  * @param {import('vue').Ref<boolean>} options.isOpen - Ref to control panel open state
- * @param {import('vue').Ref<boolean>} options.isExpanded - Ref to control panel expanded state
  * @param {number} [options.maxHeightRatio=0.8] - Maximum height as ratio of viewport height
  * @param {number} [options.snapThreshold=0.3] - Threshold for snapping open/closed
  * @param {number} [options.maxHeight] - Optional fixed max height in pixels
@@ -18,7 +17,6 @@ export function useDraggable(options = {}) {
     panel,
     handle,
     isOpen,
-    isExpanded,
     maxHeightRatio = 0.8,
     snapThreshold = 0.3,
     maxHeight,
@@ -33,10 +31,9 @@ export function useDraggable(options = {}) {
   const isSetup = ref(false); 
   const { height: windowHeight } = useWindowSize();
 
-  // Compute the max panel height based on maxHeightRatio
-  const maxPanelHeight = computed(() => {
-    return isExpanded?.value ? windowHeight.value : Math.min(windowHeight.value * maxHeightRatio, maxHeight || 600);
-  });
+  const maxPanelHeight = computed(() =>
+    Math.min(windowHeight.value * maxHeightRatio, maxHeight || 600)
+  );
 
   /**
    * Recalculates panel dimensions, useful after resize or content changes.
@@ -44,8 +41,8 @@ export function useDraggable(options = {}) {
   const updatePanelDimensions = () => {
     if (!panel.value) return;
     
-    panelHeight.value = isExpanded?.value ? windowHeight.value : Math.min(windowHeight.value * maxHeightRatio, maxHeight ?? windowHeight.value);
-    minHeight.value = Math.min(200, panelHeight.value * 0.2);
+    panelHeight.value = Math.max(windowHeight.value * maxHeightRatio, panel.value.offsetHeight);
+    minHeight.value = Math.min(200, panelHeight.value * 0.4);
   };
 
   /**
@@ -56,10 +53,8 @@ export function useDraggable(options = {}) {
     return new Promise(resolve => {
       setTimeout(() => {
         isOpen.value = false;
-        // Reset expanded state when closing
-        if (isExpanded?.value) isExpanded.value = false;
         resolve();
-      }, 300);
+      }, 150);
     });
   }
 
@@ -73,13 +68,12 @@ export function useDraggable(options = {}) {
     // Then animate in after a short delay to ensure the initial position is applied
     setTimeout(() => {
       translateY.value = 0; // Animate in
-    }, 50);
+    }, 300);
   }
 
   // Event handlers
   const onTouchStart = (e) => {
-    // Don't start dragging if panel is expanded
-    if (!handle.value || (isExpanded?.value)) return;
+    if (!handle.value) return;
     
     startY.value = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
     isDragging.value = true;
@@ -91,7 +85,7 @@ export function useDraggable(options = {}) {
   };
 
   const onTouchMove = (e) => {
-    if (!isDragging.value || (isExpanded?.value)) return;
+    if (!isDragging.value) return;
     
     const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
     const deltaY = currentY - startY.value;
@@ -142,7 +136,8 @@ export function useDraggable(options = {}) {
   // Clean up all event listeners
   const cleanup = () => {
     if (handle.value) {
-      handle.value.removeEventListener('touchstart', onTouchStart);
+      handle.value.removeEventListener('touchstart', onTouchStart); 
+      panel.value._draggableCleanup = cleanup;
     }
     
     window.removeEventListener('touchmove', onTouchMove); 
@@ -151,15 +146,11 @@ export function useDraggable(options = {}) {
     return true;
   };
 
-  // Watch for panel open or expanded state changes
-  watch([isOpen, isExpanded], ([open, expanded], [, prevExpanded]) => {
-    if (open || expanded || prevExpanded) {
-      updatePanelDimensions();
-    }
-    if (!open && isExpanded?.value) isExpanded.value = false;
-    if (expanded) translateY.value = 0;
-  }, { immediate: true });
-
+  // Watch for panel open state changes
+  if (isOpen) {
+    watch(isOpen, updatePanelDimensions);
+  }
+  
   // Clean up event listeners when component is unmounted
   onUnmounted(() => cleanup());
 

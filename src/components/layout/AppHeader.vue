@@ -4,7 +4,7 @@
   >
     <div class="container mx-auto flex justify-between items-center gap-2">
       <!-- Sidebar Toggle -->
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center justify-between">
         <Button
           v-tippy="{ content: isSidebarOpen ? 'Close Sidebar': 'Open Sidebar', placement: 'right' }"
           variant="ghost"
@@ -20,7 +20,6 @@
             class="h-5 w-5"
           />
         </Button>
-        <OfflineIndicator />
       </div>
 
       <!-- Mode Toggle and Theme Switch -->
@@ -103,7 +102,6 @@ import { useTheme } from "@/composables/useTheme"
 import ShortcutGuide from "@/components/ui/ShortcutGuide.vue"
 import Select from "@/components/ui/SelectBar.vue"
 import Button from "@/components/base/BaseButton.vue"
-import OfflineIndicator from '@/components/ui/OfflineIndicator.vue';
 
 defineProps({
   isMobile: {
@@ -152,7 +150,7 @@ const openShortcutModal = () => {
 }
 
 useKeyboard("global", {
-  toggleTheme,
-  openShortcutModal,
+  openShortcutModal: () => openShortcutModal(),
+  toggleTheme: () => toggleTheme(),
 })
 </script>

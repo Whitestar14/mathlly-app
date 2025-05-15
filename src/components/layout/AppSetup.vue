@@ -52,15 +52,17 @@ const mode = computed(() => settingsStore.activeMode)
 const sidebarPanel = usePanel('sidebar')
 const menuPanel = usePanel('menu')
 
-const toggleSidebar = () => sidebarPanel.toggle();
-const toggleMenubar = () => menuPanel.toggle();
-
 const mainContentClasses = computed(() => {
   const classes = [];
   
-  if (!deviceStore.isMobile) {
-    if (sidebarPanel.isOpen) classes.push('pl-64');
-    if (menuPanel.isOpen) classes.push('pr-64');
+  // Add padding for sidebar when open on desktop
+  if (!deviceStore.isMobile && sidebarPanel.isOpen) {
+    classes.push('pl-64');
+  }
+  
+  // Add padding for menu when open on desktop
+  if (!deviceStore.isMobile && menuPanel.isOpen) {
+    classes.push('pr-64');
   }
   
   return classes;
@@ -77,6 +79,14 @@ const updateSettings = async (newSettings) => {
   const settingsToSave = { ...newSettings }
   delete settingsToSave.mode
   await settingsStore.saveSettings(settingsToSave)
+}
+
+const toggleSidebar = () => {
+  sidebarPanel.toggle();
+}
+
+const toggleMenubar = () => {
+  menuPanel.toggle();
 }
 
   useKeyboard("global", {

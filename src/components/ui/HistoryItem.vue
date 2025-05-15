@@ -6,7 +6,7 @@
     >
       <template #trigger>
         <div
-          class="rounded-lg bg-gray-100 dark:bg-gray-800 sm:dark:bg-gray-700 p-3 hover:bg-gray-200 dark:hover:bg-gray-700 sm:dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          class="rounded-lg bg-gray-100 dark:bg-gray-700 p-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
           :class="{ 'animate-highlight': selectedItemId === item.id }"
           @click="$emit('select', item)"
         >
