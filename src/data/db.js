@@ -6,11 +6,8 @@ db.version(4).stores({
   history: '++id,timestamp',
   settings: 'id'
 }).upgrade(tx => {
-  // This will run if upgrading from version 2 to 3
   return tx.settings.toCollection().modify(settings => {
-    // Convert flat settings to nested structure if needed
     if (settings && !settings.display && settings.precision !== undefined) {
-      // Create nested structure
       const newSettings = {
         id: settings.id,
         display: {
@@ -22,7 +19,7 @@ db.version(4).stores({
             formatHexadecimal: settings.formatHexadecimal,
             formatOctal: settings.formatOctal,
           },
-          syntaxHighlighting: settings.syntaxHighlighting || true,
+          syntaxHighlighting: settings.syntaxHighlighting,
         },
         calculator: {
           mode: settings.mode,
@@ -30,9 +27,11 @@ db.version(4).stores({
         appearance: {
           theme: settings.theme,
           animationDisabled: settings.animationDisabled,
+          checkForUpdates: settings.checkForUpdates,
         },
         startup: {
-          navigation: settings.startupNavigation || 'home',
+          navigation: settings.startupNavigation,
+          lastVisitedPath: settings.lastVisitedPath,
         }
       };
       
@@ -70,9 +69,11 @@ db.on("ready", async () => {
       appearance: {
         theme: 'system',
         animationDisabled: false,
+        checkForUpdates: true,
       },
       startup: {
         navigation: 'home',
+        lastVisitedPath: '/',
       }
     });
   }

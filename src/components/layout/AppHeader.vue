@@ -20,7 +20,7 @@
             class="h-5 w-5"
           />
         </Button>
-        <OfflineIndicator />
+        <offline-indicator :is-mobile="isMobile" />
       </div>
 
       <!-- Mode Toggle and Theme Switch -->

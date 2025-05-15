@@ -37,11 +37,11 @@
           >
             <template v-if="part.type === 'text'">
               <template v-if="settingsStore.display.syntaxHighlighting">
-                <span
-                  v-for="(token, tokenIndex) in highlightSyntax(part.content)"
-                  :key="`${index}-${tokenIndex}`"
-                  :class="`syntax-${token.type}`"
-                >{{ token.content }}</span>
+              <span
+                v-for="(token, tokenIndex) in highlightSyntax(part.content)"
+                :key="`${index}-${tokenIndex}`"
+                :class="`syntax-${token.type}`"
+              >{{ token.content }}</span>
               </template>
               <template v-else>
                 {{ part.content }}
@@ -87,13 +87,9 @@
 
 <script setup>
 import { ref, inject, computed, onMounted, watch } from "vue"
-import { DisplayFormatter } from '@/services/display/DisplayFormatter'
 import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core'
-import { ParenthesesHighlighter } from '@/utils/display/ParenthesesHighlighter'
-import { SyntaxHighlighter } from '@/utils/display/SyntaxHighlighter'
+import { DisplayService } from '@/services/display/DisplayService'
 import { useSettingsStore } from '@/stores/settings';
-import anime from 'animejs/lib/anime.min.js'
-
 const props = defineProps({
   input: { type: String, default: "" },
   preview: { type: String, default: "" },
@@ -101,7 +97,7 @@ const props = defineProps({
   isAnimating: { type: Boolean, default: false },
   animatedResult: { type: String, default: "" },
   activeBase: { type: String, default: "DEC" },
-  mode: { type: String, default: "Standard" },
+  mode: { type: String, default: "Standard" }
 })
 
 const settingsStore = useSettingsStore();
@@ -121,31 +117,15 @@ const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
   onScroll: useThrottleFn(updateScrollState, 100)
 })
 
-const formattedParts = computed(() => {
-  const formatted = DisplayFormatter.format(props.input, { base: props.activeBase, mode: props.mode })
-
-  return ParenthesesHighlighter.formatWithParentheses(formatted, parenthesesTracker.value)
-})
+const formattedParts = computed(() => 
+  DisplayService.formatParts(props.input, props.activeBase, props.mode, parenthesesTracker.value)
+)
 
 const displayClass = computed(() => [
   'mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
-  fontSizeClass(props.input),
+  DisplayService.getFontSizeClass(props.input, props.mode, props.activeBase),
   props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors'
 ])
-
-const fontSizeClass = (value) => {
-  if (!value) return 'text-3xl'
-
-  const length = value.toString().length
-  const mode = props.mode
-
-  if (mode === 'Standard') {
-    if (length > 70) return 'text-xl'
-    if (length > 50) return 'text-2xl'
-    return 'text-3xl'
-  }
-  return props.activeBase === 'BIN' ? 'text-2xl' : 'text-3xl'
-}
 
 function updateScrollState() {
   if (!displayContainer.value) return
@@ -181,52 +161,13 @@ function scrollToNext() {
 }
 
 watch(() => props.isAnimating, (newValue) => {
-  newValue ? animateSlide() : resetPositions()
+  newValue 
+    ? DisplayService.animateSlide(resultContainer.value, inputContainer.value)
+    : DisplayService.resetPositions(resultContainer.value, inputContainer.value)
 }, { immediate: true })
 
-function animateSlide() {
-  if (!resultContainer.value || !inputContainer.value) return
-
-  anime.set(resultContainer.value, { translateY: '100%' })
-
-  anime.set(inputContainer.value, { translateY: '0' })
-
-  const timeline = anime.timeline({
-    easing: 'cubicBezier(0.25, 0.1, 0.25, 1)',
-    duration: 300
-  })
-
-  timeline.add({
-    targets: inputContainer.value,
-    translateY: '-100%',
-    opacity: [1, 0],
-    easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
-  })
-
-  timeline.add({
-    targets: resultContainer.value,
-    translateY: '0',
-    opacity: [0, 1],
-    easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
-  }, '-=250')
-}
-
-function resetPositions() {
-  if (!resultContainer.value || !inputContainer.value) return
-
-  anime.set(resultContainer.value, {
-    translateY: '100%',
-    opacity: 0
-  })
-
-  anime.set(inputContainer.value, {
-    translateY: '0',
-    opacity: 1
-  })
-}
-
 function highlightSyntax(content) {
-  return SyntaxHighlighter.tokenize(content)
+  return DisplayService.highlightSyntax(content)
 }
 
 onMounted(() => {

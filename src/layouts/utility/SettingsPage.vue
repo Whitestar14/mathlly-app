@@ -128,7 +128,8 @@ const saveSettings = async () => {
 </script>
 
 <template>
-  <BasePage title="Settings">
+  <div>
+    <BasePage title="Settings">
     <div class="space-y-8 mx-auto max-w-4xl">
       <div class="flex flex-col sm:flex-row justify-end items-start sm:items-center mb-6">
         <div class="relative w-full sm:w-64">
@@ -355,14 +356,19 @@ const saveSettings = async () => {
         <p class="text-sm text-gray-500 dark:text-gray-500">Try a different search term.</p>
       </div>
 
-    <BaseModal v-model:open="showUnsavedChangesModal">
+   
+
+      <div class="flex justify-end space-x-4 bg-gray-50 dark:bg-gray-900 py-4 border-t border-gray-200 dark:border-gray-700">
+        <Button variant="ghost" @click="goBack">Cancel</Button>
+        <Button variant="primary" @click="saveSettings" :disabled="!hasChanges">Save Changes</Button>
+      </div>
+    </div>
+  </BasePage> 
+  <BaseModal v-model:open="showUnsavedChangesModal">
       <template #title>Unsaved Changes</template>
-      
-      <div class="mb-6">
-        <p class="text-gray-700 dark:text-gray-300">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
           You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.
         </p>
-      </div>
       
       <div class="flex justify-end space-x-3">
         <Button variant="outline" @click="cancelNavigation">
@@ -373,12 +379,6 @@ const saveSettings = async () => {
         </Button>
       </div>
     </BaseModal>
-
-      <div class="flex justify-end space-x-4 bg-gray-50 dark:bg-gray-900 py-4 border-t border-gray-200 dark:border-gray-700">
-        <Button variant="ghost" @click="goBack">Cancel</Button>
-        <Button variant="primary" @click="saveSettings" :disabled="!hasChanges">Save Changes</Button>
-      </div>
-    </div>
-  </BasePage>
+  </div>
 </template>
 

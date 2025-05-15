@@ -1,6 +1,5 @@
 <template>
     <div>
-      <!-- Desktop version - just a colored dot -->
       <div 
         v-if="!isMobile"
         class="transition-all duration-300"
@@ -15,22 +14,11 @@
   
   <script setup>
   import { networkStatus } from '@/router/errorHandler';
-  import { ref, watch, computed } from 'vue';
   import { Wifi, WifiOff } from 'lucide-vue-next';
-  import { useWindowSize } from '@vueuse/core';
-  
-  const showOnline = ref(false);
-  const { width } = useWindowSize();
-  const isMobile = computed(() => width.value < 768);
-  
-  watch(networkStatus, (newStatus) => {
-    if (newStatus) {
-      showOnline.value = true;
-      setTimeout(() => {
-        showOnline.value = false;
-      }, 5000);
-    }
-  });
+
+  defineProps({
+    isMobile: Boolean
+  })
   </script>
   
   <style scoped>

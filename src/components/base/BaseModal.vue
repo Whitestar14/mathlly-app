@@ -8,6 +8,7 @@
         v-if="open"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
         @click="closeModal"
+        aria-hidden="true"
       />
     </Transition>
 
@@ -22,7 +23,9 @@
       <DialogContent
         v-if="open"
         class="fixed inset-0 flex items-center justify-center p-4 z-30"
-        aria-describedby="modal"
+        :aria-labelledby="titleId"
+        role="dialog"
+        aria-modal="true"
         @click.self="closeModal"
       >
         <div
@@ -35,6 +38,7 @@
             size="icon"
             class="absolute right-4 top-4 dark:text-gray-100 p-1"
             @click="closeModal"
+            aria-label="Close dialog"
           >
             <XIcon class="h-4 w-4" />
             <span class="sr-only">Close</span>
@@ -66,12 +70,16 @@ import {
 import { useEventListener } from "@vueuse/core"
 import Button from "@/components/base/BaseButton"
 import { XIcon } from "lucide-vue-next"
+import { computed } from 'vue'
 
 const props = defineProps({
   open: Boolean,
 })
 
 const emit = defineEmits(["update:open"])
+
+// Generate unique ID for accessibility
+const titleId = computed(() => `modal-title-${Math.random().toString(36).substring(2, 9)}`)
 
 // Function to close the modal
 const closeModal = () => {

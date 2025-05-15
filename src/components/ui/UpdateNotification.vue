@@ -96,7 +96,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { useIntervalFn, useEventListener } from '@vueuse/core'; // Import VueUse composables
+import { useIntervalFn, useEventListener } from '@vueuse/core';
 import {
   RefreshCwIcon,
   XIcon,
@@ -116,12 +116,9 @@ const showDetails = ref(false);
 const latestVersion = ref('');
 const updateFeatures = ref([]);
 const currentVersion = computed(() => versionStore.versionInfo.full);
+const updatesEnabled = computed(() => settingsStore.appearance.checkForUpdates !== false);
 
-// Store the service worker registration object when an update is available
 const serviceWorkerRegistration = ref(null);
-
-// Check if updates are enabled in settings
-const updatesEnabled = computed(() => settingsStore.appearance?.checkForUpdates !== false);
 
 // Fetches details like version number and features for display in the notification
 const fetchLatestVersion = async () => {
@@ -186,11 +183,9 @@ const { pause, resume } = useIntervalFn(periodicUpdateCheck, 60 * 60 * 1000, {
 
 watch(updatesEnabled, (newValue) => {
   if (newValue) {
-    // Run an initial check and then resume the interval
     periodicUpdateCheck();
     resume();
   } else {
-    // Pause the interval when updates are disabled
     pause();
   }
 });

@@ -16,7 +16,7 @@
               :class="iconClass"
               aria-hidden="true"
             />
-            <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ title }}</span>
+            <span class="text-base font-medium text-gray-900 dark:text-gray-100">{{ title }}</span>
           </div>
           <ChevronDownIcon 
             class="h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 ease-[cubic-bezier(0.87,_0,_0.13,_1)] indicator-icon"

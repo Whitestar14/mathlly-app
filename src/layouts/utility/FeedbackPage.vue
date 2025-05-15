@@ -19,9 +19,13 @@
               href="https://github.com/Whitestar14/mathlly-app/issues/new?template=bug_report.md"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700"
-            >
-              Report Bug
+             >
+              <Button
+                variant="primary"
+                class="w-full sm:w-auto"
+                >
+                Report Bug
+              </Button>
             </a>
           </div>
 
@@ -39,9 +43,13 @@
                 href="https://github.com/Whitestar14/mathlly-app/issues/new?template=feature_request.md"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700"
               >
+              <Button
+                variant="primary"
+                class="w-full sm:w-auto"
+                >
                 Request Feature
+              </Button>
               </a>
             </div>
           </div>
@@ -77,5 +85,6 @@
 <script setup>
 import { CheckCircleIcon } from 'lucide-vue-next';
 import BasePage from "@/components/base/BasePage.vue";
+import Button from "@/components/base/BaseButton.vue";
 </script>
 

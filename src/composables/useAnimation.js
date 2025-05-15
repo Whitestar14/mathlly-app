@@ -404,6 +404,83 @@ export function useAnimation() {
     };
   };
 
+   /**
+   * Creates a slide animation for transitioning between elements
+   * 
+   * @param {Object} options - Animation options
+   * @returns {Object} Animation control functions
+   */
+  const createSlideAnimation = (options = {}) => {
+    const {
+      duration = 300,
+      easing = 'cubicBezier(0.25, 0.1, 0.25, 1)',
+      inputOpacityRange = [1, 0],
+      resultOpacityRange = [0, 1],
+      inputTranslateY = [0, '-100%'],
+      resultTranslateY = ['100%', 0],
+    } = options;
+
+    /**
+     * Animates a slide transition between input and result containers
+     * 
+     * @param {HTMLElement} resultContainer - The result container element
+     * @param {HTMLElement} inputContainer - The input container element
+     */
+    const animateSlide = (resultContainer, inputContainer) => {
+      if (!resultContainer || !inputContainer) return;
+
+      // Set initial positions
+      anime.set(resultContainer, { translateY: resultTranslateY[0], opacity: resultOpacityRange[0] });
+      anime.set(inputContainer, { translateY: inputTranslateY[0], opacity: inputOpacityRange[0] });
+
+      // Create animation timeline
+      const timeline = anime.timeline({
+        easing,
+        duration
+      });
+
+      // Add animations to timeline
+      timeline
+        .add({
+          targets: inputContainer,
+          translateY: inputTranslateY[1],
+          opacity: inputOpacityRange[1],
+          easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
+        })
+        .add({
+          targets: resultContainer,
+          translateY: resultTranslateY[1],
+          opacity: resultOpacityRange[1],
+          easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
+        }, `-=${duration - 50}`); // Slight overlap for smoother transition
+    };
+
+    /**
+     * Resets element positions to their initial state
+     * 
+     * @param {HTMLElement} resultContainer - The result container element
+     * @param {HTMLElement} inputContainer - The input container element
+     */
+    const resetPositions = (resultContainer, inputContainer) => {
+      if (!resultContainer || !inputContainer) return;
+
+      anime.set(resultContainer, {
+        translateY: resultTranslateY[0],
+        opacity: resultOpacityRange[0]
+      });
+
+      anime.set(inputContainer, {
+        translateY: inputTranslateY[0],
+        opacity: inputOpacityRange[0]
+      });
+    };
+
+    return {
+      animateSlide,
+      resetPositions
+    };
+  };
+
   return {
     isInitialAnimation,
     setInitialAnimation,
@@ -411,5 +488,6 @@ export function useAnimation() {
     createFadeAnimation,
     createListAnimation,
     createLogoAnimation,
+    createSlideAnimation
   };
 }
