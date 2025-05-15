@@ -1,7 +1,6 @@
 <template>
   <BasePage title="Settings">
     <div class="space-y-8 mx-auto max-w-4xl">
-      <!-- Header with search functionality -->
       <div class="flex flex-col sm:flex-row justify-end items-start sm:items-center mb-6">
         <div class="relative w-full sm:w-64">
           <SearchIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -14,13 +13,12 @@
         </div>
       </div>
 
-      <!-- Display Settings Section -->
-      <SettingsSection 
+      <Collapsible
+        v-if="isRendered('display')"
+        id="display"
         title="Display Settings" 
         icon="MonitorIcon"
-        :expanded="expandedSections.display"
-        @toggle="toggleSection('display')"
-        :visible="isSettingVisible('display')"
+        :defaultOpen="true" 
       >
         <div class="space-y-6">
           <div class="space-y-4">
@@ -39,7 +37,7 @@
             </div>
             
             <div class="flex items-center justify-between py-2">
-              <div>
+              <div class="max-w-[80%]">
                 <label
                   for="useFractions"
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -52,11 +50,17 @@
             </div>
 
             <div class="flex items-center justify-between py-2">
-              <div>
-                <label
-                  for="syntaxHighlighting"
-                  class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >Syntax Highlighting</label>
+              <div class="max-w-[80%]">
+                <div class="flex items-center gap-2">
+                  <label
+                    for="syntaxHighlighting"
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >Syntax Highlighting</label>
+                  <CircleHelp
+                    class="h-4 w-4 cursor-help"
+                    v-tippy="{ content: 'This is an experimental feature that may affect performance on complex calculations', placement: 'top', onShow() { return true } }"
+                  />
+                </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                   Highlight numbers, operators, and functions with different colors
                 </p>
@@ -69,7 +73,7 @@
                 Number Formatting
               </h3>
               <div class="flex items-center justify-between py-2">
-                <div>
+                <div class="max-w-[80%]">
                   <label
                     for="useThousandsSeparator"
                     class="text-sm text-gray-700 dark:text-gray-300"
@@ -82,7 +86,7 @@
               </div>
               
               <div class="flex items-center justify-between py-2">
-                <div>
+                <div class="max-w-[80%]">
                   <label class="text-sm text-gray-700 dark:text-gray-300">Binary Numbers</label>
                   <p class="text-xs text-gray-500 dark:text-gray-400">
                     Format binary numbers for better readability
@@ -92,7 +96,7 @@
               </div>
               
               <div class="flex items-center justify-between py-2">
-                <div>
+                <div class="max-w-[80%]">
                   <label class="text-sm text-gray-700 dark:text-gray-300">Hexadecimal Numbers</label>
                   <p class="text-xs text-gray-500 dark:text-gray-400">
                     Format hexadecimal numbers for better readability
@@ -102,7 +106,7 @@
               </div>
               
               <div class="flex items-center justify-between py-2">
-                <div>
+                <div class="max-w-[80%]">
                   <label class="text-sm text-gray-700 dark:text-gray-300">Octal Numbers</label>
                   <p class="text-xs text-gray-500 dark:text-gray-400">
                     Format octal numbers for better readability
@@ -113,15 +117,14 @@
             </div>
           </div>
         </div>
-      </SettingsSection>
+      </Collapsible>
 
-      <!-- Calculator Mode Section -->
-      <SettingsSection 
+      <Collapsible
+        v-if="isRendered('calculator')"
+        id="calculator"
         title="Calculator Mode" 
         icon="CalculatorIcon"
-        :expanded="expandedSections.calculator"
-        @toggle="toggleSection('calculator')"
-        :visible="isSettingVisible('calculator')"
+        :defaultOpen="true"
       >
         <div>
           <label
@@ -136,15 +139,14 @@
             Choose which calculator mode to use by default when opening the app
           </p>
         </div>
-      </SettingsSection>
+      </Collapsible>
 
-      <!-- Startup Preferences Section -->
-      <SettingsSection 
+      <Collapsible
+        v-if="isRendered('startup')"
+        id="startup"
         title="Startup Preferences" 
         icon="PowerIcon"
-        :expanded="expandedSections.startup"
-        @toggle="toggleSection('startup')"
-        :visible="isSettingVisible('startup')"
+        :defaultOpen="true"
       >
         <div>
           <label
@@ -159,15 +161,14 @@
             Choose which page to show when you first open the app
           </p>
         </div>
-      </SettingsSection>
+      </Collapsible>
 
-      <!-- Themes & Preferences Section -->
-      <SettingsSection 
+      <Collapsible
+        v-if="isRendered('themes')"
+        id="themes"
         title="Themes & Preferences" 
         icon="PaletteIcon"
-        :expanded="expandedSections.themes"
-        @toggle="toggleSection('themes')"
-        :visible="isSettingVisible('themes')"
+        :defaultOpen="true"
       >
         <div class="space-y-4">
           <div>
@@ -185,7 +186,7 @@
           </div>
           
           <div class="flex items-center justify-between py-2">
-            <div>
+            <div class="max-w-[80%]">
               <label
                 for="animationDisabled"
                 class="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -197,23 +198,16 @@
             <Switch v-model="localSettings.animationDisabled" />
           </div>
         </div>
-      </SettingsSection>
+      </Collapsible>
+      
+      <div v-if="filteredManifest.length === 0 && searchQuery" class="text-center py-10">
+        <p class="text-gray-600 dark:text-gray-400 text-lg">No settings found for "{{ searchQuery }}".</p>
+        <p class="text-sm text-gray-500 dark:text-gray-500">Try a different search term.</p>
+      </div>
 
-      <!-- Action Buttons -->
       <div class="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-gray-50 dark:bg-gray-900 py-4 border-t border-gray-200 dark:border-gray-700">
-        <Button
-          variant="ghost"
-          class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-          @click="goBack"
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          @click="saveSettings"
-        >
-          Save Changes
-        </Button>
+        <Button variant="ghost" @click="goBack">Cancel</Button>
+        <Button variant="primary" @click="saveSettings" :disabled="!hasChanges">Save Changes</Button>
       </div>
     </div>
   </BasePage>
@@ -222,193 +216,98 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { SearchIcon, CircleHelp } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settings";
+import { filterByQuery } from "@/utils/misc/queryFilter";
 import { useToast } from "@/composables/useToast";
-import SettingsSection from "@/components/ui/SettingsSection.vue"
 import BasePage from "@/components/base/BasePage.vue";
 import Select from "@/components/ui/SelectBar.vue";
 import Switch from "@/components/ui/ToggleBar.vue";
 import Button from "@/components/base/BaseButton.vue";
-import { 
-  SearchIcon
-} from "lucide-vue-next";
+import Collapsible from '@/components/base/BaseCollapsible.vue';
 
 const router = useRouter();
-const settings = useSettingsStore();
+const settingsStore = useSettingsStore();
 const { toast } = useToast();
-
-// Search functionality
 const searchQuery = ref('');
 
-// Expandable sections
-const expandedSections = ref({
-  display: true,
-  calculator: true,
-  startup: true,
-  themes: true
-});
+const settingsManifest = [
+  { id: 'display', title: 'Display Settings', icon: 'MonitorIcon', keywords: ['precision', 'decimal places', 'fractions', 'syntax highlighting', 'number formatting', 'thousands separator', 'comma', 'binary', 'hexadecimal', 'octal', 'font', 'appearance'] },
+  { id: 'calculator', title: 'Calculator Mode', icon: 'CalculatorIcon', keywords: ['mode', 'standard', 'programmer', 'scientific', 'default calculator'] },
+  { id: 'startup', title: 'Startup Preferences', icon: 'PowerIcon', keywords: ['launch', 'open page', 'initial screen', 'home', 'calculator page', 'last visited', 'boot'] },
+  { id: 'themes', title: 'Themes & Preferences', icon: 'PaletteIcon', keywords: ['color theme', 'appearance', 'light mode', 'dark mode', 'system theme', 'animations', 'disable transitions', 'visuals'] }
+];
 
-const toggleSection = (section) => {
-  expandedSections.value[section] = !expandedSections.value[section];
+const filteredManifest = computed(() =>
+  filterByQuery(settingsManifest, searchQuery.value, ['title', 'keywords'])
+);
+
+const isRendered = (sectionId) => {
+  return filteredManifest.value.some(section => section.id === sectionId);
 };
 
-// Filter settings based on search
-const isSettingVisible = (section) => {
-  if (!searchQuery.value) return true;
-  
-  const query = searchQuery.value.toLowerCase();
-  
-  const sectionKeywords = {
-    display: ['display', 'precision', 'fractions', 'thousands', 'separator', 'binary', 'hexadecimal', 'octal', 'format', 'syntax', 'highlighting'],
-    calculator: ['calculator', 'mode', 'standard', 'programmer'],
-    startup: ['startup', 'navigation', 'home', 'calculator', 'last visited'],
-    themes: ['theme', 'light', 'dark', 'system', 'animations', 'disable']
-  };
-  
-  return sectionKeywords[section].some(keyword => keyword.includes(query));
+const settingsSchema = {
+  precision: 2,
+  useFractions: false,
+  useThousandsSeparator: true,
+  formatBinary: true,
+  formatHexadecimal: true,
+  formatOctal: true,
+  theme: 'system',
+  mode: 'Standard',
+  animationDisabled: false,
+  startupNavigation: 'home',
+  syntaxHighlighting: true
 };
 
-const localSettings = ref({
-  precision: settings.precision,
-  useFractions: settings.useFractions,
-  useThousandsSeparator: settings.useThousandsSeparator,
-  formatBinary: settings.formatBinary,
-  formatHexadecimal: settings.formatHexadecimal,
-  formatOctal: settings.formatOctal,
-  theme: settings.theme,
-  mode: settings.mode,
-  animationDisabled: settings.animationDisabled,
-  startupNavigation: settings.startupNavigation,
-  syntaxHighlighting: settings.syntaxHighlighting,
-});
+const localSettings = ref({...settingsSchema});
 
-const precisionOptions = [
-  { value: 0, label: "0" },
-  { value: 1, label: "1" },
-  { value: 2, label: "2" },
-  { value: 3, label: "3" },
-  { value: 4, label: "4" },
-  { value: 5, label: "5" },
-  { value: 6, label: "6" },
-  { value: 7, label: "7" },
-  { value: 8, label: "8" },
-  { value: 9, label: "9" },
-  { value: 10, label: "10" },
-];
-
-const modeOptions = [
-  { value: "Standard", label: "Standard" },
-  { value: "Programmer", label: "Programmer" },
-];
-
-const themeOptions = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
-];
-
-const startupOptions = [
-  { value: 'home', label: 'Home' },
-  { value: 'calculator', label: 'Calculator Page' },
-  { value: 'last-visited', label: 'Last Visited Page' },
-];
-
-// Check if settings have changed
-const hasChanges = computed(() => {
-  return JSON.stringify(localSettings.value) !== JSON.stringify({
-    precision: settings.precision,
-    useFractions: settings.useFractions,
-    useThousandsSeparator: settings.useThousandsSeparator,
-    formatBinary: settings.formatBinary,
-    formatHexadecimal: settings.formatHexadecimal,
-    formatOctal: settings.formatOctal,
-    theme: settings.theme,
-    mode: settings.mode,
-    animationDisabled: settings.animationDisabled,
-    startupNavigation: settings.startupNavigation,
-    syntaxHighlighting: settings.syntaxHighlighting,
+const storeSnapshot = computed(() => {
+  const snapshot = {...settingsSchema};
+  
+  Object.keys(settingsSchema).forEach(key => {
+    if (settingsStore[key] !== undefined) {
+      snapshot[key] = settingsStore[key];
+    }
   });
+  
+  return snapshot;
 });
+
+const hasChanges = computed(() => {
+  return JSON.stringify(localSettings.value) !== JSON.stringify(storeSnapshot.value);
+});
+
+const precisionOptions = Array.from({ length: 11 }, (_, i) => ({ value: i, label: i.toString() }));
+const modeOptions = [{ value: "Standard", label: "Standard" }, { value: "Programmer", label: "Programmer" }];
+const themeOptions = [{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }, { value: "system", label: "System" }];
+const startupOptions = [{ value: 'home', label: 'Home' }, { value: 'calculator', label: 'Calculator Page' }, { value: 'last-visited', label: 'Last Visited Page' }];
 
 onMounted(async () => {
-  await settings.loadSettings();
-
-  localSettings.value = {
-    precision: settings.precision,
-    useFractions: settings.useFractions,
-    useThousandsSeparator: settings.useThousandsSeparator,
-    formatBinary: settings.formatBinary,
-    formatHexadecimal: settings.formatHexadecimal,
-    formatOctal: settings.formatOctal,
-    theme: settings.theme,
-    mode: settings.mode,
-    animationDisabled: settings.animationDisabled,
-    startupNavigation: settings.startupNavigation || 'home', // Provide default value
-    syntaxHighlighting: settings.syntaxHighlighting !== undefined ? settings.syntaxHighlighting : true, // Default to true if not set
-  };
+  await settingsStore.loadSettings();
+  localSettings.value = {...storeSnapshot.value};
 });
 
 const goBack = () => {
   if (hasChanges.value) {
-    if (confirm("You have unsaved changes. Are you sure you want to leave?")) {
-      router.go(-1);
-    }
+    if (confirm("You have unsaved changes. Are you sure you want to leave?")) router.go(-1);
   } else {
     router.go(-1);
   }
 };
 
 const saveSettings = async () => {
+  if (!hasChanges.value) {
+    toast({ title: "No changes", message: "There are no changes to save.", type: "info" });
+    return;
+  }
   try {
-    await settings.setDefaultMode(localSettings.value.mode);
-
-    const settingsToSave = { ...localSettings.value };
-    await settings.saveSettings(settingsToSave);
-    toast({
-      title: "Settings saved",
-      message: "Your preferences have been updated successfully.",
-    });
-    
-    router.go(-1);
+    await settingsStore.setDefaultMode(localSettings.value.mode);
+    await settingsStore.saveSettings({ ...localSettings.value });
+    toast({ type: "success", title: "Settings saved", message: "Your preferences have been updated successfully." });
   } catch (error) {
-    toast({
-      type: "error",
-      title: "Error saving settings",
-      message: "There was a problem saving your preferences. Please try again.",
-    });
+    toast({ type: "error", title: "Error saving settings", message: "There was a problem saving your preferences." });
     console.error("Error saving settings:", error);
   }
 };
 </script>
-
-<style scoped>
-/* Fade transition for sections */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(156, 163, 175, 0.7);
-}
-</style>

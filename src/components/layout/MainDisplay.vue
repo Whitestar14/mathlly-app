@@ -36,11 +36,16 @@
             :key="index"
           >
             <template v-if="part.type === 'text'">
-              <span
-                v-for="(token, tokenIndex) in highlightSyntax(part.content)"
-                :key="`${index}-${tokenIndex}`"
-                :class="`syntax-${token.type}`"
-              >{{ token.content }}</span>
+              <template v-if="settingsStore.syntaxHighlighting">
+                <span
+                  v-for="(token, tokenIndex) in highlightSyntax(part.content)"
+                  :key="`${index}-${tokenIndex}`"
+                  :class="`syntax-${token.type}`"
+                >{{ token.content }}</span>
+              </template>
+              <template v-else>
+                {{ part.content }}
+              </template>
             </template>
             <span
               v-else-if="part.type === 'open'"
@@ -86,6 +91,7 @@ import { DisplayFormatter } from '@/services/display/DisplayFormatter'
 import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core'
 import { ParenthesesHighlighter } from '@/utils/display/ParenthesesHighlighter'
 import { SyntaxHighlighter } from '@/utils/display/SyntaxHighlighter'
+import { useSettingsStore } from '@/stores/settings';
 import anime from 'animejs/lib/anime.min.js'
 
 const props = defineProps({
@@ -95,8 +101,10 @@ const props = defineProps({
   isAnimating: { type: Boolean, default: false },
   animatedResult: { type: String, default: "" },
   activeBase: { type: String, default: "DEC" },
-  mode: { type: String, default: "Standard" }
+  mode: { type: String, default: "Standard" },
 })
+
+const settingsStore = useSettingsStore();
 
 const emit = defineEmits(['scroll-update'])
 

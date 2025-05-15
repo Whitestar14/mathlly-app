@@ -69,7 +69,8 @@
       "vue/no-required-prop-with-default": "warn",
       "vue/no-undef-components": "warn",
       "vue/no-unused-components": "warn",
-      "vue/no-unused-properties": "warn"
+      "vue/no-unused-properties": "warn",
+      "vue/no-v-model-argument": "off"
     }
   },
   "browserslist": [
