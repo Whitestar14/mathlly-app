@@ -57,7 +57,7 @@ const toggleMenubar = () => menuPanel.toggle();
 const mainContentClasses = computed(() => {
   const classes = [];
   
-  if (!deviceStore.isMobile) {
+  if (!device.isMobile) {
     if (sidebarPanel.isOpen) classes.push('pl-64');
     if (menuPanel.isOpen) classes.push('pr-64');
   }
@@ -75,7 +75,7 @@ const updateSettings = async (newSettings) => {
   }
   const settingsToSave = { ...newSettings }
   delete settingsToSave.mode
-  await settingsStore.saveSettings(settingsToSave)
+  await settings.saveSettings(settingsToSave)
 }
 
   useKeyboard("global", {
