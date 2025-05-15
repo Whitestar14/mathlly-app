@@ -43,8 +43,8 @@ export const CalculatorConstants = {
    * @type {Object}
    */
   BUTTON_TYPES: {
-    OPERATORS: ['+', '-', '×', '÷'],
-    FUNCTIONS: ['AC', 'CE', 'backspace', '=', '±', '%'],
+    OPERATORS: ['+', '-', '×', '÷', '%'],
+    FUNCTIONS: ['AC', 'CE', 'backspace', '=', '±'],
     MEMORY: ['MC', 'MR', 'M+', 'M-', 'MS'],
     PROGRAMMER_OPERATORS: ['<<', '>>', '&', '|', '^', '~']
   },
@@ -54,7 +54,7 @@ export const CalculatorConstants = {
    * @type {Object}
    */
   REGEX: {
-    OPERATOR: /[+\-×÷]/,
+    OPERATOR: /[+\-×÷%]/,
     NUMBER: /[0-9A-Fa-f.]/,
     VALID_EXPRESSION: /^[0-9A-Fa-f\s+\-*/%()<<>>]*$/,
     LAST_OPERATOR: /\s*[+\-×÷%<<>>]\s*$/,

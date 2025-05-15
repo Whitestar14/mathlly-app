@@ -14,7 +14,7 @@ const routes = [
   {
     path: '/calculator',
     name: 'Calculator',
-    component: () => import('@/layouts/calculators/MainCalculator.vue'),
+    component: () => import('@/layouts/calculators/main/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' },
   },
 

@@ -23,6 +23,7 @@ db.on("ready", async () => {
       theme: 'system',
       mode: 'Standard',
       animationDisabled: false,
+      syntaxHighlighting: true,
     });
   }
 });

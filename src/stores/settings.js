@@ -13,6 +13,8 @@ const DEFAULT_SETTINGS = {
   theme: 'system',
   mode: 'Standard',
   animationDisabled: false,
+  syntaxHighlighting: true,
+  startupNavigation: 'home',
 };
 
 export const useSettingsStore = defineStore('settings', {

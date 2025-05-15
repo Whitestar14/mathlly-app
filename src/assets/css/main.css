@@ -280,6 +280,39 @@
   .loader-expanded {
     @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
   }
+
+/* Syntax highlighting styles - refined for a more professional look */
+.syntax-number {
+  @apply text-indigo-700 dark:text-indigo-300;
+}
+
+.syntax-operator {
+  @apply text-gray-700 dark:text-gray-300 font-semibold;
+}
+
+.syntax-programmer-operator {
+  @apply text-yellow-700 dark:text-yellow-300 font-semibold;
+}
+
+.syntax-parenthesis {
+  @apply text-slate-600 dark:text-slate-300 font-semibold;
+}
+
+.syntax-function {
+  @apply text-pink-700 dark:text-pink-300;
+}
+
+.syntax-text {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+.syntax-space {
+  @apply text-transparent;
+}
+
+.syntax-ghost {
+  @apply text-green-600/40 dark:text-green-400/40;
+}
 }
 
 /* Vue Transition animation styles */
