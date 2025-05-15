@@ -1,0 +1,10 @@
+{
+  "version": "0.11.11",
+  "features": [
+    "@milestone: Implemented a robust panel system with a clearer",
+    "Removed redundant code across codebase for easier maintenance and a smaller bundle size",
+    "Ensured consistency in button appearance for mobile/desktop dynamics to avoid prop drilling",
+    "Improved toast navigation color scheme for an easier description of information",
+    "Fixed not being able to use backspace in the Base64Tool"
+  ]
+}

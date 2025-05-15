@@ -6,6 +6,82 @@ module.exports = defineConfig({
   publicPath: '/',
   productionSourceMap: false,
   
+  pwa: {
+    name: 'Mathlly',
+    themeColor: '#4f46e5',
+    msTileColor: '#4f46e5',
+    appleMobileWebAppCapable: 'yes',
+    appleMobileWebAppStatusBarStyle: '#4f46e5',
+    manifestOptions: require('./public/manifest.json'),
+    workboxPluginMode: 'GenerateSW',
+    workboxOptions: {
+      skipWaiting: false, // Keeps new SW waiting for user to update
+      clientsClaim: true,  // Allows SW to control clients once activated
+      
+      exclude: [ // Excludes these from precaching
+        /\.map$/, 
+        /_redirects/, 
+        /version-info\.json$/
+      ],
+      
+      navigateFallback: '/index.html', // For SPA routing
+      
+      navigateFallbackDenylist: [
+        /^\/_/,
+        /\/[^/?]+\.[^/]+$/,
+      ],
+      
+      runtimeCaching: [
+        {
+          urlPattern: /\.(?:png|jpg|jpeg|svg|gif|woff2|woff|ttf|eot)$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'static-assets',
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 60 * 24 * 30 * 12,
+            },
+          },
+        },
+        {
+          urlPattern: /\.(?:js|css)$/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'static-resources',
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 60 * 24 * 30,
+            },
+          },
+        },
+        {
+          urlPattern: /^https:\/\/api\./,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'api-cache',
+            networkTimeoutSeconds: 10,
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24 * 3,
+            },
+          },
+        },
+        {
+          urlPattern: /\/(?!api)/,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'pages-cache',
+            networkTimeoutSeconds: 3,
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24 * 30,
+            },
+          },
+        },
+      ],
+    },
+  },
+
   configureWebpack: {
     optimization: {
       splitChunks: {

@@ -26,7 +26,7 @@
         </p>
 
         <p v-if="isOffline && autoRetryActive" class="text-indigo-600 dark:text-indigo-400 text-sm mt-2">
-          {{ networkStatus.online ? 'Reconnected! Attempting to reload...' : `Connection lost. Auto-retrying in ${autoRetryCountdownTime}s...` }}
+          {{ networkStatus ? 'Reconnected! Attempting to reload...' : `Connection lost. Auto-retrying in ${autoRetryCountdownTime}s...` }}
           <Button @click="cancelAutomaticRetry" variant="link" size="sm" class="text-sm">Cancel Auto-Retry</Button>
         </p>
          <p v-if="manualRetryFeedbackMessage" class="text-blue-600 dark:text-blue-400 text-sm mt-2">
@@ -34,26 +34,28 @@
         </p>
       </div>
 
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 *:min-w-[120px]">
+      <div class="flex w-full flex-col sm:flex-row items-center justify-center gap-3 pt-2">
         <Button
           v-if="canAttemptRetry"
           variant="ghost"
           @click="handleManualRetry"
           :disabled="isManualRetrying"
           :aria-label="isOffline ? 'Retry Connection' : 'Try Loading Page Again'"
+          class="w-full sm:w-auto"
         >
           <template v-if="isManualRetrying && !isOffline"> <LoaderIcon class="h-4 w-4 animate-spin mr-2" />
-            Retrying...
+        Retrying...
           </template>
           <template v-else>
-            <RefreshCwIcon class="h-4 w-4" />
-            {{ isOffline ? 'Retry Connection' : 'Try Again' }}
+        <RefreshCwIcon class="h-4 w-4" />
+        {{ isOffline ? 'Retry Connection' : 'Try Again' }}
           </template>
         </Button>
         <Button
           variant="primary"
           @click="navigateToHome"
           :disabled="isManualRetrying"
+          class="w-full sm:w-auto"
         >
           <HomeIcon class="h-4 w-4" />
           Go Home
