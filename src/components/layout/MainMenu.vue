@@ -4,6 +4,8 @@
   type="side"
   title="Menu"
   position="right"
+  :draggable="true"
+  :max-height-ratio="0.85"
   :show-toggle="false"
   >
     <!-- Content -->

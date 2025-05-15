@@ -6,7 +6,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'soon',
-    validator: (value) => ['soon', 'new', 'version'].includes(value)
+    validator: (value) => ['soon', 'new', 'special', 'version'].includes(value)
   },
   text: {
     type: String,
@@ -41,6 +41,7 @@ const notchColorClass = computed(() => {
   const colors = {
     soon: 'bg-gray-400 dark:bg-gray-500',
     new: 'bg-green-500 dark:bg-green-400',
+    special: 'bg-yellow-500 dark:bg-yellow-400',
     version: 'bg-indigo-500 dark:bg-indigo-400'
   };
   return colors[props.type] || colors.soon;
@@ -57,6 +58,7 @@ const badgeText = computed(() => {
   const texts = {
     soon: 'Coming Soon',
     new: 'New',
+    special: 'Special',
     version: 'Version'
   };
   
@@ -70,12 +72,12 @@ const badgeText = computed(() => {
     :class="[badgeClasses, { 'animate-pulse': shouldPulse }]"
   >
     <span 
-      v-if="showNotch" 
-      aria-label="notch" 
+      v-if="showNotch"
       class="h-2 w-2 rounded-full mr-2"
+      aria-hidden="true" 
       :class="notchColorClass"
     />
-    {{ getBadgeProps?.text || badgeText }}
+    {{ props.text || badgeText || getBadgeProps?.text }}
   </span>
 </template>
 

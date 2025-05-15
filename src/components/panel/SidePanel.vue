@@ -2,7 +2,7 @@
     <Transition :name="position === 'left' ? 'slide-left' : 'slide-right'">
       <div
         v-if="isOpen"
-        class="side-panel-container"
+        class=" overflow-hidden h-screen flex flex-col fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900"
         :class="[
           isMobile ? 'w-full' : 'w-64',
           position === 'left' ? 'left-0' : 'right-0',
@@ -51,10 +51,6 @@
   </script>
   
   <style scoped>
-  .side-panel-container {
-    @apply overflow-hidden h-screen flex flex-col fixed top-0 z-20 bottom-0 inset-y-0 bg-gray-50 dark:bg-gray-900;
-  }
-  
   /* Side panel animations - Left side */
   .slide-left-enter-active,
   .slide-left-leave-active {

@@ -43,10 +43,8 @@ export class StandardCalculations {
     try {
       // Try to display as fraction if enabled in settings
       if (this.settings.useFractions) {
-        const frac = fraction(result);
-        if (frac.d <= 10000) {
-          return Number(frac.d) === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
-        }
+        // feature: Add an option to enable mixed fraction conversion
+        return fraction(result).toFraction(/** true */);
       }
 
       // Handle special cases for very large or very small numbers

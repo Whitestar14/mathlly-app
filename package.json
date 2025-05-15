@@ -1,11 +1,14 @@
 {
   "name": "mathlly",
-  "version": "0.11.7",
+  "version": "0.11.11",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "serve:prod": "pnpm dlx serve -s dist",
     "dev": "vue-cli-service serve --mode development --open",
+    "prebuild": "node scripts/generate-version-info.js",
     "build": "vue-cli-service build",
+    "build:analyze": "vue-cli-service build --mode production --report",
     "lint": "vue-cli-service lint",
     "version:bump": "node scripts/bump-version.js"
   },
@@ -13,14 +16,17 @@
     "@vueuse/core": "^11.3.0",
     "@vueuse/motion": "^3.0.3",
     "animejs": "^3.2.2",
+    "chart.js": "^4.4.9",
     "core-js": "^3.39.0",
     "dexie": "^4.0.10",
+    "html-to-image": "^1.11.13",
     "lucide-vue-next": "^0.469.0",
     "mathjs": "^14.2.1",
     "pinia": "^2.3.0",
     "radix-vue": "^1.9.12",
     "tippy.js": "^6.3.7",
     "vue": "^3.5.13",
+    "vue-chartjs": "^5.3.2",
     "vue-router": "^4.5.0",
     "vue-tippy": "^6.6.0"
   },
@@ -30,6 +36,7 @@
     "@babel/preset-env": "^7.26.0",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-plugin-pwa": "^5.0.8",
     "@vue/cli-service": "~5.0.8",
     "@vue/eslint-config-standard": "^8.0.1",
     "autoprefixer": "^10.4.20",
@@ -70,7 +77,7 @@
     }
   },
   "browserslist": [
-    "> 1%",
+    "> 0.5%",
     "last 2 versions",
     "not dead",
     "not ie 11"

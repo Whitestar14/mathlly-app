@@ -5,7 +5,7 @@
     :show-version="true"
   >
     <!-- Team & Vision Section -->
-    <section class="mb-16 font-mono pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">
+    <section class="mb-16 pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">
       <div class="container mx-auto px-4 pt-20 pb-16 md:py-24 relative">
         <h2 class="text-5xl md:text-6xl lg:text-7xl font-mono font-bold tracking-tight">
           Built with passion,
@@ -14,7 +14,7 @@
           </span>
         </h2>
 
-        <p class="text-base sm:text-lg md:text-xl max-w-2xl text-gray-600 dark:text-gray-400 font-sans">
+        <p class="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-lg self-center md:self-start">
           Started as a developer's side project, Mathlly has grown into a community-driven platform 
           that pushes the boundaries of development tools.
         </p>
@@ -77,7 +77,7 @@
             Mathlly is open source and welcomes contributions from developers worldwide. Whether you're fixing bugs, 
             adding features, or improving documentation, your help makes Mathlly better for everyone.
           </p>
-          <div class="flex gap-4">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <Button
               variant="primary"
               @click="goToGithub"

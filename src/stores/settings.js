@@ -13,6 +13,8 @@ const DEFAULT_SETTINGS = {
   theme: 'system',
   mode: 'Standard',
   animationDisabled: false,
+  startupNavigation: 'calculator',
+  lastVisitedPath: '/',
 };
 
 export const useSettingsStore = defineStore('settings', {
@@ -23,7 +25,6 @@ export const useSettingsStore = defineStore('settings', {
 
   getters: {
     defaultMode: (state) => state.mode,
-    // Modified to prioritize currentMode only if explicitly set
     activeMode: (state) => state.currentMode === null ? state.mode : state.currentMode
   },
 
@@ -83,6 +84,31 @@ export const useSettingsStore = defineStore('settings', {
       // Reset currentMode when default mode changes
       this.currentMode = null;
       await this.saveSettings(currentSettings);
+    },
+
+    // Update the last visited path
+    async updateLastVisitedPath(path) {
+      // Don't track error pages, home page, or settings pages
+      const ignorePaths = ['/error', '/', '/settings'];
+      if (!ignorePaths.includes(path) && !path.includes('error')) {
+        await this.saveSettings({ lastVisitedPath: path });
+      }
+    },
+
+    // Get the startup path based on settings
+    getStartupPath() {
+      switch (this.startupNavigation) {
+        case 'calculator':
+          return '/calculator';
+        case 'last-visited':
+          // Only use last visited if it's a valid path (not home or error)
+          return (this.lastVisitedPath && this.lastVisitedPath !== '/' && !this.lastVisitedPath.includes('error'))
+            ? this.lastVisitedPath
+            : '/calculator'; // Fallback to calculator if no valid last path
+        case 'home':
+        default:
+          return '/'; // Default to home
+      }
     }
   }
 });

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center left-0 top-0 absolute z-10 opacity-30 transition-opacity hover:opacity-100 group"
+    class="flex items-center left-0 top-0 absolute z-5 opacity-30 transition-opacity hover:opacity-100 group"
   >
     <div
       class="flex items-center m-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden"

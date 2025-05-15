@@ -16,7 +16,7 @@
         <ScrollAreaViewport class="h-full w-full p-3">
           <!-- History Items List -->
           <TransitionGroup v-if="!isProgrammerMode && historyItems.length > 0" tag="div" class="space-y-2"
-            name="history-list" @before-enter="onBeforeEnter" @enter="onEnter" @leave="onLeave">
+            name="history-list" @before-enter="historyAnimation.onBeforeEnter" @enter="historyAnimation.onEnter" @leave="historyAnimation.onLeave">
             <history-item v-for="(item, index) in historyItems" :key="item.id" :item="item" :is-mobile="isMobile"
               :selected-id="selectedItemId" :data-index="index" @select="handleSelectItem" @delete="handleDelete"
               @copy="copyItem" @copy-json="copyAsJson" />
@@ -100,7 +100,7 @@ import Button from "@/components/base/BaseButton.vue"
 import BaseModal from "@/components/base/BaseModal.vue"
 import BasePanel from "@/components/base/BasePanel.vue"
 import { useHistory } from "@/composables/useHistory"
-import { useHistoryAnimation } from "@/composables/useHistoryAnimation"
+import { useAnimation } from "@/composables/useAnimation"
 import { useToast } from "@/composables/useToast"
 import { useClipboard } from "@vueuse/core"
 import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from "radix-vue"
@@ -118,11 +118,22 @@ const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryIt
 
 // Composables
 const { historyItems, deleteItem, clearAll, loadHistory } = useHistory()
-const { onBeforeEnter, onEnter, onLeave, setInitialLoad } = useHistoryAnimation()
 const { toast } = useToast()
 const { copy } = useClipboard()
+const { setInitialAnimation, createListAnimation } = useAnimation()
 
-// Local state
+// Create history animation with custom options
+const historyAnimation = createListAnimation({
+  initialDelay: 50,
+  initialDuration: 400,
+  enterTransform: [-20, 0],
+  leaveTransform: [0, 80],
+  leaveAxis: 'x',
+  moveDuration: 300,
+  moveEasing: 'easeOutQuad'
+})
+
+// Local state 
 const selectedItemId = ref(null)
 const showClearConfirmation = ref(false)
 
@@ -136,9 +147,9 @@ watch(
   async (isOpen) => {
     if (isOpen && !isProgrammerMode.value) {
       // Reset animation state when panel opens
-      setInitialLoad(true)
+      setInitialAnimation(true)
       await loadHistory()
-      setTimeout(() => setInitialLoad(false), 500)
+      setTimeout(() => setInitialAnimation(false), 500)
     }
   },
   { immediate: true },

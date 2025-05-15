@@ -78,6 +78,31 @@
         </div>
       </section>
 
+<!-- Add this section after the Calculator Mode section -->
+<section class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-medium tracking-tight">
+      Startup Preferences
+    </h2>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+    <div>
+      <label
+        for="startupNavigation"
+        class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
+      >When app starts, open:</label>
+      <Select
+        v-model="localSettings.startupNavigation"
+        :options="startupOptions"
+      />
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        Choose which page to show when you first open the app
+      </p>
+    </div>
+  </div>
+</section>
+
+
       <section class="space-y-6">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-medium tracking-tight">
@@ -148,7 +173,9 @@ const localSettings = ref({
   theme: settingsStore.theme,
   mode: settingsStore.mode,
   animationDisabled: settingsStore.animationDisabled,
+  startupNavigation: settingsStore.startupNavigation,
 });
+
 
 const precisionOptions = [
   { value: 0, label: "0" },
@@ -175,6 +202,12 @@ const themeOptions = [
   { value: "system", label: "System" },
 ];
 
+const startupOptions = [
+  { value: 'home', label: 'Home Page' },
+  { value: 'calculator', label: 'Calculator' },
+  { value: 'last-visited', label: 'Last Visited Page' },
+];
+
 onMounted(async () => {
   await settingsStore.loadSettings();
 
@@ -188,6 +221,7 @@ onMounted(async () => {
     theme: settingsStore.theme,
     mode: settingsStore.mode,
     animationDisabled: settingsStore.animationDisabled,
+    startupNavigation: settingsStore.startupNavigation,
   };
 });
 

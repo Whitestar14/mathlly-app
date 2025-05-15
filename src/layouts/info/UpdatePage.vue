@@ -47,10 +47,8 @@
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0"
           >
-            <div class="relative hidden md:block">
-              <SparklesIcon class="h-12 w-12 text-indigo-500/30 dark:text-indigo-400/30 absolute -top-6 -left-6 rotate-12" />
-              <HistoryIcon class="h-32 w-32 text-indigo-500 dark:text-indigo-400" />
-              <RocketIcon class="h-16 w-16 text-indigo-500/40 dark:text-indigo-400/40 absolute -bottom-4 -right-4 rotate-12" />
+           <div class="relative hidden md:block">
+            <BaseMedia size="lg" type="svg" class="relative hidden md:block fill-indigo-500 dark:fill-indigo-400 scale-150 md:scale-[2.5] lg:scale-[3.5]" :svg-path="'/img/icons/sparkles.svg'" />
             </div>
           </div>
         </div>
@@ -154,7 +152,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { ClockIcon, HistoryIcon, ChevronDownIcon, RocketIcon, SparklesIcon } from 'lucide-vue-next';
+import BaseMedia from '@/components/base/BaseMedia.vue'
+import { ClockIcon, HistoryIcon, ChevronDownIcon, RocketIcon } from 'lucide-vue-next';
 import { updates, upcomingFeatures } from '@/data/changelog';
 import { useVersionStore } from '@/stores/version';
 import UpdateCard from '@/components/cards/UpdateCard.vue';

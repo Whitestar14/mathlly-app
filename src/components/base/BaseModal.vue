@@ -5,8 +5,9 @@
   >
     <Transition name="fade">
       <DialogOverlay
+        v-if="open"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-        @click="$emit('update:open', false)"
+        @click="closeModal"
       />
     </Transition>
 
@@ -19,18 +20,21 @@
       leave-to-class="opacity-0 scale-95"
     >
       <DialogContent
+        v-if="open"
         class="fixed inset-0 flex items-center justify-center p-4 z-30"
         aria-describedby="modal"
+        @click.self="closeModal"
       >
         <div
           class="relative w-full max-w-md max-h-[85vh] overflow-y-auto transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl"
+          @click.stop
         >
           <!-- Close Button -->
           <Button
             variant="ghost"
             size="icon"
             class="absolute right-4 top-4 dark:text-gray-100 p-1"
-            @click="$emit('update:open', false)"
+            @click="closeModal"
           >
             <XIcon class="h-4 w-4" />
             <span class="sr-only">Close</span>
@@ -69,10 +73,15 @@ const props = defineProps({
 
 const emit = defineEmits(["update:open"])
 
+// Function to close the modal
+const closeModal = () => {
+  emit("update:open", false)
+}
+
 // Close modal on escape key
 useEventListener(document, 'keydown', (e) => {
   if (e.key === 'Escape' && props.open) {
-    emit("update:open", false)
+    closeModal()
   }
 })
 </script>
