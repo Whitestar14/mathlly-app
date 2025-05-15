@@ -35,21 +35,29 @@
             v-for="(part, index) in formattedParts"
             :key="index"
           >
-            <span
-              v-if="part.type === 'text'"
-              v-text="DisplayFormatter.formatDisplayContent(part.content)"
-            />
+            <template v-if="part.type === 'text'">
+              <template v-if="settingsStore.syntaxHighlighting">
+                <span
+                  v-for="(token, tokenIndex) in highlightSyntax(part.content)"
+                  :key="`${index}-${tokenIndex}`"
+                  :class="`syntax-${token.type}`"
+                >{{ token.content }}</span>
+              </template>
+              <template v-else>
+                {{ part.content }}
+              </template>
+            </template>
             <span
               v-else-if="part.type === 'open'"
-              class="paren-open"
+              class="paren-open syntax-parenthesis"
             >{{ part.content }}</span>
             <span
               v-else-if="part.type === 'close'"
-              class="paren-close"
+              class="paren-close syntax-parenthesis"
             >{{ part.content }}</span>
             <span
               v-else-if="part.type === 'ghost'"
-              class="paren-ghost text-gray-400"
+              class="paren-ghost syntax-ghost"
             >{{ part.content }}</span>
           </span>
         </div>
@@ -82,6 +90,8 @@ import { ref, inject, computed, onMounted, watch } from "vue"
 import { DisplayFormatter } from '@/services/display/DisplayFormatter'
 import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core'
 import { ParenthesesHighlighter } from '@/utils/display/ParenthesesHighlighter'
+import { SyntaxHighlighter } from '@/utils/display/SyntaxHighlighter'
+import { useSettingsStore } from '@/stores/settings';
 import anime from 'animejs/lib/anime.min.js'
 
 const props = defineProps({
@@ -91,8 +101,10 @@ const props = defineProps({
   isAnimating: { type: Boolean, default: false },
   animatedResult: { type: String, default: "" },
   activeBase: { type: String, default: "DEC" },
-  mode: { type: String, default: "Standard" }
+  mode: { type: String, default: "Standard" },
 })
+
+const settingsStore = useSettingsStore();
 
 const emit = defineEmits(['scroll-update'])
 
@@ -211,6 +223,10 @@ function resetPositions() {
     translateY: '0',
     opacity: 1
   })
+}
+
+function highlightSyntax(content) {
+  return SyntaxHighlighter.tokenize(content)
 }
 
 onMounted(() => {

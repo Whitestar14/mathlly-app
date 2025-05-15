@@ -48,19 +48,19 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
+import { useSettingsStore } from '@/stores/settings'
 import { useTitle } from '@/composables/useTitle'
 import { useHistory } from '@/composables/useHistory'
 import { useMemory } from '@/composables/useMemory'
+import { usePanel } from '@/composables/usePanel'
 import { useInputValidation } from '@/composables/useValidation'
 import { useCalculatorState } from '@/composables/useCalculatorState'
-import { useMainCalculator } from '@/composables/useMainCalculator'
+import { Manager } from './MainCalculator'
 import { CalculatorFactory } from '@/services/factory/CalculatorFactory'
 import HistoryPanel from '@/layouts/calculators/main/HistoryPanel.vue'
 import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
-import { useSettingsStore } from '@/stores/settings'
 import BasePage from '@/components/base/BasePage.vue'
-import { usePanel } from '@/composables/usePanel'
 const props = defineProps({
   mode: { type: String, required: true },
   settings: { type: Object, required: true },
@@ -68,7 +68,7 @@ const props = defineProps({
 })
 
 const { isValidForBase } = useInputValidation()
-const settingsStore = useSettingsStore()
+const settings = useSettingsStore()
 
 // Create unified calculator state
 const {
@@ -111,7 +111,7 @@ const {
   handleBaseChange,
   preview,
   animatedResult
-} = useMainCalculator({
+} = Manager({
   calculator,
   state,
   updateState,
@@ -125,7 +125,7 @@ const {
 })
 
 onMounted(async () => {
-  await settingsStore.loadSettings()
+  await settings.loadSettings()
 })
 
 // Watch for mode changes

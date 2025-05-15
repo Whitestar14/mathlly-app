@@ -8,14 +8,14 @@
   import { useDeviceStore } from '@/stores/device';
   
   // Get the device store instance
-  const deviceStore = useDeviceStore();
+  const device = useDeviceStore();
   const { actions } = createPanelContext();
   
   onMounted(() => {
-    const isMobile = deviceStore.isMobile;
+    const isMobile = device.isMobile;
     actions.setMobile(isMobile);
   
-    watch(() => deviceStore.isMobile, (newIsMobile) => {
+    watch(() => device.isMobile, (newIsMobile) => {
       actions.setMobile(newIsMobile);
     });
   });

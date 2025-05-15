@@ -110,56 +110,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Webkit scrollbar styles */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-    background-color: transparent;
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: transparent;
-    border-radius: 8px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.4);
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(156, 163, 175, 0.7);
-  }
-
-  /* Dark mode adjustments */
-  .dark ::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.3);
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(156, 163, 175, 0.6);
-  }
-
-  /* Firefox scrollbar styles (for completeness) */
-  @supports (scrollbar-color: auto) {
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
-    }
-
-    *:hover {
-      scrollbar-color: rgba(156, 163, 175, 0.7) transparent;
-    }
-
-    .dark * {
-      scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
-    }
-
-    .dark *:hover {
-      scrollbar-color: rgba(156, 163, 175, 0.6) transparent;
-    }
-  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background-color: rgba(156, 163, 175, 0.7); }
+  .dark ::-webkit-scrollbar-thumb { background-color: rgba(107, 114, 128, 0.5); }
+  .dark ::-webkit-scrollbar-thumb:hover { background-color: rgba(107, 114, 128, 0.7); }
 
   kbd {
     @apply w-fit bg-gray-200/90 font-mono text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
@@ -265,6 +221,39 @@
   .loader-expanded {
     @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
   }
+
+/* Syntax highlighting styles - refined for a more professional look */
+.syntax-number {
+  @apply text-indigo-700 dark:text-indigo-300;
+}
+
+.syntax-operator {
+  @apply text-gray-700 dark:text-gray-300 font-semibold;
+}
+
+.syntax-programmer-operator {
+  @apply text-yellow-700 dark:text-yellow-300 font-semibold;
+}
+
+.syntax-parenthesis {
+  @apply text-slate-600 dark:text-slate-300 font-semibold;
+}
+
+.syntax-function {
+  @apply text-pink-700 dark:text-pink-300;
+}
+
+.syntax-text {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+.syntax-space {
+  @apply text-transparent;
+}
+
+.syntax-ghost {
+  @apply text-green-600/40 dark:text-green-400/40;
+}
 }
 
 /* Vue Transition animation styles */

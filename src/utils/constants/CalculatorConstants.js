@@ -43,8 +43,8 @@ export const CalculatorConstants = {
    * @type {Object}
    */
   BUTTON_TYPES: {
-    OPERATORS: ['+', '-', '×', '÷'],
-    FUNCTIONS: ['AC', 'CE', 'backspace', '=', '±', '%'],
+    OPERATORS: ['+', '-', '×', '÷', '%'],
+    FUNCTIONS: ['AC', 'CE', 'backspace', '=', '±'],
     MEMORY: ['MC', 'MR', 'M+', 'M-', 'MS'],
     PROGRAMMER_OPERATORS: ['<<', '>>', '&', '|', '^', '~']
   },
@@ -54,7 +54,7 @@ export const CalculatorConstants = {
    * @type {Object}
    */
   REGEX: {
-    OPERATOR: /[+\-×÷]/,
+    OPERATOR: /[+\-×÷%]/,
     NUMBER: /[0-9A-Fa-f.]/,
     VALID_EXPRESSION: /^[0-9A-Fa-f\s+\-*/%()<<>>]*$/,
     LAST_OPERATOR: /\s*[+\-×÷%<<>>]\s*$/,
@@ -334,25 +334,6 @@ export const CalculatorUtils = {
    */
   removeShiftOperator(expr) {
     return expr.replace(CalculatorConstants.REGEX.SHIFT_OPERATOR, '');
-  },
-  
-  /**
-   * Check if a character is a valid digit for a specific base
-   * 
-   * @param {string} char - Character to check
-   * @param {string} base - Base to check against
-   * @returns {boolean} True if character is valid for base
-   */
-  isValidDigitForBase(char, base) {
-    if (!char || char.length !== 1) return false;
-    
-    switch(base) {
-      case 'BIN': return /[01]/.test(char);
-      case 'OCT': return /[0-7]/.test(char);
-      case 'DEC': return /[0-9]/.test(char);
-      case 'HEX': return /[0-9A-Fa-f]/i.test(char);
-      default: return false;
-    }
   },
   
   /**

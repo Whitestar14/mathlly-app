@@ -2,17 +2,17 @@
   <div class="min-h-screen flex bg-background dark:bg-background-dark duration-300" :class="{
     'animation-disabled': settings.animationDisabled,
   }">
-    <sidebar-menu :is-mobile="deviceStore.isMobile" @sidebar-close="sidebarPanel.close()" />
+    <sidebar-menu :is-mobile="device.isMobile" @sidebar-close="sidebarPanel.close()" />
     <div class="flex flex-col flex-grow duration-300" :class="mainContentClasses">
-      <app-header :is-mobile="deviceStore.isMobile" :is-sidebar-open="sidebarPanel.isOpen" :is-menubar-open="menuPanel.isOpen"
+      <app-header :is-mobile="device.isMobile" :is-sidebar-open="sidebarPanel.isOpen" :is-menubar-open="menuPanel.isOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" />
 
-      <app-view :mode="mode" :settings="settings" :is-mobile="deviceStore.isMobile" @settings-change="updateSettings"
+      <app-view :mode="mode" :settings="settings" :is-mobile="device.isMobile" @settings-change="updateSettings"
         @update:mode="updateMode" />
     </div>
 
     <main-menu />
-    <toast :is-mobile="deviceStore.isMobile" />
+    <toast :is-mobile="device.isMobile" />
   </div>
 </template>
 
@@ -31,22 +31,21 @@ import AppView from "@/components/layout/AppView.vue"
 import Toast from "@/components/feedback/BaseToast.vue"
 
 const router = useRouter()
-const deviceStore = useDeviceStore()
-const settingsStore = useSettingsStore()
+const device = useDeviceStore()
+const settings = useSettingsStore()
 
 // --- Loading Logic ---
 const minLoadTime = new Promise(resolve => setTimeout(resolve, 1500)) // Keep minimum load time for UX
 
 await Promise.all([
-  settingsStore.loadSettings(),
+  settings.loadSettings(),
   router.isReady(),
   minLoadTime,
 ])
 
-deviceStore.initializeDeviceInfo()
+device.initializeDeviceInfo()
 
-const settings = settingsStore
-const mode = computed(() => settingsStore.activeMode)
+const mode = computed(() => settings.activeMode)
 
 // Use the panel context for sidebar and menu
 const sidebarPanel = usePanel('sidebar')
@@ -67,12 +66,12 @@ const mainContentClasses = computed(() => {
 });
 
 const updateMode = async (newMode) => {
-  settingsStore.setCurrentMode(newMode)
+  settings.setCurrentMode(newMode)
 }
 
 const updateSettings = async (newSettings) => {
-  if (newSettings.mode !== settingsStore.mode) {
-    await settingsStore.setDefaultMode(newSettings.mode)
+  if (newSettings.mode !== settings.mode) {
+    await settings.setDefaultMode(newSettings.mode)
   }
   const settingsToSave = { ...newSettings }
   delete settingsToSave.mode
@@ -88,6 +87,6 @@ const updateSettings = async (newSettings) => {
 })
 
 onUnmounted(() => {
-  deviceStore.destroyDeviceInfo()
+  device.destroyDeviceInfo()
 })
 </script>
