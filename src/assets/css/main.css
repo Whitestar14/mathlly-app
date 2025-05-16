@@ -12,7 +12,7 @@
    Font Definitions
    ========================================================================== */
 @font-face {
-  font-family: 'Reddit Mono';
+  font-family: 'Geist Mono';
   src: url(/public/fonts/GeistMonoVF.woff2);
   font-display: swap;
 }
@@ -109,7 +109,7 @@
 @layer components {
   /* Button styles */
   .btn {
-    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors disabled:opacity-50 disabled:pointer-events-none focus-colors;
+    @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium duration-200 transition-colors disabled:opacity-50 disabled:pointer-events-none focus-colors;
   }
 
   .btn-primary {
@@ -154,14 +154,8 @@
   }
 
   /* Loader styles */
-  .loader-expanded,
-  .loader-regular,
-  .loader-compact {
-    @apply flex justify-center items-center h-full;
-  }
-
   .loader-expanded {
-    @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
+    @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95;
   }
 
   /* Syntax highlighting styles */

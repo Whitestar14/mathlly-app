@@ -15,16 +15,16 @@ module.exports = defineConfig({
     manifestOptions: require('./public/manifest.json'),
     workboxPluginMode: 'GenerateSW',
     workboxOptions: {
-      skipWaiting: false, // Keeps new SW waiting for user to update
-      clientsClaim: true,  // Allows SW to control clients once activated
+      skipWaiting: false,
+      clientsClaim: true,
       
-      exclude: [ // Excludes these from precaching
+      exclude: [
         /\.map$/, 
         /_redirects/, 
         /version-info\.json$/
       ],
       
-      navigateFallback: '/index.html', // For SPA routing
+      navigateFallback: '/index.html',
       
       navigateFallbackDenylist: [
         /^\/_/,

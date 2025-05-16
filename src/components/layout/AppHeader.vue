@@ -28,7 +28,7 @@
         <div class="w-full sm:w-auto flex justify-end items-center space-x-4">
           <!-- Mode Toggler using SelectBar -->
           <div
-            v-if="route.path === '/calculator'"
+            v-show="route.path === '/calculator'"
             class="relative w-full min-w-36"
           >
             <Select
@@ -37,6 +37,8 @@
               label=""
               position="popper"
               placeholder="Select mode"
+              role="button"
+              aria-label="Mode toggler"
               @update:modelValue="onModeChange"
             />
           </div>

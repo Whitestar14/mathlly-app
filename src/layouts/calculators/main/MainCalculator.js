@@ -7,7 +7,7 @@ import { DisplayFormatter } from '@/services/display/DisplayFormatter'
  * @param {Object} options - Calculator options and dependencies
  * @returns {Object} Calculator operations, preview, and keyboard handlers
  */
-export function Manager({
+export function CalculatorController({
   calculator,
   state,
   updateState,
@@ -161,7 +161,7 @@ export function Manager({
         return '';
       }
     }, 
-    { max: 20 }
+    { max: 100, ttl: 5000 }
   );
 
   /**

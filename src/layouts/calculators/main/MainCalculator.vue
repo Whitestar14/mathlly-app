@@ -48,12 +48,13 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
+
 import { useHistory } from '@/composables/useHistory'
 import { useMemory } from '@/composables/useMemory'
 import { usePanel } from '@/composables/usePanel'
 import { useInputValidation } from '@/composables/useValidation'
 import { useCalculatorState } from '@/composables/useCalculatorState'
-import { Manager } from './MainCalculator'
+import { CalculatorController } from './MainCalculator'
 import { CalculatorFactory } from '@/services/factory/CalculatorFactory'
 import HistoryPanel from '@/layouts/calculators/main/HistoryPanel.vue'
 import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
@@ -96,7 +97,7 @@ const {
   handleClear,
   handleButtonClick,
   handleBaseChange,
-} = Manager({
+} = CalculatorController({
   state,
   calculator,
   updateState,

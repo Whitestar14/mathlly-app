@@ -45,12 +45,14 @@
           </Button>
 
           <!-- Title Slot -->
+          <div :id="titleId">
           <DialogTitle
             as="h3"
             class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
           >
             <slot name="title" />
           </DialogTitle>
+          </div>
 
           <!-- Content Slot -->
           <slot />

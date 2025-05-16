@@ -1,6 +1,5 @@
 <template>
   <SelectRoot
-    v-model="selectedValue"
     :model-value="modelValue"
     @update:model-value="$emit('update:model-value', $event)"
   >
@@ -20,12 +19,12 @@
         <SelectScrollUpButton
           class="flex items-center justify-center text-gray-700 dark:text-gray-300 h-[25px] bg-white dark:bg-gray-700 cursor-default"
         >
-          <chevron-up-icon class="h-4 w-4" />
+          <ChevronUpIcon class="h-4 w-4" />
         </SelectScrollUpButton>
 
         <SelectViewport>
           <SelectGroup>
-            <div v-if="props.label !== ''">
+            <div v-if="label">
               <SelectLabel
                 class="px-1.5 py-1 text-xs font-medium"
               >
@@ -44,7 +43,7 @@
         </SelectViewport>
 
         <SelectScrollDownButton
-          class="flex items-center text-gray-700 dark:text-gray-300 justify-center h-[25px] bg-white dark:bg-gray-700cursor-default"
+          class="flex items-center text-gray-700 dark:text-gray-300 justify-center h-[25px] bg-white dark:bg-gray-700 cursor-default"
         >
           <ChevronDownIcon class="h-4 w-4" />
         </SelectScrollDownButton>
@@ -54,7 +53,6 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
 import {
   SelectRoot,
   SelectTrigger,
@@ -71,7 +69,7 @@ import {
 } from "radix-vue";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-vue-next";
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: [Number, String],
     required: true,
@@ -86,7 +84,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    default: "Options",
+    default: "",
   },
   position: {
     type: String,
@@ -94,20 +92,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:model-value"]);
-
-const selectedValue = ref(props.modelValue);
-
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    selectedValue.value = newValue;
-  }
-);
-
-watch(selectedValue, (newValue) => {
-  emit("update:model-value", newValue);
-});
+defineEmits(["update:model-value"]);
 </script>
 
 <style>

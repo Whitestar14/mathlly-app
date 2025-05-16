@@ -355,7 +355,7 @@ export function usePanel(id, options = {}, api = false) {
 
   let panel = reactive({});
   if (hasRegistrationOptions && state.panels[id]) {
-    setTimeout(() => panel = actions.getInstance(id), 50);
+    panel = actions.getInstance(id);
     console.warn("Panel", id, "already registered. Using existing instance.")
   } else if (hasRegistrationOptions && !state.panels[id] && api) {
     const panelInstance = actions.registerPanel(id, options);

@@ -1,11 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useSettingsStore } from '@/stores/settings';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
-// Import clearRouteError and isHandlingError as they are needed in beforeEach
-import { setupRouteErrorHandling, routeError, routePath, clearRouteError, isHandlingError } from './errorHandler';
+import { setupRouteErrorHandling, routeError, routePath } from './errorHandler';
 
 const routes = [
-  // ... your existing routes ...
   {
     path: '/',
     name: 'Home',
@@ -57,10 +55,9 @@ const routes = [
       path: routePath.value,
       isRouteError: true,
     }),
-    beforeEnter: (to, from, next) => {
-      if (routeError.value) {
-        next();
-      } else {
+    beforeEnter: (_, __, next) => {
+      if (routeError.value) next();
+      else {
         console.warn(
           'Direct access to /error page without active error. Redirecting to home.'
         );
@@ -70,8 +67,8 @@ const routes = [
     meta: { transition: 'fade', errorPage: true },
   },
   {
-    path: "/doom",
-    component: () => import("@/layouts/special/DoomChart.vue"),
+    path: '/doom',
+    component: () => import('@/layouts/special/DoomChart.vue'),
     meta: { type: 'seasonal' },
   },
   {
@@ -84,40 +81,14 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
   fallback: ErrorFallback,
-  
+  routes,
 });
 
-// --- BEGIN PROPOSED FIX ---
-// Add this beforeEach guard BEFORE setupRouteErrorHandling
-router.beforeEach((to, from, next) => {
-  // If navigating away from the error page to a different page,
-  // and an error was actively being handled.
-  if (from.path === '/error' && to.path !== '/error' && isHandlingError.value) {
-    console.log(
-      `[Router.beforeEach] Navigating from /error to ${to.fullPath}. Clearing previous route error optimistically.`
-    );
-    // Clear the error state. If the upcoming navigation to 'to.path' fails,
-    // router.onError (from setupRouteErrorHandling) will catch it and set a new error.
-    // If 'to.path' loads successfully (e.g., from cache), it won't be affected by the old error state.
-    clearRouteError();
-  }
-  next();
-});
-// --- END PROPOSED FIX ---
-
-// Setup centralized error handling (this registers router.onError and router.afterEach)
 setupRouteErrorHandling(router);
 
-// Track last visited page
 router.afterEach((to) => {
-  const skipTracking = [
-    'Error',
-    'NotFound',
-    'Settings',
-    'Home'
-  ];
+  const skipTracking = ['Error', 'NotFound', 'Settings', 'Home'];
 
   if (!to.meta.errorPage && !skipTracking.includes(to.name)) {
     const settingsStore = useSettingsStore();

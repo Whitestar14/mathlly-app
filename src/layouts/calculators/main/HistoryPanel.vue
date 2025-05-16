@@ -22,25 +22,25 @@
               @copy="copyItem" @copy-json="copyAsJson" />
           </TransitionGroup>
 
-          <!-- Empty State -->
-          <div v-show="!historyItems.length || isProgrammerMode"
-            class="text-center text-sm py-4 flex flex-col items-center justify-center h-full">
-            <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 min-w-[80%]">
-              <div v-show="isProgrammerMode">
-                <p class="flex justify-center items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
-                  History is disabled in <kbd>Programmer Mode</kbd>
-                </p>
-              </div>
-              <div v-show="!isProgrammerMode">
-                <p class="text-gray-500 dark:text-gray-400">
-                  No history items yet
-                </p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  Your calculations will appear here
-                </p>
-              </div>
+        <div v-show="!historyItems.length || isProgrammerMode"
+          class="text-center py-4 flex flex-col items-center justify-center h-full">
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
+            <div v-show="isProgrammerMode">
+              <p class="flex justify-center text-xs items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
+                History is disabled in <kbd>Programmer Mode</kbd>
+              </p>
+            </div>
+
+            <div v-show="!isProgrammerMode">
+              <p class="text-gray-500 dark:text-gray-400 font-medium">
+                No history items yet
+              </p>
+              <p class="text-gray-400 dark:text-gray-500 text-xs">
+                Your calculations will appear here as you work
+              </p>
             </div>
           </div>
+        </div>
         </ScrollAreaViewport>
 
         <!-- Scrollbar -->
@@ -129,7 +129,8 @@ const historyAnimation = createListAnimation({
   leaveTransform: [0, 80],
   leaveAxis: 'x',
   moveDuration: 300,
-  moveEasing: 'easeOutQuad'
+  moveEasing: 'easeOutQuad',
+  moveDelay: 150
 })
 
 // Local state 
@@ -178,16 +179,13 @@ const handleSelectItem = (item) => {
     result: item.result,
   });
 
-  // Close the panel
   emit('history-close');
 };
 
-// Handle item deletion
 const handleDelete = async (id) => {
   await deleteItem(id)
 }
 
-// Handle clearing all history
 const handleClear = async () => {
   await clearAll()
   showClearConfirmation.value = false
@@ -197,7 +195,6 @@ const handleClear = async () => {
   })
 }
 
-// Copy item functionality
 const copyItem = (item) => {
   copy(`${item.expression} = ${item.result}`)
   toast({

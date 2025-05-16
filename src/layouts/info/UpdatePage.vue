@@ -15,7 +15,7 @@
               class="self-center md:self-start mb-2"
             >
               <Badge
-                type="version"
+                type="custom"
                 :text="`v${version.versionInfo.full}`"
                 :show-notch="true"
               />

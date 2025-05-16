@@ -1,7 +1,6 @@
 <script setup>
-import { computed } from 'vue'
-
-const props = defineProps({
+import { Loader2Icon } from 'lucide-vue-next';
+defineProps({
   variant: {
     type: String,
     default: 'default',
@@ -17,22 +16,27 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
-
-const variantClass = computed(() => props.variant === 'default' ? 'btn-default' : `btn-${props.variant}`)
-const sizeClass = computed(() => props.size === 'default' ? 'btn-default-size' : `btn-${props.size}`)
-const classes = {[variantClass.value]: true, [sizeClass.value]: true, 'btn': true};
 </script>
 
 <template>
   <button
     :type="type"
-    :disabled="disabled"
-    :class="classes"
+    :disabled="disabled || loading"
+    :class="[
+      size === 'default' ? 'btn-default-size' : `btn-${size}`,
+      variant === 'default' ? 'btn-default' : `btn-${variant}`,
+      'btn'
+    ]"
     aria-label="button"
   >
-    <slot />
+    <Loader2Icon v-if="loading" class="h-4 w-4 animate-spin" />
+    <slot></slot>
   </button>
 </template>
 

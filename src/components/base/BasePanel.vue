@@ -172,27 +172,3 @@ const {
   translateY
 } = usePanel(props.id, options, true);
 </script>
-
-<style scoped>
-/* Scoped styles for the BasePanel wrapper */
-.panel-container.panel-mobile {
-  display: contents;
-}
-
-.panel-container.panel-side {
-  display: contents;
-}
-
-.panel-content {
-  @apply flex flex-col w-full;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

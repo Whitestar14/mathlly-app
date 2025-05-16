@@ -1,5 +1,8 @@
 import { shallowRef } from 'vue';
-import anime from 'animejs';
+import { TransitionPresets } from '@vueuse/core';
+
+// Separate utility for anime.js operations
+import { createAnimeUtils } from '@/utils/animation/animeUtils';
 
 /**
  * Composable for managing reusable animations
@@ -8,6 +11,36 @@ import anime from 'animejs';
  */
 export function useAnimation() {
   const isInitialAnimation = shallowRef(true);
+  
+  // Get anime.js utilities
+  const { getAnime, animateElements } = createAnimeUtils();
+
+  /**
+   * Sets the initial animation state
+   */
+  const setInitialAnimation = (value = true) => {
+    isInitialAnimation.value = value;
+  };
+
+  /**
+   * Creates animation handlers for Vue transitions
+   * @param {Object} options - Base animation options
+   * @returns {Object} Common animation handlers
+   */
+  const createAnimationHandlers = (options = {}) => {
+    const {
+      enterDuration = 300,
+      enterEasing = 'easeOutCubic',
+      leaveDuration = 300,
+      leaveEasing = 'easeOutCubic',
+    } = options;
+
+    return {
+      // Common animation properties
+      durations: { enter: enterDuration, leave: leaveDuration },
+      easings: { enter: enterEasing, leave: leaveEasing },
+    };
+  };
 
   /**
    * Creates a staggered fade-in animation
@@ -20,15 +53,13 @@ export function useAnimation() {
       initialDelay = 50,
       initialDuration = 400,
       initialEasing = 'easeOutCubic',
-      enterDuration = 300,
-      enterEasing = 'easeOutCubic',
-      leaveDuration = 300,
-      leaveEasing = 'easeOutCubic',
-      leaveTransform = [0, 80],
-      leaveAxis = 'x',
       enterTransform = [-20, 0],
       enterAxis = 'y',
+      leaveTransform = [0, 80],
+      leaveAxis = 'x',
     } = options;
+
+    const baseHandlers = createAnimationHandlers(options);
 
     /**
      * Handles animation before an element enters
@@ -47,8 +78,9 @@ export function useAnimation() {
     /**
      * Handles animation when an element enters
      */
-    const onEnter = (el, done) => {
-      // For initial load, use staggered fade-in
+    const onEnter = async (el, done) => {
+      const anime = await getAnime();
+      
       if (isInitialAnimation.value) {
         anime({
           targets: el,
@@ -62,12 +94,11 @@ export function useAnimation() {
           },
         });
       } else {
-        // For new items, slide in
         const animProps = {
           targets: el,
           opacity: [0, 1],
-          duration: enterDuration,
-          easing: enterEasing,
+          duration: baseHandlers.durations.enter,
+          easing: baseHandlers.easings.enter,
           complete: () => {
             done();
             el.style.opacity = '';
@@ -75,7 +106,6 @@ export function useAnimation() {
           },
         };
 
-        // Add transform property dynamically
         animProps[`translate${enterAxis.toUpperCase()}`] = enterTransform;
 
         anime(animProps);
@@ -85,26 +115,23 @@ export function useAnimation() {
     /**
      * Handles animation when an element leaves
      */
-    const onLeave = (el, done) => {
+    const onLeave = async (el, done) => {
+      const anime = await getAnime();
+      
       const animProps = {
         targets: el,
         opacity: [1, 0],
-        duration: leaveDuration,
-        easing: leaveEasing,
+        duration: baseHandlers.durations.leave,
+        easing: baseHandlers.easings.leave,
         complete: done,
       };
 
-      // Add transform property dynamically
       animProps[`translate${leaveAxis.toUpperCase()}`] = leaveTransform;
 
       anime(animProps);
     };
 
-    return {
-      onBeforeEnter,
-      onEnter,
-      onLeave,
-    };
+    return {onBeforeEnter, onEnter, onLeave};
   };
 
   /**
@@ -115,112 +142,80 @@ export function useAnimation() {
    */
   const createListAnimation = (options = {}) => {
     const {
-      initialDelay = 50,
-      initialDuration = 400,
-      initialEasing = 'easeOutCubic',
-      enterDuration = 300,
-      enterEasing = 'easeOutCubic',
-      leaveDuration = 300,
-      leaveEasing = 'easeOutCubic',
-      enterTransform = [-20, 0],
-      leaveTransform = [0, 80],
-      leaveAxis = 'x',
       moveEasing = 'easeInOutQuad',
       moveDuration = 300,
+      moveDelay = 150,
     } = options;
 
     // Basic animations
-    const { onBeforeEnter, onEnter } = createStaggeredAnimation({
-      initialDelay,
-      initialDuration,
-      initialEasing,
-      enterDuration,
-      enterEasing,
-      enterTransform,
-    });
+    const { onBeforeEnter, onEnter } = createStaggeredAnimation(options);
 
     /**
      * Handles animation when an element leaves
      * This special version handles the "slide up" effect for remaining items
      */
-    const onLeave = (el, done) => {
-      // First, get the height of the element being removed
+    const onLeave = async (el, done) => {
+      const anime = await getAnime();
+      const { leaveAxis = 'x', leaveTransform = [0, 80], leaveDuration = 300, leaveEasing = 'easeOutCubic' } = options;
+      
+      // Get element dimensions
       const height = el.offsetHeight;
-      const marginBottom =
-        parseInt(window.getComputedStyle(el).marginBottom, 10) || 0;
+      const marginBottom = parseInt(window.getComputedStyle(el).marginBottom, 10) || 0;
       const totalHeight = height + marginBottom;
 
-      // Find all elements that come after this one
+      // Find elements below
       const parent = el.parentNode;
       const siblings = Array.from(parent.children);
       const index = siblings.indexOf(el);
       const elementsBelow = siblings.slice(index + 1);
 
       // Animate the element being removed
-      const leaveProps = {
-        targets: el,
+      animateElements(el, {
         opacity: [1, 0],
+        [`translate${leaveAxis.toUpperCase()}`]: leaveTransform,
         duration: leaveDuration,
-        easing: leaveEasing,
-      };
+        easing: leaveEasing
+      });
 
-      // Add transform property dynamically
-      leaveProps[`translate${leaveAxis.toUpperCase()}`] = leaveTransform;
-
-      // Start the leave animation
-      anime(leaveProps);
-
-      // Animate all elements below to move up
+      // Animate elements below with delay
       if (elementsBelow.length > 0) {
         anime({
           targets: elementsBelow,
           translateY: [`0px`, `-${totalHeight}px`],
           duration: moveDuration,
           easing: moveEasing,
+          delay: moveDelay,
           complete: () => {
-            // Reset the transform after animation completes
-            elementsBelow.forEach((el) => {
-              el.style.transform = '';
-            });
+            elementsBelow.forEach(el => { el.style.transform = ''; });
             done();
           },
         });
       } else {
-        // If no elements below, just call done when leave animation completes
         setTimeout(done, leaveDuration);
       }
     };
 
-    return {
-      onBeforeEnter,
-      onEnter,
-      onLeave,
-    };
+    return {onBeforeEnter, onEnter, onLeave};
   };
 
   /**
-   * Sets the initial animation state
-   */
-  const setInitialAnimation = (value = true) => {
-    isInitialAnimation.value = value;
-  };
-
-  /**
-   * Creates a simple fade animation
+   * Creates a simple fade animation using VueUse
    */
   const createFadeAnimation = (options = {}) => {
-    const { duration = 300, easing = 'easeOutCubic' } = options;
-
+    const { duration = 300 } = options;
+    
     const onBeforeEnter = (el) => {
       el.style.opacity = '0';
     };
 
-    const onEnter = (el, done) => {
+    const onEnter = async (el, done) => {
+      const anime = await getAnime();
+      
       anime({
         targets: el,
         opacity: [0, 1],
         duration,
-        easing,
+        easing: TransitionPresets.easeOutCubic.toString(),
         complete: () => {
           done();
           el.style.opacity = '';
@@ -228,21 +223,19 @@ export function useAnimation() {
       });
     };
 
-    const onLeave = (el, done) => {
+    const onLeave = async (el, done) => {
+      const anime = await getAnime();
+      
       anime({
         targets: el,
         opacity: [1, 0],
         duration,
-        easing,
+        easing: TransitionPresets.easeOutCubic.toString(),
         complete: done,
       });
     };
 
-    return {
-      onBeforeEnter,
-      onEnter,
-      onLeave,
-    };
+    return {onBeforeEnter, onEnter, onLeave};
   };
 
   /**
@@ -251,235 +244,167 @@ export function useAnimation() {
    * @param {Object} options - Animation options
    * @returns {Object} Animation control functions
    */
-  const createLogoAnimation = (options = {}) => {
-    const { elements, prefersReducedMotion, isVisible } = options;
+const createLogoAnimation = (options = {}) => {
+  const { elements, prefersReducedMotion, isVisible } = options;
+  let firstTimeline = null;
+  let secondTimeline = null;
 
-    // Animation timeline references
-    let firstTimeline = null;
-    let secondTimeline = null;
+  const playAnimation = async () => {
+    if (isVisible && isVisible.value === false) return;
+    
+    const anime = await getAnime();
+    const { 
+      slashTop, slashBottom, bracketLeft, bracketRight,
+      letterM, letterA, letterT, letterH, letterY 
+    } = elements;
 
-    // Dynamically import anime.js
-    const animeInstance = shallowRef(null);
+    if (!anime || !slashTop.value || !slashBottom.value) return;
 
-    // Import anime.js asynchronously
-    const importAnime = async () => {
-      if (!animeInstance.value) {
-        animeInstance.value = (await import('animejs')).default;
-      }
-      return animeInstance.value;
-    };
-
-    /**
-     * Initialize and play the animation
-     */
-    const playAnimation = async () => {
-    if (isVisible && isVisible.value === false) {
+    // Use simplified animations if reduced motion is preferred
+    if (prefersReducedMotion?.value) {
+      await animateElements([
+        slashTop.value, slashBottom.value, letterM.value, letterA.value,
+        letterT.value, letterH.value, letterY.value, bracketLeft.value, bracketRight.value
+      ], {
+        opacity: [0, 1],
+        duration: 600,
+        easing: 'easeOutQuad'
+      });
       return;
     }
-      // Make sure anime.js is loaded
-      const anime = await importAnime();
 
-      // Make sure all elements are available
-      const {
-        slashTop,
-        slashBottom,
-        bracketLeft,
-        bracketRight,
-        letterM,
-        letterA,
-        letterT,
-        letterH,
-        letterY,
-      } = elements;
+    // Create and play animations
+    secondTimeline = anime({
+      targets: [bracketLeft.value, bracketRight.value],
+      opacity: [0.5, 1],
+      duration: 1000,
+      loop: true,
+      direction: 'alternate',
+      easing: 'easeInOutSine',
+      autoplay: false,
+    });
 
-      if (!anime || !slashTop.value || !slashBottom.value) return;
+    // Create timeline directly with anime
+    firstTimeline = anime.timeline({
+      easing: 'easeOutExpo',
+      autoplay: false
+    });
 
-      // Use simplified animations if reduced motion is preferred
-      if (prefersReducedMotion?.value) {
-        // Simple fade-in for reduced motion
-        anime({
-          targets: [
-            slashTop.value,
-            slashBottom.value,
-            letterM.value,
-            letterA.value,
-            letterT.value,
-            letterH.value,
-            letterY.value,
-            bracketLeft.value,
-            bracketRight.value,
-          ],
-          opacity: [0, 1],
-          duration: 600,
-          easing: 'easeOutQuad',
-        });
-        return;
-      }
-
-      // Continuous animations
-      secondTimeline = anime({
+    // Add animations to timeline
+    firstTimeline
+      .add({
+        targets: slashTop.value,
+        translateY: ['-100%', '0%'],
+        opacity: [0, 1],
+        duration: 600,
+      })
+      .add({
+        targets: slashBottom.value,
+        translateY: ['100%', '0%'],
+        opacity: [0, 1],
+        duration: 600,
+      }, '-=400')
+      .add({
+        targets: [letterM.value, letterA.value, letterT.value, letterH.value, letterY.value],
+        opacity: [0, 1],
+        translateY: [10, 0],
+        delay: anime.stagger(100),
+        duration: 400,
+      }, '-=200')
+      .add({
         targets: [bracketLeft.value, bracketRight.value],
-        opacity: [0.5, 1],
-        duration: 1000,
-        loop: true,
-        direction: 'alternate',
-        easing: 'easeInOutSine',
-        autoplay: false,
-      });
+        opacity: [0, 0.5],
+        translateX: (el, i) => [i === 0 ? -20 : 20, 0],
+        duration: 400,
+        complete: () => secondTimeline.play(),
+      }, '-=200');
 
-      firstTimeline = anime.timeline({
-        easing: 'easeOutExpo',
-        autoplay: false,
-      });
-
-      // Slashes animation with better timing
-      firstTimeline
-        .add({
-          targets: slashTop.value,
-          translateY: ['-100%', '0%'],
-          opacity: [0, 1],
-          duration: 600,
-        })
-        .add(
-          {
-            targets: slashBottom.value,
-            translateY: ['100%', '0%'],
-            opacity: [0, 1],
-            duration: 600,
-          },
-          '-=400'
-        )
-
-        // Individual letters stagger animation
-        .add(
-          {
-            targets: [
-              letterM.value,
-              letterA.value,
-              letterT.value,
-              letterH.value,
-              letterY.value,
-            ],
-            opacity: [0, 1],
-            translateY: [10, 0],
-            delay: anime.stagger(100),
-            duration: 400,
-          },
-          '-=200'
-        )
-
-        // Brackets animation
-        .add(
-          {
-            targets: [bracketLeft.value, bracketRight.value],
-            opacity: [0, 0.5],
-            translateX: (el, i) => [i === 0 ? -20 : 20, 0],
-            duration: 400,
-            complete: () => secondTimeline.play(),
-          },
-          '-=200'
-        );
-
-      // Play the animation
-      firstTimeline.play();
-    };
-
-    /**
-     * Stop and clean up the animation
-     */
-    const stopAnimation = () => {
-      if (firstTimeline) {
-        firstTimeline.pause();
-        firstTimeline = null;
-      }
-      if (secondTimeline) {
-        secondTimeline.pause();
-        secondTimeline = null;
-      }
-    };
-
-    return {
-      playAnimation,
-      stopAnimation,
-    };
+    firstTimeline.play();
   };
 
-   /**
+  const stopAnimation = () => {
+    if (firstTimeline) {
+      firstTimeline.pause();
+      firstTimeline = null;
+    }
+    if (secondTimeline) {
+      secondTimeline.pause();
+      secondTimeline = null;
+    }
+  };
+
+  return { playAnimation, stopAnimation };
+};
+
+
+  /**
    * Creates a slide animation for transitioning between elements
-   * 
-   * @param {Object} options - Animation options
-   * @returns {Object} Animation control functions
    */
-  const createSlideAnimation = (options = {}) => {
-    const {
-      duration = 300,
-      easing = 'cubicBezier(0.25, 0.1, 0.25, 1)',
-      inputOpacityRange = [1, 0],
-      resultOpacityRange = [0, 1],
-      inputTranslateY = [0, '-100%'],
-      resultTranslateY = ['100%', 0],
-    } = options;
+const createSlideAnimation = (options = {}) => {
+  const {
+    duration = 300,
+    easing = 'cubicBezier(0.25, 0.1, 0.25, 1)',
+    inputOpacityRange = [1, 0],
+    resultOpacityRange = [0, 1],
+    inputTranslateY = [0, '-100%'],
+    resultTranslateY = ['100%', 0],
+  } = options;
 
-    /**
-     * Animates a slide transition between input and result containers
-     * 
-     * @param {HTMLElement} resultContainer - The result container element
-     * @param {HTMLElement} inputContainer - The input container element
-     */
-    const animateSlide = (resultContainer, inputContainer) => {
-      if (!resultContainer || !inputContainer) return;
+  const animateSlide = async (resultContainer, inputContainer) => {
+    if (!resultContainer || !inputContainer) return;
+    
+    const anime = await getAnime();
 
-      // Set initial positions
-      anime.set(resultContainer, { translateY: resultTranslateY[0], opacity: resultOpacityRange[0] });
-      anime.set(inputContainer, { translateY: inputTranslateY[0], opacity: inputOpacityRange[0] });
+    // Set initial positions
+    anime.set(resultContainer, { 
+      translateY: resultTranslateY[0], 
+      opacity: resultOpacityRange[0] 
+    });
+    
+    anime.set(inputContainer, { 
+      translateY: inputTranslateY[0], 
+      opacity: inputOpacityRange[0] 
+    });
 
-      // Create animation timeline
-      const timeline = anime.timeline({
-        easing,
-        duration
-      });
-
-      // Add animations to timeline
-      timeline
-        .add({
-          targets: inputContainer,
-          translateY: inputTranslateY[1],
-          opacity: inputOpacityRange[1],
-          easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
-        })
-        .add({
-          targets: resultContainer,
-          translateY: resultTranslateY[1],
-          opacity: resultOpacityRange[1],
-          easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
-        }, `-=${duration - 50}`); // Slight overlap for smoother transition
-    };
-
-    /**
-     * Resets element positions to their initial state
-     * 
-     * @param {HTMLElement} resultContainer - The result container element
-     * @param {HTMLElement} inputContainer - The input container element
-     */
-    const resetPositions = (resultContainer, inputContainer) => {
-      if (!resultContainer || !inputContainer) return;
-
-      anime.set(resultContainer, {
-        translateY: resultTranslateY[0],
-        opacity: resultOpacityRange[0]
-      });
-
-      anime.set(inputContainer, {
-        translateY: inputTranslateY[0],
-        opacity: inputOpacityRange[0]
-      });
-    };
-
-    return {
-      animateSlide,
-      resetPositions
-    };
+    // Create animation timeline directly with anime
+    const timeline = anime.timeline({
+      easing,
+      duration
+    });
+    
+    timeline
+      .add({
+        targets: inputContainer,
+        translateY: inputTranslateY[1],
+        opacity: inputOpacityRange[1],
+        easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
+      })
+      .add({
+        targets: resultContainer,
+        translateY: resultTranslateY[1],
+        opacity: resultOpacityRange[1],
+        easing: 'cubicBezier(0.4, 0.0, 0.2, 1)'
+      }, `-=${duration - 50}`);
   };
+
+  const resetPositions = async (resultContainer, inputContainer) => {
+    if (!resultContainer || !inputContainer) return;
+    
+    const anime = await getAnime();
+
+    anime.set(resultContainer, {
+      translateY: resultTranslateY[0],
+      opacity: resultOpacityRange[0]
+    });
+
+    anime.set(inputContainer, {
+      translateY: inputTranslateY[0],
+      opacity: inputOpacityRange[0]
+    });
+  };
+
+  return { animateSlide, resetPositions };
+};
 
   return {
     isInitialAnimation,

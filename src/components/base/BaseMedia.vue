@@ -114,7 +114,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  // Video specific props
   autoplay: {
     type: Boolean,
     default: false
@@ -165,7 +164,6 @@ const hasError = ref(false);
 const isLoaded = ref(false);
 const showFallback = ref(false);
 
-// Container classes
 const containerClasses = computed(() => [
   'inline-flex items-center justify-center',
   'overflow-hidden',
@@ -177,7 +175,6 @@ const containerClasses = computed(() => [
   }
 ]);
 
-// Media classes
 const mediaClasses = computed(() => [
   'max-w-full transition-opacity duration-300',
   {
@@ -195,7 +192,6 @@ const mediaClasses = computed(() => [
   }
 ]);
 
-// Determine the appropriate role for accessibility
 const role = computed(() => {
   if (props.hideFromScreenReaders) return 'presentation';
   if (props.type === 'img' || props.type === 'svg') return 'img';
@@ -203,7 +199,6 @@ const role = computed(() => {
   return null;
 });
 
-// Get the effective source based on dark mode
 const effectiveSrc = computed(() => {
   if (isDark.value && props.darkSrc) {
     return props.darkSrc;
@@ -211,7 +206,6 @@ const effectiveSrc = computed(() => {
   return props.src;
 });
 
-// Load SVG content if svgPath is provided
 const loadSvgContent = async () => {
   const path = props.svgPath;
   if (!path) return;

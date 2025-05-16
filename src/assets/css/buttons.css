@@ -29,10 +29,6 @@
          disabled:hover:bg-indigo-400 disabled:dark:hover:bg-gray-500;
   }
 
-  .calc-special-btn-ac {
-    @apply bg-red-500 text-white hover:bg-red-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-500;
-  }
-
   .calc-memory-btn {
     @apply text-sm tracking-wider text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 disabled:dark:hover:bg-transparent;
   }

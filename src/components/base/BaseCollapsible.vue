@@ -79,20 +79,18 @@
   
   return iconMap[iconName] || CalculatorIcon;
 };
-
   </script>
   
   <style>
-
   .radix-collapsible-content[data-state='open'] {
-    animation: slideDownCollapsible 300ms cubic-bezier(0.87, 0, 0.13, 1);
+    animation: slide-down 300ms cubic-bezier(0.87, 0, 0.13, 1);
   }
   
   .radix-collapsible-content[data-state='closed'] {
-    animation: slideUpCollapsible 300ms cubic-bezier(0.87, 0, 0.13, 1);
+    animation: slide-up 300ms cubic-bezier(0.87, 0, 0.13, 1);
   }
   
-  @keyframes slideDownCollapsible {
+  @keyframes slide-down {
     from { 
       height: 0; 
       opacity: 0;
@@ -103,7 +101,7 @@
     }
   }
   
-  @keyframes slideUpCollapsible {
+  @keyframes slide-up {
     from { 
       height: var(--radix-collapsible-content-height); 
       opacity: 1;

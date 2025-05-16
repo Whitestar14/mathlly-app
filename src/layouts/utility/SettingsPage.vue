@@ -8,6 +8,7 @@ import { DEFAULT_SETTINGS } from "@/stores/settings"
 import { useToast } from "@/composables/useToast";
 import { cloneDeep } from "@/utils/misc/objectUtils";
 import BasePage from "@/components/base/BasePage.vue";
+import BaseInput from "@/components/base/BaseInput.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import Select from "@/components/ui/SelectBar.vue";
 import Switch from "@/components/ui/ToggleBar.vue";
@@ -108,9 +109,7 @@ const saveSettings = async () => {
     toast({ 
       type: "success", 
       title: "Settings saved", 
-      message: "Your preferences have been updated successfully." ,
-      duration: 5000,
-      dismissible: true 
+      description: "Your preferences have been updated successfully."
     });
     
     localSettings.value = cloneDeep(storeSnapshot.value);
@@ -120,7 +119,7 @@ const saveSettings = async () => {
     toast({ 
       type: "error", 
       title: "Error saving settings", 
-      message: "There was a problem saving your preferences." 
+      description: "There was a problem saving your preferences." 
     });
     console.error("Error saving settings:", error);
   }
@@ -133,13 +132,12 @@ const saveSettings = async () => {
     <div class="space-y-8 mx-auto max-w-4xl">
       <div class="flex flex-col sm:flex-row justify-end items-start sm:items-center mb-6">
         <div class="relative w-full sm:w-64">
-          <SearchIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search settings..." 
-            class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
-            v-model="searchQuery"
-          />
+          <BaseInput
+              v-model="searchQuery"
+              placeholder="Search settings..."
+              :icon="SearchIcon"
+              aria-label="Search settings"
+            />
         </div>
       </div>
 
@@ -324,7 +322,7 @@ const saveSettings = async () => {
                   >Disable Animation</label>
                   <CircleHelp
                     class="h-4 w-4 cursor-help"
-                    v-tippy="{ content: 'May experience thrashing and flashes during transitions. Backdrops will be disabled.', placement: 'top', onShow() { return true } }"
+                    v-tippy="{ content: 'May experience layout thrashing and flashes during transitions. Backdrops will be disabled.', placement: 'top', onShow() { return true } }"
                   />
                 </div>
               <p class="text-xs text-gray-500 dark:text-gray-400">

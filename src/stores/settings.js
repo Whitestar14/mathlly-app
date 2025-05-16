@@ -118,7 +118,7 @@ async saveSettings(newSettings) {
     },
 
     async updateLastVisitedPath(path) {
-      const ignorePaths = ['/error', '/', '/notfound', '/settings'];
+      const ignorePaths = ['/error', '/', '/:pathMatch(.*)*', '/settings'];
       if (!ignorePaths.includes(path) && !path.includes('error')) {
         await this.updateSetting('startup.lastVisitedPath', path);
       }

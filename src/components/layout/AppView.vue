@@ -1,11 +1,13 @@
 <template>
   <router-view v-slot="{ Component, route }">
     <Transition name="fade" mode="out-in">
+      <KeepAlive>
       <component :is="Component" v-bind="shouldPassComponent(route.path) ? {
         mode,
         settings,
         isMobile
       } : {}" />
+      </KeepAlive>
     </Transition>
   </router-view>
 </template>

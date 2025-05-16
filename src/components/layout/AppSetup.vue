@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen flex bg-background dark:bg-background-dark duration-300" :class="{
+  <div class="min-h-screen flex bg-background dark:bg-background-dark transition-all duration-300" :class="{
     'animation-disabled': settings.appearance.animationDisabled,
   }">
     <sidebar-menu :is-mobile="device.isMobile" @sidebar-close="sidebarPanel.close()" />
-    <div class="flex flex-col flex-grow duration-300" :class="mainContentClasses">
+    <div class="flex flex-col flex-grow transition-all duration-300" :class="mainContentClasses">
       <app-header :is-mobile="device.isMobile" :is-sidebar-open="sidebarPanel.isOpen" :is-menubar-open="menuPanel.isOpen"
         @toggle-sidebar="toggleSidebar" @toggle-menubar="toggleMenubar" @update:mode="handleModeChange" />
 
@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { onUnmounted, computed, ref } from "vue"
+import { onUnmounted, computed, shallowRef } from "vue"
 import { useRouter } from "vue-router"
 import { useFullscreen } from "@vueuse/core"
 import { useDeviceStore } from "@/stores/device"
@@ -33,8 +33,7 @@ const router = useRouter()
 const device = useDeviceStore()
 const settings = useSettingsStore()
 
-// --- Loading Logic ---
-const minLoadTime = new Promise(resolve => setTimeout(resolve, 1500)) // Keep minimum load time for UX
+const minLoadTime = new Promise(resolve => setTimeout(resolve, 1500))
 
 await Promise.all([
   settings.loadSettings(),
@@ -44,14 +43,12 @@ await Promise.all([
 
 device.initializeDeviceInfo()
 
-const currentMode = ref(settings.calculator?.mode || 'Standard')
+const currentMode = shallowRef(settings.calculator.mode)
 
-// Handle mode changes from AppHeader
 const handleModeChange = (newMode) => {
   currentMode.value = newMode
 }
 
-// Use the panel context for sidebar and menu
 const sidebarPanel = usePanel('sidebar')
 const menuPanel = usePanel('menu')
 

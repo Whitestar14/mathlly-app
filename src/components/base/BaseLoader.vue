@@ -1,20 +1,17 @@
 <template>
   <div
-    v-if="isActive"
-    :class="containerClasses"
+    :class="[
+      `loader-${variant} flex flex-col justify-center items-center`,
+    ]"
     ref="containerRef"
-    class="relative h-full font-mono"
+    class="h-full font-mono"
   >
     <!-- Expanded Loader (formerly macro) -->
     <template v-if="variant === 'expanded'">
-      <div class="relative flex flex-col items-center justify-center gap-8">
+      <div class="relative flex flex-col items-center justify-center gap-8 pointer-events-none cursor-auto">
         <div class="relative z-10 flex items-center justify-center">
           <div class="relative text-6xl inline-flex">
-            <span
-              ref="bracketLeft"
-              class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0"
-            >{</span>
-
+            <span ref="bracketLeft" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">{</span>
             <span class="inline-flex *:text-gray-800 *:dark:text-gray-100 *:opacity-0">
               <span ref="letterM">m</span>
               <span ref="letterA">a</span>
@@ -22,33 +19,11 @@
               <span ref="letterH">h</span>
             </span>
             <span class="relative inline-flex items-center justify-center w-[1.2em] *:left-1/2 *:-translate-x-1/2 *:text-indigo-500 *:dark:text-indigo-400 *:font-black *:opacity-0">
-              <span
-                ref="slashTop"
-                class="top-0 origin-bottom"
-              >/</span>
-              <span
-                ref="slashBottom"
-                class="bottom-0 origin-top"
-              >/</span>
+              <span ref="slashTop" class="top-0 origin-bottom">/</span>
+              <span ref="slashBottom" class="bottom-0 origin-top">/</span>
             </span>
-            <span
-              ref="letterY"
-              class="text-gray-800 dark:text-gray-100 opacity-0"
-            >y</span>
-
-            <span
-              ref="bracketRight"
-              class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0"
-            >}</span>
-          </div>
-        </div>
-
-        <div
-          v-if="message"
-          class="relative z-10 text-center"
-        >
-          <div class="text-sm text-gray-600 dark:text-gray-300">
-            {{ message }}
+            <span ref="letterY" class="text-gray-800 dark:text-gray-100 opacity-0">y</span>
+            <span ref="bracketRight" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">}</span>
           </div>
         </div>
       </div>
@@ -64,20 +39,13 @@
           }"
           aria-label="Loading"
         />
-        <span
-          v-if="message"
-          class="ml-3 text-sm text-gray-600 dark:text-gray-300"
-          :class="{ 'ml-2': variant === 'compact' }"
-        >
-          {{ message }}
-        </span>
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { shallowRef, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useElementVisibility } from '@vueuse/core';
 import { useAnimation } from '@/composables/useAnimation';
 
@@ -87,44 +55,25 @@ const props = defineProps({
     default: "regular",
     validator: (value) => ["compact", "regular", "expanded"].includes(value),
   },
-  message: {
-    type: String,
-    default: null,
-  },
-  isActive: {
-    type: Boolean,
-    default: true,
-  }
 });
 
-const containerClasses = computed(() => [
-  `loader-${props.variant}`,
-  {
-    "flex items-center justify-center h-full": props.message && props.variant !== "expanded",
-  },
-]);
+const slashTop = shallowRef(null);
+const slashBottom = shallowRef(null);
+const bracketLeft = shallowRef(null);
+const bracketRight = shallowRef(null);
+const letterM = shallowRef(null);
+const letterA = shallowRef(null);
+const letterT = shallowRef(null);
+const letterH = shallowRef(null);
+const letterY = shallowRef(null);
 
-// Animation refs
-const slashTop = ref(null);
-const slashBottom = ref(null);
-const bracketLeft = ref(null);
-const bracketRight = ref(null);
-const letterM = ref(null);
-const letterA = ref(null);
-const letterT = ref(null);
-const letterH = ref(null);
-const letterY = ref(null);
-
-// Container ref for visibility detection
-const containerRef = ref(null);
+const containerRef = shallowRef(null);
 const isVisible = useElementVisibility(containerRef);
 
-// Check for reduced motion preference
-const prefersReducedMotion = ref(
+const prefersReducedMotion = shallowRef(
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false
 );
 
-// Watch for changes in reduced motion preference
 if (window.matchMedia) {
   const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   mediaQuery.addEventListener('change', (e) => {
@@ -132,10 +81,7 @@ if (window.matchMedia) {
   });
 }
 
-// Use our animation composable
 const { createLogoAnimation } = useAnimation();
-
-// Create the logo animation
 const { playAnimation, stopAnimation } = createLogoAnimation({
   elements: {
     slashTop,
@@ -152,7 +98,6 @@ const { playAnimation, stopAnimation } = createLogoAnimation({
   isVisible
 });
 
-// Watch for visibility changes to optimize animation initialization
 watch(isVisible, (visible) => {
   if (visible && props.variant === 'expanded') {
     playAnimation();
@@ -160,18 +105,12 @@ watch(isVisible, (visible) => {
 });
 
 onMounted(() => {
-  if (props.variant === 'expanded' && isVisible.value) {
-    // Use requestAnimationFrame to ensure DOM is fully rendered
-    requestAnimationFrame(() => {
-      playAnimation();
-    });
+  if (isVisible.value && props.variant === 'expanded') {
+    requestAnimationFrame(playAnimation);
   }
 });
 
-onBeforeUnmount(() => {
-  // Clean up animations to prevent memory leaks
-  stopAnimation();
-});
+onBeforeUnmount(stopAnimation);
 </script>
 
 <style scoped>
