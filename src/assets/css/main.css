@@ -158,21 +158,18 @@
     @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95;
   }
 
-  /* Syntax highlighting styles */
+  /* Syntax highlighting classes */
   .syntax-number {
-    @apply text-indigo-700 dark:text-indigo-300;
+    @apply text-blue-700 dark:text-blue-300;
   }
 
-  .syntax-operator {
-    @apply text-gray-700 dark:text-gray-300 font-semibold;
-  }
-
+  .syntax-operator,
   .syntax-programmer-operator {
-    @apply text-amber-700 dark:text-amber-300 font-semibold;
+    @apply text-purple-600 dark:text-purple-400;
   }
 
   .syntax-parenthesis {
-    @apply text-slate-600 dark:text-slate-300 font-semibold;
+    @apply text-gray-600 dark:text-gray-400 font-semibold;
   }
 
   .syntax-function {
@@ -180,7 +177,7 @@
   }
 
   .syntax-decimal {
-    @apply text-rose-600 dark:text-rose-300 font-bold;
+    @apply text-indigo-600 dark:text-indigo-400 font-bold;
   }
 
   .syntax-text {
@@ -192,7 +189,7 @@
   }
 
   .syntax-ghost {
-    @apply text-green-600/40 dark:text-green-400/40;
+    @apply text-gray-400/40 dark:text-gray-600/40;
   }
 }
 

@@ -26,33 +26,11 @@
           aria-atomic="true"
         >
           <span
-            v-for="(part, index) in formattedParts"
+            v-for="(token, index) in formattedTokens"
             :key="index"
+            :class="getTokenClass(token)"
           >
-            <template v-if="part.type === 'text'">
-              <template v-if="settingsStore.display.syntaxHighlighting">
-                <span
-                  v-for="(token, tokenIndex) in highlightedTokens[index] || []"
-                  :key="`${index}-${tokenIndex}`"
-                  :class="`syntax-${token.type}`"
-                >{{ token.content }}</span>
-              </template>
-              <template v-else>
-                {{ part.content }}
-              </template>
-            </template>
-            <span
-              v-else-if="part.type === 'open'"
-              class="paren-open syntax-parenthesis"
-            >{{ part.content }}</span>
-            <span
-              v-else-if="part.type === 'close'"
-              class="paren-close syntax-parenthesis"
-            >{{ part.content }}</span>
-            <span
-              v-else-if="part.type === 'ghost'"
-              class="paren-ghost syntax-ghost"
-            >{{ part.content }}</span>
+            {{ token.content }}
           </span>
         </div>
 
@@ -80,10 +58,11 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, onMounted, watch } from "vue"
+import { ref, inject, computed, onMounted, watch, onUnmounted } from "vue"
 import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core'
 import { DisplayService } from '@/services/display/DisplayService'
 import { useSettingsStore } from '@/stores/settings';
+import { ExpressionFormatter } from '@/utils/display/ExpressionFormatter';
 
 const props = defineProps({
   input: { type: String, default: "" },
@@ -98,40 +77,67 @@ const props = defineProps({
 const settingsStore = useSettingsStore();
 const emit = defineEmits(['scroll-update']);
 
+// DOM refs
 const displayContainer = ref(null);
 const resultContainer = ref(null);
 const inputContainer = ref(null);
 const previewContainer = ref(null);
 
+// Inject calculator
 const calculator = inject('calculator');
 const parenthesesTracker = computed(() => calculator.value.operations.parenthesesTracker);
 
+// Use VueUse for better performance
 const { width } = useElementSize(displayContainer);
 const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
   throttle: 16,
   onScroll: useThrottleFn(updateScrollState, 100)
 });
 
-const formattedParts = computed(() => 
-  DisplayService.formatParts(props.input, props.activeBase, props.mode, parenthesesTracker.value)
+// Check if syntax highlighting is enabled
+const syntaxHighlightingEnabled = computed(() => settingsStore.display.syntaxHighlighting);
+
+// Use the unified formatter to get tokens in a single pass
+const formattedTokens = computed(() => 
+  ExpressionFormatter.format(
+    props.input, 
+    parenthesesTracker.value, 
+    syntaxHighlightingEnabled.value
+  )
 );
 
-const highlightedTokens = computed(() => {
-  if (!settingsStore.display.syntaxHighlighting) return {};
-  
-  return formattedParts.value.reduce((acc, part, index) => {
-    if (part.type === 'text') {
-      acc[index] = DisplayService.highlightSyntax(part.content);
-    }
-    return acc;
-  }, {});
-});
-
+// Compute display classes once
 const displayClass = computed(() => [
   'mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
   DisplayService.getFontSizeClass(props.input, props.mode, props.activeBase),
   props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors'
 ]);
+
+// Get class for a token based on its type
+function getTokenClass(token) {
+  switch (token.type) {
+    case 'open':
+      return 'paren-open syntax-parenthesis';
+    case 'close':
+      return 'paren-close syntax-parenthesis';
+    case 'ghost':
+      return 'paren-ghost syntax-ghost';
+    case 'number':
+      return 'syntax-number';
+    case 'operator':
+      return 'syntax-operator';
+    case 'programmer-operator':
+      return 'syntax-programmer-operator';
+    case 'function':
+      return 'syntax-function';
+    case 'decimal':
+      return 'syntax-decimal';
+    case 'text':
+      return 'syntax-text';
+    default:
+      return 'syntax-space';
+  }
+}
 
 function updateScrollState() {
   if (!displayContainer.value) return;
@@ -166,16 +172,29 @@ function scrollToNext() {
   }
 }
 
+// Use watch with flush: 'post' to ensure DOM is updated
 watch(() => props.isAnimating, (newValue) => {
   newValue 
     ? DisplayService.animateSlide(resultContainer.value, inputContainer.value)
     : DisplayService.resetPositions(resultContainer.value, inputContainer.value);
 }, { flush: 'post' });
 
+// Watch for mode changes to clear caches
+watch(() => props.mode, () => {
+  ExpressionFormatter.clearCache();
+});
+
+// Update scroll state on mount
 onMounted(() => {
   updateScrollState();
 });
 
+// Clean up caches on unmount
+onUnmounted(() => {
+  ExpressionFormatter.clearCache();
+});
+
+// Expose methods
 defineExpose({
   scrollToEnd,
   scrollToPrevious,
@@ -185,7 +204,7 @@ defineExpose({
 
 <style scoped>
 .paren-ghost {
-  opacity: 0.4;
+  @apply opacity-40;
   color: var(--ghost-paren-color, #6b7280);
   margin-left: 0.125rem;
 }
@@ -208,16 +227,5 @@ defineExpose({
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-[data-nest-level="1"] {
-  padding-left: 0.25rem;
-}
-
-[data-nest-level="2"] {
-  padding-left: 0.5rem;
-}
-
-[data-nest-level="3"] {
-  padding-left: 0.75rem;
-}
+/* Syntax highlighting classes found in main.css */
 </style>
