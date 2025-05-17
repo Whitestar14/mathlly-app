@@ -5,7 +5,7 @@
       :key="base"
       :class="[
         'flex justify-between items-center p-2 rounded transition-colors duration-200',
-        baseButtonClasses(base)
+        baseButtonClasses(base),
       ]"
       @click="$emit('base-change', base)"
     >
@@ -23,12 +23,13 @@
             ? 'text-indigo-500 dark:text-indigo-300 font-medium'
             : 'text-gray-800 dark:text-gray-300',
         ]"
-      >{{ formatDisplayValue(base) }}</span>
+      >{{ formattedValues[base] }}</span>
     </button>
   </div>
 </template>
 
 <script setup>
+import { computed, markRaw } from 'vue';
 import { DisplayFormatter } from "@/services/display/DisplayFormatter";
 
 const props = defineProps({
@@ -44,15 +45,20 @@ const props = defineProps({
 
 defineEmits(['base-change']);
 
-const bases = ['HEX', 'DEC', 'OCT', 'BIN'];
+const bases = markRaw(['HEX', 'DEC', 'OCT', 'BIN']);
+
+const formattedValues = computed(() => {
+  const result = {};
+  for (const base of bases) {
+    const value = props.displayValues[base]?.display;
+    result[base] = value ? DisplayFormatter.formatDisplayValue(value, base) : '';
+  }
+  return result;
+});
 
 const baseButtonClasses = (base) => {
   return props.activeBase === base
     ? 'bg-indigo-50 dark:bg-gray-700/70 text-gray-500 border border-indigo-300 dark:border-indigo-300/25 dark:text-gray-200'
     : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30';
-};
-
-const formatDisplayValue = (base) => {
-  return DisplayFormatter.formatDisplayValue(props.displayValues[base]?.display, base);
 };
 </script>

@@ -1,46 +1,45 @@
 import { CalculatorConstants } from '../constants/CalculatorConstants.js';
+import { DisplayFormatter } from '@/services/display/DisplayFormatter';
 
 /**
  * @class ExpressionFormatter
  * @description Unified class for formatting mathematical expressions with both parentheses and syntax highlighting
  */
 export class ExpressionFormatter {
-  // Static instance for reuse
-  static instance = new ExpressionFormatter();
-  
-  // Cache for formatted expressions
+  // Static cache for formatted expressions
   static formattedCache = new Map();
   static MAX_CACHE_SIZE = 100;
-  
-  constructor() {
-    this.expressionCache = new Map();
-    this.MAX_CACHE_SIZE = 50;
-  }
   
   /**
    * Format an expression with both parentheses and syntax highlighting
    * @param {string} expr - The expression to format
    * @param {Object} parenthesesTracker - Tracker for parentheses state
    * @param {boolean} syntaxHighlightingEnabled - Whether syntax highlighting is enabled
+   * @param {Object} options - Formatting options to pass to DisplayFormatter
    * @returns {Array} Formatted tokens for rendering
    */
-  static format(expr, parenthesesTracker, syntaxHighlightingEnabled = true) {
+  static format(expr, parenthesesTracker, syntaxHighlightingEnabled = true, options = {}) {
     if (!expr) {
       return [{ type: 'text', content: '0' }];
     }
     
+    // Format the expression using DisplayFormatter if needed
+    const formattedExpr = options.base && options.mode 
+      ? DisplayFormatter.format(expr, options)
+      : expr;
+    
     // Generate cache key based on inputs
-    const cacheKey = `${expr}-${parenthesesTracker?.openCount || 0}-${syntaxHighlightingEnabled}`;
+    const cacheKey = `${formattedExpr}-${parenthesesTracker?.openCount || 0}-${syntaxHighlightingEnabled}`;
     
     // Check cache first
     if (this.formattedCache.has(cacheKey)) {
       return this.formattedCache.get(cacheKey);
     }
     
-    // Format the expression
-    const parts = this.instance.getFormattedExpression(expr);
+    // First, handle parentheses
+    const parts = this.formatParentheses(formattedExpr, parenthesesTracker);
     
-    // Apply syntax highlighting if enabled
+    // Then apply syntax highlighting if enabled
     const result = syntaxHighlightingEnabled 
       ? this.applySyntaxHighlighting(parts)
       : parts;
@@ -77,6 +76,108 @@ export class ExpressionFormatter {
         // Keep non-text parts as is
         result.push(part);
       }
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Format an expression with parentheses
+   * @param {string} expr - The expression to format
+   * @param {Object} parenthesesTracker - Tracker for parentheses state
+   * @returns {Array} Formatted parts
+   */
+  static formatParentheses(expr, parenthesesTracker) {
+    const parts = [];
+    let currentIndex = 0;
+    let nestLevel = 0;
+    
+    const { REGEX } = CalculatorConstants;
+    
+    const isOperator = (char, nextChar) => {
+      if (REGEX.OPERATOR.test(char)) return true;
+      if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) return true;
+      return false;
+    };
+    
+    for (let i = 0; i < expr.length; i++) {
+      const char = expr[i];
+      const nextChar = expr[i+1];
+
+      if (char === '(') {
+        if (i > currentIndex) {
+          const beforeText = expr.slice(currentIndex, i).trim();
+          if (beforeText) parts.push({ type: 'text', content: beforeText, level: nestLevel });
+        }
+        
+        parts.push({ type: 'open', content: '(', level: nestLevel });
+        currentIndex = i + 1;
+        nestLevel++;
+      } else if (char === ')') {
+        if (i > currentIndex) {
+          const content = expr.slice(currentIndex, i).trim();
+          if (content) parts.push({ type: 'text', content: content, level: nestLevel });
+        }
+        
+        parts.push({ type: 'close', content: ')', level: --nestLevel });
+        currentIndex = i + 1;
+      } else if (isOperator(char, nextChar)) {
+        if (i > currentIndex) {
+          const beforeOp = expr.slice(currentIndex, i).trim();
+          if (beforeOp) parts.push({ type: 'text', content: beforeOp, level: nestLevel });
+        }
+        
+        if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) {
+          parts.push({ type: 'text', content: ` ${expr.slice(i, i+2)} `, level: nestLevel });
+          i++;
+        } else {
+          parts.push({ type: 'text', content: ` ${char} `, level: nestLevel });
+        }
+        currentIndex = i + 1;
+      }
+    }
+  
+    if (currentIndex < expr.length) {
+      const remaining = expr.slice(currentIndex).trim();
+      if (remaining) parts.push({ type: 'text', content: remaining, level: nestLevel });
+    }
+  
+    while (nestLevel > 0) {
+      parts.push({ type: 'ghost', content: ')', level: --nestLevel });
+    }
+  
+    return this.cleanupParts(parts);
+  }
+  
+  /**
+   * Clean up formatted parts
+   * @param {Array} parts - The parts to clean up
+   * @returns {Array} Cleaned up parts
+   */
+  static cleanupParts(parts) {
+    const result = [];
+    const { REGEX } = CalculatorConstants;
+    
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      const nextPart = parts[i + 1];
+      const prevPart = result[result.length - 1];
+      
+      if (part.type === 'text' && !part.content.trim()) {
+        if ((prevPart?.type === 'open') || (nextPart?.type === 'close')) {
+          result.push(part);
+        }
+        continue;
+      }
+      
+      if (part.type === 'text' && 
+          (REGEX.OPERATOR.test(part.content.trim()[0]) || /^<<|^>>/.test(part.content.trim()))) {
+        if (prevPart?.type === 'text') {
+          prevPart.content = prevPart.content.trimEnd();
+        }
+      }
+      
+      result.push(part);
     }
     
     return result;
@@ -162,117 +263,22 @@ export class ExpressionFormatter {
   }
   
   /**
-   * Format an expression with parentheses
-   * @param {string} expr - The expression to format
-   * @returns {Array} Formatted parts
+   * Format a display value using DisplayFormatter
+   * @param {string} value - The value to format
+   * @param {Object} options - Formatting options
+   * @returns {string} Formatted value
    */
-  getFormattedExpression(expr) {
-    // Check cache first
-    if (this.expressionCache.has(expr)) {
-      return this.expressionCache.get(expr);
-    }
-
-    const parts = [];
-    let currentIndex = 0;
-    let nestLevel = 0;
-    
-    const { REGEX } = CalculatorConstants;
-    
-    const isOperator = (char, nextChar) => {
-      if (REGEX.OPERATOR.test(char)) return true;
-      if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) return true;
-      return false;
-    };
-    
-    for (let i = 0; i < expr.length; i++) {
-      const char = expr[i];
-      const nextChar = expr[i+1];
-
-      if (char === '(') {
-        if (i > currentIndex) {
-          const beforeText = expr.slice(currentIndex, i).trim();
-          if (beforeText) parts.push({ type: 'text', content: beforeText, level: nestLevel });
-        }
-        
-        parts.push({ type: 'open', content: '(', level: nestLevel });
-        currentIndex = i + 1;
-        nestLevel++;
-      } else if (char === ')') {
-        if (i > currentIndex) {
-          const content = expr.slice(currentIndex, i).trim();
-          if (content) parts.push({ type: 'text', content: content, level: nestLevel });
-        }
-        
-        parts.push({ type: 'close', content: ')', level: --nestLevel });
-        currentIndex = i + 1;
-      } else if (isOperator(char, nextChar)) {
-        if (i > currentIndex) {
-          const beforeOp = expr.slice(currentIndex, i).trim();
-          if (beforeOp) parts.push({ type: 'text', content: beforeOp, level: nestLevel });
-        }
-        
-        if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) {
-          parts.push({ type: 'text', content: ` ${expr.slice(i, i+2)} `, level: nestLevel });
-          i++;
-        } else {
-          parts.push({ type: 'text', content: ` ${char} `, level: nestLevel });
-        }
-        currentIndex = i + 1;
-      }
-    }
-  
-    if (currentIndex < expr.length) {
-      const remaining = expr.slice(currentIndex).trim();
-      if (remaining) parts.push({ type: 'text', content: remaining, level: nestLevel });
-    }
-  
-    while (nestLevel > 0) {
-      parts.push({ type: 'ghost', content: ')', level: --nestLevel });
-    }
-  
-    const result = this.cleanupParts(parts);
-    
-    if (this.expressionCache.size >= this.MAX_CACHE_SIZE) {
-      const firstKey = this.expressionCache.keys().next().value;
-      this.expressionCache.delete(firstKey);
-    }
-    this.expressionCache.set(expr, result);
-    
-    return result;
+  static formatDisplayValue(value, options = {}) {
+    return DisplayFormatter.format(value, options);
   }
   
   /**
-   * Clean up formatted parts
-   * @param {Array} parts - The parts to clean up
-   * @returns {Array} Cleaned up parts
+   * Format display content using DisplayFormatter
+   * @param {string} content - The content to format
+   * @returns {string} Formatted content
    */
-  cleanupParts(parts) {
-    const result = [];
-    const { REGEX } = CalculatorConstants;
-    
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      const nextPart = parts[i + 1];
-      const prevPart = result[result.length - 1];
-      
-      if (part.type === 'text' && !part.content.trim()) {
-        if ((prevPart?.type === 'open') || (nextPart?.type === 'close')) {
-          result.push(part);
-        }
-        continue;
-      }
-      
-      if (part.type === 'text' && 
-          (REGEX.OPERATOR.test(part.content.trim()[0]) || /^<<|^>>/.test(part.content.trim()))) {
-        if (prevPart?.type === 'text') {
-          prevPart.content = prevPart.content.trimEnd();
-        }
-      }
-      
-      result.push(part);
-    }
-    
-    return result;
+  static formatDisplayContent(content) {
+    return DisplayFormatter.formatDisplayContent(content);
   }
   
   /**
@@ -280,6 +286,5 @@ export class ExpressionFormatter {
    */
   static clearCache() {
     this.formattedCache.clear();
-    this.instance.expressionCache.clear();
   }
 }

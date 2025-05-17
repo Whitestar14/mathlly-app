@@ -5,6 +5,8 @@
   >
 
   <Suspense>
+    <!-- Sidebar jumps into view on load without suspense, disappears abruptly if the panel is closed
+      by default on desktop. does not work with v-if="sidebarPanel.isOpen" due to delayed provision -->
       <sidebar-menu 
         :is-mobile="device.isMobile" 
         @sidebar-close="sidebarPanel.close()" 

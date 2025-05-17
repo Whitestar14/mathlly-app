@@ -1,6 +1,6 @@
 <template>
   <BasePage 
-    :title="props.mode + ' Mode'" 
+    :title="mode + ' Mode'" 
     :show-header="false" 
     :show-footer="false" 
     main-class="flex"

@@ -1,12 +1,12 @@
 <template>
   <router-view v-slot="{ Component, route }">
     <Transition name="fade" mode="out-in">
-      <KeepAlive>
+      <!-- KeepAlive causes the title bar to persist only the latest pages -->
+       <!-- Make the Select bar animate subtly on enter just as the shadcn component -->
         <component 
           :is="Component" 
           v-bind="isCalculatorRoute(route.path) ? calculatorProps : {}" 
         />
-      </KeepAlive>
     </Transition>
   </router-view>
 </template>

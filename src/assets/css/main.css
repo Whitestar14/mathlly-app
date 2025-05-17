@@ -191,6 +191,32 @@
   .syntax-ghost {
     @apply text-gray-400/40 dark:text-gray-600/40;
   }
+
+  .paren-ghost {
+    @apply opacity-40;
+    color: var(--ghost-paren-color, #6b7280);
+    margin-left: 0.125rem;
+  }
+
+  .paren-open,
+  .paren-close {
+    position: relative;
+    margin: 0 0.125rem;
+  }
+
+  .paren-open {
+    margin-right: 0.25rem;
+  }
+
+    /* Scrollbar hiding utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ==========================================================================
