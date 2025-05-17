@@ -7,14 +7,11 @@
     }"
   >
     <!-- Backdrop (mobile only) -->
-    <Transition :name="!animationDisabled ? 'fade' : ''">
+    <Transition :name="animationEnabled ? 'fade' : ''">
       <div
         v-show="isMobile && isOpen"
         class="fixed inset-0 z-20"
-        :class="[
-          draggable ? [isDragging ? 'bg-black/20' : 'bg-black/40'] : '',
-          !animationDisabled ? 'backdrop-blur-sm transition-colors duration-300' : 'bg-black/50'
-        ]"
+        :class="backdropClasses"
         aria-hidden="true"
         @click="close()"
       />
@@ -23,15 +20,9 @@
     <!-- Side Panel -->
     <SidePanel
       v-if="type === 'side' && !isMobile"
-      :is-open="isOpen"
-      :is-mobile="isMobile"
-      :position="position"
-      :title="title"
-      :show-header="showHeader"
-      :show-footer="showFooter"
-      :content-class="contentClass"
-      :main-class="mainClass"
+      v-bind="panelProps"
       @close="close()"
+      @toggle="toggle()"
     >
       <template #default><slot /></template>
       <template #header-actions><slot name="header-actions" /></template>
@@ -41,13 +32,7 @@
     <!-- Desktop Panel -->
     <DesktopPanel
       v-else-if="!isMobile"
-      :is-open="isOpen"
-      :position="position"
-      :title="title"
-      :show-header="showHeader"
-      :show-footer="showFooter"
-      :content-class="contentClass"
-      :main-class="mainClass"
+      v-bind="panelProps"
       :show-toggle="showToggle"
       @close="close()"
       @toggle="toggle()"
@@ -63,15 +48,8 @@
         <div
           ref="panel"
           class="bg-white dark:bg-gray-900 fixed inset-x-0 bottom-0 overflow-hidden"
-          :class="[
-            isExpanded || maxHeightRatio === 1 ? 'rounded-none' : 
-            !animationDisabled ? 'transition-[rounded] duration-300 rounded-t-xl' : 'rounded-t-xl'
-          ]"
-          :style="{
-            height: `${panelHeight}px`,
-            transform: `translateY(${translateY}px)`,
-            transition: isDragging ? '' : !animationDisabled ? 'transform 0.3s ease-out, height 0.3s ease-out' : '',
-          }"
+          :class="mobilePanelClasses"
+          :style="mobilePanelStyle"
         >
           <!-- Expand/Minimize Button -->
           <button
@@ -87,11 +65,8 @@
           <!-- Draggable Handle - Hide when expanded -->
           <div
             ref="handle"
-            class="w-full absolute h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-manipulation"
-            :class="[
-              { 'cursor-grabbing': isDragging },
-              isExpanded || maxHeightRatio === 1 ? 'pointer-events-none opacity-0' : ''
-            ]"
+            class="w-full absolute h-6 flex items-center justify-center touch-manipulation"
+            :class="handleClasses"
             aria-label="Drag handle to resize panel"
           >
             <div v-if="draggable" class="w-10 h-1 pb-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
@@ -150,15 +125,18 @@ const props = defineProps({
 });
 
 const settingsStore = useSettingsStore();
-const animationDisabled = computed(() => settingsStore.appearance.animationDisabled);
+const animationEnabled = computed(() => !settingsStore.appearance.animationDisabled);
 
+// Panel options consolidated
 const options = {
   storageKey: props.id || props.storageKey,
   defaultDesktopState: props.defaultDesktopState,
   maxHeightRatio: props.maxHeightRatio,
   snapThreshold: props.snapThreshold,
   draggable: props.draggable
-}
+};
+
+// Use the panel composable
 const {
   isOpen,
   isMobile,
@@ -171,4 +149,42 @@ const {
   panelHeight,
   translateY
 } = usePanel(props.id, options, true);
+
+// Common props for panel components
+const panelProps = computed(() => ({
+  isOpen: isOpen.value,
+  isMobile: isMobile.value,
+  position: props.position,
+  title: props.title,
+  showHeader: props.showHeader,
+  showFooter: props.showFooter,
+  contentClass: props.contentClass,
+  mainClass: props.mainClass
+}));
+
+// Computed classes for backdrop
+const backdropClasses = computed(() => [
+  props.draggable ? [isDragging.value ? 'bg-black/20' : 'bg-black/40'] : '',
+  animationEnabled.value ? 'backdrop-blur-sm transition-colors duration-300' : 'bg-black/50'
+]);
+
+// Computed classes for mobile panel
+const mobilePanelClasses = computed(() => [
+  isExpanded.value || props.maxHeightRatio === 1 ? 'rounded-none' : 
+  animationEnabled.value ? 'transition-[rounded] duration-300 rounded-t-xl' : 'rounded-t-xl'
+]);
+
+// Computed style for mobile panel
+const mobilePanelStyle = computed(() => ({
+  height: `${panelHeight.value}px`,
+  transform: `translateY(${translateY.value}px)`,
+  transition: isDragging.value ? '' : animationEnabled.value ? 'transform 0.3s ease-out, height 0.3s ease-out' : '',
+}));
+
+// Computed classes for handle
+const handleClasses = computed(() => [
+  { 'cursor-grab': props.draggable },
+  { 'cursor-grabbing': isDragging.value },
+  isExpanded.value || props.maxHeightRatio === 1 ? 'pointer-events-none opacity-0' : ''
+]);
 </script>

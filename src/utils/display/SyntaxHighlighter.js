@@ -5,6 +5,10 @@ import { CalculatorConstants } from '../constants/CalculatorConstants';
  * @description Utility class for tokenizing and classifying mathematical expressions for syntax highlighting
  */
 export class SyntaxHighlighter {
+  static tokenCache = new Map();
+  
+  static MAX_CACHE_SIZE = 100;
+
   /**
    * Breaks down a mathematical expression string into classified tokens
    * @param {string} text - The input mathematical expression to tokenize
@@ -12,8 +16,14 @@ export class SyntaxHighlighter {
    */
   static tokenize(text) {
     if (!text) return [];
+    
+    // Check cache first
+    const cachedResult = this.tokenCache.get(text);
+    if (cachedResult) return cachedResult;
+    
     const tokens = [];
     let currentToken = '';
+    const { REGEX, BUTTON_TYPES } = CalculatorConstants;
 
     /**
      * Adds the current token to the tokens array and resets it
@@ -46,8 +56,8 @@ export class SyntaxHighlighter {
 
       // Handle operators
       if (
-        CalculatorConstants.BUTTON_TYPES.OPERATORS.includes(char) ||
-        CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(char)
+        BUTTON_TYPES.OPERATORS.includes(char) ||
+        BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(char)
       ) {
         pushToken();
         tokens.push(this.classifyToken(char));
@@ -55,7 +65,7 @@ export class SyntaxHighlighter {
       }
 
       // Handle parentheses
-      if (CalculatorConstants.REGEX.PARENTHESIS.test(char)) {
+      if (REGEX.PARENTHESIS.test(char)) {
         pushToken();
         tokens.push({ type: 'parenthesis', content: char });
         continue;
@@ -64,6 +74,15 @@ export class SyntaxHighlighter {
       currentToken += char;
     }
     pushToken();
+    
+    // Store in cache
+    if (this.tokenCache.size >= this.MAX_CACHE_SIZE) {
+      // Remove oldest entry if cache is full
+      const firstKey = this.tokenCache.keys().next().value;
+      this.tokenCache.delete(firstKey);
+    }
+    this.tokenCache.set(text, tokens);
+    
     return tokens;
   }
 
@@ -76,11 +95,21 @@ export class SyntaxHighlighter {
    */
   static classifyToken(token) {
     const { REGEX, BUTTON_TYPES } = CalculatorConstants;
+    
     if (token === '.') return { type: 'decimal', content: token };
     if (REGEX.NUMBER.test(token)) return { type: 'number', content: token };
     if (BUTTON_TYPES.OPERATORS.includes(token)) return { type: 'operator', content: token };
     if (BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token)) return { type: 'programmer-operator', content: token };
     if (BUTTON_TYPES.FUNCTIONS.includes(token)) return { type: 'function', content: token };
+    
     return { type: 'text', content: token };
+  }
+  
+  /**
+   * Clears the token cache
+   * Useful when calculator mode changes or when memory needs to be freed
+   */
+  static clearCache() {
+    this.tokenCache.clear();
   }
 }

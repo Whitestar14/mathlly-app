@@ -1,53 +1,55 @@
 <template>
+  <div
+    v-show="isOpen"
+    class="fixed inset-x-0 z-20"
+  >
     <div
-      v-show="isOpen"
-      class="fixed inset-x-0 z-20"
+      ref="panel"
+      class="bg-white dark:bg-gray-800 rounded-t-xl fixed inset-x-0 bottom-0 overflow-hidden transition-transform duration-300 ease-out"
+      :class="{ 'transition-none': isDragging }"
+      :style="{
+        height: `${panelHeight}px`,
+        transform: `translateY(${translateY}px)`,
+      }"
     >
+      <!-- Draggable Handle -->
       <div
-        ref="panel"
-        class="bg-white dark:bg-gray-800 rounded-t-xl fixed inset-x-0 bottom-0 overflow-hidden"
-        :style="{
-          height: `${panelHeight}px`,
-          transform: `translateY(${translateY}px)`,
-          transition: isDragging ? 'none' : 'transform 0.3s ease',
-        }"
+        ref="handle"
+        class="w-full absolute h-6 flex items-center justify-center touch-manipulation"
+        :class="[
+          draggable ? 'cursor-grab' : '',
+          isDragging ? 'cursor-grabbing' : ''
+        ]"
       >
-        <!-- Draggable Handle -->
-        <div
-          ref="handle"
-          class="w-full absolute h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-manipulation"
-          :class="{ 'cursor-grabbing': isDragging }"
-        >
-          <div v-if="draggable" class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
-        </div>
+        <div v-if="draggable" class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+      </div>
 
-        <div class="panel-content h-full" :class="mainClass">
-          <PanelContent
-            :title="title"
-            :show-header="showHeader"
-            :show-footer="showFooter"
-            :content-class="contentClass"
-            :is-mobile="isMobile"
-            @close="$emit('close')"
-          >
-            <template #default>
-              <slot />
-            </template>
-            <template #header-actions>
-              <slot name="header-actions" />
-            </template>
-            <template v-if="$slots.footer" #footer>
-              <slot name="footer" />
-            </template>
-          </PanelContent>
-        </div>
+      <div class="panel-content h-full overflow-y-auto" :class="mainClass">
+        <PanelContent
+          :title="title"
+          :show-header="showHeader"
+          :show-footer="showFooter"
+          :content-class="contentClass"
+          :is-mobile="isMobile"
+          @close="$emit('close')"
+        >
+          <template #default>
+            <slot />
+          </template>
+          <template #header-actions>
+            <slot name="header-actions" />
+          </template>
+          <template v-if="$slots.footer" #footer>
+            <slot name="footer" />
+          </template>
+        </PanelContent>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
 import PanelContent from '@/components/base/PanelContent.vue';
-
 // --- Props ---
 defineProps({
   // State & Content Props
@@ -61,24 +63,15 @@ defineProps({
 
   // Draggable State Props
   draggable: { type: Boolean, default: false },
-  panelHeight: { type: Number, default: 300 }, // Adjusted default
+  panelHeight: { type: Number, default: 300 },
   translateY: { type: Number, default: 0 },
   isDragging: { type: Boolean, default: false },
 
   // Refs passed from parent (usePanel)
-  // These props expect actual Vue Ref objects (Ref<HTMLElement | null>)
-  panel: { type: [Object, Function], default: null }, // Accept Ref object or function
-  handle: { type: [Object, Function], default: null }, // Accept Ref object or function
+  panel: { type: Object, default: null },
+  handle: { type: Object, default: null },
 });
 
 // --- Emits ---
 defineEmits(['close']);
 </script>
-
-<style scoped>
-/* Scoped styles specific to BottomPanel */
-.panel-content {
-  /* Ensure content area allows scrolling if needed */
-  overflow-y: auto;
-}
-</style>

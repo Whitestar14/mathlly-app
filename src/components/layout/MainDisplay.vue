@@ -5,10 +5,7 @@
       <div
         ref="resultContainer"
         class="absolute w-full transform-gpu"
-        :class="{
-          'opacity-100': isAnimating,
-          'opacity-0': !isAnimating,
-        }"
+        :class="{ 'opacity-100': isAnimating, 'opacity-0': !isAnimating }"
       >
         <div :class="displayClass">
           {{ animatedResult }}
@@ -19,10 +16,7 @@
       <div
         ref="inputContainer"
         class="absolute grid grid-rows-[1.5fr_1fr] w-full h-full transform-gpu"
-        :class="{
-          'opacity-0': isAnimating,
-          'opacity-100': !isAnimating,
-        }"
+        :class="{ 'opacity-0': isAnimating, 'opacity-100': !isAnimating }"
       >
         <!-- Display container -->
         <div
@@ -37,11 +31,11 @@
           >
             <template v-if="part.type === 'text'">
               <template v-if="settingsStore.display.syntaxHighlighting">
-              <span
-                v-for="(token, tokenIndex) in highlightSyntax(part.content)"
-                :key="`${index}-${tokenIndex}`"
-                :class="`syntax-${token.type}`"
-              >{{ token.content }}</span>
+                <span
+                  v-for="(token, tokenIndex) in highlightedTokens[index] || []"
+                  :key="`${index}-${tokenIndex}`"
+                  :class="`syntax-${token.type}`"
+                >{{ token.content }}</span>
               </template>
               <template v-else>
                 {{ part.content }}
@@ -62,7 +56,7 @@
           </span>
         </div>
 
-        <!-- Preview/Error container - use preview directly without additional formatting -->
+        <!-- Preview/Error container -->
         <div
           v-if="preview && !error"
           ref="previewContainer"
@@ -90,6 +84,7 @@ import { ref, inject, computed, onMounted, watch } from "vue"
 import { useElementSize, useScroll, useThrottleFn } from '@vueuse/core'
 import { DisplayService } from '@/services/display/DisplayService'
 import { useSettingsStore } from '@/stores/settings';
+
 const props = defineProps({
   input: { type: String, default: "" },
   preview: { type: String, default: "" },
@@ -98,55 +93,66 @@ const props = defineProps({
   animatedResult: { type: String, default: "" },
   activeBase: { type: String, default: "DEC" },
   mode: { type: String, default: "Standard" }
-})
+});
 
 const settingsStore = useSettingsStore();
+const emit = defineEmits(['scroll-update']);
 
-const emit = defineEmits(['scroll-update'])
+const displayContainer = ref(null);
+const resultContainer = ref(null);
+const inputContainer = ref(null);
+const previewContainer = ref(null);
 
-const displayContainer = ref(null)
-const resultContainer = ref(null)
-const inputContainer = ref(null)
-const previewContainer = ref(null)
+const calculator = inject('calculator');
+const parenthesesTracker = computed(() => calculator.value.operations.parenthesesTracker);
 
-const calculator = inject('calculator')
-const parenthesesTracker = computed(() => calculator.value.operations.parenthesesTracker)
-const { width } = useElementSize(displayContainer)
+const { width } = useElementSize(displayContainer);
 const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
   throttle: 16,
   onScroll: useThrottleFn(updateScrollState, 100)
-})
+});
 
 const formattedParts = computed(() => 
   DisplayService.formatParts(props.input, props.activeBase, props.mode, parenthesesTracker.value)
-)
+);
+
+const highlightedTokens = computed(() => {
+  if (!settingsStore.display.syntaxHighlighting) return {};
+  
+  return formattedParts.value.reduce((acc, part, index) => {
+    if (part.type === 'text') {
+      acc[index] = DisplayService.highlightSyntax(part.content);
+    }
+    return acc;
+  }, {});
+});
 
 const displayClass = computed(() => [
   'mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
   DisplayService.getFontSizeClass(props.input, props.mode, props.activeBase),
   props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors'
-])
+]);
 
 function updateScrollState() {
-  if (!displayContainer.value) return
+  if (!displayContainer.value) return;
 
-  const canScrollLeft = scrollLeft.value > 0
+  const canScrollLeft = scrollLeft.value > 0;
   const canScrollRight = !arrivedState.right &&
-    (displayContainer.value.scrollWidth - displayContainer.value.clientWidth - scrollLeft.value) > 2
+    (displayContainer.value.scrollWidth - displayContainer.value.clientWidth - scrollLeft.value) > 2;
 
-  emit('scroll-update', { canScrollLeft, canScrollRight })
+  emit('scroll-update', { canScrollLeft, canScrollRight });
 }
 
 function scrollToEnd() {
   if (displayContainer.value) {
-    displayContainer.value.scrollLeft = displayContainer.value.scrollWidth
+    displayContainer.value.scrollLeft = displayContainer.value.scrollWidth;
   }
 }
 
 function scrollToPrevious() {
   if (displayContainer.value) {
-    const newScrollLeft = Math.max(0, scrollLeft.value - width.value / 2)
-    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
+    const newScrollLeft = Math.max(0, scrollLeft.value - width.value / 2);
+    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
   }
 }
 
@@ -155,30 +161,26 @@ function scrollToNext() {
     const newScrollLeft = Math.min(
       displayContainer.value.scrollWidth - width.value,
       scrollLeft.value + width.value / 2
-    )
-    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
+    );
+    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
   }
 }
 
 watch(() => props.isAnimating, (newValue) => {
   newValue 
     ? DisplayService.animateSlide(resultContainer.value, inputContainer.value)
-    : DisplayService.resetPositions(resultContainer.value, inputContainer.value)
-}, { immediate: true })
-
-function highlightSyntax(content) {
-  return DisplayService.highlightSyntax(content)
-}
+    : DisplayService.resetPositions(resultContainer.value, inputContainer.value);
+}, { flush: 'post' });
 
 onMounted(() => {
-  updateScrollState()
-})
+  updateScrollState();
+});
 
 defineExpose({
   scrollToEnd,
   scrollToPrevious,
   scrollToNext
-})
+});
 </script>
 
 <style scoped>

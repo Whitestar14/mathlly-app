@@ -6,7 +6,7 @@
     <header v-if="showHeader"
       class="sticky -top-px z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div class="container mx-auto flex items-center gap-2 h-14 px-4">
-        <Button v-if="showBackButton" variant="ghost" size="icon" @click="goBack">
+        <Button v-show="showBackButton" variant="ghost" size="icon" @click="goBack">
           <ArrowLeftIcon class="h-5 w-5" />
         </Button>
         <h1 class="text-xl font-medium">
@@ -73,9 +73,7 @@ const props = defineProps({
 const router = useRouter()
 const version = useVersionStore()
 
-// Use our custom title management
 useTitle(props.title)
-
 const goBack = () => {
   router.go(-1)
 }

@@ -1,23 +1,21 @@
 <template>
   <BasePanel
-  id="sidebar"
-  type="side"
-  position="left"
-  :show-toggle="false"
-  :show-header="true"
-  :show-footer="true"
-  :draggable="true"
-  :max-height-ratio="1"
-  :default-desktop-state="true"
+    id="sidebar"
+    type="side"
+    position="left"
+    :show-toggle="false"
+    :show-header="true"
+    :show-footer="true"
+    :draggable="true"
+    :max-height-ratio="1"
+    :default-desktop-state="true"
   >
     <!-- Custom header -->
     <template #header-actions>
       <div class="flex justify-between items-center">
-        <TextLogo :clipped="isMobile ? true : false" size="sm" class="absolute left-2" />
+        <TextLogo :clipped="isMobile" size="sm" class="absolute left-2" />
       </div>
     </template>
-
-    <!-- Main content -->
 
     <!-- Navigation content -->
     <div class="flex-1 overflow-y-auto">
@@ -46,13 +44,7 @@
                   <button
                     :data-path="item.path"
                     :disabled="item.comingSoon ?? false"
-                    :class="[
-                      menuItemClasses,
-                      currentPill === item.path
-                        ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
-                        : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300 disabled:hover:!bg-inherit disabled:hover:text-gray-700/90 disabled:dark:hover:text-gray-400/90',
-                      item.comingSoon ? 'opacity-50' : '',
-                    ]"
+                    :class="getMenuItemClasses(item)"
                     @click="handleItemClick($event, item)"
                   >
                     <component
@@ -75,9 +67,9 @@
                       class="opacity-75"
                     />
                     <Badge
-                    v-if="item.seasonal"
-                    type="special"
-                    class="opacity-75"
+                      v-if="item.seasonal"
+                      type="special"
+                      class="opacity-75"
                     />
                   </button>
                 </NavigationMenuLink>
@@ -116,15 +108,10 @@
                   @click="handleFooterItemClick($event, `/${item}`)"
                 >
                   <component
-                    :is="item === 'settings'
-                      ? Settings2Icon
-                      : MessageSquareIcon
-                    "
+                    :is="item === 'settings' ? Settings2Icon : MessageSquareIcon"
                     class="h-5 w-5"
                   />
-                  <span class="block md:hidden capitalize">{{
-                    item
-                  }}</span>
+                  <span class="block md:hidden capitalize">{{ item }}</span>
                 </button>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -152,35 +139,36 @@ import {
   ArrowRightLeftIcon,
   Binary,
   Skull,
-} from "lucide-vue-next"
+} from "lucide-vue-next";
 import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuRoot,
-} from "radix-vue"
-import { ref } from "vue"
-import { usePills } from "@/composables/usePills"
-import Badge from "@/components/base/BaseBadge.vue"
-import TextLogo from '@/components/base/TextLogo.vue'
-import BasePanel from "@/components/base/BasePanel.vue"
-import Indicator from "@/components/ui/PillIndicator.vue"
+} from "radix-vue";
+import { ref, markRaw } from "vue";
+import { usePills } from "@/composables/usePills";
+import Badge from "@/components/base/BaseBadge.vue";
+import TextLogo from '@/components/base/TextLogo.vue';
+import BasePanel from "@/components/base/BasePanel.vue";
+import Indicator from "@/components/ui/PillIndicator.vue";
+
 const props = defineProps({
   isMobile: {
     type: Boolean,
     default: false,
   },
-})
+});
 
 const emit = defineEmits(["sidebar-close"]);
 
 defineOptions({
   name: "SidebarMenu",
-})
+});
 
 const sidebarElements = ref([]);
 
-const categories = ref([
+const categories = markRaw([
   {
     title: "Navigation",
     items: [
@@ -238,7 +226,7 @@ const categories = ref([
       { name: "About", path: "/info/about", icon: InfoIcon },
     ],
   },
-])
+]);
 
 const {
   currentPill,
@@ -254,21 +242,30 @@ const {
       emit('sidebar-close');
     }
   },
-})
+});
+
+const getMenuItemClasses = (item) => {
+  const baseClasses = "w-full flex items-center gap-2.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200";
+  
+  if (currentPill.value === item.path) {
+    return `${baseClasses} bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium`;
+  }
+  
+  let classes = `${baseClasses} text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300`;
+  
+  if (item.comingSoon) {
+    classes += ' opacity-50 disabled:hover:!bg-inherit disabled:hover:text-gray-700/90 disabled:dark:hover:text-gray-400/90';
+  }
+  
+  return classes;
+};
 
 const handleItemClick = (event, item) => {
-  if (item.comingSoon) return
-  handleNavigation(item.path, event.currentTarget)
-}
+  if (item.comingSoon) return;
+  handleNavigation(item.path, event.currentTarget);
+};
 
 const handleFooterItemClick = (event, path) => {
-  handleNavigation(path, null)
-}
-
-const menuItemClasses = [
-  "w-full flex items-center gap-2.5",
-  "px-3 py-1.5",
-  "text-sm rounded-md",
-  "transition-colors duration-200",
-].join(" ")
+  handleNavigation(path, null);
+};
 </script>

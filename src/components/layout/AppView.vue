@@ -2,20 +2,20 @@
   <router-view v-slot="{ Component, route }">
     <Transition name="fade" mode="out-in">
       <KeepAlive>
-      <component :is="Component" v-bind="shouldPassComponent(route.path) ? {
-        mode,
-        settings,
-        isMobile
-      } : {}" />
+        <component 
+          :is="Component" 
+          v-bind="isCalculatorRoute(route.path) ? calculatorProps : {}" 
+        />
       </KeepAlive>
     </Transition>
   </router-view>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { RouterView } from 'vue-router'
 
-defineProps({
+const props = defineProps({
   mode: {
     type: String,
     required: true,
@@ -30,14 +30,13 @@ defineProps({
   }
 })
 
-await new Promise(resolve => setTimeout(resolve, 1200))
+const calculatorProps = computed(() => ({
+  mode: props.mode,
+  settings: props.settings,
+  isMobile: props.isMobile
+}))
 
-/**
- * Determines if props and event listeners should be passed to the current route component
- * @param {string} path - Current route path
- * @returns {boolean} - True if props should be passed, false otherwise
- */
-const shouldPassComponent = (path) => {
-  return path.includes('/calculator')
-}
+const isCalculatorRoute = (path) => path.includes('/calculator')
+
+await new Promise(resolve => setTimeout(resolve, 800))
 </script>

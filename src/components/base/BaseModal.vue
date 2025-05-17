@@ -46,12 +46,12 @@
 
           <!-- Title Slot -->
           <div :id="titleId">
-          <DialogTitle
-            as="h3"
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
-          >
-            <slot name="title" />
-          </DialogTitle>
+            <DialogTitle
+              as="h3"
+              class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
+            >
+              <slot name="title" />
+            </DialogTitle>
           </div>
 
           <!-- Content Slot -->
@@ -72,26 +72,22 @@ import {
 import { useEventListener } from "@vueuse/core"
 import Button from "@/components/base/BaseButton"
 import { XIcon } from "lucide-vue-next"
-import { computed } from 'vue'
 
 const props = defineProps({
   open: Boolean,
-})
+});
 
-const emit = defineEmits(["update:open"])
+const emit = defineEmits(["update:open"]);
 
-// Generate unique ID for accessibility
-const titleId = computed(() => `modal-title-${Math.random().toString(36).substring(2, 9)}`)
+const titleId = `modal-title-${Math.random().toString(36).substring(2, 9)}`;
 
-// Function to close the modal
 const closeModal = () => {
-  emit("update:open", false)
-}
+  emit("update:open", false);
+};
 
-// Close modal on escape key
 useEventListener(document, 'keydown', (e) => {
   if (e.key === 'Escape' && props.open) {
-    closeModal()
+    closeModal();
   }
-})
+});
 </script>

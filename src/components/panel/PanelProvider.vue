@@ -14,10 +14,10 @@
   onMounted(() => {
     const isMobile = device.isMobile;
     actions.setMobile(isMobile);
+  });
   
-    watch(() => device.isMobile, (newIsMobile) => {
-      actions.setMobile(newIsMobile);
-    });
+  watch(() => device.isMobile, (newIsMobile) => {
+    actions.setMobile(newIsMobile);
   });
   </script>
   

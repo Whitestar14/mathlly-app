@@ -11,14 +11,7 @@
           size="icon"
           @click="$emit('toggle-sidebar')"
         >
-          <PanelLeftIcon
-            v-if="!isSidebarOpen"
-            class="h-5 w-5"
-          />
-          <PanelLeftCloseIcon
-            v-else
-            class="h-5 w-5"
-          />
+          <component :is="isSidebarOpen ? PanelLeftCloseIcon : PanelLeftIcon" class="h-5 w-5" />
         </Button>
         <offline-indicator :is-mobile="isMobile" />
       </div>
@@ -26,22 +19,18 @@
       <!-- Mode Toggle and Theme Switch -->
       <div class="flex-grow flex justify-center sm:justify-end items-center">
         <div class="w-full sm:w-auto flex justify-end items-center space-x-4">
-          <!-- Mode Toggler using SelectBar -->
-          <div
-            v-show="route.path === '/calculator'"
-            class="relative w-full min-w-36"
-          >
-            <Select
-              v-model="currentMode"
-              :options="availableModes"
-              label=""
-              position="popper"
-              placeholder="Select mode"
-              role="button"
-              aria-label="Mode toggler"
-              @update:modelValue="onModeChange"
-            />
-          </div>
+          <!-- Mode Toggler using SelectBar - Lazy loaded when visible -->
+          <Suspense v-if="isCalculatorRoute">
+            <div class="relative w-full min-w-36">
+              <Select
+                :model-value="currentMode"
+                :options="availableModes"
+                position="popper"
+                placeholder="Select mode"
+                @update:model-value="onModeChange"
+              />
+            </div>
+          </Suspense>
 
           <div class="flex items-center justify-between gap-2">
             <!-- Keyboard Shortcuts -->
@@ -62,52 +51,42 @@
               size="icon"
               @click="$emit('toggle-menubar')"
             >
-              <div
-                v-if="!isMobile"
-                class="rotate-180"
-              >
-                <PanelLeftIcon
-                  v-if="!isMenubarOpen"
-                  class="h-5 w-5"
-                />
-                <PanelLeftCloseIcon
-                  v-else
-                  class="h-5 w-5"
-                />
-              </div>
-              <MoreVerticalIcon
-                v-else
-                class="h-5 w-5"
+              <component 
+                :is="menuIcon" 
+                class="h-5 w-5" 
+                :class="{ 'rotate-180': !isMobile }"
               />
             </Button>
           </div>
         </div>
       </div>
     </div>
-    <ShortcutGuide
-      v-model="isShortcutModalOpen"
-    />
+    <ShortcutGuide v-model="isShortcutModalOpen" />
   </header>
 </template>
 
 <script setup>
-import { shallowRef } from "vue"
+import { shallowRef, computed, defineAsyncComponent } from "vue";
 import {
   Command,
   PanelLeftIcon,
   PanelLeftCloseIcon,
   MoreVerticalIcon
-} from "lucide-vue-next"
-import { useRoute } from "vue-router"
-import { useSettingsStore } from '@/stores/settings'
-import { useKeyboard } from "@/composables/useKeyboard"
-import { useTheme } from "@/composables/useTheme"
-import ShortcutGuide from "@/components/ui/ShortcutGuide.vue"
-import Select from "@/components/ui/SelectBar.vue"
-import Button from "@/components/base/BaseButton.vue"
+} from "lucide-vue-next";
+import { useRoute } from "vue-router";
+import { useSettingsStore } from '@/stores/settings';
+import { useKeyboard } from "@/composables/useKeyboard";
+import { useTheme } from "@/composables/useTheme";
+import ShortcutGuide from "@/components/ui/ShortcutGuide.vue";
+import Button from "@/components/base/BaseButton.vue";
 import OfflineIndicator from '@/components/ui/OfflineIndicator.vue';
 
-defineProps({
+// Lazy load the Select component to improve initial load time
+const Select = defineAsyncComponent(() => 
+  import("@/components/ui/SelectBar.vue")
+);
+
+const props = defineProps({
   isMobile: {
     type: Boolean,
     required: true,
@@ -120,9 +99,9 @@ defineProps({
     type: Boolean,
     default: false,
   },
-})
+});
 
-const emit = defineEmits(["update:mode", "toggle-sidebar", "toggle-menubar"])
+const emit = defineEmits(["update:mode", "toggle-sidebar", "toggle-menubar"]);
 
 const availableModes = [
   { value: 'Standard', label: 'Standard' },
@@ -130,26 +109,33 @@ const availableModes = [
   { value: 'Programmer', label: 'Programmer' }
 ];
 
-const route = useRoute()
-const isShortcutModalOpen = shallowRef(false)
+const route = useRoute();
+const isShortcutModalOpen = shallowRef(false);
+const { toggleTheme } = useTheme();
+const settingsStore = useSettingsStore();
+const currentMode = shallowRef(settingsStore.calculator.mode);
 
-const { toggleTheme } = useTheme()
+const isCalculatorRoute = computed(() => route.path === '/calculator');
+
+const menuIcon = computed(() => {
+  if (props.isMobile) {
+    return MoreVerticalIcon;
+  }
+  return props.isMenubarOpen ? PanelLeftCloseIcon : PanelLeftIcon;
+});
 
 const onModeChange = (newMode) => {
-  emit("update:mode", newMode)
+  emit("update:mode", newMode);
   currentMode.value = newMode;
-  return newMode;
-}
+};
 
-const settingsStore = useSettingsStore();
-
-const currentMode = shallowRef(settingsStore.calculator.mode);
 const openShortcutModal = () => {
-  isShortcutModalOpen.value = true
-}
+  isShortcutModalOpen.value = true;
+};
 
+// Keyboard shortcuts
 useKeyboard("global", {
   toggleTheme,
   openShortcutModal,
-})
+});
 </script>

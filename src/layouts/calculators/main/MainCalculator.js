@@ -1,11 +1,10 @@
-import { computed, nextTick, watch } from 'vue'
+import { computed, nextTick, watch, shallowRef } from 'vue'
 import { useKeyboard } from '@/composables/useKeyboard'
-import { useEventListener, useMemoize } from '@vueuse/core'
+import { useEventListener, useMemoize, useThrottleFn } from '@vueuse/core'
 import { DisplayFormatter } from '@/services/display/DisplayFormatter'
+
 /**
  * Provides unified calculator functionality for MainCalculator component
- * @param {Object} options - Calculator options and dependencies
- * @returns {Object} Calculator operations, preview, and keyboard handlers
  */
 export function CalculatorController({
   calculator,
@@ -19,21 +18,17 @@ export function CalculatorController({
   toggleHistory,
   isValidForBase
 }) {
-  /**
-   * CALCULATOR OPERATIONS
-   */
+  // Use throttled functions for better performance
+  const throttledUpdateDisplay = useThrottleFn(updateDisplayFn, 100)
   
   /**
-   * Handle button clicks
-   * @param {string} btn - Button value
+   * Handle button clicks with performance optimizations
    */
   const handleButtonClick = (btn) => {
     try {
-      let result;
-
       // Handle memory operations
       if (['MC', 'MR', 'M+', 'M-', 'MS'].includes(btn)) {
-        result = handleMemoryOperation({
+        const result = handleMemoryOperation({
           operation: btn,
           mode: state.mode,
           calculator: calculator.value,
@@ -41,7 +36,6 @@ export function CalculatorController({
           activeBase: state.activeBase
         });
 
-        // Update state based on memory operation result
         updateState({
           input: result.input,
           error: result.error || ""
@@ -49,16 +43,14 @@ export function CalculatorController({
 
         // For Programmer mode memory recall, update display values
         if (result.displayValues) {
-          nextTick(() => {
-            updateDisplayValues(result.displayValues);
-          });
+          nextTick(() => updateDisplayValues(result.displayValues));
         }
         
         return;
-      } else {
-        // Use calculator's button click handler
-        result = calculator.value.handleButtonClick(btn);
       }
+      
+      // Use calculator's button click handler
+      const result = calculator.value.handleButtonClick(btn);
 
       // Update state with result
       updateState({
@@ -73,8 +65,8 @@ export function CalculatorController({
           setAnimation(result.result);
         }
       } else if (state.mode === "Programmer") {
-        // Update display values for programmer mode
-        nextTick(() => updateDisplayFn());
+        // Update display values for programmer mode - throttled for performance
+        nextTick(() => throttledUpdateDisplay());
       }
 
       // Add to history for standard mode calculations
@@ -92,7 +84,7 @@ export function CalculatorController({
   };
 
   /**
-   * Handle clear button
+   * Handle clear button - simplified
    */
   const handleClear = () => {
     const result = calculator.value.handleButtonClick('AC');
@@ -102,32 +94,30 @@ export function CalculatorController({
     });
 
     if (state.mode === 'Programmer') {
-      updateDisplayFn();
+      throttledUpdateDisplay();
     }
   };
 
   /**
-   * Handle base change for programmer mode
-   * @param {string} newBase - New base
+   * Handle base change for programmer mode - optimized
    */
   const handleBaseChange = (newBase) => {
     if (state.mode === 'Programmer') {
       const result = calculator.value.handleBaseChange(newBase);
-      nextTick(() => {
-        setActiveBase(newBase);
-        updateState({
-          input: result.input,
-          error: result.error || '',
-          displayValues: result.displayValues
-        });
+      setActiveBase(newBase);
+      
+      updateState({
+        input: result.input,
+        error: result.error || '',
+        displayValues: result.displayValues
       });
     }
   };
 
   /**
-   * Update programmer display values
+   * Update programmer display values - extracted for throttling
    */
-  const updateDisplayFn = () => {
+  function updateDisplayFn() {
     if (state.mode === 'Programmer' && state.input !== 'Error') {
       try {
         const updatedValues = calculator.value.updateDisplayValues(state.input);
@@ -136,14 +126,10 @@ export function CalculatorController({
         console.error('Error updating display values:', error);
       }
     }
-  };
+  }
 
   /**
-   * PREVIEW CALCULATION
-   */
-  
-  /**
-   * Memoized preview calculation function
+   * Memoized preview calculation function with improved caching
    */
   const calculatePreview = useMemoize(
     (input, mode, activeBase) => {
@@ -161,11 +147,11 @@ export function CalculatorController({
         return '';
       }
     }, 
-    { max: 100, ttl: 5000 }
+    { max: 200, ttl: 10000 } // Increased cache size and TTL for better performance
   );
 
   /**
-   * Computed preview value with proper formatting
+   * Computed preview value with proper formatting - using shallowRef for better performance
    */
   const preview = computed(() => {
     const rawPreview = calculatePreview(state.input, state.mode, state.activeBase);
@@ -183,18 +169,15 @@ export function CalculatorController({
     }
   });
 
-  /**
-   * KEYBOARD HANDLING
-   */
-  
-  const mode = computed(() => state.mode);
-  const activeBase = computed(() => state.activeBase);
+  // Use shallowRef for better performance
+  const mode = shallowRef(state.mode);
+  const activeBase = shallowRef(state.activeBase);
 
   /**
    * Set up keyboard handlers
    */
   const { setContext, clearContext } = useKeyboard('calculator', {
-    clear: () => handleButtonClick('AC'),
+    clear: handleClear,
     calculate: () => handleButtonClick('='),
     backspace: () => handleButtonClick('backspace'),
     input: (value) => {
@@ -206,18 +189,36 @@ export function CalculatorController({
         handleButtonClick(value);
       }
     },
-    setBase: (base) => {
-      if (mode.value === 'Programmer') {
-        handleBaseChange(base);
-      }
-    },
+    setBase: handleBaseChange,
     toggleHistory
   });
 
+  // Watch for mode changes - optimized with shallowRef
+  watch(
+    () => state.mode,
+    (newMode) => {
+      mode.value = newMode;
+      if (newMode === 'Programmer') {
+        setContext('programmer');
+      } else {
+        clearContext('programmer');
+      }
+    },
+    { immediate: true }
+  );
+
+  // Watch for activeBase changes - optimized with shallowRef
+  watch(
+    () => state.activeBase,
+    (newBase) => {
+      activeBase.value = newBase;
+    }
+  );
+
   /**
-   * Handle keyboard shortcuts for base changes
+   * Handle keyboard shortcuts for base changes - throttled for performance
    */
-  const handleKeyboardShortcuts = (e) => {
+  const handleKeyboardShortcuts = useThrottleFn((e) => {
     if (mode.value !== 'Programmer') return;
 
     const shortcuts = {
@@ -240,25 +241,11 @@ export function CalculatorController({
       e.preventDefault();
       shortcuts[combo]();
     }
-  };
+  }, 100);
 
   // Add keyboard event listener
   useEventListener('keydown', handleKeyboardShortcuts);
 
-  // Watch for mode changes
-  watch(
-    mode,
-    (newMode) => {
-      if (newMode === 'Programmer') {
-        setContext('programmer');
-      } else {
-        clearContext('programmer');
-      }
-    },
-    { immediate: true }
-  );
-
-  // Format animated result for display
   const animatedResult = computed(() => {
     if (!state.animatedResult) return "";
     
@@ -276,7 +263,7 @@ export function CalculatorController({
     handleButtonClick,
     handleClear,
     handleBaseChange,
-    updateDisplayFn,
+    updateDisplayFn: throttledUpdateDisplay,
     preview,
     animatedResult
   };

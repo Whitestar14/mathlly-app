@@ -36,7 +36,7 @@
         </button>
       </div>
 
-      <div class="relative overflow-hidden">
+      <div class="relative overflow-hidden h-[250px] overflow-y-auto">
         <TransitionGroup
           enter-active-class="transition-transform duration-200 ease-out"
           enter-from-class="opacity-0 translate-x-4"
@@ -65,6 +65,7 @@
                   <div
                     v-for="(part, index) in key.split('+')"
                     :key="index"
+                    class="inline-flex items-center"
                   >
                     <kbd
                       class="px-2 py-1 text-xs font-medium bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
@@ -93,18 +94,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { shallowRef } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { usePills } from "@/composables/usePills";
 import Indicator from "@/components/ui/PillIndicator.vue";
 
 defineProps({
-  modelValue: Boolean, // Changed from 'open' to 'modelValue' for v-model support
+  modelValue: Boolean,
 });
 
-defineEmits(['update:modelValue']); // Add emits for v-model
+defineEmits(['update:modelValue']);
 
-const tabElements = ref([]);
+const tabElements = shallowRef([]);
+
 const shortcutGroups = {
   Global: {
     "ctrl+alt+f": { description: "Toggle Fullscreen" },
@@ -132,6 +134,7 @@ const shortcutGroups = {
     "ctrl+s": { description: "Swap Input/Output" },
   },
 };
+
 const { 
   currentPill, 
   indicatorStyle, 
@@ -147,16 +150,3 @@ const handleTabChange = (category, tabElement) => {
   handleNavigation(category, tabElement); 
 };
 </script>
-
-<style scoped>
-.shortcut-key {
-  @apply px-2 py-1 min-w-[1.8rem] text-center rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono shadow-sm;
-}
-
-
-.relative.overflow-hidden {
-  overflow: hidden;
-  height: 250px;
-  overflow-y: auto;
-}
-</style>

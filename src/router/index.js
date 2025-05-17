@@ -83,6 +83,9 @@ const router = createRouter({
   history: createWebHistory(),
   fallback: ErrorFallback,
   routes,
+  scrollBehavior() {
+    return { top: 0 }
+  },
 });
 
 setupRouteErrorHandling(router);
