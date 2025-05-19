@@ -9,26 +9,11 @@
 @import url(./buttons.css);
 
 /* ==========================================================================
-   Font Definitions
-   ========================================================================== */
-@font-face {
-  font-family: 'Geist Mono';
-  src: url(/public/fonts/GeistMonoVF.woff2);
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url(/public/fonts/GeistVF.woff2);
-  font-display: swap;
-}
-
-/* ==========================================================================
    Base Styles
    ========================================================================== */
 @layer base {
   :root {
-    @apply font-sans font-normal text-sm sm:text-base;
+    @apply font-sans font-normal text-[0.95rem] sm:text-base;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -184,12 +169,8 @@
     @apply text-gray-800 dark:text-gray-200;
   }
 
-  .syntax-space {
-    @apply text-transparent;
-  }
-
   .syntax-ghost {
-    @apply text-gray-400/40 dark:text-gray-600/40;
+    @apply text-gray-400 opacity-40 dark:opacity-60;
   }
 
   .paren-ghost {

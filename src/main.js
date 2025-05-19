@@ -10,6 +10,10 @@ import '@/assets/css/main.css';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 
+if (process.env.NODE_ENV === 'development') {
+  import('@/assets/css/fonts.css');
+}
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker

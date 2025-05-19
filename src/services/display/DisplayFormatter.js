@@ -1,14 +1,18 @@
 // services/display/DisplayFormatter.js
 import { useSettingsStore } from "@/stores/settings";
+import { CacheManager } from '@/utils/cache/CacheManager';
 
 /**
  * @class DisplayFormatter
  * @description Handles formatting of display values for different calculator modes and bases
  */
 export class DisplayFormatter {
-  // Cache for formatted values to avoid redundant calculations
-  static formattedCache = new Map();
-  static MAX_CACHE_SIZE = 100;
+  // Cache names
+  static CACHE_NAMES = {
+    FORMAT: 'display-format',
+    DISPLAY: 'display-preview',
+    CONTENT: 'display-content'
+  };
 
   /**
    * Format a value based on calculator mode and options
@@ -22,9 +26,12 @@ export class DisplayFormatter {
     // Generate cache key
     const cacheKey = this.generateCacheKey(value, options);
     
+    // Get the format cache
+    const formatCache = CacheManager.getCache(this.CACHE_NAMES.FORMAT, 100);
+    
     // Check cache first
-    if (this.formattedCache.has(cacheKey)) {
-      return this.formattedCache.get(cacheKey);
+    if (formatCache.has(cacheKey)) {
+      return formatCache.get(cacheKey);
     }
 
     const settings = useSettingsStore();
@@ -50,7 +57,7 @@ export class DisplayFormatter {
     }
 
     // Cache the result
-    this.cacheResult(cacheKey, result);
+    formatCache.set(cacheKey, result);
     
     return result;
   }
@@ -70,20 +77,6 @@ export class DisplayFormatter {
     } = options;
 
     return `${value}-${base}-${mode}-${useThousandsSeparator}-${formatBinary}-${formatHexadecimal}-${formatOctal}`;
-  }
-
-  /**
-   * Cache a formatted result
-   * @private
-   */
-  static cacheResult(key, value) {
-    // Limit cache size
-    if (this.formattedCache.size >= this.MAX_CACHE_SIZE) {
-      const firstKey = this.formattedCache.keys().next().value;
-      this.formattedCache.delete(firstKey);
-    }
-    
-    this.formattedCache.set(key, value);
   }
 
   /**
@@ -207,6 +200,17 @@ export class DisplayFormatter {
   static formatDisplayValue(value, base) {
     if (!value && value !== 0) return "0";
 
+    // Generate cache key
+    const cacheKey = `${value}-${base}`;
+    
+    // Get the display cache
+    const displayCache = CacheManager.getCache(this.CACHE_NAMES.DISPLAY, 50);
+    
+    // Check cache first
+    if (displayCache.has(cacheKey)) {
+      return displayCache.get(cacheKey);
+    }
+
     const MAX_PREVIEW_LENGTHS = {
       BIN: 12,
       OCT: 8,
@@ -219,9 +223,12 @@ export class DisplayFormatter {
       .toUpperCase();
 
     if (result.length > MAX_PREVIEW_LENGTHS[base]) {
-      return result.slice(0, MAX_PREVIEW_LENGTHS[base]) + "…";
+      result = result.slice(0, MAX_PREVIEW_LENGTHS[base]) + "…";
     }
 
+    // Cache the result
+    displayCache.set(cacheKey, result);
+    
     return result;
   }
 
@@ -233,7 +240,18 @@ export class DisplayFormatter {
   static formatDisplayContent(content) {
     if (!content) return '';
     
-    return content
+    // Generate cache key
+    const cacheKey = content;
+    
+    // Get the content cache
+    const contentCache = CacheManager.getCache(this.CACHE_NAMES.CONTENT, 30);
+    
+    // Check cache first
+    if (contentCache.has(cacheKey)) {
+      return contentCache.get(cacheKey);
+    }
+    
+    const result = content
       // Basic operators
       .replace(/&times;/g, "×")
       .replace(/&divide;/g, "÷")
@@ -263,12 +281,17 @@ export class DisplayFormatter {
       .replace(/&infin;/g, "∞")
       .replace(/&int;/g, "∫")
       .replace(/&part;/g, "∂");
+      
+    // Cache the result
+    contentCache.set(cacheKey, result);
+    
+    return result;
   }
   
   /**
-   * Clear the formatter cache
+   * Clear all formatter caches
    */
   static clearCache() {
-    this.formattedCache.clear();
+    CacheManager?.clearAllCaches?.();
   }
 }

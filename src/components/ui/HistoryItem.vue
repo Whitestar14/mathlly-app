@@ -10,10 +10,10 @@
           :class="{ 'animate-highlight': selectedItemId === item.id }"
           @click="$emit('select', item)"
         >
-          <div class="text-sm text-gray-600 dark:text-gray-400 break-all">
+          <div class="text-sm text-gray-700/75 dark:text-gray-300/75 break-all">
             {{ item.expression }}
           </div>
-          <div class="text-lg font-medium text-gray-700 dark:text-gray-200 break-all">
+          <div class="text-lg font-medium text-gray-700 dark:text-gray-300 break-all">
             {{ item.result }}
           </div>
 

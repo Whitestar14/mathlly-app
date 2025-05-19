@@ -86,8 +86,8 @@ module.exports = defineConfig({
     optimization: {
       splitChunks: {
         chunks: 'all',
-        maxSize: 1000000,
-        minSize: 500000,
+        maxSize: 250 * 1024,
+        minSize: 50 * 1024,
         maxAsyncRequests: 30,
         maxInitialRequests: 30,
         hidePathInfo: true,
@@ -96,9 +96,15 @@ module.exports = defineConfig({
       minimizer: [
         new TerserPlugin({
           terserOptions: {
-          mangle: true,
-          compress: true,
-        }})
+            mangle: true,
+            compress: true,
+            output: {
+              comments: false,
+              drop_console: true,
+            },
+          },
+          extractComments: false,
+        })
       ],
     },
     plugins: [new webpack.DefinePlugin({

@@ -48,7 +48,6 @@
 
 <script setup>
 import { computed, watch, ref, onMounted, provide } from 'vue'
-
 import { useHistory } from '@/composables/useHistory'
 import { useMemory } from '@/composables/useMemory'
 import { usePanel } from '@/composables/usePanel'
@@ -107,7 +106,7 @@ const {
   addToHistory,
   handleMemoryOperation,
   toggleHistory,
-  isValidForBase
+  isValidForBase,
 })
 
 onMounted(async () => {

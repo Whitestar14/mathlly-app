@@ -50,9 +50,12 @@
     <link rel="manifest" href="<%= BASE_URL %>manifest.json" />
     
     <!-- Preconnect to important domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
+    <% if (process.env.NODE_ENV === 'production') { %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <% } %>  
+
     <!-- Canonical URL -->
     <link rel="canonical" href="https://mathlly-app.vercel.app" />
   </head>

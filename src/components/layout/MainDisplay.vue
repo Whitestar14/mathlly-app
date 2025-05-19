@@ -5,6 +5,7 @@
       <div
         ref="resultContainer"
         class="absolute w-full will-change-transform"
+        aria-atomic="true"
         :class="{ 'opacity-100': isAnimating, 'opacity-0': !isAnimating }"
       >
         <div :class="displayClass">
@@ -43,7 +44,7 @@
         <div
           v-if="preview && !error"
           ref="previewContainer"
-          class="font-medium text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-hide"
+          class="font-medium text-gray-700/75 dark:text-gray-300/75 overflow-x-auto whitespace-nowrap scrollbar-hide"
           aria-live="polite"
           aria-atomic="true"
         >
@@ -63,8 +64,8 @@
 </template>
 
 <script setup>
-import { inject, computed, onMounted, watch, onUnmounted, shallowRef, readonly } from "vue"
-import { useElementSize, useScroll, useThrottleFn, useMemoize, useEventListener } from '@vueuse/core'
+import { inject, computed, onMounted, watch, onUnmounted, shallowRef, markRaw } from "vue"
+import { useElementSize, useScroll, useThrottleFn, useEventListener } from '@vueuse/core'
 import { useAnimation } from '@/composables/useAnimation'
 import { DisplayFormatter } from '@/services/display/DisplayFormatter'
 import { useSettingsStore } from '@/stores/settings'
@@ -83,33 +84,26 @@ const props = defineProps({
 const settingsStore = useSettingsStore();
 const emit = defineEmits(['scroll-update']);
 
-// DOM refs - use shallowRef for better performance with DOM elements
 const displayContainer = shallowRef(null);
 const resultContainer = shallowRef(null);
 const inputContainer = shallowRef(null);
 const previewContainer = shallowRef(null);
 
-// Animation service - created once and reused
 const { createSlideAnimation } = useAnimation();
 const animationService = createSlideAnimation();
 
-// Inject calculator
 const calculator = inject('calculator');
 const parenthesesTracker = computed(() => calculator.value.operations.parenthesesTracker);
 
-// Use VueUse for better performance
 const { width } = useElementSize(displayContainer);
 const { x: scrollLeft, arrivedState } = useScroll(displayContainer, { throttle: 16 });
 
-// Use useEventListener with throttle instead of onScroll option
 useEventListener(displayContainer, 'scroll', useThrottleFn(updateScrollState, 100));
 
-// Non-reactive constants for better performance
 const syntaxHighlightingEnabled = computed(() => settingsStore.display.syntaxHighlighting);
 const formattingEnabled = computed(() => settingsStore.display.useThousandSeparator);
 
-// Pre-compute token class map as readonly for better performance
-const tokenClassMap = readonly({
+const tokenClassMap = markRaw({
   'open': 'paren-open syntax-parenthesis',
   'close': 'paren-close syntax-parenthesis',
   'ghost': 'paren-ghost syntax-ghost',
@@ -119,11 +113,10 @@ const tokenClassMap = readonly({
   'function': 'syntax-function',
   'decimal': 'syntax-decimal',
   'text': 'syntax-text',
-  'space': ''
+  'space': 'syntax-space'
 });
 
-// Memoize font size calculation for better performance
-const getFontSizeClass = useMemoize((value, mode, activeBase) => {
+const getFontSizeClass = (value, mode, activeBase) => {
   if (!value) return 'text-3xl';
 
   const length = value.toString().length;
@@ -134,7 +127,7 @@ const getFontSizeClass = useMemoize((value, mode, activeBase) => {
     return 'text-3xl';
   }
   return activeBase === 'BIN' ? 'text-2xl' : 'text-3xl';
-}, { max: 20 });
+};
 
 // Format options for DisplayFormatter - memoized to avoid recalculation
 const formatOptions = computed(() => ({
@@ -159,7 +152,6 @@ const formattedTokens = computed(() => {
   );
 });
 
-// Compute display classes once
 const displayClass = computed(() => [
   'mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
   getFontSizeClass(props.input, props.mode, props.activeBase),
@@ -199,7 +191,6 @@ function scrollToNext() {
   }
 }
 
-// Animation functions
 function animateSlide() {
   if (resultContainer.value && inputContainer.value) {
     animationService.animateSlide(resultContainer.value, inputContainer.value);
@@ -212,39 +203,19 @@ function resetPositions() {
   }
 }
 
-// Use a single watcher for animation state
 watch(() => props.isAnimating, (newValue) => {
   newValue ? animateSlide() : resetPositions();
 }, { flush: 'post' });
 
-// Combine cache clearing functions
 function clearCache() {
   if (syntaxHighlightingEnabled.value) ExpressionFormatter.clearCache();
   if (formattingEnabled.value) DisplayFormatter.clearCache();
 }
 
-// Use a single watcher for multiple dependencies to clear caches
 watch([() => props.mode, () => props.activeBase], clearCache, { deep: false });
 
-// Lifecycle hooks
 onMounted(updateScrollState);
 onUnmounted(clearCache);
 
-// Expose methods for parent components
-defineExpose({
-  scrollToEnd,
-  scrollToPrevious,
-  scrollToNext
-});
+defineExpose({scrollToEnd, scrollToPrevious, scrollToNext});
 </script>
-
-<style scoped>
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>

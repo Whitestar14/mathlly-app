@@ -59,17 +59,14 @@
                     <Badge
                       v-if="item.comingSoon"
                       type="soon"
-                      class="opacity-75"
                     />
                     <Badge
                       v-if="item.isNew"
                       type="new"
-                      class="opacity-75"
                     />
                     <Badge
                       v-if="item.seasonal"
                       type="special"
-                      class="opacity-75"
                     />
                   </button>
                 </NavigationMenuLink>

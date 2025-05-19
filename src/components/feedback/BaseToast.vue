@@ -82,9 +82,8 @@ defineProps({
 
 const { toasts, removeToast } = useToast();
 
-// Static objects for toast styling - defined once, not recreated on each render
 const toastTypeClasses = {
-  info: 'bg-gray-50 dark:bg-gray-950/95 border-gray-200 dark:border-gray-800',
+  info: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600/70',
   success: 'bg-emerald-50 dark:bg-emerald-950/95 border-emerald-200 dark:border-emerald-800',
   warning: 'bg-amber-50 dark:bg-amber-950/95 border-amber-200 dark:border-amber-800',
   error: 'bg-rose-50 dark:bg-rose-950/95 border-rose-200 dark:border-rose-800'

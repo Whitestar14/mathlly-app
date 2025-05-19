@@ -2,7 +2,6 @@
   <BasePage
     title="About"
     :show-footer="true"
-    :show-version="true"
   >
     <!-- Team & Vision Section -->
     <section class="mb-16 pattern-grid overflow-hidden bg-gradient-to-b from-indigo-50/20 to-white dark:from-gray-900 dark:to-gray-800/80">

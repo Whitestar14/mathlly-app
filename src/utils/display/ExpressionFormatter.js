@@ -1,14 +1,18 @@
 import { CalculatorConstants } from '../constants/CalculatorConstants.js';
 import { DisplayFormatter } from '@/services/display/DisplayFormatter';
+import { CacheManager } from '@/utils/cache/CacheManager';
 
 /**
  * @class ExpressionFormatter
  * @description Unified class for formatting mathematical expressions with both parentheses and syntax highlighting
  */
 export class ExpressionFormatter {
-  // Static cache for formatted expressions
-  static formattedCache = new Map();
-  static MAX_CACHE_SIZE = 100;
+  // Cache names
+  static CACHE_NAMES = {
+    FORMAT: 'expression-format',
+    PARENTHESES: 'expression-parentheses',
+    TOKENS: 'expression-tokens'
+  };
   
   /**
    * Format an expression with both parentheses and syntax highlighting
@@ -31,9 +35,12 @@ export class ExpressionFormatter {
     // Generate cache key based on inputs
     const cacheKey = `${formattedExpr}-${parenthesesTracker?.openCount || 0}-${syntaxHighlightingEnabled}`;
     
+    // Get the format cache
+    const formatCache = CacheManager.getCache(this.CACHE_NAMES.FORMAT, 100);
+    
     // Check cache first
-    if (this.formattedCache.has(cacheKey)) {
-      return this.formattedCache.get(cacheKey);
+    if (formatCache.has(cacheKey)) {
+      return formatCache.get(cacheKey);
     }
     
     // First, handle parentheses
@@ -45,11 +52,7 @@ export class ExpressionFormatter {
       : parts;
     
     // Cache the result
-    if (this.formattedCache.size >= this.MAX_CACHE_SIZE) {
-      const firstKey = this.formattedCache.keys().next().value;
-      this.formattedCache.delete(firstKey);
-    }
-    this.formattedCache.set(cacheKey, result);
+    formatCache.set(cacheKey, result);
     
     return result;
   }
@@ -60,12 +63,27 @@ export class ExpressionFormatter {
    * @returns {Array} Parts with syntax highlighting applied to text parts
    */
   static applySyntaxHighlighting(parts) {
+    // Get the tokens cache
+    const tokensCache = CacheManager.getCache(this.CACHE_NAMES.TOKENS, 50);
+    
     const result = [];
     
     for (const part of parts) {
       if (part.type === 'text') {
-        // Apply syntax highlighting to text parts
-        const tokens = this.tokenize(part.content);
+        // Generate cache key for this text part
+        const cacheKey = part.content;
+        
+        // Check tokens cache first
+        let tokens;
+        if (tokensCache.has(cacheKey)) {
+          tokens = tokensCache.get(cacheKey);
+        } else {
+          // Apply syntax highlighting to text parts
+          tokens = this.tokenize(part.content);
+          tokensCache.set(cacheKey, tokens);
+        }
+        
+        // Add tokens to result with parent level
         for (const token of tokens) {
           result.push({
             ...token,
@@ -84,10 +102,17 @@ export class ExpressionFormatter {
   /**
    * Format an expression with parentheses
    * @param {string} expr - The expression to format
-   * @param {Object} parenthesesTracker - Tracker for parentheses state
    * @returns {Array} Formatted parts
    */
-  static formatParentheses(expr, parenthesesTracker) {
+  static formatParentheses(expr) {
+    // Get the parentheses cache
+    const parenthesesCache = CacheManager.getCache(this.CACHE_NAMES.PARENTHESES, 50);
+    
+    // Check cache first
+    if (parenthesesCache.has(expr)) {
+      return parenthesesCache.get(expr);
+    }
+    
     const parts = [];
     let currentIndex = 0;
     let nestLevel = 0;
@@ -146,7 +171,12 @@ export class ExpressionFormatter {
       parts.push({ type: 'ghost', content: ')', level: --nestLevel });
     }
   
-    return this.cleanupParts(parts);
+    const result = this.cleanupParts(parts);
+    
+    // Cache the result
+    parenthesesCache.set(expr, result);
+    
+    return result;
   }
   
   /**
@@ -263,28 +293,9 @@ export class ExpressionFormatter {
   }
   
   /**
-   * Format a display value using DisplayFormatter
-   * @param {string} value - The value to format
-   * @param {Object} options - Formatting options
-   * @returns {string} Formatted value
-   */
-  static formatDisplayValue(value, options = {}) {
-    return DisplayFormatter.format(value, options);
-  }
-  
-  /**
-   * Format display content using DisplayFormatter
-   * @param {string} content - The content to format
-   * @returns {string} Formatted content
-   */
-  static formatDisplayContent(content) {
-    return DisplayFormatter.formatDisplayContent(content);
-  }
-  
-  /**
-   * Clear all caches
+   * Clear all expression formatter caches
    */
   static clearCache() {
-    this.formattedCache.clear();
+    CacheManager?.clearAllCaches?.();
   }
 }

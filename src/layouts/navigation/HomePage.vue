@@ -346,11 +346,7 @@
     </section>
 
     <!-- Welcome Modal -->
-    <welcome-modal
-      :open="showWelcomeModal"
-      @update:open="showWelcomeModal = $event"
-      @close="showWelcomeModal = false"
-    />
+    <welcome-modal v-model="showWelcomeModal" />
   </BasePage>
 </template>
 

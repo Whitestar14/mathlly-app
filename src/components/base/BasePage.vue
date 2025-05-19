@@ -24,19 +24,13 @@
         &copy; {{ new Date().getFullYear() }} Mathlly. All rights reserved.
       </div>
     </footer>
-
-    <div v-if="showVersion" class="fixed bottom-4 right-4 z-10">
-      <Badge :show-notch="true" type="custom" :text="`v${version.versionInfo.full}`" />
-    </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useVersionStore } from '@/stores/version'
 import { ArrowLeftIcon } from 'lucide-vue-next'
 import Button from '@/components/base/BaseButton.vue'
-import Badge from '@/components/base/BaseBadge.vue'
 import { useTitle } from '@/composables/useTitle'
 
 const props = defineProps({
@@ -56,10 +50,6 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  showVersion: {
-    type: Boolean,
-    default: false
-  },
   mainClass: {
     type: String,
     default: 'container mx-auto px-4 py-8 md:py-12'
@@ -71,7 +61,6 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const version = useVersionStore()
 
 useTitle(props.title)
 const goBack = () => {

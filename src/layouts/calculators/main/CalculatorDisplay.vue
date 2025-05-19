@@ -9,8 +9,8 @@
       ]"
     >
       <ChevronScroll
-        :show-left-chevron="showLeftChevron"
-        :show-right-chevron="showRightChevron"
+        :show-left-chevron="scrollState.canScrollLeft"
+        :show-right-chevron="scrollState.canScrollRight"
         @scroll-to-previous="scrollToPrevious"
         @scroll-to-next="scrollToNext"
       />
@@ -48,7 +48,7 @@ import ChevronScroll from "@/components/ui/ChevronScroll.vue"
 import ControlButtons from "@/components/ui/ControlButtons.vue"
 import MainDisplay from "@/components/layout/MainDisplay.vue"
 import BaseDisplay from "@/components/layout/BaseDisplay.vue"
-import { computed, nextTick, ref, watch } from "vue"
+import { computed, nextTick, shallowRef, reactive, watch } from "vue"
 import { useToast } from "@/composables/useToast"
 import { useClipboard, useEventListener, useDebounceFn } from "@vueuse/core"
 
@@ -66,20 +66,21 @@ const props = defineProps({
 defineEmits(["open-history", "base-change"])
 const { toast } = useToast()
 
-const mainDisplay = ref(null)
-const showLeftChevron = ref(false)
-const showRightChevron = ref(false)
-
+const mainDisplay = shallowRef(null)
+const scrollState = reactive({
+  canScrollLeft: false,
+  canScrollRight: false
+})
 const handleScrollUpdate = useDebounceFn(({ canScrollLeft, canScrollRight }) => {
-  showLeftChevron.value = canScrollLeft
-  showRightChevron.value = canScrollRight
+  scrollState.canScrollLeft = canScrollLeft
+  scrollState.canScrollRight = canScrollRight
 }, 100)
 
 useEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft' && showLeftChevron.value) {
+  if (e.key === 'ArrowLeft' && scrollState.canScrollLeft) {
     scrollToPrevious()
   }
-  if (e.key === 'ArrowRight' && showRightChevron.value) {
+  if (e.key === 'ArrowRight' && scrollState.canScrollRight) {
     scrollToNext()
   }
 })
@@ -94,19 +95,11 @@ function scrollToNext() {
 
 watch(
   () => props.input,
-  () => {
-    nextTick(() => {
-      mainDisplay.value?.scrollToEnd()
-    })
-  }
-)
+  () => {nextTick(mainDisplay.value?.scrollToEnd)})
 
-const copyContent = computed(() => {
-  if (props.animatedResult) {
-    return `${props.input} = ${props.animatedResult}`
-  }
-  return props.input
-})
+const copyContent = computed(() => 
+  props.animatedResult ? `${props.input} = ${props.animatedResult}` : props.input
+)
 
 const { copy } = useClipboard({ legacy: true })
 

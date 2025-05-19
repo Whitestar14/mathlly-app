@@ -68,13 +68,9 @@
             size="sm" 
             @click="toggleDetails"
           >
-            <span v-if="!showDetails" class="flex items-center">
-              <ChevronDownIcon class="h-4 w-4 mr-1" />
-              Details
-            </span>
-            <span v-else class="flex items-center">
-              <ChevronUpIcon class="h-4 w-4 mr-1" />
-              Hide
+            <span class="flex items-center">
+              <component :is="showDetails ? ChevronUpIcon : ChevronDownIcon" class="h-4 w-4 mr-1" />
+              {{ showDetails ? 'Hide' : 'Details' }}
             </span>
           </BaseButton>
           
@@ -95,8 +91,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { useIntervalFn, useEventListener } from '@vueuse/core';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useIntervalFn, useEventListener, useLocalStorage } from '@vueuse/core';
 import {
   RefreshCwIcon,
   XIcon,
@@ -115,26 +111,31 @@ const showNotification = ref(false);
 const showDetails = ref(false);
 const latestVersion = ref('');
 const updateFeatures = ref([]);
+const serviceWorkerRegistration = ref(null);
+
+const dismissedVersion = useLocalStorage('dismissed-version', '');
+
 const currentVersion = computed(() => versionStore.versionInfo.full);
 const updatesEnabled = computed(() => settingsStore.appearance.checkForUpdates !== false);
 
-const serviceWorkerRegistration = ref(null);
-
-// Fetches details like version number and features for display in the notification
 const fetchLatestVersion = async () => {
   try {
     if (updates.length > 0) {
       latestVersion.value = updates[0]?.version || '';
       updateFeatures.value = updates[0]?.features || [];
-    } else {
-      // Fallback or fetch if 'updates' isn't immediately available
-      const response = await fetch('/version-info.json?t=' + new Date().getTime());
-      if (!response.ok) throw new Error('Failed to fetch version-info.json');
-      const versionData = await response.json();
-      latestVersion.value = versionData.full || '';
-      const updateEntry = updates.find(u => u.version === latestVersion.value.replace(/^v/, ''));
-      updateFeatures.value = updateEntry?.features || [];
+      return;
     }
+    
+    // Fallback if updates array is empty
+    const timestamp = Date.now();
+    const response = await fetch(`/version-info.json?t=${timestamp}`);
+    if (!response.ok) throw new Error('Failed to fetch version-info.json');
+    
+    const versionData = await response.json();
+    latestVersion.value = versionData.full || '';
+    
+    const updateEntry = updates.find(u => u.version === latestVersion.value.replace(/^v/, ''));
+    updateFeatures.value = updateEntry?.features || [];
   } catch (error) {
     console.error('Failed to fetch version info for display:', error);
   }
@@ -148,94 +149,91 @@ const handleWorkerUpdate = (event) => {
   if (event.detail) {
     serviceWorkerRegistration.value = event.detail;
     showNotification.value = true;
-    fetchLatestVersion(); // Fetch display details
-  } else {
-    console.warn('"sw-update-available" received without detail.');
+    fetchLatestVersion();
   }
 };
 
-const periodicUpdateCheck = () => {
+// Check for updates periodically
+const checkForUpdates = async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-      registration.update(); // This tells the browser to check the server for a new SW script
-    }).catch(error => {
-      console.error('Error getting SW registration for update check:', error);
-    });
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      registration.update();
+    } catch (error) {
+      console.error('Error updating service worker:', error);
+    }
   }
 
-  fetchLatestVersion().then(() => {
-    const current = currentVersion.value.replace(/^v/, '');
-    const latest = latestVersion.value.replace(/^v/, '');
-    if (latest && current && latest !== current) {
-      const dismissedVersion = localStorage.getItem('dismissed-version');
-      if (dismissedVersion !== latestVersion.value && !showNotification.value) {
-        console.log('Version mismatch from version-info.json. Current:', current, 'Latest:', latest);
-        showNotification.value = true;
-      }
+  await fetchLatestVersion();
+  
+  const current = currentVersion.value?.replace(/^v/, '');
+  const latest = latestVersion.value?.replace(/^v/, '');
+  
+  if (latest && current && latest !== current) {
+    if (dismissedVersion.value !== latestVersion.value && !showNotification.value) {
+      showNotification.value = true;
     }
-  });
+  }
 };
 
-const { pause, resume } = useIntervalFn(periodicUpdateCheck, 60 * 60 * 1000, { 
+// Use VueUse's useIntervalFn for periodic checks
+const { pause, resume } = useIntervalFn(checkForUpdates, 60 * 60 * 1000, { 
   immediate: false, 
   immediateCallback: false
-});
-
-watch(updatesEnabled, (newValue) => {
-  if (newValue) {
-    periodicUpdateCheck();
-    resume();
-  } else {
-    pause();
-  }
 });
 
 // Use VueUse's useEventListener for cleaner event handling
 useEventListener(window, 'sw-update-available', handleWorkerUpdate);
 
+// Refresh the app with the new version
 const refreshApp = () => {
-  showNotification.value = false; // Hide notification
+  showNotification.value = false;
   const registration = serviceWorkerRegistration.value;
 
-  if (registration && registration.waiting) {
+  if (registration?.waiting) {
     const worker = registration.waiting;
-    // Add a listener for state change ONCE, right before sending skipWaiting
-    worker.addEventListener('statechange', (event) => {
+    
+    useEventListener(worker, 'statechange', (event) => {
       if (event.target.state === 'activated') {
         window.location.reload();
       }
-    }, { once: true }); // Use { once: true } to auto-remove listener
+    }, { once: true });
 
-    // Check state *before* sending message
     if (worker.state === 'installed') {
-        worker.postMessage({ type: 'SKIP_WAITING' });
+      worker.postMessage({ type: 'SKIP_WAITING' });
     } else {
-        console.warn(`Waiting worker state is already "${worker.state}". Attempting reload directly.`);
-        window.location.reload();
+      window.location.reload();
     }
 
     setTimeout(() => {
-        if (!window.location.reloading) { // Simple flag to avoid multiple reloads
-             window.location.reloading = true; // Set flag
-             window.location.reload();
-        }
+      if (!window.location.reloading) {
+        window.location.reloading = true;
+        window.location.reload();
+      }
     }, 3000);
-
   } else {
-    console.warn('"Update Now" clicked, but no valid waiting service worker found. Forcing reload.');
     window.location.reload();
   }
 };
 
-// User dismisses the notification
+// Dismiss the update notification
 const dismissUpdate = () => {
   showNotification.value = false;
-  if (latestVersion.value) { // Use the displayed version from changelog
-    localStorage.setItem('dismissed-version', latestVersion.value);
+  if (latestVersion.value) {
+    dismissedVersion.value = latestVersion.value;
   }
 };
-</script>
 
+// Lifecycle hooks
+onMounted(() => {
+  if (updatesEnabled.value) {
+    checkForUpdates();
+    resume();
+  }
+});
+
+onUnmounted(pause);
+</script>
 
 <style scoped>
 .animate-spin-slow {
