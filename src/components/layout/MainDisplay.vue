@@ -71,7 +71,7 @@ import { inject, computed, onMounted, watch, onUnmounted, shallowRef } from "vue
 import { useElementSize, useScroll, useThrottleFn, useMemoize } from '@vueuse/core'
 import { useAnimation } from '@/composables/useAnimation'
 import { useSettingsStore } from '@/stores/settings'
-import { ExpressionFormatter } from '@/utils/display/ExpressionFormatter'
+import { ExpressionFormatter } from '@/services/display/SyntaxHighlighter'
 
 const props = defineProps({
   input: { type: String, default: "" },

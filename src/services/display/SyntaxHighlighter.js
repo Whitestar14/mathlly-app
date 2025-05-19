@@ -1,4 +1,4 @@
-import { CalculatorConstants } from '../constants/CalculatorConstants.js';
+import { CalculatorConstants } from '../../utils/constants/CalculatorConstants.js';
 import { CacheManager } from '@/utils/cache/CacheManager';
 
 /**

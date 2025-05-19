@@ -1,6 +1,6 @@
 import { shallowRef, computed, nextTick, watch, provide, inject, reactive, readonly, onUnmounted, markRaw } from 'vue';
 import { useLocalStorage, useDebounceFn } from '@vueuse/core';
-import { useDraggable } from '@/utils/misc/useDraggable';
+import { useDraggable } from '@/utils/misc/draggable';
 
 /**
  * Unified panel composable managing state, persistence, responsiveness, and dragging.
