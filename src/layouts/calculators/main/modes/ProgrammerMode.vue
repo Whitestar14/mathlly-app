@@ -1,8 +1,9 @@
 <template>
   <div class="flex flex-col gap-1">
+    <!-- Memory buttons row -->
     <div class="grid grid-cols-5 gap-1">
       <button
-        v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
+        v-for="op in memoryOperations"
         :key="op"
         class="calc-btn calc-memory-btn calc-btn-grid"
         :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
@@ -13,194 +14,56 @@
     </div>
 
     <div class="grid grid-cols-5 gap-1 flex-grow">
+      <!-- Hex letters column -->
       <div class="flex flex-col gap-1">
         <button
-          v-for="letter in ['A', 'B', 'C', 'D', 'E', 'F']"
+          v-for="letter in hexLetters"
           :key="letter"
-          :disabled="!isButtonEnabled(letter)"
+          :disabled="!isButtonEnabled(letter) || isMaxLengthReached"
           :class="[
             'calc-btn calc-letter-btn calc-btn-grid',
-            !isButtonEnabled(letter) || isMaxLengthReached
-              ? 'calc-btn-disabled'
-              : '',
+            (!isButtonEnabled(letter) || isMaxLengthReached) ? 'calc-btn-disabled' : '',
           ]"
           @click="handleClick(letter)"
         >
           {{ letter }}
         </button>
       </div>
+
+      <!-- Main calculator grid -->
       <div class="col-span-4 grid grid-cols-4 gap-1">
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('<<')"
-        >
-          <ChevronsLeftIcon class="w-6 h-6 mx-auto" />
-        </button>
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('>>')"
-        >
-          <ChevronsRightIcon class="w-6 h-6 mx-auto" />
-        </button>
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
-          @click="handleClick('CE')"
-        >
-          CE
-        </button>
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
-          @click="handleClick('backspace')"
-        >
-          <Delete class="w-6 h-6 mx-auto" />
-          <span class="sr-only">Backspace</span>
-        </button>
+        <!-- Bit shift and clear row -->
+        <CalcButton 
+          v-for="(btn, index) in bitShiftRow" 
+          :key="index"
+          :value="btn.value"
+          :icon="btn.icon"
+          :disabled="btn.checkMaxLength ? isMaxLengthReached : false"
+          :variant="btn.variant"
+          @click="handleClick(btn.value)"
+        />
 
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
+        <!-- Parentheses and operators row -->
+        <CalcButton 
+          v-for="(btn, index) in parenthesesRow" 
+          :key="index"
+          :value="btn.value"
           :disabled="isMaxLengthReached"
-          @click="handleClick('(')"
-        >
-          (
-        </button>
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick(')')"
-        >
-          )
-        </button>
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('%')"
-        >
-          %
-        </button>
-        <button
-          class="calc-btn calc-operator-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('÷')"
-        >
-          ÷
-        </button>
+          :variant="btn.variant"
+          @click="handleClick(btn.value)"
+        />
 
-        <button
-          :disabled="!isButtonEnabled('7') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('7')"
-        >
-          7
-        </button>
-        <button
-          :disabled="!isButtonEnabled('8') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('8')"
-        >
-          8
-        </button>
-        <button
-          :disabled="!isButtonEnabled('9') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('9')"
-        >
-          9
-        </button>
-        <button
-          class="calc-btn calc-operator-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('×')"
-        >
-          ×
-        </button>
-
-        <button
-          :disabled="!isButtonEnabled('4') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('4')"
-        >
-          4
-        </button>
-        <button
-          :disabled="!isButtonEnabled('5') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('5')"
-        >
-          5
-        </button>
-        <button
-          :disabled="!isButtonEnabled('6') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('6')"
-        >
-          6
-        </button>
-        <button
-          class="calc-btn calc-operator-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('-')"
-        >
-          −
-        </button>
-
-        <button
-          :disabled="!isButtonEnabled('1') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('1')"
-        >
-          1
-        </button>
-        <button
-          :disabled="!isButtonEnabled('2') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('2')"
-        >
-          2
-        </button>
-        <button
-          :disabled="!isButtonEnabled('3') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('3')"
-        >
-          3
-        </button>
-        <button
-          class="calc-btn calc-operator-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('+')"
-        >
-          +
-        </button>
-
-        <button
-          class="calc-btn calc-function-btn calc-btn-grid"
-          :disabled="isMaxLengthReached"
-          @click="handleClick('±')"
-        >
-          ±
-        </button>
-        <button
-          :disabled="!isButtonEnabled('0') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('0')"
-        >
-          0
-        </button>
-        <button
-          :disabled="!isButtonEnabled('.') || isMaxLengthReached"
-          class="calc-btn calc-number-btn calc-btn-grid"
-          @click="handleClick('.')"
-        >
-          .
-        </button>
-        <button
-          class="calc-btn calc-operator-btn calc-btn-grid"
-          @click="handleClick('=')"
-        >
-          =
-        </button>
+        <!-- Number pad and operations -->
+        <template v-for="(row, rowIndex) in numberRows">
+          <CalcButton 
+            v-for="(btn, btnIndex) in row" 
+            :key="`row-${rowIndex}-btn-${btnIndex}`"
+            :value="btn.value"
+            :disabled="!isButtonEnabled(btn.value) || isMaxLengthReached"
+            :variant="btn.variant"
+            @click="handleClick(btn.value)"
+          />
+        </template>
       </div>
     </div>
   </div>
@@ -208,8 +71,9 @@
 
 <script setup>
 import { Delete, ChevronsRightIcon, ChevronsLeftIcon } from "lucide-vue-next";
-import { computed } from "vue";
-
+import { computed, markRaw } from "vue";
+import CalcButton from '@/components/ui/CalculatorButton.vue';
+import { numberRows } from './NumberRows'
 const props = defineProps({
   activeBase: {
     type: String,
@@ -231,13 +95,37 @@ const props = defineProps({
 
 const emit = defineEmits(["button-click", "clear"]);
 
+const isMaxLengthReached = computed(() => props.inputLength >= props.maxLength);
+
+// Button configurations using markRaw for better performance
+const memoryOperations = markRaw(['MC', 'MR', 'M+', 'M-', 'MS']);
+const hexLetters = markRaw(['A', 'B', 'C', 'D', 'E', 'F']);
+
+// Bit shift and clear row
+const bitShiftRow = markRaw([
+  { value: '<<', variant: 'function', icon: ChevronsLeftIcon, checkMaxLength: true },
+  { value: '>>', variant: 'function', icon: ChevronsRightIcon, checkMaxLength: true },
+  { value: 'CE', variant: 'function' },
+  { value: 'backspace', variant: 'function', icon: Delete }
+]);
+
+// Parentheses and operators row
+const parenthesesRow = markRaw([
+  { value: '(', variant: 'function' },
+  { value: ')', variant: 'function' },
+  { value: '%', variant: 'function' },
+  { value: '÷', variant: 'operator' }
+]);
+
 const handleClick = (value) => {
   emit("button-click", value);
 };
 
-const isMaxLengthReached = computed(() => props.inputLength >= props.maxLength);
-
 const isButtonEnabled = computed(() => (button) => {
+  if (['×', '-', '+', '=', '±'].includes(button)) {
+    return true;
+  }
+  
   if (isMaxLengthReached.value && /^[0-9A-F.]$/.test(button.toUpperCase())) {
     return false;
   }

@@ -1,13 +1,11 @@
 import { CalculatorConstants } from '../constants/CalculatorConstants.js';
-import { DisplayFormatter } from '@/services/display/DisplayFormatter';
 import { CacheManager } from '@/utils/cache/CacheManager';
 
 /**
  * @class ExpressionFormatter
- * @description Unified class for formatting mathematical expressions with both parentheses and syntax highlighting
+ * @description Class for syntax highlighting of mathematical expressions
  */
 export class ExpressionFormatter {
-  // Cache names
   static CACHE_NAMES = {
     FORMAT: 'expression-format',
     PARENTHESES: 'expression-parentheses',
@@ -19,39 +17,27 @@ export class ExpressionFormatter {
    * @param {string} expr - The expression to format
    * @param {Object} parenthesesTracker - Tracker for parentheses state
    * @param {boolean} syntaxHighlightingEnabled - Whether syntax highlighting is enabled
-   * @param {Object} options - Formatting options to pass to DisplayFormatter
    * @returns {Array} Formatted tokens for rendering
    */
-  static format(expr, parenthesesTracker, syntaxHighlightingEnabled = true, options = {}) {
+  static format(expr, parenthesesTracker, syntaxHighlightingEnabled = true) {
     if (!expr) {
       return [{ type: 'text', content: '0' }];
     }
     
-    // Format the expression using DisplayFormatter if needed
-    const formattedExpr = options.base && options.mode 
-      ? DisplayFormatter.format(expr, options)
-      : expr;
+    const cacheKey = `${expr}-${parenthesesTracker?.openCount || 0}-${syntaxHighlightingEnabled}`;
     
-    // Generate cache key based on inputs
-    const cacheKey = `${formattedExpr}-${parenthesesTracker?.openCount || 0}-${syntaxHighlightingEnabled}`;
-    
-    // Get the format cache
     const formatCache = CacheManager.getCache(this.CACHE_NAMES.FORMAT, 100);
-    
-    // Check cache first
+
     if (formatCache.has(cacheKey)) {
       return formatCache.get(cacheKey);
     }
-    
-    // First, handle parentheses
-    const parts = this.formatParentheses(formattedExpr, parenthesesTracker);
-    
-    // Then apply syntax highlighting if enabled
+
+    const parts = this.formatParentheses(expr, parenthesesTracker);
+
     const result = syntaxHighlightingEnabled 
       ? this.applySyntaxHighlighting(parts)
       : parts;
     
-    // Cache the result
     formatCache.set(cacheKey, result);
     
     return result;
@@ -63,27 +49,22 @@ export class ExpressionFormatter {
    * @returns {Array} Parts with syntax highlighting applied to text parts
    */
   static applySyntaxHighlighting(parts) {
-    // Get the tokens cache
     const tokensCache = CacheManager.getCache(this.CACHE_NAMES.TOKENS, 50);
     
     const result = [];
     
     for (const part of parts) {
       if (part.type === 'text') {
-        // Generate cache key for this text part
         const cacheKey = part.content;
         
-        // Check tokens cache first
         let tokens;
         if (tokensCache.has(cacheKey)) {
           tokens = tokensCache.get(cacheKey);
         } else {
-          // Apply syntax highlighting to text parts
           tokens = this.tokenize(part.content);
           tokensCache.set(cacheKey, tokens);
         }
         
-        // Add tokens to result with parent level
         for (const token of tokens) {
           result.push({
             ...token,
@@ -91,7 +72,6 @@ export class ExpressionFormatter {
           });
         }
       } else {
-        // Keep non-text parts as is
         result.push(part);
       }
     }
@@ -105,10 +85,8 @@ export class ExpressionFormatter {
    * @returns {Array} Formatted parts
    */
   static formatParentheses(expr) {
-    // Get the parentheses cache
     const parenthesesCache = CacheManager.getCache(this.CACHE_NAMES.PARENTHESES, 50);
     
-    // Check cache first
     if (parenthesesCache.has(expr)) {
       return parenthesesCache.get(expr);
     }
@@ -146,7 +124,7 @@ export class ExpressionFormatter {
         
         parts.push({ type: 'close', content: ')', level: --nestLevel });
         currentIndex = i + 1;
-      } else if (isOperator(char, nextChar)) {
+              } else if (isOperator(char, nextChar)) {
         if (i > currentIndex) {
           const beforeOp = expr.slice(currentIndex, i).trim();
           if (beforeOp) parts.push({ type: 'text', content: beforeOp, level: nestLevel });
@@ -173,7 +151,6 @@ export class ExpressionFormatter {
   
     const result = this.cleanupParts(parts);
     
-    // Cache the result
     parenthesesCache.set(expr, result);
     
     return result;
@@ -235,14 +212,12 @@ export class ExpressionFormatter {
     for (let i = 0; i < text.length; i++) {
       const char = text[i], nextChar = text[i + 1];
 
-      // Handle decimal point
       if (char === '.') {
         pushToken();
         tokens.push({ type: 'decimal', content: '.' });
         continue;
       }
 
-      // Handle shift operators
       if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) {
         pushToken();
         tokens.push({ type: 'programmer-operator', content: char + nextChar });
@@ -250,7 +225,6 @@ export class ExpressionFormatter {
         continue;
       }
 
-      // Handle operators
       if (
         BUTTON_TYPES.OPERATORS.includes(char) ||
         BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(char)
@@ -260,7 +234,6 @@ export class ExpressionFormatter {
         continue;
       }
 
-      // Handle parentheses
       if (REGEX.PARENTHESIS.test(char)) {
         pushToken();
         tokens.push({ type: 'parenthesis', content: char });

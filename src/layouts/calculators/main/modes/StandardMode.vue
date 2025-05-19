@@ -1,8 +1,9 @@
 <template>
   <div class="flex flex-col gap-1">
+    <!-- Memory buttons row -->
     <div class="grid grid-cols-5 gap-1">
       <button
-        v-for="op in ['MC', 'MR', 'M+', 'M-', 'MS']"
+        v-for="op in memoryOperations"
         :key="op"
         class="calc-btn calc-memory-btn calc-btn-grid"
         :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
@@ -12,184 +13,50 @@
       </button>
     </div>
     
+    <!-- Calculator buttons grid -->
     <div class="grid grid-cols-4 gap-1 flex-grow">
-      <button
-        class="calc-btn calc-function-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('%')"
-      >
-        %
-      </button>
-      <button
-        class="calc-btn calc-function-btn calc-btn-grid"
-        @click="handleClick('CE')"
-      >
-        CE
-      </button>
-      <button
-        class="calc-btn calc-function-btn calc-btn-grid"
-        @click="handleClick('C')"
-      >
-        C
-      </button>
-      <button
-        class="calc-btn calc-function-btn calc-btn-grid"
-        @click="handleClick('backspace')"
-      >
-        <Delete class="w-6 h-6 mx-auto" />
-        <span class="sr-only">Backspace</span>
-      </button>
+      <!-- First row -->
+      <CalcButton 
+        v-for="(btn, index) in firstRow" 
+        :key="index"
+        :value="btn.value"
+        :icon="btn.icon"
+        :disabled="btn.checkMaxLength ? isMaxLengthReached : false"
+        :variant="btn.variant"
+        @click="handleClick(btn.value)"
+      />
 
-      <button
-        class="calc-btn calc-function-btn calc-btn-grid"
+      <!-- Second row -->
+      <CalcButton 
+        v-for="(btn, index) in secondRow" 
+        :key="index"
+        :value="btn.value"
         :disabled="isMaxLengthReached"
-        @click="handleClick('1/x')"
-      >
-        1/x
-      </button>
-      <button
-        class="calc-btn calc-function-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('x²')"
-      >
-        x²
-      </button>
-      <button
-        class="calc-btn calc-function-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('√')"
-      >
-        √
-      </button>
-      <button
-        class="calc-btn calc-operator-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('÷')"
-      >
-        ÷
-      </button>
+        :variant="btn.variant"
+        @click="handleClick(btn.value)"
+      />
 
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('7')"
-      >
-        7
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('8')"
-      >
-        8
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('9')"
-      >
-        9
-      </button>
-      <button
-        class="calc-btn calc-operator-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('×')"
-      >
-        ×
-      </button>
-
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('4')"
-      >
-        4
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('5')"
-      >
-        5
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('6')"
-      >
-        6
-      </button>
-      <button
-        class="calc-btn calc-operator-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('-')"
-      >
-        −
-      </button>
-
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('1')"
-      >
-        1
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('2')"
-      >
-        2
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('3')"
-      >
-        3
-      </button>
-      <button
-        class="calc-btn calc-operator-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('+')"
-      >
-        +
-      </button>
-
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('±')"
-      >
-        ±
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('0')"
-      >
-        0
-      </button>
-      <button
-        class="calc-btn calc-number-btn calc-btn-grid"
-        :disabled="isMaxLengthReached"
-        @click="handleClick('.')"
-      >
-        .
-      </button>
-      <button
-        class="calc-btn calc-operator-btn calc-btn-grid"
-        @click="handleClick('=')"
-      >
-        =
-      </button>
+      <!-- Number pad and operations -->
+      <template v-for="(row, rowIndex) in numberRows">
+        <CalcButton 
+          v-for="(btn, btnIndex) in row" 
+          :key="`row-${rowIndex}-btn-${btnIndex}`"
+          :value="btn.value"
+          :disabled="isMaxLengthReached"
+          :variant="btn.variant"
+          @click="handleClick(btn.value)"
+        />
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed, markRaw } from "vue";
 import { Delete } from 'lucide-vue-next';
-import { computed } from "vue";
+import { numberRows } from './NumberRows'
+import CalcButton from '@/components/ui/CalculatorButton.vue';
+
 const props = defineProps({
   inputLength: {
     type: Number,
@@ -210,6 +77,22 @@ const emit = defineEmits(['button-click', 'clear']);
 const isMaxLengthReached = computed(() => 
   props.inputLength >= props.maxLength
 );
+
+const memoryOperations = markRaw(['MC', 'MR', 'M+', 'M-', 'MS']);
+
+const firstRow = markRaw([
+  { value: '%', variant: 'function', checkMaxLength: true },
+  { value: 'CE', variant: 'function' },
+  { value: 'C', variant: 'function' },
+  { value: 'backspace', variant: 'function', icon: Delete }
+]);
+
+const secondRow = markRaw([
+  { value: '1/x', variant: 'function' },
+  { value: 'x²', variant: 'function' },
+  { value: '√', variant: 'function' },
+  { value: '÷', variant: 'operator' }
+]);
 
 const handleClick = (value) => {
   if (value === 'C') {

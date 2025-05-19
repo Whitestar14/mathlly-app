@@ -6,7 +6,7 @@
         <!-- Add a font-size slider to keep me off variability -->
          <!-- Rename ExpressionFormatter to SyntaxHighlighter -->
         <component 
-          :is="Component" 
+          :is="Component"
           v-bind="isCalculatorRoute(route.path) ? calculatorProps : {}" 
         />
     </Transition>
@@ -39,6 +39,4 @@ const calculatorProps = computed(() => ({
 }))
 
 const isCalculatorRoute = (path) => path.includes('/calculator')
-
-await new Promise(resolve => setTimeout(resolve, 800))
 </script>

@@ -30,13 +30,16 @@
             <span
               v-for="(token, index) in formattedTokens"
               :key="index"
-              :class="tokenClassMap[token.type] || ''"
+              :class="[
+              tokenClassMap[token.type] || '',
+              errorClass,
+            ]"
             >
               {{ token.content }}
             </span>
           </template>
           <template v-else>
-            {{ formattedInput }}
+            {{ input }}
           </template>
         </div>
 
@@ -64,10 +67,9 @@
 </template>
 
 <script setup>
-import { inject, computed, onMounted, watch, onUnmounted, shallowRef, markRaw } from "vue"
-import { useElementSize, useScroll, useThrottleFn, useEventListener } from '@vueuse/core'
+import { inject, computed, onMounted, watch, onUnmounted, shallowRef } from "vue"
+import { useElementSize, useScroll, useThrottleFn, useMemoize } from '@vueuse/core'
 import { useAnimation } from '@/composables/useAnimation'
-import { DisplayFormatter } from '@/services/display/DisplayFormatter'
 import { useSettingsStore } from '@/stores/settings'
 import { ExpressionFormatter } from '@/utils/display/ExpressionFormatter'
 
@@ -84,26 +86,34 @@ const props = defineProps({
 const settingsStore = useSettingsStore();
 const emit = defineEmits(['scroll-update']);
 
+// DOM refs - use shallowRef for better performance with DOM elements
 const displayContainer = shallowRef(null);
 const resultContainer = shallowRef(null);
 const inputContainer = shallowRef(null);
 const previewContainer = shallowRef(null);
 
-const { createSlideAnimation } = useAnimation();
-const animationService = createSlideAnimation();
+// Animation service - created once and reused
+const animationService = (() => {
+  const { createSlideAnimation } = useAnimation();
+  return createSlideAnimation();
+})();
 
+// Inject calculator
 const calculator = inject('calculator');
 const parenthesesTracker = computed(() => calculator.value.operations.parenthesesTracker);
 
+// Use VueUse for better performance
 const { width } = useElementSize(displayContainer);
-const { x: scrollLeft, arrivedState } = useScroll(displayContainer, { throttle: 16 });
+const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
+  throttle: 16,
+  onScroll: useThrottleFn(updateScrollState, 100)
+});
 
-useEventListener(displayContainer, 'scroll', useThrottleFn(updateScrollState, 100));
-
+// Check if syntax highlighting is enabled - non-reactive if setting doesn't change often
 const syntaxHighlightingEnabled = computed(() => settingsStore.display.syntaxHighlighting);
-const formattingEnabled = computed(() => settingsStore.display.useThousandSeparator);
 
-const tokenClassMap = markRaw({
+// Pre-compute token class map for better performance
+const tokenClassMap = {
   'open': 'paren-open syntax-parenthesis',
   'close': 'paren-close syntax-parenthesis',
   'ghost': 'paren-ghost syntax-ghost',
@@ -113,10 +123,11 @@ const tokenClassMap = markRaw({
   'function': 'syntax-function',
   'decimal': 'syntax-decimal',
   'text': 'syntax-text',
-  'space': 'syntax-space'
-});
+  'space': ''
+};
 
-const getFontSizeClass = (value, mode, activeBase) => {
+// Memoize font size calculation for better performance
+const getFontSizeClass = useMemoize((value, mode, activeBase) => {
   if (!value) return 'text-3xl';
 
   const length = value.toString().length;
@@ -127,19 +138,7 @@ const getFontSizeClass = (value, mode, activeBase) => {
     return 'text-3xl';
   }
   return activeBase === 'BIN' ? 'text-2xl' : 'text-3xl';
-};
-
-// Format options for DisplayFormatter - memoized to avoid recalculation
-const formatOptions = computed(() => ({
-  base: props.activeBase,
-  mode: props.mode
-}));
-
-// Format the input using DisplayFormatter
-const formattedInput = computed(() => {
-  if (!props.input) return "0";
-  return DisplayFormatter.format(props.input, formatOptions.value);
-});
+}, { max: 20 });
 
 const formattedTokens = computed(() => {
   if (!syntaxHighlightingEnabled.value) return [];
@@ -148,15 +147,20 @@ const formattedTokens = computed(() => {
     props.input, 
     parenthesesTracker.value, 
     true,
-    formatOptions.value
+    {
+      base: props.activeBase,
+      mode: props.mode
+    }
   );
 });
 
 const displayClass = computed(() => [
   'mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
   getFontSizeClass(props.input, props.mode, props.activeBase),
-  props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors'
+  errorClass.value
 ]);
+
+const errorClass = computed(() => props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors');
 
 function updateScrollState() {
   if (!displayContainer.value) return;
@@ -192,15 +196,11 @@ function scrollToNext() {
 }
 
 function animateSlide() {
-  if (resultContainer.value && inputContainer.value) {
-    animationService.animateSlide(resultContainer.value, inputContainer.value);
-  }
+  animationService.animateSlide(resultContainer.value, inputContainer.value);
 }
 
 function resetPositions() {
-  if (resultContainer.value && inputContainer.value) {
-    animationService.resetPositions(resultContainer.value, inputContainer.value);
-  }
+  animationService.resetPositions(resultContainer.value, inputContainer.value);
 }
 
 watch(() => props.isAnimating, (newValue) => {
@@ -209,7 +209,6 @@ watch(() => props.isAnimating, (newValue) => {
 
 function clearCache() {
   if (syntaxHighlightingEnabled.value) ExpressionFormatter.clearCache();
-  if (formattingEnabled.value) DisplayFormatter.clearCache();
 }
 
 watch([() => props.mode, () => props.activeBase], clearCache, { deep: false });

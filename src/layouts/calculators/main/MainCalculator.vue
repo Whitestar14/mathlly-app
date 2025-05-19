@@ -12,7 +12,7 @@
         :class="state.mode === 'Programmer' ? 'grid-rows-[1fr_2fr]' : 'grid-rows-[1fr_2.5fr]'"
       >
         <calculator-display
-          :input="state.input"
+          :input="input"
           :preview="preview"
           :error="state.error"
           :is-animating="state.isAnimating"
@@ -26,7 +26,7 @@
 
         <calculator-buttons
           :mode="state.mode"
-          :input-length="state.input.length"
+          :input-length="input.length"
           :max-length="maxInputLength"
           :active-base="state.activeBase"
           :has-memory="hasMemoryValue"
@@ -45,29 +45,29 @@
   </BasePage>
 </template>
 
-
 <script setup>
-import { computed, watch, ref, onMounted, provide } from 'vue'
-import { useHistory } from '@/composables/useHistory'
-import { useMemory } from '@/composables/useMemory'
-import { usePanel } from '@/composables/usePanel'
-import { useInputValidation } from '@/composables/useValidation'
-import { useCalculatorState } from '@/composables/useCalculatorState'
-import { CalculatorController } from './MainCalculator'
-import { CalculatorFactory } from '@/services/factory/CalculatorFactory'
-import HistoryPanel from '@/layouts/calculators/main/HistoryPanel.vue'
-import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
-import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
-import BasePage from '@/components/base/BasePage.vue'
+import { computed, watch, shallowRef, onMounted, provide } from 'vue';
+import { useHistory } from '@/composables/useHistory';
+import { useMemory } from '@/composables/useMemory';
+import { usePanel } from '@/composables/usePanel';
+import { useCalculatorState } from '@/composables/useCalculatorState';
+import { CalculatorController } from './MainCalculator';
+import { CalculatorFactory } from '@/services/factory/CalculatorFactory';
+import HistoryPanel from '@/layouts/calculators/main/HistoryPanel.vue';
+import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue';
+import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue';
+import BasePage from '@/components/base/BasePage.vue';
+
 const props = defineProps({
   mode: { type: String, required: true },
   settings: { type: Object, required: true },
   isMobile: { type: Boolean, required: true },
-})
+});
 
-const { addToHistory } = useHistory()
-const { hasMemory, handleMemoryOperation } = useMemory()
-const { isValidForBase } = useInputValidation()
+// Use composables for state management
+const historyService = useHistory();
+const memoryService = useMemory();
+const history = usePanel('history-panel');
 
 const {
   state,
@@ -76,22 +76,18 @@ const {
   setAnimation,
   updateDisplayValues,
   setActiveBase
-} = useCalculatorState(props.mode)
+} = useCalculatorState(props.mode);
 
-const calculator = ref(CalculatorFactory.create(props.mode, props.settings))
-provide('calculator', computed(() => calculator.value))
+// Use shallowRef for better performance with objects
+const calculator = shallowRef(CalculatorFactory.create(props.mode, props.settings));
+ 
+// Provide calculator instance to child components
+provide('calculator', computed(() => calculator.value));
 
-const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH)
-const hasMemoryValue = computed(() => hasMemory(props.mode).value)
-
-const history = usePanel('history-panel')
-
-const openHistory = () => history.open()
-const toggleHistory = () => history.toggle()
-
-
+// Initialize controller with all dependencies
 const {
   preview,
+  input,
   animatedResult,
   handleClear,
   handleButtonClick,
@@ -103,12 +99,19 @@ const {
   setAnimation,
   updateDisplayValues,
   setActiveBase,
-  addToHistory,
-  handleMemoryOperation,
-  toggleHistory,
-  isValidForBase,
-})
+  historyService,
+  memoryService,
+  toggleHistory: history.toggle
+});
 
+// Memoized computed properties
+const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH);
+const hasMemoryValue = computed(() => memoryService.hasMemory(props.mode).value);
+
+// History panel methods
+const openHistory = () => history.open();
+
+// Load settings on mount
 onMounted(async () => {
   await props.settings.loadSettings();
 })

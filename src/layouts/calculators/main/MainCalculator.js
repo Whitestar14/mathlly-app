@@ -2,25 +2,36 @@ import { computed, nextTick, watch, shallowRef } from 'vue'
 import { useKeyboard } from '@/composables/useKeyboard'
 import { useEventListener, useMemoize, useThrottleFn } from '@vueuse/core'
 import { DisplayFormatter } from '@/services/display/DisplayFormatter'
+import { CalculatorUtils } from '@/utils/constants/CalculatorConstants'
 
 /**
  * Provides unified calculator functionality for MainCalculator component
+ * 
+ * @param {Object} options - Configuration options
+ * @param {Object} options.state - Calculator state
+ * @param {Object} options.calculator - Calculator instance
+ * @param {Function} options.updateState - Function to update calculator state
+ * @param {Function} options.setAnimation - Function to set animation state
+ * @param {Function} options.updateDisplayValues - Function to update display values
+ * @param {Function} options.setActiveBase - Function to set active base
+ * @param {Object} options.historyService - History service
+ * @param {Object} options.memoryService - Memory service
+ * @param {Function} options.toggleHistory - Function to toggle history panel
+ * @returns {Object} Calculator controller API
  */
 export function CalculatorController({
-  calculator,
   state,
+  calculator,
   updateState,
   setAnimation,
   updateDisplayValues,
   setActiveBase,
-  addToHistory,
-  handleMemoryOperation,
-  toggleHistory,
-  isValidForBase
+  historyService,
+  memoryService,
+  toggleHistory
 }) {
-  // Use throttled functions for better performance
-  const throttledUpdateDisplay = useThrottleFn(updateDisplayFn, 100)
-  
+  const displayRefresh = useThrottleFn(updateDisplayFn, 100)
+
   /**
    * Handle button clicks with performance optimizations
    */
@@ -66,12 +77,12 @@ export function CalculatorController({
         }
       } else if (state.mode === "Programmer") {
         // Update display values for programmer mode - throttled for performance
-        nextTick(() => throttledUpdateDisplay());
+        nextTick(() => displayRefresh());
       }
 
       // Add to history for standard mode calculations
       if (btn === "=" && state.mode !== "Programmer" && result.result) {
-        addToHistory(result.expression, result.result);
+        historyService.addToHistory(result.expression, result.result);
         setAnimation(result.result);
       }
     } catch (err) {
@@ -81,6 +92,21 @@ export function CalculatorController({
         error: "Operation failed"
       });
     }
+  };
+
+  /**
+   * Handle memory operations
+   * @param {Object} options - Memory operation options
+   * @returns {Object} Operation result
+   */
+  const handleMemoryOperation = ({ operation, mode, calculator, currentInput, activeBase }) => {
+    return memoryService.handleMemoryOperation({
+      operation,
+      mode,
+      calculator,
+      currentInput,
+      activeBase
+    });
   };
 
   /**
@@ -94,7 +120,7 @@ export function CalculatorController({
     });
 
     if (state.mode === 'Programmer') {
-      throttledUpdateDisplay();
+      displayRefresh();
     }
   };
 
@@ -151,25 +177,52 @@ export function CalculatorController({
   );
 
   /**
+   * Get formatting options from settings
+   */
+  const getFormattingOptions = () => {
+    return {
+      base: state.activeBase,
+      mode: state.mode,
+    };
+  };
+
+  /**
+   * Format text for display with centralized formatting logic
+   * @param {string} value - The value to format
+   * @returns {string} Formatted text
+   */
+  const formatDisplayText = useMemoize(
+    (value) => {
+      if (!value && value !== 0) return '0';
+      if (value === 'Error') return value;
+      
+      try {
+        return DisplayFormatter.format(value, getFormattingOptions());
+      } catch (err) {
+        console.error('Error formatting display text:', err);
+        return String(value);
+      }
+    },
+    { max: 100, ttl: 5000 }
+  );
+
+  /**
    * Computed preview value with proper formatting - using shallowRef for better performance
    */
   const preview = computed(() => {
     const rawPreview = calculatePreview(state.input, state.mode, state.activeBase);
     if (!rawPreview) return '';
     
-    try {
-      // Use DisplayFormatter for consistent formatting
-      return DisplayFormatter.format(rawPreview, {
-        base: state.activeBase,
-        mode: state.mode
-      });
-    } catch (err) {
-      console.error('Error formatting preview:', err);
-      return rawPreview.toString();
-    }
+    return formatDisplayText(rawPreview);
   });
 
-  // Use shallowRef for better performance
+  /**
+   * Computed formatted input based on settings
+   */
+  const input = computed(() => {
+    return formatDisplayText(state.input || '0');
+  });
+
   const mode = shallowRef(state.mode);
   const activeBase = shallowRef(state.activeBase);
 
@@ -182,7 +235,11 @@ export function CalculatorController({
     backspace: () => handleButtonClick('backspace'),
     input: (value) => {
       if (mode.value === 'Programmer') {
-        if (isValidForBase(value, activeBase.value)) {
+        // Allow operators and valid digits for the current base
+        if (CalculatorUtils.isOperator(value) || 
+            value === '(' || 
+            value === ')' ||
+            CalculatorUtils.isValidForBase(value, activeBase.value)) {
           handleButtonClick(value);
         }
       } else {
@@ -193,7 +250,6 @@ export function CalculatorController({
     toggleHistory
   });
 
-  // Watch for mode changes - optimized with shallowRef
   watch(
     () => state.mode,
     (newMode) => {
@@ -248,23 +304,15 @@ export function CalculatorController({
 
   const animatedResult = computed(() => {
     if (!state.animatedResult) return "";
-    
-    try {
-      return DisplayFormatter.format(state.animatedResult, {
-        base: state.activeBase,
-        mode: state.mode
-      });
-    } catch (err) {
-      return state.animatedResult;
-    }
+    return formatDisplayText(state.animatedResult);
   });
 
   return {
+    input,
+    preview,
+    animatedResult,
     handleButtonClick,
     handleClear,
     handleBaseChange,
-    updateDisplayFn: throttledUpdateDisplay,
-    preview,
-    animatedResult
   };
 }

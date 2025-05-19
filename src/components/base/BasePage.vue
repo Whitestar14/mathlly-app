@@ -28,11 +28,11 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeftIcon } from 'lucide-vue-next'
-import Button from '@/components/base/BaseButton.vue'
 import { useTitle } from '@/composables/useTitle'
-
+import Button from '@/components/base/BaseButton.vue'
 const props = defineProps({
   title: {
     type: String,
@@ -62,7 +62,8 @@ const props = defineProps({
 
 const router = useRouter()
 
-useTitle(props.title)
+useTitle(computed(() => props.title))
+
 const goBack = () => {
   router.go(-1)
 }

@@ -15,6 +15,10 @@ import Switch from "@/components/ui/ToggleBar.vue";
 import Button from "@/components/base/BaseButton.vue";
 import Collapsible from '@/components/base/BaseCollapsible.vue';
 
+defineOptions({
+  name: "SettingsPage"
+})
+
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const { toast } = useToast();

@@ -24,7 +24,7 @@ const routes = [
   },
   {
     path: '/info/update',
-    name: "What's New",
+    name: "Updates",
     component: () => import('@/layouts/info/UpdatePage.vue'),
     meta: { transition: 'fade', group: 'information' },
   },

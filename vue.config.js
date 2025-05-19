@@ -103,7 +103,6 @@ module.exports = defineConfig({
               drop_console: true,
             },
           },
-          extractComments: false,
         })
       ],
     },

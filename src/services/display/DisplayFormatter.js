@@ -22,6 +22,7 @@ export class DisplayFormatter {
    */
   static format(value, options = {}) {
     if (!value && value !== 0) return "0";
+    if (value === 'Error') return value;
 
     // Generate cache key
     const cacheKey = this.generateCacheKey(value, options);
@@ -232,62 +233,6 @@ export class DisplayFormatter {
     return result;
   }
 
-  /**
-   * Format display content by replacing HTML entities with symbols
-   * @param {string} content - Content to format
-   * @returns {string} Formatted content
-   */
-  static formatDisplayContent(content) {
-    if (!content) return '';
-    
-    // Generate cache key
-    const cacheKey = content;
-    
-    // Get the content cache
-    const contentCache = CacheManager.getCache(this.CACHE_NAMES.CONTENT, 30);
-    
-    // Check cache first
-    if (contentCache.has(cacheKey)) {
-      return contentCache.get(cacheKey);
-    }
-    
-    const result = content
-      // Basic operators
-      .replace(/&times;/g, "×")
-      .replace(/&divide;/g, "÷")
-      .replace(/&minus;/g, "−")
-      .replace(/&plusmn;/g, "±")
-      .replace(/&sum;/g, "∑")
-      .replace(/&prod;/g, "∏")
-      // Comparison
-      .replace(/&lt;=/g, "≤")
-      .replace(/&gt;=/g, "≥")
-      .replace(/&ne;/g, "≠")
-      .replace(/&equiv;/g, "≡")
-      // Greek letters (commonly used in math)
-      .replace(/&alpha;/g, "α")
-      .replace(/&beta;/g, "β")
-      .replace(/&delta;/g, "δ")
-      .replace(/&Delta;/g, "Δ")
-      .replace(/&pi;/g, "π")
-      .replace(/&sigma;/g, "σ")
-      // Set notation
-      .replace(/&isin;/g, "∈")
-      .replace(/&notin;/g, "∉")
-      .replace(/&cup;/g, "∪")
-      .replace(/&cap;/g, "∩")
-      // Other math symbols
-      .replace(/&radic;/g, "√")
-      .replace(/&infin;/g, "∞")
-      .replace(/&int;/g, "∫")
-      .replace(/&part;/g, "∂");
-      
-    // Cache the result
-    contentCache.set(cacheKey, result);
-    
-    return result;
-  }
-  
   /**
    * Clear all formatter caches
    */
