@@ -3,10 +3,6 @@
     id="sidebar"
     type="side"
     position="left"
-    :show-toggle="false"
-    :show-header="true"
-    :show-footer="true"
-    :draggable="true"
     :max-height-ratio="1"
     :default-desktop-state="true"
   >

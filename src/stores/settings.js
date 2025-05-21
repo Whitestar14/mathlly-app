@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS = {
       formatOctal: true,
     },
     syntaxHighlighting: true,
+    textSize: "normal",
   },
   calculator: {
     mode: 'Standard',
@@ -38,7 +39,7 @@ export const DEFAULT_SETTINGS = {
     checkForUpdates: true,
   },
   startup: {
-    navigation: 'home',
+    navigation: 'last-visited',
     lastVisitedPath: '/',
   }
 };
