@@ -40,16 +40,12 @@
           variant="ghost"
           @click="handleManualRetry"
           :disabled="isManualRetrying"
+          :loading="isManualRetrying && !isOffline"
           :aria-label="isOffline ? 'Retry Connection' : 'Try Loading Page Again'"
           class="w-full sm:w-auto"
         >
-          <template v-if="isManualRetrying && !isOffline"> <LoaderIcon class="h-4 w-4 animate-spin mr-2" />
-        Retrying...
-          </template>
-          <template v-else>
-        <RefreshCwIcon class="h-4 w-4" />
+        <RefreshCwIcon class="h-4 w-4" :class="[isManualRetrying && !isOffline && 'hidden']" />
         {{ isOffline ? 'Retry Connection' : 'Try Again' }}
-          </template>
         </Button>
         <Button
           variant="primary"
@@ -80,7 +76,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { HomeIcon, RefreshCwIcon, LoaderIcon } from 'lucide-vue-next'
+import { HomeIcon, RefreshCwIcon } from 'lucide-vue-next'
 import {
   clearRouteError,
   routeError, 

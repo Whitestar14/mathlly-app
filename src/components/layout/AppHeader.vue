@@ -35,7 +35,7 @@
           <div class="flex items-center justify-between gap-2">
             <!-- Keyboard Shortcuts -->
             <Button
-              v-if="!isMobile"
+              class="hidden md:flex"
               v-tippy="{content: 'Keyboard Shortcuts'}"
               variant="ghost"
               size="icon"
@@ -53,8 +53,7 @@
             >
               <component 
                 :is="menuIcon" 
-                class="h-5 w-5" 
-                :class="{ 'rotate-180': !isMobile }"
+                class="h-5 w-5 md:rotate-180" 
               />
             </Button>
           </div>

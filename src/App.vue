@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { shallowRef, ref, onErrorCaptured, onMounted } from 'vue';
+import { shallowRef, onErrorCaptured, onMounted } from 'vue';
 import { hasError } from "@/router/errorHandler"
 import { useRouter } from 'vue-router';
 import { useSettingsStore } from '@/stores/settings';
@@ -29,7 +29,7 @@ import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import UpdateNotification from '@/components/ui/UpdateNotification.vue';
 
-const error = ref(null);
+const error = shallowRef(null);
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const navigationComplete = shallowRef(false);
@@ -57,7 +57,6 @@ const redirect = async () => {
 }
 
 onMounted(async () => {
-  await settingsStore.loadSettings();
   redirect();
 });
 </script>

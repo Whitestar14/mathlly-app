@@ -55,12 +55,12 @@
     <!-- Footer -->
     <template #footer>
       <div v-if="showClearButton" class="flex justify-end">
-        <Button v-if="!isMobile" v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
-          class="text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
+        <Button v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
+          class="hidden md:flex text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
           @click="showClearConfirmation = true">
           <TrashIcon class="w-4 h-4" />
         </Button>
-        <Button v-else variant="destructive" class="w-full" @click="showClearConfirmation = true">
+        <Button variant="destructive" class="w-full md:hidden" @click="showClearConfirmation = true">
           <TrashIcon class="w-4 h-4 mr-2" />
           Clear History
         </Button>

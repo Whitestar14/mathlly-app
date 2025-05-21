@@ -7,6 +7,8 @@ const routes = [
   {
     path: '/',
     name: 'Home',
+    // use the redirect option to conditionally reroute the loaded route into the specified
+    // startup route. gracefully ensure that the logic does not aggressively prevent loading into homepage
     component: () => import('@/layouts/navigation/HomePage.vue'),
     meta: { transition: 'fade' },
   },

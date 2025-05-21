@@ -11,7 +11,7 @@
       <div class="flex items-center gap-2 justify-between">
         <slot name="header-actions" />
         <Button
-          v-if="isMobile"
+          class="md:hidden"
           variant="ghost"
           size="icon"
           @click="$emit('close')"
