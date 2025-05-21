@@ -13,18 +13,39 @@
    ========================================================================== */
 @layer base {
   :root {
-    @apply font-sans font-normal text-[0.95rem] sm:text-base;
+    @apply font-sans font-normal;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-medium text-gray-900 dark:text-gray-100;
+  .ts-small {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  .ts-normal {
+    font-size: 0.975rem;
+  }
+  .ts-medium {
+    font-size: 1rem; /* 16px */
+  }
+
+  .ts-large {
+    font-size: 1.125rem; /* 18px */
   }
 
   p {
-    @apply text-[0.95rem];
+    @apply text-[0.875rem];
   }
 
-  a, input {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-medium text-gray-900 dark:text-gray-100;
+  }
+
+  a,
+  input {
     @apply focus-colors;
   }
 
@@ -37,7 +58,8 @@
   }
 
   /* Scrollbar styles */
-  body, html {
+  body,
+  html {
     scrollbar-width: thin;
     scroll-behavior: smooth;
     scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
@@ -46,20 +68,35 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background-color: rgba(156, 163, 175, 0.7); }
-  .dark ::-webkit-scrollbar-thumb { background-color: rgba(107, 114, 128, 0.5); }
-  .dark ::-webkit-scrollbar-thumb:hover { background-color: rgba(107, 114, 128, 0.7); }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(156, 163, 175, 0.7);
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: rgba(107, 114, 128, 0.5);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(107, 114, 128, 0.7);
+  }
 
   /* Logo SVG styling */
   svg {
     #logo-background {
-      @apply !fill-gray-100 dark:!fill-gray-800 !stroke-gray-200 dark:!stroke-gray-700
+      @apply !fill-gray-100 dark:!fill-gray-800 !stroke-gray-200 dark:!stroke-gray-700;
     }
 
-    #logo-asterisk, #logo-slash {
+    #logo-asterisk,
+    #logo-slash {
       @apply !fill-indigo-600 dark:!fill-indigo-400;
     }
 
@@ -189,7 +226,7 @@
     margin-right: 0.25rem;
   }
 
-    /* Scrollbar hiding utility */
+  /* Scrollbar hiding utility */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -211,15 +248,18 @@
   @apply border-t-gray-800 dark:border-t-gray-100;
 }
 
-.tippy-box[data-theme~='custom'][data-placement^='bottom'] > .tippy-arrow::before {
+.tippy-box[data-theme~='custom'][data-placement^='bottom']
+  > .tippy-arrow::before {
   @apply border-b-gray-800 dark:border-b-gray-100;
 }
 
-.tippy-box[data-theme~='custom'][data-placement^='left'] > .tippy-arrow::before {
+.tippy-box[data-theme~='custom'][data-placement^='left']
+  > .tippy-arrow::before {
   @apply border-l-gray-800 dark:border-l-gray-100;
 }
 
-.tippy-box[data-theme~='custom'][data-placement^='right'] > .tippy-arrow::before {
+.tippy-box[data-theme~='custom'][data-placement^='right']
+  > .tippy-arrow::before {
   @apply border-r-gray-800 dark:border-r-gray-100;
 }
 
@@ -268,12 +308,12 @@
     );
     background-size: 16px 16px;
   }
-  
+
   .z-5 {
     z-index: 5;
   }
 
   .focus-colors {
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-indigo-500 dark:focus:ring-indigo-300
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-indigo-500 dark:focus:ring-indigo-300;
   }
 }

@@ -20,6 +20,7 @@ db.version(4).stores({
             formatOctal: settings.formatOctal,
           },
           syntaxHighlighting: settings.syntaxHighlighting,
+          textSize: settings.textSize,
         },
         calculator: {
           mode: settings.mode,
@@ -62,6 +63,7 @@ db.on("ready", async () => {
           formatOctal: true,
         },
         syntaxHighlighting: true,
+        textSize: "normal"
       },
       calculator: {
         mode: 'Standard',

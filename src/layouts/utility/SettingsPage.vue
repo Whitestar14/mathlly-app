@@ -14,6 +14,8 @@ import Select from "@/components/ui/SelectBar.vue";
 import Switch from "@/components/ui/ToggleBar.vue";
 import Button from "@/components/base/BaseButton.vue";
 import Collapsible from '@/components/base/BaseCollapsible.vue';
+// Import RadioGroup from radix-vue for the segmented control
+import { RadioGroupRoot, RadioGroupItem } from 'radix-vue';
 
 defineOptions({
   name: "SettingsPage"
@@ -26,10 +28,10 @@ const searchQuery = ref('');
 const showUnsavedChangesModal = ref(false);
 
 const settingsManifest = [
-  { id: 'display', title: 'Display Settings', icon: 'MonitorIcon', keywords: ['precision', 'decimal places', 'fractions', 'syntax highlighting', 'number formatting', 'thousands separator', 'comma', 'binary', 'hexadecimal', 'octal', 'font', 'appearance'] },
+  { id: 'display', title: 'Display Settings', icon: 'MonitorIcon', keywords: ['precision', 'decimal places', 'fractions', 'syntax highlighting', 'number formatting', 'thousands separator', 'comma', 'binary', 'hexadecimal', 'octal', 'font', 'appearance', 'text size'] },
   { id: 'calculator', title: 'Calculator Mode', icon: 'CalculatorIcon', keywords: ['mode', 'standard', 'programmer', 'scientific', 'default calculator'] },
   { id: 'startup', title: 'Startup Preferences', icon: 'PowerIcon', keywords: ['launch', 'open page', 'initial screen', 'home', 'calculator page', 'last visited', 'boot'] },
-  { id: 'themes', title: 'Themes & Preferences', icon: 'PaletteIcon', keywords: ['color theme', 'appearance', 'light mode', 'dark mode', 'system theme', 'animations', 'disable transitions', 'visuals'] }
+  { id: 'themes', title: 'Themes & Preferences', icon: 'PaletteIcon', keywords: ['color theme', 'appearance', 'light mode', 'dark mode', 'system theme', 'animations', 'disable transitions', 'visuals', 'text size'] }
 ];
 
 const filteredManifest = computed(() =>
@@ -55,6 +57,7 @@ const storeSnapshot = computed(() => ({
       formatOctal: settingsStore.display.formatting.formatOctal,
     },
     syntaxHighlighting: settingsStore.display.syntaxHighlighting,
+    textSize: settingsStore.display.textSize
   },
   calculator: {
     mode: settingsStore.calculator.mode,
@@ -77,6 +80,12 @@ const precisionOptions = Array.from({ length: 11 }, (_, i) => ({ value: i, label
 const modeOptions = [{ value: "Standard", label: "Standard" }, { value: "Programmer", label: "Programmer" }];
 const themeOptions = [{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }, { value: "system", label: "System" }];
 const startupOptions = [{ value: 'home', label: 'Home' }, { value: 'calculator', label: 'Calculator Page' }, { value: 'last-visited', label: 'Last Visited Page' }];
+const textSizeOptions = [
+  { value: 'small', label: 'Small' },
+  { value: 'normal', label: 'Normal'},
+  { value: 'medium', label: 'Medium' },
+  { value: 'large', label: 'Large' }
+];
 
 onMounted(async () => {
   await settingsStore.loadSettings();
@@ -168,6 +177,39 @@ const saveSettings = async () => {
               </p>
             </div>
             
+            <!-- Add Text Size Segmented Control -->
+            <div>
+              <label
+                for="textSize"
+                class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block"
+              >Text Size</label>
+              <div class="mt-2">
+                <RadioGroupRoot 
+                  v-model="localSettings.display.textSize" 
+                  class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-800 p-1"
+                >
+                  <div class="flex space-x-1">
+                    <RadioGroupItem
+                      v-for="option in textSizeOptions"
+                      :key="option.value"
+                      :value="option.value"
+                      class="rounded-md px-3 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      :class="[
+                        localSettings.display.textSize === option.value 
+                          ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' 
+                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      ]"
+                    >
+                      {{ option.label }}
+                    </RadioGroupItem>
+                  </div>
+                </RadioGroupRoot>
+              </div>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Adjust the size of text throughout the application
+              </p>
+            </div>
+          
             <div class="flex items-center justify-between py-2">
               <div class="max-w-[80%]">
                 <label
@@ -251,6 +293,7 @@ const saveSettings = async () => {
         </div>
       </Collapsible>
 
+      <!-- Other collapsible sections remain unchanged -->
       <Collapsible
         v-if="isRendered('calculator')"
         id="calculator"
@@ -383,4 +426,3 @@ const saveSettings = async () => {
     </BaseModal>
   </div>
 </template>
-

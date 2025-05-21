@@ -1,30 +1,44 @@
 <template>
+  <!-- Backdrop (mobile only) -->
+<Transition :name="animationEnabled ? 'fade' : ''">
   <div
     v-show="isOpen"
-    class="fixed inset-x-0 z-20"
-  >
+    class="fixed inset-0 z-20"
+    :class="backdropClasses"
+    aria-hidden="true"
+    @click="$emit('close')"
+  />
+</Transition>
+
+  <div v-show="isOpen" class="fixed inset-x-0 z-20">
     <div
-      ref="panel"
-      class="bg-white dark:bg-gray-800 rounded-t-xl fixed inset-x-0 bottom-0 overflow-hidden transition-transform duration-300 ease-out"
-      :class="{ 'transition-none': isDragging }"
-      :style="{
-        height: `${panelHeight}px`,
-        transform: `translateY(${translateY}px)`,
-      }"
+      ref="panelRef"
+      class="bg-white dark:bg-gray-900 fixed inset-x-0 bottom-0 overflow-hidden"
+      :class="mobilePanelClasses"
+      :style="mobilePanelStyle"
     >
-      <!-- Draggable Handle -->
-      <div
-        ref="handle"
-        class="w-full absolute h-6 flex items-center justify-center touch-manipulation"
-        :class="[
-          draggable ? 'cursor-grab' : '',
-          isDragging ? 'cursor-grabbing' : ''
-        ]"
+      <!-- Expand/Minimize Button -->
+      <button
+        v-if="!(maxHeightRatio === 1)"
+        class="absolute right-14 top-3.5 p-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        @click="$emit('toggle')"
+        aria-label="Toggle panel expansion"
       >
-        <div v-if="draggable" class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+        <Maximize2 v-if="!isExpanded" class="w-4 h-4" />
+        <Minimize2 v-else class="w-4 h-4" />
+      </button>
+
+      <!-- Draggable Handle - Hide when expanded -->
+      <div
+        ref="handleRef"
+        class="w-full absolute h-6 flex items-center justify-center touch-manipulation"
+        :class="handleClasses"
+        aria-label="Drag handle to resize panel"
+      >
+        <div class="w-10 h-1 pb-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
       </div>
 
-      <div class="panel-content h-full overflow-y-auto" :class="mainClass">
+      <div class="h-full" :class="mainClass">
         <PanelContent
           :title="title"
           :show-header="showHeader"
@@ -49,29 +63,69 @@
 </template>
 
 <script setup>
+import { computed, ref, onMounted, watch } from 'vue';
+import { Maximize2, Minimize2 } from 'lucide-vue-next';
 import PanelContent from '@/components/base/PanelContent.vue';
-// --- Props ---
-defineProps({
-  // State & Content Props
+
+const props = defineProps({
   isOpen: { type: Boolean, default: false },
   isMobile: { type: Boolean, default: false },
   title: { type: String, default: '' },
   showHeader: { type: Boolean, default: true },
   showFooter: { type: Boolean, default: true },
-  contentClass: { type: String, default: '' },
   mainClass: { type: String, default: '' },
-
-  // Draggable State Props
-  draggable: { type: Boolean, default: false },
+  contentClass: { type: String, default: '' },
+  panelRef: { type: Object, default: null },
+  handleRef: { type: Object, default: null },
+  isExpanded: { type: Boolean, default: false },
   panelHeight: { type: Number, default: 300 },
   translateY: { type: Number, default: 0 },
   isDragging: { type: Boolean, default: false },
-
-  // Refs passed from parent (usePanel)
-  panel: { type: Object, default: null },
-  handle: { type: Object, default: null },
+  maxHeightRatio: { type: Number, default: 0.8 },
+  animationEnabled : { type: Boolean, default: false },
 });
 
-// --- Emits ---
-defineEmits(['close']);
+defineEmits(['close', 'toggle']);
+
+const panelRef = ref(null);
+const handleRef = ref(null);
+
+onMounted(updateRefs);
+
+watch([panelRef, handleRef], updateRefs);
+
+function updateRefs() {
+  if (props.panelRef && panelRef.value) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.panelRef.value = panelRef.value;
+  }
+  
+  if (props.handleRef && handleRef.value) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.handleRef.value = handleRef.value;
+  }
+}
+
+const mobilePanelClasses = computed(() => [
+  props.isExpanded || props.maxHeightRatio === 1 ? 'rounded-none' : 
+  props.animationEnabled ? 'transition-[rounded] duration-300 rounded-t-xl' : 'rounded-t-xl'
+]);
+
+const mobilePanelStyle = computed(() => ({
+  height: `${props.panelHeight}px`,
+  transform: `translateY(${props.translateY}px)`,
+  transition: props.isDragging ? '' : props.animationEnabled ? 'transform 0.3s ease-out, height 0.3s ease-out' : '',
+}));
+
+const handleClasses = computed(() => [
+  { 'cursor-grabbing': props.isDragging },
+  props.isExpanded || props.maxHeightRatio === 1 ? 'pointer-events-none opacity-0' : 'cursor-grab'
+]);
+
+const backdropClasses = computed(() => [
+  props.isDragging ? 'bg-black/20' : 'bg-black/40',
+  props.animationEnabled
+    ? 'backdrop-blur-sm transition-colors duration-300'
+    : 'bg-black/50',
+]);
 </script>

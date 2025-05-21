@@ -8,7 +8,7 @@ import { useDraggable } from '@/utils/misc/draggable';
  * @param {string} options.storageKey - Key for localStorage persistence.
  * @param {boolean} [options.defaultDesktopState=true] - Default open state on desktop.
  * @param {boolean} options.initialIsMobile - Initial mobile state.
- * @param {boolean} [options.draggable=false] - Enable mobile bottom sheet dragging.
+ * @param {function} [options.animation] - Function indicating if sheet animation is enabled.
  * @param {number} [options.maxHeightRatio=0.8] - Max height ratio for mobile draggable panel.
  * @param {number} [options.snapThreshold=0.3] - Snap threshold for mobile draggable panel.
  * @param {number} [options.maxHeight] - Optional fixed max height in pixels for mobile draggable panel.
@@ -19,7 +19,7 @@ export function createPanel(options = {}) {
     storageKey,
     defaultDesktopState = false,
     initialIsMobile = false,
-    draggable = false,
+    animation = () => false,
     maxHeightRatio = 0.8,
     snapThreshold = 0.3,
     maxHeight,
@@ -76,8 +76,7 @@ export function createPanel(options = {}) {
     preferences.value[deviceContext.value].isOpen = isOpen.value;
   }, 300);
 
-  // Initialize draggable composable only if enabled
-  const draggableApi = draggable ? useDraggable({
+  const draggable = useDraggable({
     panel, 
     handle, 
     isOpen,
@@ -85,7 +84,7 @@ export function createPanel(options = {}) {
     maxHeightRatio,
     snapThreshold, 
     maxHeight,
-  }) : null;
+  });
 
   /**
    * Closes the panel, handling animations if applicable.
@@ -95,8 +94,8 @@ export function createPanel(options = {}) {
   const close = async (isMobile = currentIsMobile.value) => {
     currentIsMobile.value = isMobile;
 
-    if (isMobile && draggable && draggableApi?.animateClose) {
-      await draggableApi.animateClose();
+    if (isMobile && animation() && draggable?.animateClose) {
+      await draggable.animateClose();
     } else {
       isOpen.value = false;
     }
@@ -116,11 +115,11 @@ export function createPanel(options = {}) {
     isOpen.value = true;
     updatePreferences();
 
-    if (isMobile && draggable && draggableApi) {
+    if (isMobile && animation() && draggable) {
       await nextTick();
-      draggableApi.animateOpen?.();
+      draggable.animateOpen?.();
 
-      const success = draggableApi.setupDraggable?.();
+      const success = draggable.setupDraggable?.();
       if (!success) {
         console.warn(`[usePanelUnified ${storageKey}]: Draggable setup failed (handle likely not found).`);
       }
@@ -138,7 +137,7 @@ export function createPanel(options = {}) {
     if (expanded) {
       if (!currentIsMobile.value || !isOpen.value) return;
       isExpanded.value = !isExpanded.value;
-      if (draggableApi) {
+      if (draggable) {
         nextTick(updatePanelDimensions);
       }
       updatePreferences();
@@ -158,7 +157,7 @@ export function createPanel(options = {}) {
     isOpen.value = newIsMobile ? false : preferences.value.desktop.isOpen;
     updatePreferences();
 
-    if (draggable && draggableApi) {
+    if (draggable) {
       nextTick(updatePanelDimensions);
     }
   };
@@ -168,7 +167,7 @@ export function createPanel(options = {}) {
    * Debounced to prevent excessive calculations.
    */
   const updatePanelDimensions = useDebounceFn(() => {
-    draggableApi?.updatePanelDimensions?.();
+    draggable?.updatePanelDimensions?.();
   }, 100);
 
   // Single watcher for state changes to reduce reactivity overhead
@@ -186,10 +185,10 @@ export function createPanel(options = {}) {
     handleResize,
     updatePanelDimensions,
 
-    isDragging: draggableApi?.isDragging ?? shallowRef(false),
-    translateY: draggableApi?.translateY ?? shallowRef(0),
-    panelHeight: draggableApi?.panelHeight ?? shallowRef(0),
-    maxPanelHeight: draggableApi?.maxPanelHeight ?? computed(() => 0),
+    isDragging: draggable?.isDragging ?? shallowRef(false),
+    translateY: draggable?.translateY ?? shallowRef(0),
+    panelHeight: draggable?.panelHeight ?? shallowRef(0),
+    maxPanelHeight: draggable?.maxPanelHeight ?? computed(() => 0),
   };
 
   return api;
@@ -352,10 +351,10 @@ export function usePanelContext() {
  * Returns a stable API object that dynamically accesses the underlying panel's state/methods.
  * @param {string} id - The unique identifier for the panel.
  * @param {object} [options={}] - Configuration options for the panel.
- * @param {boolean} [api=false] - Determines returning api getters or default setup object
+ * @param {boolean} [api=true] - Determines returning api getters or default setup object
  * @returns {object} A stable panel API object.
  */
-export function usePanel(id, options = {}, api = false) {
+export function usePanel(id, options = {}, api = true) {
   if (!id) {
     console.warn("usePanel() requires an id");
     return {};
@@ -370,11 +369,11 @@ export function usePanel(id, options = {}, api = false) {
     return actions.getInstance(id);
   } 
   
-  if (hasRegistrationOptions && !state.panels[id] && api) {
+  if (hasRegistrationOptions && !state.panels[id] && !api) {
     return actions.registerPanel(id, options);
   } 
   
-  if (!hasRegistrationOptions && !api) {
+  if (!hasRegistrationOptions && api) {
     // Create a lightweight API object with computed getters
     const panel = {
       get isOpen() {

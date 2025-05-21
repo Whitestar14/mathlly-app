@@ -6,7 +6,6 @@
     position="left"
     :max-height-ratio="0.8" 
     :snap-threshold="0.4"
-    :draggable="true"
     :default-desktop-state="false"
   >
     <!-- Content -->

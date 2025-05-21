@@ -1,14 +1,14 @@
 <template>
   <Transition name="slide-out">
     <div
-      class="relative md:flex flex-col flex-auto overflow-hidden hidden transition-[width] duration-300 ease-in-out bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+      class="relative md:flex h-full flex-col flex-auto overflow-hidden hidden transition-[width] duration-300 ease-in-out bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
       :class="[
         isOpen ? 'w-64' : 'w-10',
         position === 'left' ? 'border-l' : 'border-r',
       ]"
     >
       <div
-        class="panel-content absolute inset-y-0 right-0 transition-opacity duration-300 max-h-[100vh]"
+        class="absolute inset-y-0 right-0 transition-opacity duration-300 max-h-[100vh]"
         :class="[
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
           mainClass,
@@ -35,7 +35,6 @@
       </div>
 
       <!-- Toggle button (desktop only) -->
-      <div v-if="showToggle">
         <Button
           v-tippy="{
             content: isOpen ? 'Hide Panel' : 'Show Panel',
@@ -53,7 +52,6 @@
           />
         </Button>
       </div>
-    </div>
   </Transition>
 </template>
 
@@ -68,16 +66,9 @@ defineProps({
   title: { type: String, default: '' },
   showHeader: { type: Boolean, default: true },
   showFooter: { type: Boolean, default: true },
-  showToggle: { type: Boolean, default: true },
   contentClass: { type: String, default: '' },
   mainClass: { type: String, default: '' },
 });
 
 defineEmits(['close', 'toggle']);
 </script>
-
-<style scoped>  
-.panel-content {
-  @apply flex flex-col w-full;
-}
-</style>

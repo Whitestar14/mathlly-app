@@ -1,6 +1,6 @@
 <template>
   <div :class="[
-    isToolLayout ? 'flex flex-col flex-grow' : 'min-h-screen',
+    isToolLayout ? 'flex flex-col flex-grow' : 'h-full',
     'bg-gray-50/50 dark:bg-gray-900 text-gray-900 dark:text-gray-100'
   ]">
     <header v-if="showHeader"
