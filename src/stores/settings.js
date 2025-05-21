@@ -120,29 +120,6 @@ export const useSettingsStore = defineStore('settings', {
         throw error;
       }
     },
-
-    async updateLastVisitedPath(path) {
-      const ignorePaths = ['/error', '/', '/:pathMatch(.*)*', '/settings'];
-      if (!ignorePaths.includes(path) && !path.includes('error')) {
-        await this.updateSetting('startup.lastVisitedPath', path);
-      }
-    },
-
-    getStartupPath() {
-      switch (this.startup_navigation) {
-        case 'calculator':
-          return '/calculator';
-        case 'last-visited':
-          return this.startup_lastVisitedPath &&
-            this.startup_lastVisitedPath !== '/' &&
-            !this.startup_lastVisitedPath.includes('error')
-            ? this.startup_lastVisitedPath
-            : '/calculator';
-        case 'home':
-        default:
-          return '/';
-      }
-    },
   },
 });
 
