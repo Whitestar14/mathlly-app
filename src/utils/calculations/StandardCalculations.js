@@ -42,11 +42,9 @@ export class StandardCalculations {
 
     try {
       // Try to display as fraction if enabled in settings
-      if (this.settings.useFractions) {
-        const frac = fraction(result);
-        if (frac.d <= 10000) {
-          return Number(frac.d) === 1 ? `${frac.n}` : `${frac.n}/${frac.d}`;
-        }
+      if (this.settings.display.useFractions) {
+        // feature: Add an option to enable mixed fraction conversion
+        return fraction(result).toFraction(/** true */);
       }
 
       // Handle special cases for very large or very small numbers
@@ -55,7 +53,7 @@ export class StandardCalculations {
         (Math.abs(result) < 1e-7 && result !== 0)
       ) {
         return format(result, {
-          precision: this.settings.precision,
+          precision: this.settings.display.precision,
           notation: "exponential",
         });
       }
@@ -68,7 +66,7 @@ export class StandardCalculations {
 
       // For decimal numbers, respect precision but trim unnecessary zeros
       const formattedDecimal = format(result, {
-        precision: this.settings.precision,
+        precision: this.settings.display.precision,
         notation: "fixed",
       });
 

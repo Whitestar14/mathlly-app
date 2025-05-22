@@ -6,7 +6,6 @@
     position="left"
     :max-height-ratio="0.8" 
     :snap-threshold="0.4"
-    :draggable="true"
     :default-desktop-state="false"
   >
     <!-- Content -->
@@ -16,31 +15,31 @@
         <ScrollAreaViewport class="h-full w-full p-3">
           <!-- History Items List -->
           <TransitionGroup v-if="!isProgrammerMode && historyItems.length > 0" tag="div" class="space-y-2"
-            name="history-list" @before-enter="onBeforeEnter" @enter="onEnter" @leave="onLeave">
+            name="history-list" @before-enter="historyAnimation.onBeforeEnter" @enter="historyAnimation.onEnter" @leave="historyAnimation.onLeave">
             <history-item v-for="(item, index) in historyItems" :key="item.id" :item="item" :is-mobile="isMobile"
               :selected-id="selectedItemId" :data-index="index" @select="handleSelectItem" @delete="handleDelete"
               @copy="copyItem" @copy-json="copyAsJson" />
           </TransitionGroup>
 
-          <!-- Empty State -->
-          <div v-show="!historyItems.length || isProgrammerMode"
-            class="text-center text-sm py-4 flex flex-col items-center justify-center h-full">
-            <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 min-w-[80%]">
-              <div v-show="isProgrammerMode">
-                <p class="flex justify-center items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
-                  History is disabled in <kbd>Programmer Mode</kbd>
-                </p>
-              </div>
-              <div v-show="!isProgrammerMode">
-                <p class="text-gray-500 dark:text-gray-400">
-                  No history items yet
-                </p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  Your calculations will appear here
-                </p>
-              </div>
+        <div v-show="!historyItems.length || isProgrammerMode"
+          class="text-center py-4 flex flex-col items-center justify-center h-full">
+          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
+            <div v-show="isProgrammerMode">
+              <p class="flex justify-center text-sm items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
+                History is disabled in <kbd>Programmer Mode</kbd>
+              </p>
+            </div>
+
+            <div v-show="!isProgrammerMode">
+              <p class="text-gray-500 dark:text-gray-400 font-medium">
+                No history items yet
+              </p>
+              <p class="text-gray-400 dark:text-gray-500 text-xs">
+                Your calculations will appear here as you work
+              </p>
             </div>
           </div>
+        </div>
         </ScrollAreaViewport>
 
         <!-- Scrollbar -->
@@ -56,12 +55,12 @@
     <!-- Footer -->
     <template #footer>
       <div v-if="showClearButton" class="flex justify-end">
-        <Button v-if="!isMobile" v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
-          class="text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
+        <Button v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
+          class="hidden md:flex text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
           @click="showClearConfirmation = true">
           <TrashIcon class="w-4 h-4" />
         </Button>
-        <Button v-else variant="destructive" class="w-full" @click="showClearConfirmation = true">
+        <Button variant="destructive" class="w-full md:hidden" @click="showClearConfirmation = true">
           <TrashIcon class="w-4 h-4 mr-2" />
           Clear History
         </Button>
@@ -70,8 +69,7 @@
   </BasePanel>
   
   <!-- Clear confirmation modal -->
-  <BaseModal :open="showClearConfirmation" description="confirmation-dialog"
-    @update:open="showClearConfirmation = $event">
+  <BaseModal v-model:open="showClearConfirmation" description="confirmation-dialog">
     <template #title>
       <div class="flex items-center">
         <AlertTriangleIcon class="h-5 w-5 text-red-500 dark:text-gray-300 mr-2" />
@@ -100,7 +98,7 @@ import Button from "@/components/base/BaseButton.vue"
 import BaseModal from "@/components/base/BaseModal.vue"
 import BasePanel from "@/components/base/BasePanel.vue"
 import { useHistory } from "@/composables/useHistory"
-import { useHistoryAnimation } from "@/composables/useHistoryAnimation"
+import { useAnimation } from "@/composables/useAnimation"
 import { useToast } from "@/composables/useToast"
 import { useClipboard } from "@vueuse/core"
 import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from "radix-vue"
@@ -118,11 +116,23 @@ const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryIt
 
 // Composables
 const { historyItems, deleteItem, clearAll, loadHistory } = useHistory()
-const { onBeforeEnter, onEnter, onLeave, setInitialLoad } = useHistoryAnimation()
 const { toast } = useToast()
 const { copy } = useClipboard()
+const { setInitialAnimation, createListAnimation } = useAnimation()
 
-// Local state
+// Create history animation with custom options
+const historyAnimation = createListAnimation({
+  initialDelay: 50,
+  initialDuration: 400,
+  enterTransform: [-20, 0],
+  leaveTransform: [0, 80],
+  leaveAxis: 'x',
+  moveDuration: 300,
+  moveEasing: 'easeOutQuad',
+  moveDelay: 150
+})
+
+// Local state 
 const selectedItemId = ref(null)
 const showClearConfirmation = ref(false)
 
@@ -136,9 +146,9 @@ watch(
   async (isOpen) => {
     if (isOpen && !isProgrammerMode.value) {
       // Reset animation state when panel opens
-      setInitialLoad(true)
+      setInitialAnimation(true)
       await loadHistory()
-      setTimeout(() => setInitialLoad(false), 500)
+      setTimeout(() => setInitialAnimation(false), 500)
     }
   },
   { immediate: true },
@@ -168,16 +178,13 @@ const handleSelectItem = (item) => {
     result: item.result,
   });
 
-  // Close the panel
-  emit('history-close');
+  if (props.isMobile) emit('history-close');
 };
 
-// Handle item deletion
 const handleDelete = async (id) => {
   await deleteItem(id)
 }
 
-// Handle clearing all history
 const handleClear = async () => {
   await clearAll()
   showClearConfirmation.value = false
@@ -187,7 +194,6 @@ const handleClear = async () => {
   })
 }
 
-// Copy item functionality
 const copyItem = (item) => {
   copy(`${item.expression} = ${item.result}`)
   toast({

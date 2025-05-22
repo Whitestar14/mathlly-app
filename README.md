@@ -1,4 +1,4 @@
-![mathlly-banner](./public/mathlly-social.png)
+![mathlly-banner](./public/img/socials/mathlly-github.png)
 
 # Mathlly - Whitestar Studios
 Mathlly is a sophisticated, developer-oriented calculator application built with Vue.js that combines powerful mathematical capabilities with an intuitive user interface. Designed for both everyday calculations and specialized developer needs, Mathlly offers multiple calculation modes, real-time base conversions, and advanced mathematical operations.

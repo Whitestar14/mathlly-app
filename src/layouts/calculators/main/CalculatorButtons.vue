@@ -1,4 +1,3 @@
-<!-- CalculatorButtons.vue -->
 <template>
   <Suspense>
     <!-- Main Content -->
@@ -74,11 +73,6 @@ const modeComponent = computed(() => {
   }
 });
 
-const handleButtonClick = (value) => {
-  emit('button-click', value);
-};
-
-const handleClear = () => {
-  emit('clear');
-};
+const handleButtonClick = (value) => emit('button-click', value);
+const handleClear = () => emit('clear');
 </script>

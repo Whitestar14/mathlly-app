@@ -1,7 +1,7 @@
 <template>
   <BaseModal 
-    :open="isOpen"
-    @update:open="$emit('update:isOpen', $event)"
+    :open="modelValue"
+    @update:open="$emit('update:modelValue', $event)"
   >
     <template #title>
       Welcome to Mathlly Beta
@@ -69,13 +69,13 @@ import { ref } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 
 defineProps({
-  isOpen: {
+  modelValue: {
     type: Boolean,
     required: true,
   },
 });
 
-const emit = defineEmits(["update:isOpen", "close"]);
+const emit = defineEmits(["update:modelValue"]);
 
 const features = [
   "This is a beta version and some features might be experimental",
@@ -89,6 +89,6 @@ const handleClose = () => {
   if (dontShowAgain.value) {
     localStorage.setItem("mathlly-welcome-shown", "true");
   }
-  emit("close");
+  emit('update:modelValue', false);
 };
 </script>

@@ -3,7 +3,7 @@
   .calc-btn {
     @apply font-mono text-xl font-semibold rounded-lg transition-transform duration-100 ease-in-out px-3 py-2
            active:scale-[0.985] active:opacity-80 
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:bg-inherit;
+           disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:bg-inherit;
   }
 
   .calc-btn-grid {
@@ -24,13 +24,9 @@
   }
 
   .calc-operator-btn {
-    @apply bg-indigo-400 text-white hover:bg-indigo-500 
-         dark:bg-gray-500 dark:text-white dark:hover:bg-gray-400
+    @apply bg-indigo-500/85 text-white hover:bg-indigo-500 
+         dark:bg-gray-500 dark:text-white dark:hover:bg-gray-500/85
          disabled:hover:bg-indigo-400 disabled:dark:hover:bg-gray-500;
-  }
-
-  .calc-special-btn-ac {
-    @apply bg-red-500 text-white hover:bg-red-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-500;
   }
 
   .calc-memory-btn {

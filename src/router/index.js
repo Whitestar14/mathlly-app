@@ -1,100 +1,150 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 import { setupRouteErrorHandling, routeError, routePath } from './errorHandler';
+import db from '@/data/db';
+
+let isInitialNavigation = true;
 
 const routes = [
-  // Home route
   {
     path: '/',
-    name: 'Home',
+    name: 'home',
     component: () => import('@/layouts/navigation/HomePage.vue'),
     meta: { transition: 'fade' },
   },
-
-  // Calculator routes
   {
     path: '/calculator',
-    name: 'Calculator',
-    component: () => import('@/layouts/calculators/MainCalculator.vue'),
+    name: 'calculator',
+    component: () => import('@/layouts/calculators/main/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' },
   },
-
-  // Tools routes
   {
     path: '/tools/base64',
-    name: 'Base64',
+    name: 'base64',
     component: () => import('@/layouts/tools/Base64Tool.vue'),
     meta: { transition: 'fade', group: 'tools' },
   },
-
-  // Information routes
   {
     path: '/info/update',
-    name: "What's New",
+    name: 'updates',
     component: () => import('@/layouts/info/UpdatePage.vue'),
     meta: { transition: 'fade', group: 'information' },
   },
   {
     path: '/info/about',
-    name: 'About',
+    name: 'about',
     component: () => import('@/layouts/info/AboutPage.vue'),
     meta: { transition: 'fade', group: 'information' },
   },
-
-  // Utility routes
   {
     path: '/settings',
-    name: 'Settings',
+    name: 'settings',
     component: () => import('@/layouts/utility/SettingsPage.vue'),
     meta: { transition: 'fade', group: 'utility' },
   },
   {
     path: '/feedback',
-    name: 'Feedback',
+    name: 'feedback',
     component: () => import('@/layouts/utility/FeedbackPage.vue'),
     meta: { transition: 'fade', group: 'utility' },
   },
   {
     path: '/error',
-    name: 'Error',
-    component: () => import('@/layouts/navigation/ErrorFallback.vue'),
+    name: 'error',
+    component: ErrorFallback,
     props: () => ({
-      error: routeError.value, // Pass the reactive ref directly
-      path: routePath.value, // Pass the reactive ref directly
-      isRouteError: true, // Add a flag to distinguish router errors
+      error: routeError.value,
+      path: routePath.value,
+      isRouteError: true,
     }),
-    beforeEnter: (to, from, next) => {
-      // Only allow direct access if there's an error
-      if (routeError.value) {
-        next();
-      } else {
-        // No active error, redirect home
+    beforeEnter: (_, __, next) => {
+      if (routeError.value) next();
+      else {
         console.warn(
-          'Direct access to /error page without active error. Redirecting.'
+          'Direct access to /error page without active error. Redirecting to home.'
         );
         next('/');
       }
     },
     meta: { transition: 'fade', errorPage: true },
   },
-    {
-      path: "/doom",
-      component: () => import("@/layouts/special/DoomChart.vue"),
-      meta: { type: 'seasonal' },
-    },
+  {
+    path: '/doom',
+    component: () => import('@/layouts/special/DoomChart.vue'),
+    meta: { type: 'seasonal' },
+  },
   {
     path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/layouts/navigation/NotFound.vue'),
-    meta: { transition: 'fade' },
+    name: 'not-found',
+    redirect: (to) => {
+      const error = {
+        status: 404,
+        message: 'Page not found',
+        originalError: new Error('Not Found'),
+      };
+
+      routeError.value = error;
+      routePath.value = to.fullPath;
+
+      return { name: 'error' };
+    },
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
+  fallback: ErrorFallback,
   routes,
+  scrollBehavior() {
+    return {};
+  },
 });
 
-// Setup centralized error handling
 setupRouteErrorHandling(router);
+
+router.afterEach((to) => {
+  const excludedRoutes = ['not-found', 'settings', 'error', 'feedback'];
+
+  if (!excludedRoutes.includes(to.name) && to.path !== '/') {
+    localStorage.setItem('path-lstv', to.fullPath);
+  }
+
+  isInitialNavigation = false;
+});
+
+router.beforeEach(async (to, _, next) => {
+  if (to.path === '/' && isInitialNavigation) {
+    try {
+      const settings = await db.settings.get(1);
+
+      if (settings && settings.startup) {
+        const startupNav = settings.startup.navigation;
+
+        if (startupNav === 'last-visited') {
+          const lastVisitedPath = localStorage.getItem('path-lstv');
+
+          if (lastVisitedPath && lastVisitedPath !== '/') {
+            return next(lastVisitedPath);
+          }
+
+          if (settings.calculator) {
+            return next('/calculator');
+          }
+        }
+
+        if (startupNav === 'calculator') {
+          return next('/calculator');
+        }
+      }
+
+      next();
+    } catch (error) {
+      console.error('Error in navigation guard:', error);
+      next();
+    }
+  } else {
+    next();
+  }
+});
 
 export default router;

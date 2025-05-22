@@ -1,30 +1,56 @@
 // settings.js (Pinia Store)
 import { defineStore } from 'pinia';
 import db from '@/data/db';
+import {
+  cloneDeep,
+  merge,
+  set,
+  flattenObject,
+  unflattenObject,
+  isNestedStructure,
+} from '@/utils/misc/objectUtils';
 
-const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS = {
   id: 1,
-  precision: 4,
-  useFractions: false,
-  useThousandsSeparator: true,
-  formatBinary: true,
-  formatHexadecimal: true,
-  formatOctal: true,
-  theme: 'system',
-  mode: 'Standard',
-  animationDisabled: false,
+  display: {
+    precision: 4,
+    useFractions: false,
+    formatting: {
+      useThousandsSeparator: true,
+      formatBinary: true,
+      formatHexadecimal: true,
+      formatOctal: true,
+    },
+    syntaxHighlighting: true,
+    textSize: 'normal',
+  },
+  calculator: {
+    mode: 'Standard',
+    scientific: {
+      angleUnit: 'degrees',
+    },
+    programmer: {
+      defaultBase: 'decimal',
+    },
+  },
+  appearance: {
+    theme: 'system',
+    animationDisabled: false,
+    checkForUpdates: true,
+  },
+  startup: {
+    navigation: 'last-visited',
+  },
 };
 
 export const useSettingsStore = defineStore('settings', {
-  state: () => ({
-    ...DEFAULT_SETTINGS,
-    currentMode: null
-  }),
+  state: () => ({ ...flattenObject(DEFAULT_SETTINGS) }),
 
   getters: {
-    defaultMode: (state) => state.mode,
-    // Modified to prioritize currentMode only if explicitly set
-    activeMode: (state) => state.currentMode === null ? state.mode : state.currentMode
+    display: (state) => createSettingsProxy(state, 'display'),
+    calculator: (state) => createSettingsProxy(state, 'calculator'),
+    appearance: (state) => createSettingsProxy(state, 'appearance'),
+    startup: (state) => createSettingsProxy(state, 'startup'),
   },
 
   actions: {
@@ -32,57 +58,123 @@ export const useSettingsStore = defineStore('settings', {
       try {
         const settings = await db.settings.get(1);
         if (settings) {
-          Object.assign(this, settings);
+          const mergedSettings = merge({}, DEFAULT_SETTINGS, settings);
+
+          Object.assign(this, flattenObject(mergedSettings));
         } else {
           await this.saveSettings(DEFAULT_SETTINGS);
         }
-        // Initialize currentMode as null to use default mode
-        this.currentMode = null;
       } catch (error) {
         console.error('Error loading settings:', error);
-        Object.assign(this, DEFAULT_SETTINGS);
-        this.currentMode = null;
+        Object.assign(this, flattenObject(DEFAULT_SETTINGS));
       }
     },
 
     async saveSettings(newSettings) {
       try {
-        // Create a new settings object that preserves the ID
         const currentSettings = await db.settings.get(1);
-        const settingsToSave = {
-          id: 1,
-          ...DEFAULT_SETTINGS,  // Ensure all default fields exist
-          ...(currentSettings || {}),  // Preserve existing settings
-          ...newSettings,  // Apply new settings
-        };
-        
-        // If no existing settings, add new record
+        const baseSettings = cloneDeep(DEFAULT_SETTINGS);
+
+        const flattenedNewSettings = isNestedStructure(newSettings)
+          ? flattenObject(newSettings)
+          : newSettings;
+
+        const settingsToSave = merge(
+          {},
+          baseSettings,
+          currentSettings || {},
+          isNestedStructure(newSettings)
+            ? newSettings
+            : unflattenObject(flattenedNewSettings)
+        );
+
+        settingsToSave.id = 1;
+
         if (!currentSettings) {
           await db.settings.add(settingsToSave);
         } else {
-          // Update existing record
           await db.settings.update(1, settingsToSave);
         }
-        
-        // Update store state
-        Object.assign(this, settingsToSave);
+
+        Object.assign(this, flattenObject(settingsToSave));
+
+        return true;
       } catch (error) {
         console.error('Error saving settings:', error);
-        throw error; // Propagate error to UI for handling
+        throw error;
       }
     },
 
-    setCurrentMode(mode) {
-      // Only set currentMode if it differs from default mode
-      this.currentMode = mode !== this.mode ? mode : null;
+    async updateSetting(path, value) {
+      try {
+        const currentSettings =
+          (await db.settings.get(1)) || cloneDeep(DEFAULT_SETTINGS);
+        set(currentSettings, path, value);
+        await this.saveSettings(currentSettings);
+
+        const flatKey = path.replace(/\./g, '_');
+        this[flatKey] = value;
+      } catch (error) {
+        console.error(`Error updating setting at path ${path}:`, error);
+        throw error;
+      }
+    },
+  },
+});
+
+/**
+ * Creates a proxy for accessing nested settings with dot notation
+ * @param {Object} state - The store state
+ * @param {string} section - The top-level section (display, calculator, etc.)
+ * @returns {Proxy} A proxy object for the section
+ */
+function createSettingsProxy(state, section) {
+  const handler = {
+    get(_, prop) {
+      if (prop === 'toJSON') {
+        return () => {
+          const result = {};
+          Object.keys(state).forEach((key) => {
+            if (key.startsWith(`${section}_`)) {
+              const subPath = key.substring(section.length + 1);
+              set(result, subPath, state[key]);
+            }
+          });
+          return result;
+        };
+      }
+
+      const flatKey = `${section}_${prop}`;
+      if (flatKey in state) {
+        return state[flatKey];
+      }
+
+      const subsectionPrefix = `${section}_${prop}_`;
+      const hasSubsection = Object.keys(state).some((key) =>
+        key.startsWith(subsectionPrefix)
+      );
+
+      if (hasSubsection) {
+        return new Proxy(
+          {},
+          {
+            get(_, subProp) {
+              const subKey = `${section}_${prop}_${subProp}`;
+              return state[subKey];
+            },
+          }
+        );
+      }
+
+      return undefined;
     },
 
-    async setDefaultMode(mode) {
-      const currentSettings = { ...this.$state };
-      currentSettings.mode = mode;
-      // Reset currentMode when default mode changes
-      this.currentMode = null;
-      await this.saveSettings(currentSettings);
-    }
-  }
-});
+    set(_, prop, value) {
+      const flatKey = `${section}_${prop}`;
+      state[flatKey] = value;
+      return true;
+    },
+  };
+
+  return new Proxy({}, handler);
+}

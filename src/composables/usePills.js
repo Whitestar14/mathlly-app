@@ -1,4 +1,4 @@
-import { ref, watch, nextTick, computed } from 'vue';
+import { ref, watch, nextTick, computed, markRaw } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   useElementVisibility,
@@ -11,12 +11,12 @@ import {
  * Style configuration for different indicator positions
  * @type {Object}
  */
-const STYLE_MAP = {
+const STYLE_MAP = markRaw({
   left: { dimension: 'top', offset: 'verticalOffset', align: 'left' },
   right: { dimension: 'top', offset: 'verticalOffset', align: 'right' },
   top: { dimension: 'left', offset: 'horizontalOffset', align: 'top' },
   bottom: { dimension: 'left', offset: 'horizontalOffset', align: 'bottom' },
-};
+});
 
 /**
  * A composable for creating a navigation pill system with animated indicators

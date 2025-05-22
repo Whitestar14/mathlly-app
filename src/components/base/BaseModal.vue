@@ -5,8 +5,10 @@
   >
     <Transition name="fade">
       <DialogOverlay
+        v-if="open"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-        @click="$emit('update:open', false)"
+        @click="closeModal"
+        aria-hidden="true"
       />
     </Transition>
 
@@ -19,30 +21,38 @@
       leave-to-class="opacity-0 scale-95"
     >
       <DialogContent
+        v-if="open"
         class="fixed inset-0 flex items-center justify-center p-4 z-30"
-        aria-describedby="modal"
+        :aria-labelledby="titleId"
+        role="dialog"
+        aria-modal="true"
+        @click.self="closeModal"
       >
         <div
           class="relative w-full max-w-md max-h-[85vh] overflow-y-auto transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl"
+          @click.stop
         >
           <!-- Close Button -->
           <Button
             variant="ghost"
             size="icon"
             class="absolute right-4 top-4 dark:text-gray-100 p-1"
-            @click="$emit('update:open', false)"
+            @click="closeModal"
+            aria-label="Close dialog"
           >
             <XIcon class="h-4 w-4" />
             <span class="sr-only">Close</span>
           </Button>
 
           <!-- Title Slot -->
-          <DialogTitle
-            as="h3"
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
-          >
-            <slot name="title" />
-          </DialogTitle>
+          <div :id="titleId">
+            <DialogTitle
+              as="h3"
+              class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
+            >
+              <slot name="title" />
+            </DialogTitle>
+          </div>
 
           <!-- Content Slot -->
           <slot />
@@ -65,14 +75,19 @@ import { XIcon } from "lucide-vue-next"
 
 const props = defineProps({
   open: Boolean,
-})
+});
 
-const emit = defineEmits(["update:open"])
+const emit = defineEmits(["update:open"]);
 
-// Close modal on escape key
+const titleId = `modal-title-${Math.random().toString(36).substring(2, 9)}`;
+
+const closeModal = () => {
+  emit("update:open", false);
+};
+
 useEventListener(document, 'keydown', (e) => {
   if (e.key === 'Escape' && props.open) {
-    emit("update:open", false)
+    closeModal();
   }
-})
+});
 </script>

@@ -1,22 +1,17 @@
 <template>
   <BasePanel
-  id="sidebar"
-  type="side"
-  position="left"
-  :show-toggle="false"
-  :show-header="true"
-  :show-footer="true"
-  :draggable="false"
-  :default-desktop-state="true"
+    id="sidebar"
+    type="side"
+    position="left"
+    :max-height-ratio="1"
+    :default-desktop-state="true"
   >
     <!-- Custom header -->
     <template #header-actions>
       <div class="flex justify-between items-center">
-        <TextLogo class="absolute left-2" />
+        <TextLogo :clipped="isMobile" size="sm" class="absolute left-2" />
       </div>
     </template>
-
-    <!-- Main content -->
 
     <!-- Navigation content -->
     <div class="flex-1 overflow-y-auto">
@@ -44,13 +39,8 @@
                 >
                   <button
                     :data-path="item.path"
-                    :class="[
-                      menuItemClasses,
-                      currentPill === item.path
-                        ? 'bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium'
-                        : 'text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300',
-                      item.comingSoon ? 'opacity-50 cursor-not-allowed' : '',
-                    ]"
+                    :disabled="item.comingSoon ?? false"
+                    :class="getMenuItemClasses(item)"
                     @click="handleItemClick($event, item)"
                   >
                     <component
@@ -65,17 +55,14 @@
                     <Badge
                       v-if="item.comingSoon"
                       type="soon"
-                      class="opacity-75"
                     />
                     <Badge
                       v-if="item.isNew"
                       type="new"
-                      class="opacity-75"
                     />
                     <Badge
-                    v-if="item.seasonal"
-                    type="special"
-                    class="opacity-75"
+                      v-if="item.seasonal"
+                      type="special"
                     />
                   </button>
                 </NavigationMenuLink>
@@ -114,15 +101,10 @@
                   @click="handleFooterItemClick($event, `/${item}`)"
                 >
                   <component
-                    :is="item === 'settings'
-                      ? Settings2Icon
-                      : MessageSquareIcon
-                    "
+                    :is="item === 'settings' ? CogIcon : MessagesSquareIcon"
                     class="h-5 w-5"
                   />
-                  <span class="block md:hidden capitalize">{{
-                    item
-                  }}</span>
+                  <span class="block md:hidden capitalize">{{ item }}</span>
                 </button>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -138,51 +120,52 @@
 
 <script setup>
 import {
-  HomeIcon,
+  CompassIcon,
   Code2Icon,
   InfoIcon,
-  MessageSquareIcon,
-  Settings2Icon,
+  MessagesSquareIcon,
+  CogIcon,
   SparklesIcon,
   FunctionSquareIcon,
   RegexIcon,
   LineChartIcon,
   ArrowRightLeftIcon,
-  Binary,
+  BinaryIcon,
   Skull,
-} from "lucide-vue-next"
+} from "lucide-vue-next";
 import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuRoot,
-} from "radix-vue"
-import { ref } from "vue"
-import { usePills } from "@/composables/usePills"
-import Badge from "@/components/base/BaseBadge.vue"
-import TextLogo from '@/components/base/TextLogo.vue'
-import BasePanel from "@/components/base/BasePanel.vue"
-import Indicator from "@/components/ui/PillIndicator.vue"
+} from "radix-vue";
+import { ref, markRaw } from "vue";
+import { usePills } from "@/composables/usePills";
+import Badge from "@/components/base/BaseBadge.vue";
+import TextLogo from '@/components/base/TextLogo.vue';
+import BasePanel from "@/components/base/BasePanel.vue";
+import Indicator from "@/components/ui/PillIndicator.vue";
+
 const props = defineProps({
   isMobile: {
     type: Boolean,
     default: false,
   },
-})
+});
 
 const emit = defineEmits(["sidebar-close"]);
 
 defineOptions({
   name: "SidebarMenu",
-})
+});
 
 const sidebarElements = ref([]);
 
-const categories = ref([
+const categories = markRaw([
   {
     title: "Navigation",
     items: [
-      { name: "Home", path: "/", icon: HomeIcon, isNew: false },
+      { name: "Home", path: "/", icon: CompassIcon, isNew: false },
     ]
   },
   {
@@ -216,7 +199,7 @@ const categories = ref([
       {
         name: "Base64",
         path: "/tools/base64",
-        icon: Binary,
+        icon: BinaryIcon,
         isNew: true,
         description: "Encode and decode Base64 strings",
       },
@@ -236,7 +219,7 @@ const categories = ref([
       { name: "About", path: "/info/about", icon: InfoIcon },
     ],
   },
-])
+]);
 
 const {
   currentPill,
@@ -252,21 +235,30 @@ const {
       emit('sidebar-close');
     }
   },
-})
+});
+
+const getMenuItemClasses = (item) => {
+  const baseClasses = "w-full flex items-center gap-2.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200";
+  
+  if (currentPill.value === item.path) {
+    return `${baseClasses} bg-gray-100/80 dark:bg-gray-800/80 text-indigo-600 dark:text-indigo-400 font-medium`;
+  }
+  
+  let classes = `${baseClasses} text-gray-700/90 dark:text-gray-400/90 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300`;
+  
+  if (item.comingSoon) {
+    classes += ' opacity-50 disabled:hover:!bg-inherit disabled:hover:text-gray-700/90 disabled:dark:hover:text-gray-400/90';
+  }
+  
+  return classes;
+};
 
 const handleItemClick = (event, item) => {
-  if (item.comingSoon) return
-  handleNavigation(item.path, event.currentTarget)
-}
+  if (item.comingSoon) return;
+  handleNavigation(item.path, event.currentTarget);
+};
 
 const handleFooterItemClick = (event, path) => {
-  handleNavigation(path, null)
-}
-
-const menuItemClasses = [
-  "w-full flex items-center gap-2.5",
-  "px-3 py-1.5",
-  "text-sm rounded-md",
-  "transition-colors duration-200",
-].join(" ")
+  handleNavigation(path, null);
+};
 </script>

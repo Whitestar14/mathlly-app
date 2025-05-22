@@ -19,7 +19,7 @@
               class="self-center md:self-start mb-2"
             >
               <Badge
-                type="version"
+                type="custom"
                 :text="`v${version.versionInfo.full}`"
                 :show-notch="true"
               />
@@ -55,7 +55,7 @@
                   variant="primary"
                   class="w-full sm:w-auto"
                 >
-                  <CalculatorIcon class="h-4 w-4" />
+                  <Sparkles class="h-4 w-4" />
                   Get Started
                 </Button>
               </RouterLink>
@@ -280,7 +280,7 @@
             <!-- Title with monospace accent - improved for dark mode -->
             <h2 class="text-2xl md:text-3xl font-mono font-medium mb-4 text-white">
               Ready to experience <kbd
-                class="font-mono inline-block bg-white/10 dark:bg-white/30 px-2 py-1 rounded text-white dark:text-white border border-white/20"
+                class="inline-block bg-white/10 dark:bg-white/30 px-2 py-1 rounded text-white dark:text-white border border-white/20"
               >
                 {math<span class="text-indigo-200 dark:text-indigo-300 font-black inline-block mx-0.5">//</span>y}
               </kbd>?
@@ -319,7 +319,7 @@
             <!-- Version badge -->
             <div class="mt-8 flex justify-center">
               <Badge
-                type="version"
+                type="custom"
                 :text="`v${version.versionInfo.full}`"
                 :show-notch="false"
               />
@@ -346,17 +346,14 @@
     </section>
 
     <!-- Welcome Modal -->
-    <welcome-modal
-      :is-open="showWelcomeModal"
-      @update:is-open="showWelcomeModal = $event"
-      @close="closeWelcomeModal"
-    />
+    <welcome-modal v-model="showWelcomeModal" />
   </BasePage>
 </template>
 
 <script setup>
 import { ref, defineComponent, h, onMounted } from 'vue';
 import {
+  Sparkles,
   ArrowRightIcon, 
   CheckCircleIcon,
   CalculatorIcon,
@@ -501,8 +498,4 @@ onMounted(() => {
     }, 1000);
   }
 });
-
-const closeWelcomeModal = () => {
-  showWelcomeModal.value = false;
-};
 </script>

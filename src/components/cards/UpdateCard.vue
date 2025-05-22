@@ -4,7 +4,7 @@
     <div class="absolute -top-3 right-4">
       <Badge
         :show-notch="true"
-        type="version"
+        type="custom"
         :text="`v${version}`"
       />
     </div>

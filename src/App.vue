@@ -5,9 +5,9 @@
     :is-global-error="true" />
   <Suspense v-else>
     <template #default>
-      <PanelProvider>
+      <AppProvider>
         <app-setup />
-      </PanelProvider>
+      </AppProvider>
     </template>
     <template #fallback>
       <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
@@ -15,17 +15,19 @@
       </div>
     </template>
   </Suspense>
+  <UpdateNotification />
 </template>
 
 <script setup>
-import { ref, onErrorCaptured } from 'vue';
-import AppSetup from '@/components/layout/AppSetup.vue';
-import PanelProvider from '@/components/panel/PanelProvider.vue';
-import Loader from '@/components/base/BaseLoader.vue';
+import { shallowRef, onErrorCaptured } from 'vue';
+import { hasError } from "@/router/errorHandler"
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
+import AppProvider from '@/components/panel/AppProvider.vue';
+import AppSetup from '@/components/layout/AppSetup.vue';
+import Loader from '@/components/base/BaseLoader.vue';
+import UpdateNotification from '@/components/ui/UpdateNotification.vue';
 
-const error = ref(null);
-const hasError = ref(false);
+const error = shallowRef(null);
 
 onErrorCaptured((err, instance, info) => {
   console.error("[Global Error Boundary Caught]:", err, instance, info);

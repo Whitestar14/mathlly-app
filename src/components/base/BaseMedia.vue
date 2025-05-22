@@ -15,7 +15,7 @@
     <!-- Image -->
     <img 
       v-else-if="type === 'img'"
-      :src="src" 
+      :src="effectiveSrc" 
       :alt="alt" 
       :class="mediaClasses"
       :loading="lazyLoad ? 'lazy' : 'eager'"
@@ -23,6 +23,7 @@
       :height="height"
       :aria-hidden="hideFromScreenReaders"
       @error="handleMediaError"
+      @load="handleMediaLoad"
     >
     
     <!-- Video -->
@@ -38,10 +39,11 @@
       :loading="lazyLoad ? 'lazy' : 'eager'"
       :aria-hidden="hideFromScreenReaders"
       @error="handleMediaError"
+      @loadeddata="handleMediaLoad"
     >
       <source
-        v-if="src"
-        :src="src"
+        v-if="effectiveSrc"
+        :src="effectiveSrc"
         :type="mimeType"
       >
       <slot name="fallback">
@@ -70,6 +72,7 @@
 import { computed, ref, watch, onMounted } from 'vue';
 import { ImageIcon } from 'lucide-vue-next';
 import { useTheme } from '@/composables/useTheme';
+import { useFetch } from '@vueuse/core';
 
 const props = defineProps({
   type: {
@@ -114,7 +117,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  // Video specific props
   autoplay: {
     type: Boolean,
     default: false
@@ -165,10 +167,9 @@ const hasError = ref(false);
 const isLoaded = ref(false);
 const showFallback = ref(false);
 
-// Container classes
+// Use Tailwind classes directly
 const containerClasses = computed(() => [
-  'inline-flex items-center justify-center',
-  'overflow-hidden',
+  'inline-flex items-center justify-center overflow-hidden',
   {
     'rounded-sm': props.rounded === 'sm',
     'rounded-md': props.rounded === 'md',
@@ -177,25 +178,27 @@ const containerClasses = computed(() => [
   }
 ]);
 
-// Media classes
+const sizeClasses = computed(() => {
+  if (props.width && props.height) return '';
+  
+  switch (props.size) {
+    case 'sm': return 'h-6 w-auto';
+    case 'lg': return 'h-14 w-auto';
+    case 'xl': return 'h-24 w-auto';
+    default: return 'h-8 w-auto'; // md
+  }
+});
+
 const mediaClasses = computed(() => [
   'max-w-full transition-opacity duration-300',
+  sizeClasses.value,
   {
     'opacity-0': !isLoaded.value && !hasError.value,
     'opacity-100': isLoaded.value && !hasError.value,
-    'h-6 w-auto': props.size === 'sm' && !props.width && !props.height,
-    'h-8 w-auto': props.size === 'md' && !props.width && !props.height,
-    'h-14 w-auto': props.size === 'lg' && !props.width && !props.height,
-    'h-24 w-auto': props.size === 'xl' && !props.width && !props.height,
-    'object-contain': props.objectFit === 'contain',
-    'object-cover': props.objectFit === 'cover',
-    'object-fill': props.objectFit === 'fill',
-    'object-none': props.objectFit === 'none',
-    'object-scale-down': props.objectFit === 'scale-down',
+    [`object-${props.objectFit}`]: props.objectFit,
   }
 ]);
 
-// Determine the appropriate role for accessibility
 const role = computed(() => {
   if (props.hideFromScreenReaders) return 'presentation';
   if (props.type === 'img' || props.type === 'svg') return 'img';
@@ -203,7 +206,6 @@ const role = computed(() => {
   return null;
 });
 
-// Get the effective source based on dark mode
 const effectiveSrc = computed(() => {
   if (isDark.value && props.darkSrc) {
     return props.darkSrc;
@@ -211,24 +213,26 @@ const effectiveSrc = computed(() => {
   return props.src;
 });
 
-// Load SVG content if svgPath is provided
+// Use vueuse's useFetch for SVG loading
 const loadSvgContent = async () => {
   const path = props.svgPath;
   if (!path) return;
   
   if (svgCache.has(path)) {
     svgContent.value = svgCache.get(path);
+    isLoaded.value = true;
     return;
   }
 
   try {
-    const response = await fetch(path);
-    if (!response.ok) throw new Error('Failed to load SVG');
+    const { data, error } = await useFetch(path).get().text();
     
-    let svg = await response.text();
+    if (error.value) throw new Error('Failed to load SVG');
+    
+    let svg = data.value;
     
     // Add size classes to SVG
-    svg = svg.replace(/<svg/, `<svg class="${getSvgSizeClass()}"`);
+    svg = svg.replace(/<svg/, `<svg class="${sizeClasses.value}"`);
     
     svgCache.set(path, svg);
     svgContent.value = svg;
@@ -238,20 +242,6 @@ const loadSvgContent = async () => {
     hasError.value = true;
     showFallback.value = true;
     emit('error', error);
-  }
-};
-
-// Get appropriate size class for SVG
-const getSvgSizeClass = () => {
-  if (props.width && props.height) {
-    return `w-[${props.width}px] h-[${props.height}px]`;
-  }
-  
-  switch (props.size) {
-    case 'sm': return 'h-6 w-auto';
-    case 'lg': return 'h-14 w-auto';
-    case 'xl': return 'h-24 w-auto';
-    default: return 'h-8 w-auto';
   }
 };
 
@@ -285,15 +275,6 @@ watch([isDark, () => props.src, () => props.darkSrc], () => {
 onMounted(() => {
   if (props.type === 'svg' && props.svgPath) {
     loadSvgContent();
-  }
-  
-  // Add event listeners for media elements
-  if (props.type === 'img' || props.type === 'video') {
-    const mediaElement = document.querySelector(`[src="${effectiveSrc.value}"]`);
-    if (mediaElement) {
-      mediaElement.addEventListener('load', handleMediaLoad);
-      mediaElement.addEventListener('loadeddata', handleMediaLoad);
-    }
   }
 });
 </script>

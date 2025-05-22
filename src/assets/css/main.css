@@ -1,103 +1,38 @@
-/*
-  @tailwind base;
-
-  The base layer is where Tailwind injects its base styles. These are the default styles
-  that are applied to all elements, like resetting margins, setting default font families, etc.
-
-  It's generally recommended to leave this layer alone and only add your own global styles
-  if absolutely necessary. For example, you might add custom CSS variables or global resets
-  that Tailwind doesn't handle.
-
-  In this file, you're using @layer base to:
-  - Define custom CSS variables for colors (border-input, ring, ring-offset)
-  - Apply dark mode overrides for these variables.
-  - Customize the VueTippy tooltip styles with Tailwind utilities.
-*/
+/* ==========================================================================
+   Tailwind Directives
+   ========================================================================== */
 @tailwind base;
-
-/*
-  @tailwind components;
-
-  The components layer is where you define reusable UI patterns that you often use in your project.
-  These are typically more complex than single utility classes and often combine multiple utilities.
-
-  For example, you might define a button component that includes styles for padding, background color,
-  text color, rounded corners, and hover effects.
-
-  In this file, you're using @layer components to:
-  - Define various button styles (primary, destructive, outline, secondary, ghost, link).
-  - Define button sizes (default, small, large, icon).
-  - Use @apply to combine multiple Tailwind utility classes into these component definitions.
-*/
 @tailwind components;
-
-/*
-  @tailwind utilities;
-
-  The utilities layer is where Tailwind generates all of its utility classes. These are the single-purpose
-  classes that you use to style your HTML elements directly.
-
-  You can also use this layer to add your own custom utility classes that you use frequently in your project.
-  This allows you to create your own design system on top of Tailwind's existing utility classes.
-
-  In this file, you're using @layer utilities to:
-  - Define custom background color utilities (bg-muted, bg-accent, bg-muted-30).
-  - Define a custom ring offset utility (ring-offset-background).
-  - Use @apply to combine Tailwind utility classes into these custom utility definitions.
-*/
 @tailwind utilities;
 
 /* CSS Stylesheet Imports */
 @import url(./buttons.css);
 
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
 @layer base {
-  /* Global definitions */
-  @font-face {
-    font-family: 'Geist Mono';
-    src: url(../fonts/GeistMonoVF.woff2);
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Geist';
-    src: url(../fonts/GeistVF.woff2);
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Reddit Mono';
-    src: url(../fonts/RedditMono.ttf);
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Inter';
-    src: url(../fonts/Inter.ttf);
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Apple Sans';
-    src: url(../fonts/SFUIText-Regular.otf);
-    font-display: swap;
-  }
-
-  /* Global reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-
-    .animation-disabled * {
-      @apply !animate-none !duration-0;
-    }
-  }
-
   :root {
-    @apply font-sans font-normal text-sm sm:text-base;
+    @apply font-sans font-normal;
+  }
+
+  .ts-small {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  .ts-normal {
+    font-size: 0.975rem;
+  }
+  .ts-medium {
+    font-size: 1rem; /* 16px */
+  }
+
+  .ts-large {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  p {
+    @apply text-[0.875rem];
   }
 
   h1,
@@ -109,11 +44,20 @@
     @apply font-medium text-gray-900 dark:text-gray-100;
   }
 
-  p {
-    @apply text-sm;
+  a,
+  input {
+    @apply focus-colors;
   }
 
-  /* Scrollbar styles - Updated */
+  kbd {
+    @apply w-fit bg-gray-200/90 font-mono text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
+  }
+
+  textarea {
+    @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
+  }
+
+  /* Scrollbar styles */
   body,
   html {
     scrollbar-width: thin;
@@ -124,97 +68,35 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Webkit scrollbar styles */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-    background-color: transparent;
+    width: 8px;
+    height: 8px;
   }
-
   ::-webkit-scrollbar-track {
-    background-color: transparent;
-    border-radius: 8px;
+    background: transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.4);
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
   }
-
   ::-webkit-scrollbar-thumb:hover {
     background-color: rgba(156, 163, 175, 0.7);
   }
-
-  /* Dark mode adjustments */
   .dark ::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.3);
+    background-color: rgba(107, 114, 128, 0.5);
   }
-
   .dark ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(156, 163, 175, 0.6);
+    background-color: rgba(107, 114, 128, 0.7);
   }
 
-  /* Firefox scrollbar styles (for completeness) */
-  @supports (scrollbar-color: auto) {
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
-    }
-
-    *:hover {
-      scrollbar-color: rgba(156, 163, 175, 0.7) transparent;
-    }
-
-    .dark * {
-      scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
-    }
-
-    .dark *:hover {
-      scrollbar-color: rgba(156, 163, 175, 0.6) transparent;
-    }
-  }
-
-  kbd {
-    @apply w-fit bg-gray-200/90 font-mono text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
-  }
-
-  /* Settings toggle classes */
-  .animation-disabled * {
-    @apply !animate-none !duration-0;
-  }
-
-  textarea {
-    @apply outline-none text-gray-800 dark:text-gray-100 transition-[border-color] duration-200 ease-linear focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500/50;
-  }
-
-  /* VueTippy custom tooltip styles */
-  .tippy-box[data-theme~='custom'] {
-    @apply dark:bg-gray-100 bg-gray-800 dark:text-gray-800 text-gray-100 p-1 rounded-lg;
-
-    &[data-placement^='top'] > .tippy-arrow::before {
-      @apply border-t-gray-800 dark:border-t-gray-100;
-    }
-
-    &[data-placement^='bottom'] > .tippy-arrow::before {
-      @apply border-b-gray-800 dark:border-b-gray-100;
-    }
-
-    &[data-placement^='left'] > .tippy-arrow::before {
-      @apply border-l-gray-800 dark:border-l-gray-100;
-    }
-
-    &[data-placement^='right'] > .tippy-arrow::before {
-      @apply border-r-gray-800 dark:border-r-gray-100;
-    }
-  }
-
+  /* Logo SVG styling */
   svg {
     #logo-background {
-      @apply !fill-gray-100 dark:!fill-gray-800 !stroke-gray-200 dark:!stroke-gray-700
+      @apply !fill-gray-100 dark:!fill-gray-800 !stroke-gray-200 dark:!stroke-gray-700;
     }
 
-    #logo-asterisk, #logo-slash {
+    #logo-asterisk,
+    #logo-slash {
       @apply !fill-indigo-600 dark:!fill-indigo-400;
     }
 
@@ -224,10 +106,32 @@
   }
 }
 
+/* ==========================================================================
+   Accessibility & Motion Preferences
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.animation-disabled * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ==========================================================================
+   Component Styles
+   ========================================================================== */
 @layer components {
+  /* Button styles */
   .btn {
-    @apply inline-flex items-center justify-center gap-1 md:gap-2 rounded-md text-sm font-medium duration-200 transition-colors focus-visible:outline-none 
-    focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+    @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium duration-200 transition-colors disabled:opacity-50 disabled:pointer-events-none focus-colors;
   }
 
   .btn-primary {
@@ -251,9 +155,10 @@
   }
 
   .btn-link {
-    @apply text-primary dark:text-primary-dark underline-offset-4 hover:underline;
+    @apply text-primary dark:text-primary-light underline-offset-4 hover:underline;
   }
 
+  /* Button sizes */
   .btn-default-size {
     @apply h-9 py-1 px-3 rounded-md;
   }
@@ -270,20 +175,97 @@
     @apply size-8 rounded-md;
   }
 
-  /* Keeping Necessary Loader Animations */
-  .loader-expanded,
-  .loader-regular,
-  .loader-compact {
-    @apply flex justify-center items-center h-full;
+  /* Loader styles */
+  .loader-expanded {
+    @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95;
   }
 
-  .loader-expanded {
-    @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md;
+  /* Syntax highlighting classes */
+  .syntax-number {
+    @apply text-blue-700 dark:text-blue-300;
+  }
+
+  .syntax-operator,
+  .syntax-programmer-operator {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+
+  .syntax-parenthesis {
+    @apply text-gray-600 dark:text-gray-400 font-semibold;
+  }
+
+  .syntax-function {
+    @apply text-pink-700 dark:text-pink-300;
+  }
+
+  .syntax-decimal {
+    @apply text-indigo-600 dark:text-indigo-400 font-bold;
+  }
+
+  .syntax-text {
+    @apply text-gray-800 dark:text-gray-200;
+  }
+
+  .syntax-ghost {
+    @apply text-gray-400 opacity-40 dark:opacity-60;
+  }
+
+  .paren-ghost {
+    @apply opacity-40;
+    color: var(--ghost-paren-color, #6b7280);
+    margin-left: 0.125rem;
+  }
+
+  .paren-open,
+  .paren-close {
+    position: relative;
+    margin: 0 0.125rem;
+  }
+
+  .paren-open {
+    margin-right: 0.25rem;
+  }
+
+  /* Scrollbar hiding utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* Vue Transition animation styles */
-/* Fade animations for backdrop */
+/* ==========================================================================
+   Tooltip Styles
+   ========================================================================== */
+.tippy-box[data-theme~='custom'] {
+  @apply text-xs dark:bg-gray-100 bg-gray-800 dark:text-gray-800 text-gray-100 p-0.5 rounded-lg;
+}
+
+.tippy-box[data-theme~='custom'][data-placement^='top'] > .tippy-arrow::before {
+  @apply border-t-gray-800 dark:border-t-gray-100;
+}
+
+.tippy-box[data-theme~='custom'][data-placement^='bottom']
+  > .tippy-arrow::before {
+  @apply border-b-gray-800 dark:border-b-gray-100;
+}
+
+.tippy-box[data-theme~='custom'][data-placement^='left']
+  > .tippy-arrow::before {
+  @apply border-l-gray-800 dark:border-l-gray-100;
+}
+
+.tippy-box[data-theme~='custom'][data-placement^='right']
+  > .tippy-arrow::before {
+  @apply border-r-gray-800 dark:border-r-gray-100;
+}
+
+/* ==========================================================================
+   Transition Animations
+   ========================================================================== */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -303,6 +285,10 @@
 .scale-leave-to {
   transform: scale(0.985);
 }
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
 @layer utilities {
   /* Pattern utilities */
   .pattern-grid {
@@ -322,8 +308,12 @@
     );
     background-size: 16px 16px;
   }
-  
+
   .z-5 {
     z-index: 5;
+  }
+
+  .focus-colors {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-indigo-500 dark:focus:ring-indigo-300;
   }
 }
