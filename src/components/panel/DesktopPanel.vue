@@ -8,7 +8,7 @@
       ]"
     >
       <div
-        class="absolute inset-y-0 right-0 transition-opacity duration-300 max-h-[100vh]"
+        class="flex flex-col w-full absolute inset-y-0 right-0 transition-opacity duration-300 max-h-[100vh]"
         :class="[
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
           mainClass,
@@ -47,7 +47,7 @@
           @click="$emit('toggle')"
         >
           <ArrowRightToLine
-            class="h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-300"
+            class="h-4 w-4 text-gray-700 dark:text-gray-300 transition-transform duration-300"
             :class="{ 'rotate-180': isOpen }"
           />
         </Button>

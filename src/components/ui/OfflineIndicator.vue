@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isMobile">
+  <div class="hidden md:inline-block">
     <div 
       v-tippy="{ 
         content: networkStatus ? 'Connected' : 'Not connected. Some functionality may not be available', 

@@ -64,19 +64,4 @@ export function setupRouteErrorHandling(router) {
     setRouteError(processedError, currentPath);
     router.replace({ path: '/error' });
   });
-
-  router.afterEach((to) => {
-    if (to.path !== '/error' && isHandlingError.value) {
-      clearRouteError();
-    }
-
-    let baseTitle = 'Mathlly';
-    if (to.meta?.title) {
-      baseTitle = to.meta.title;
-    } else if (to.name && typeof to.name === 'string') {
-      baseTitle = to.name;
-    }
-    document.title =
-      baseTitle !== 'Mathlly' ? `${baseTitle} - Mathlly` : baseTitle;
-  });
 }

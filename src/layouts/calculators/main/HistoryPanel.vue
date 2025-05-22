@@ -25,7 +25,7 @@
           class="text-center py-4 flex flex-col items-center justify-center h-full">
           <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
             <div v-show="isProgrammerMode">
-              <p class="flex justify-center text-xs items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
+              <p class="flex justify-center text-sm items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
                 History is disabled in <kbd>Programmer Mode</kbd>
               </p>
             </div>
@@ -55,12 +55,12 @@
     <!-- Footer -->
     <template #footer>
       <div v-if="showClearButton" class="flex justify-end">
-        <Button v-if="!isMobile" v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
-          class="text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
+        <Button v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
+          class="hidden md:flex text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
           @click="showClearConfirmation = true">
           <TrashIcon class="w-4 h-4" />
         </Button>
-        <Button v-else variant="destructive" class="w-full" @click="showClearConfirmation = true">
+        <Button variant="destructive" class="w-full md:hidden" @click="showClearConfirmation = true">
           <TrashIcon class="w-4 h-4 mr-2" />
           Clear History
         </Button>
@@ -178,7 +178,7 @@ const handleSelectItem = (item) => {
     result: item.result,
   });
 
-  emit('history-close');
+  if (props.isMobile) emit('history-close');
 };
 
 const handleDelete = async (id) => {

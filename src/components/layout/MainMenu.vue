@@ -60,7 +60,7 @@ import {
   Sun,
   Moon,
   AppWindowMac,
-  ArrowUpRight,
+  AtSign,
   GithubIcon,
 } from "lucide-vue-next";
 import { useTheme } from "@/composables/useTheme";
@@ -91,7 +91,7 @@ const externalLinks = [
   {
     url: "https://x.com/@SOlusunmbola",
     text: "Follow my Twitter",
-    icon: ArrowUpRight
+    icon: AtSign
   }
 ];
 

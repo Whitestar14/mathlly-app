@@ -101,7 +101,7 @@
                   @click="handleFooterItemClick($event, `/${item}`)"
                 >
                   <component
-                    :is="item === 'settings' ? Settings2Icon : MessageSquareIcon"
+                    :is="item === 'settings' ? CogIcon : MessagesSquareIcon"
                     class="h-5 w-5"
                   />
                   <span class="block md:hidden capitalize">{{ item }}</span>
@@ -120,17 +120,17 @@
 
 <script setup>
 import {
-  HomeIcon,
+  CompassIcon,
   Code2Icon,
   InfoIcon,
-  MessageSquareIcon,
-  Settings2Icon,
+  MessagesSquareIcon,
+  CogIcon,
   SparklesIcon,
   FunctionSquareIcon,
   RegexIcon,
   LineChartIcon,
   ArrowRightLeftIcon,
-  Binary,
+  BinaryIcon,
   Skull,
 } from "lucide-vue-next";
 import {
@@ -165,7 +165,7 @@ const categories = markRaw([
   {
     title: "Navigation",
     items: [
-      { name: "Home", path: "/", icon: HomeIcon, isNew: false },
+      { name: "Home", path: "/", icon: CompassIcon, isNew: false },
     ]
   },
   {
@@ -199,7 +199,7 @@ const categories = markRaw([
       {
         name: "Base64",
         path: "/tools/base64",
-        icon: Binary,
+        icon: BinaryIcon,
         isNew: true,
         description: "Encode and decode Base64 strings",
       },

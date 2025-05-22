@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted, ref, computed } from 'vue';
-import { useEventListener, useStorage } from '@vueuse/core';
+import { useEventListener } from '@vueuse/core';
 import { useKeyboardStore } from '@/stores/keyboard';
 
 /**
@@ -18,12 +18,6 @@ export function useKeyboard(initialContext = 'global', handlers) {
    */
   const isProcessing = ref(false);
   
-  /**
-   * Debug mode preference
-   * @type {import('vue').Ref<boolean>}
-   */
-  const debugMode = useStorage('keyboard-debug-mode', false);
-
   /**
    * Constructs a key combination string from a keyboard event
    * 
@@ -65,15 +59,6 @@ export function useKeyboard(initialContext = 'global', handlers) {
       const combo = getKeyCombo(event);
       const singleKey = keyboardStore.normalizeKey(event.key?.toLowerCase?.());
 
-      // Log debug information if enabled
-      if (keyboardStore.debug || debugMode.value) {
-        console.group('Keyboard Event');
-        console.log('Key pressed:', singleKey);
-        console.log('Combo:', combo);
-        console.log('Current context:', keyboardStore.currentContext);
-        console.groupEnd();
-      }
-
       // Check for shortcuts first
       const shortcut = keyboardStore.activeShortcuts[combo];
       if (shortcut) {
@@ -108,14 +93,6 @@ export function useKeyboard(initialContext = 'global', handlers) {
     keyboardStore.clearContext(context);
   };
 
-  /**
-   * Toggles debug mode
-   */
-  const toggleDebug = () => {
-    debugMode.value = !debugMode.value;
-    keyboardStore.debug = debugMode.value;
-  };
-
   // Use VueUse's useEventListener for better cleanup
   useEventListener('keydown', handleKeyDown);
 
@@ -136,8 +113,6 @@ export function useKeyboard(initialContext = 'global', handlers) {
   return {
     setContext,
     clearContext,
-    toggleDebug,
     currentContext,
-    isDebugMode: debugMode,
   };
 }

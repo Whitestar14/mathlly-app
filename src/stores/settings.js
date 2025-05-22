@@ -1,13 +1,13 @@
 // settings.js (Pinia Store)
 import { defineStore } from 'pinia';
 import db from '@/data/db';
-import { 
-  cloneDeep, 
+import {
+  cloneDeep,
   merge,
-  set, 
+  set,
   flattenObject,
   unflattenObject,
-  isNestedStructure
+  isNestedStructure,
 } from '@/utils/misc/objectUtils';
 
 export const DEFAULT_SETTINGS = {
@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS = {
       formatOctal: true,
     },
     syntaxHighlighting: true,
-    textSize: "normal",
+    textSize: 'normal',
   },
   calculator: {
     mode: 'Standard',
@@ -40,12 +40,11 @@ export const DEFAULT_SETTINGS = {
   },
   startup: {
     navigation: 'last-visited',
-    lastVisitedPath: '/',
-  }
+  },
 };
 
 export const useSettingsStore = defineStore('settings', {
-  state: () => ({...flattenObject(DEFAULT_SETTINGS)}),
+  state: () => ({ ...flattenObject(DEFAULT_SETTINGS) }),
 
   getters: {
     display: (state) => createSettingsProxy(state, 'display'),
@@ -60,7 +59,7 @@ export const useSettingsStore = defineStore('settings', {
         const settings = await db.settings.get(1);
         if (settings) {
           const mergedSettings = merge({}, DEFAULT_SETTINGS, settings);
-          
+
           Object.assign(this, flattenObject(mergedSettings));
         } else {
           await this.saveSettings(DEFAULT_SETTINGS);
@@ -71,45 +70,48 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
 
-async saveSettings(newSettings) {
-  try {
-    const currentSettings = await db.settings.get(1);
-    const baseSettings = cloneDeep(DEFAULT_SETTINGS);
-    
-    const flattenedNewSettings = isNestedStructure(newSettings) 
-      ? flattenObject(newSettings) 
-      : newSettings;
-    
-    const settingsToSave = merge(
-      {},
-      baseSettings,
-      currentSettings || {},
-      isNestedStructure(newSettings) ? newSettings : unflattenObject(flattenedNewSettings)
-    );
-    
-    settingsToSave.id = 1;
-    
-    if (!currentSettings) {
-      await db.settings.add(settingsToSave);
-    } else {
-      await db.settings.update(1, settingsToSave);
-    }
-    
-    Object.assign(this, flattenObject(settingsToSave));
-    
-    return true;
-  } catch (error) {
-    console.error('Error saving settings:', error);
-    throw error;
-  }
-},
+    async saveSettings(newSettings) {
+      try {
+        const currentSettings = await db.settings.get(1);
+        const baseSettings = cloneDeep(DEFAULT_SETTINGS);
+
+        const flattenedNewSettings = isNestedStructure(newSettings)
+          ? flattenObject(newSettings)
+          : newSettings;
+
+        const settingsToSave = merge(
+          {},
+          baseSettings,
+          currentSettings || {},
+          isNestedStructure(newSettings)
+            ? newSettings
+            : unflattenObject(flattenedNewSettings)
+        );
+
+        settingsToSave.id = 1;
+
+        if (!currentSettings) {
+          await db.settings.add(settingsToSave);
+        } else {
+          await db.settings.update(1, settingsToSave);
+        }
+
+        Object.assign(this, flattenObject(settingsToSave));
+
+        return true;
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        throw error;
+      }
+    },
 
     async updateSetting(path, value) {
       try {
-        const currentSettings = await db.settings.get(1) || cloneDeep(DEFAULT_SETTINGS);
+        const currentSettings =
+          (await db.settings.get(1)) || cloneDeep(DEFAULT_SETTINGS);
         set(currentSettings, path, value);
         await this.saveSettings(currentSettings);
-        
+
         const flatKey = path.replace(/\./g, '_');
         this[flatKey] = value;
       } catch (error) {
@@ -117,30 +119,7 @@ async saveSettings(newSettings) {
         throw error;
       }
     },
-
-    async updateLastVisitedPath(path) {
-      const ignorePaths = ['/error', '/', '/:pathMatch(.*)*', '/settings'];
-      if (!ignorePaths.includes(path) && !path.includes('error')) {
-        await this.updateSetting('startup.lastVisitedPath', path);
-      }
-    },
-
-    getStartupPath() {
-      switch (this.startup_navigation) {
-        case 'calculator':
-          return '/calculator';
-        case 'last-visited':
-          return (this.startup_lastVisitedPath && 
-                 this.startup_lastVisitedPath !== '/' && 
-                 !this.startup_lastVisitedPath.includes('error'))
-            ? this.startup_lastVisitedPath
-            : '/calculator';
-        case 'home':
-        default:
-          return '/';
-      }
-    }
-  }
+  },
 });
 
 /**
@@ -155,7 +134,7 @@ function createSettingsProxy(state, section) {
       if (prop === 'toJSON') {
         return () => {
           const result = {};
-          Object.keys(state).forEach(key => {
+          Object.keys(state).forEach((key) => {
             if (key.startsWith(`${section}_`)) {
               const subPath = key.substring(section.length + 1);
               set(result, subPath, state[key]);
@@ -164,33 +143,38 @@ function createSettingsProxy(state, section) {
           return result;
         };
       }
-      
+
       const flatKey = `${section}_${prop}`;
       if (flatKey in state) {
         return state[flatKey];
       }
-      
+
       const subsectionPrefix = `${section}_${prop}_`;
-      const hasSubsection = Object.keys(state).some(key => key.startsWith(subsectionPrefix));
-      
+      const hasSubsection = Object.keys(state).some((key) =>
+        key.startsWith(subsectionPrefix)
+      );
+
       if (hasSubsection) {
-        return new Proxy({}, {
-          get(_, subProp) {
-            const subKey = `${section}_${prop}_${subProp}`;
-            return state[subKey];
+        return new Proxy(
+          {},
+          {
+            get(_, subProp) {
+              const subKey = `${section}_${prop}_${subProp}`;
+              return state[subKey];
+            },
           }
-        });
+        );
       }
-      
+
       return undefined;
     },
-    
+
     set(_, prop, value) {
       const flatKey = `${section}_${prop}`;
       state[flatKey] = value;
       return true;
-    }
+    },
   };
-  
+
   return new Proxy({}, handler);
 }

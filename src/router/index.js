@@ -1,54 +1,56 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useSettingsStore } from '@/stores/settings';
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 import { setupRouteErrorHandling, routeError, routePath } from './errorHandler';
+import db from '@/data/db';
+
+let isInitialNavigation = true;
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'home',
     component: () => import('@/layouts/navigation/HomePage.vue'),
     meta: { transition: 'fade' },
   },
   {
     path: '/calculator',
-    name: 'Calculator',
+    name: 'calculator',
     component: () => import('@/layouts/calculators/main/MainCalculator.vue'),
     meta: { transition: 'fade', group: 'calculators' },
   },
   {
     path: '/tools/base64',
-    name: 'Base64',
+    name: 'base64',
     component: () => import('@/layouts/tools/Base64Tool.vue'),
     meta: { transition: 'fade', group: 'tools' },
   },
   {
     path: '/info/update',
-    name: "Updates",
+    name: 'updates',
     component: () => import('@/layouts/info/UpdatePage.vue'),
     meta: { transition: 'fade', group: 'information' },
   },
   {
     path: '/info/about',
-    name: 'About',
+    name: 'about',
     component: () => import('@/layouts/info/AboutPage.vue'),
     meta: { transition: 'fade', group: 'information' },
   },
   {
     path: '/settings',
-    name: 'Settings',
+    name: 'settings',
     component: () => import('@/layouts/utility/SettingsPage.vue'),
     meta: { transition: 'fade', group: 'utility' },
   },
   {
     path: '/feedback',
-    name: 'Feedback',
+    name: 'feedback',
     component: () => import('@/layouts/utility/FeedbackPage.vue'),
     meta: { transition: 'fade', group: 'utility' },
   },
   {
     path: '/error',
-    name: 'Error',
+    name: 'error',
     component: ErrorFallback,
     props: () => ({
       error: routeError.value,
@@ -73,9 +75,19 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/layouts/navigation/NotFound.vue'),
-    meta: { transition: 'fade' },
+    name: 'not-found',
+    redirect: (to) => {
+      const error = {
+        status: 404,
+        message: 'Page not found',
+        originalError: new Error('Not Found'),
+      };
+
+      routeError.value = error;
+      routePath.value = to.fullPath;
+
+      return { name: 'error' };
+    },
   },
 ];
 
@@ -84,18 +96,54 @@ const router = createRouter({
   fallback: ErrorFallback,
   routes,
   scrollBehavior() {
-    return { top: 0 }
+    return {};
   },
 });
 
 setupRouteErrorHandling(router);
 
 router.afterEach((to) => {
-  const skipTracking = ['Error', 'NotFound', 'Settings', 'Home'];
+  const excludedRoutes = ['not-found', 'settings', 'error', 'feedback'];
 
-  if (!to.meta.errorPage && !skipTracking.includes(to.name)) {
-    const settingsStore = useSettingsStore();
-    settingsStore.updateLastVisitedPath(to.fullPath);
+  if (!excludedRoutes.includes(to.name) && to.path !== '/') {
+    localStorage.setItem('path-lstv', to.fullPath);
+  }
+
+  isInitialNavigation = false;
+});
+
+router.beforeEach(async (to, _, next) => {
+  if (to.path === '/' && isInitialNavigation) {
+    try {
+      const settings = await db.settings.get(1);
+
+      if (settings && settings.startup) {
+        const startupNav = settings.startup.navigation;
+
+        if (startupNav === 'last-visited') {
+          const lastVisitedPath = localStorage.getItem('path-lstv');
+
+          if (lastVisitedPath && lastVisitedPath !== '/') {
+            return next(lastVisitedPath);
+          }
+
+          if (settings.calculator) {
+            return next('/calculator');
+          }
+        }
+
+        if (startupNav === 'calculator') {
+          return next('/calculator');
+        }
+      }
+
+      next();
+    } catch (error) {
+      console.error('Error in navigation guard:', error);
+      next();
+    }
+  } else {
+    next();
   }
 });
 

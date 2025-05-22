@@ -19,9 +19,8 @@
       :aria-invalid="!!error"
       :aria-describedby="error ? `${id}-error` : undefined"
       :class="[
-        'w-full rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors',
+        'w-full rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed',
         error ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-gray-700',
-        disabled ? 'opacity-60 cursor-not-allowed' : '',
         $slots.icon || icon ? 'pl-10' : 'pl-4',
         $slots.suffix ? 'pr-10' : 'pr-4',
         'py-2'

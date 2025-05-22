@@ -1,9 +1,8 @@
 <template>
   <button
     :class="[
-      'calc-btn calc-btn-grid',
+      'calc-btn calc-btn-grid disabled:calc-btn-disabled',
       `calc-${variant}-btn`,
-      disabled ? 'calc-btn-disabled' : ''
     ]"
     :disabled="disabled"
     @click="$emit('click', value)"
