@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { XIcon, InfoIcon, CheckCircle2Icon, AlertTriangleIcon, CircleXIcon } from 'lucide-vue-next';
+import { BadgeXIcon, BadgeAlertIcon, CheckCircle2Icon, BadgeInfoIcon, XIcon } from 'lucide-vue-next';
 import { useToast } from '@/composables/useToast';
 import Button from "@/components/base/BaseButton.vue";
 
@@ -111,10 +111,10 @@ const iconClasses = {
 };
 
 const toastIcons = {
-  info: InfoIcon,
+  info: BadgeInfoIcon,
   success: CheckCircle2Icon,
-  warning: AlertTriangleIcon,
-  error: CircleXIcon
+  warning: BadgeAlertIcon,
+  error: BadgeXIcon
 };
 
 const defaultTitles = {

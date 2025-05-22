@@ -10,7 +10,7 @@
           size="icon"
           @click="$emit('toggle-sidebar')"
         >
-          <component :is="isSidebarOpen ? PanelLeftCloseIcon : PanelLeftIcon" class="h-5 w-5" />
+          <component :is="isSidebarOpen ? CircleMinus : CircleEqual" class="h-5 w-5" />
         </Button>
         <offline-indicator :is-mobile="isMobile" />
       </div>
@@ -50,8 +50,8 @@
               @click="$emit('toggle-menubar')"
             >
               <component 
-                :is="menuIcon" 
-                class="h-5 w-5 md:rotate-180" 
+                :is="isMenubarOpen ? CircleMinus : CircleEqual" 
+                class="h-5 w-5" 
               />
             </Button>
           </div>
@@ -65,9 +65,8 @@
 import { computed } from "vue";
 import {
   Command,
-  PanelLeftIcon,
-  PanelLeftCloseIcon,
-  MoreVerticalIcon, 
+  CircleEqual,
+  CircleMinus, 
 } from "lucide-vue-next";
 import { useRoute } from "vue-router";
 import Button from "@/components/base/BaseButton.vue";
@@ -108,13 +107,6 @@ const availableModes = [
 
 const route = useRoute();
 const isCalculatorRoute = computed(() => route.path === '/calculator' || route.path.startsWith('/calculator/'));
-
-const menuIcon = computed(() => {
-  if (props.isMobile) {
-    return MoreVerticalIcon;
-  }
-  return props.isMenubarOpen ? PanelLeftCloseIcon : PanelLeftIcon;
-});
 
 const onModeChange = (newMode) => {
   emit("update:mode", newMode);

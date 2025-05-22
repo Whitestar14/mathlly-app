@@ -13,7 +13,7 @@
 
       <SelectPortal>
         <SelectContent
-          class="select-content z-20 overflow-hidden text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 shadow-md"
+          class="select-content z-20 overflow-hidden text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md"
           :position="position"
           :side-offset="5"
           :align="align"
@@ -31,7 +31,7 @@
                 v-for="option in options"
                 :key="option.value"
                 :value="option.value"
-                class="outline-none flex w-full items-center text-gray-700 dark:text-gray-300 px-2 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 select-none rounded"
+                class="outline-none flex w-full items-center text-gray-700 dark:text-gray-300 px-2.5 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 select-none rounded"
               >
                 <SelectItemText>{{ option.label }}</SelectItemText>
               </SelectItem>

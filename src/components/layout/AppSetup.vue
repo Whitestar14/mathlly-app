@@ -80,6 +80,17 @@ const ShortcutGuide = defineAsyncComponent(() => import("@/components/ui/Shortcu
 const router = useRouter();
 const device = useDeviceStore();
 const settings = useSettingsStore();
+
+const minLoadTime = new Promise(resolve => setTimeout(resolve, 300));
+
+await Promise.all([
+  settings.loadSettings(),
+  router.isReady(),
+  minLoadTime,
+])
+
+device.initializeDeviceInfo();
+
 const { toggleTheme } = useTheme();
 
 const panelStates = reactive({
@@ -88,9 +99,8 @@ const panelStates = reactive({
   isLoaded: false
 });
 
-let currentMode = shallowRef(settings.calculator.mode); 
-
 const isShortcutModalOpen = shallowRef(false);
+const currentMode = shallowRef(settings.calculator.mode); 
 
 const sidebarPanel = usePanel('sidebar');
 const menuPanel = usePanel('menu');
@@ -127,7 +137,7 @@ const mainContentClasses = computed(() => {
   return classes;
 });
 
-const preloadPanelStates = async () => {
+const preloadPanelStates = () => {
   const defaults = {
     desktop: { isOpen: false },
     mobile: { isOpen: false }
@@ -142,23 +152,7 @@ const preloadPanelStates = async () => {
   panelStates.isLoaded = true;
 };
 
-const initializeApp = async () => {
-  const minLoadTime = new Promise(resolve => setTimeout(resolve, 300));
-  
-  await Promise.all([
-    settings.loadSettings(),
-    router.isReady(),
-    minLoadTime,
-  ]);
-  
-  updateMode(settings.calculator.mode);
-  
-  device.initializeDeviceInfo();
-  
-  await preloadPanelStates();
-};
-
-await initializeApp();
+preloadPanelStates();
 
 onUnmounted(device.destroyDeviceInfo);
 </script>

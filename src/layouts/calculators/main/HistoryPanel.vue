@@ -25,7 +25,7 @@
           class="text-center py-4 flex flex-col items-center justify-center h-full">
           <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
             <div v-show="isProgrammerMode">
-              <p class="flex justify-center text-xs items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
+              <p class="flex justify-center text-sm items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
                 History is disabled in <kbd>Programmer Mode</kbd>
               </p>
             </div>

@@ -47,7 +47,7 @@
           @click="$emit('toggle')"
         >
           <ArrowRightToLine
-            class="h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-300"
+            class="h-4 w-4 text-gray-700 dark:text-gray-300 transition-transform duration-300"
             :class="{ 'rotate-180': isOpen }"
           />
         </Button>

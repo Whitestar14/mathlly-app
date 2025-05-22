@@ -24,7 +24,7 @@
         />
 
         <calculator-buttons
-          :key="state.mode"  :mode="state.mode" :input-length="state.input.length" :max-length="maxInputLength"
+          :mode="state.mode" :input-length="state.input.length" :max-length="maxInputLength"
           :active-base="state.activeBase"
           :has-memory="hasMemoryValue"
           @button-click="handleButtonClick"
@@ -119,17 +119,19 @@ watch(() => state.input, (newRawInput) => {
 
 watch(() => props.mode, (newMode, oldMode) => {
   if (!newMode) return;
-  const isInitialLoad = oldMode === undefined;
 
   resetState(newMode);
   calculator.value = CalculatorFactory.create(newMode, props.settings);
   if (newMode === 'Programmer') {
     setActiveBase('DEC');
   }
-  if (isInitialLoad) {
+  if (oldMode === undefined) {
     if (storedInput.value && state.input !== storedInput.value) {
       updateState({ input: storedInput.value });
       calculator.value.input = storedInput.value;
+      if (props.mode === "Programmer") {
+      calculator.value.states.DEC.input = storedInput.value;
+      }
     }
   } else { 
     storedInput.value = "";

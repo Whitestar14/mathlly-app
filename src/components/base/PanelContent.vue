@@ -11,7 +11,7 @@
       <div class="flex items-center gap-2 justify-between">
         <slot name="header-actions" />
         <Button
-          class="md:hidden"
+          class="md:hidden rounded-full"
           variant="ghost"
           size="icon"
           @click="$emit('close')"
