@@ -60,10 +60,6 @@
                       v-if="item.isNew"
                       type="new"
                     />
-                    <Badge
-                      v-if="item.seasonal"
-                      type="special"
-                    />
                   </button>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -130,8 +126,7 @@ import {
   RegexIcon,
   LineChartIcon,
   ArrowRightLeftIcon,
-  BinaryIcon,
-  Skull,
+  BinaryIcon
 } from "lucide-vue-next";
 import {
   NavigationMenuItem,
@@ -202,13 +197,6 @@ const categories = markRaw([
         icon: BinaryIcon,
         isNew: true,
         description: "Encode and decode Base64 strings",
-      },
-      {
-        name: "Doom Chart",
-        path: "/doom",
-        icon: Skull,
-        seasonal: true,
-        description: "Calculate your developer expiration date",
       },
     ],
   },
