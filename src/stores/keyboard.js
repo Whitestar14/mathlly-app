@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { ref, computed, markRaw } from "vue";
-import { useStorage } from "@vueuse/core";
 
 /**
  * Store for managing keyboard shortcuts and input validation
@@ -117,12 +116,6 @@ export const useKeyboardStore = defineStore("keyboard", () => {
   const contextStack = ref(["global"]);
   
   /**
-   * Debug mode flag with persistence
-   * @type {import('vue').Ref<boolean>}
-   */
-  const debug = useStorage("keyboard-debug-mode", false);
-
-  /**
    * Active shortcuts based on current context stack
    * @type {import('vue').ComputedRef<Object>}
    */
@@ -144,9 +137,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
    * Sets the current keyboard context
    * @param {string} ctx - Context to set
    */
-  function setContext(ctx) {
-    if (debug.value) console.log("Setting context:", ctx);
-    
+  function setContext(ctx) {    
     // Remove existing instance of context if it exists
     contextStack.value = contextStack.value.filter((c) => c !== ctx);
     
@@ -158,9 +149,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
    * Clears a context from the stack
    * @param {string} ctx - Context to clear
    */
-  function clearContext(ctx) {
-    if (debug.value) console.log("Clearing context:", ctx);
-    
+  function clearContext(ctx) {    
     contextStack.value = contextStack.value.filter((c) => c !== ctx);
     
     // Ensure global context is always present
@@ -208,7 +197,6 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     contextStack,
     currentContext,
     activeShortcuts,
-    debug,
     setContext,
     clearContext,
     isValidInput,

@@ -32,7 +32,6 @@ db.version(4).stores({
         },
         startup: {
           navigation: settings.startupNavigation,
-          lastVisitedPath: settings.lastVisitedPath,
         }
       };
       
@@ -75,7 +74,6 @@ db.on("ready", async () => {
       },
       startup: {
         navigation: 'home',
-        lastVisitedPath: '/',
       }
     });
   }

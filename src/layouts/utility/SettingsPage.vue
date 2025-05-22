@@ -149,6 +149,7 @@ const saveSettings = async () => {
               v-model="searchQuery"
               placeholder="Search settings..."
               :icon="SearchIcon"
+              :autofocus="true"
               aria-label="Search settings"
             />
         </div>

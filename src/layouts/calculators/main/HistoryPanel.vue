@@ -178,7 +178,7 @@ const handleSelectItem = (item) => {
     result: item.result,
   });
 
-  emit('history-close');
+  if (props.isMobile) emit('history-close');
 };
 
 const handleDelete = async (id) => {

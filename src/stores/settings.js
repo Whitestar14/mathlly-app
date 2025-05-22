@@ -40,7 +40,6 @@ export const DEFAULT_SETTINGS = {
   },
   startup: {
     navigation: 'last-visited',
-    lastVisitedPath: '/',
   },
 };
 

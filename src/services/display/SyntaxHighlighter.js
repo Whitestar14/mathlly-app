@@ -2,10 +2,10 @@ import { CalculatorConstants } from '../../utils/constants/CalculatorConstants.j
 import { CacheManager } from '@/utils/cache/CacheManager';
 
 /**
- * @class ExpressionFormatter
+ * @class SyntaxHighlighter
  * @description Class for syntax highlighting of mathematical expressions
  */
-export class ExpressionFormatter {
+export class SyntaxHighlighter {
   static CACHE_NAMES = {
     FORMAT: 'expression-format',
     PARENTHESES: 'expression-parentheses',

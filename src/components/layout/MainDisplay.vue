@@ -71,7 +71,7 @@ import { inject, computed, onMounted, watch, onUnmounted, shallowRef } from "vue
 import { useElementSize, useScroll, useThrottleFn, useMemoize } from '@vueuse/core'
 import { useAnimation } from '@/composables/useAnimation'
 import { useSettingsStore } from '@/stores/settings'
-import { ExpressionFormatter } from '@/services/display/SyntaxHighlighter'
+import { SyntaxHighlighter } from '@/services/display/SyntaxHighlighter'
 
 const props = defineProps({
   input: { type: String, default: "" },
@@ -143,7 +143,7 @@ const getFontSizeClass = useMemoize((value, mode, activeBase) => {
 const formattedTokens = computed(() => {
   if (!syntaxHighlightingEnabled.value) return [];
   
-  return ExpressionFormatter.format(
+  return SyntaxHighlighter.format(
     props.input, 
     parenthesesTracker.value, 
     true,
@@ -208,7 +208,7 @@ watch(() => props.isAnimating, (newValue) => {
 }, { flush: 'post' });
 
 function clearCache() {
-  if (syntaxHighlightingEnabled.value) ExpressionFormatter.clearCache();
+  if (syntaxHighlightingEnabled.value) SyntaxHighlighter.clearCache();
 }
 
 watch([() => props.mode, () => props.activeBase], clearCache, { deep: false });

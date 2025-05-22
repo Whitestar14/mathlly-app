@@ -13,7 +13,7 @@
 
       <SelectPortal>
         <SelectContent
-          class="z-20 overflow-hidden text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-1 shadow-md"
+          class="select-content z-20 overflow-hidden text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 shadow-md"
           :position="position"
           :side-offset="5"
           :align="align"
@@ -92,5 +92,44 @@ defineEmits(["update:model-value"]);
 [data-radix-popper-content-wrapper] {
   width: var(--radix-popper-anchor-width);
   z-index: 20 !important;
+}
+
+/* Animation for the select dropdown */
+.select-content {
+  transform-origin: var(--radix-popper-transform-origin);
+  animation: selectContentShow 0.2s ease-out;
+}
+
+@keyframes selectContentShow {
+  from {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animation for when the select dropdown is closing */
+.select-content[data-state="closed"] {
+  animation: selectContentHide 0.1s ease-in;
+}
+
+@keyframes selectContentHide {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+}
+
+/* Ensure the animation plays smoothly */
+.select-content {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 </style>

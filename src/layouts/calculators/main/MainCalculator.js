@@ -263,7 +263,6 @@ export function CalculatorController({
     { immediate: true }
   );
 
-  // Watch for activeBase changes - optimized with shallowRef
   watch(
     () => state.activeBase,
     (newBase) => {
