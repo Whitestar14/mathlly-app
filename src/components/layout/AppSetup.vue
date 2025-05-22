@@ -1,82 +1,67 @@
 <template>
-  <div 
-    class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
-    :class="globalClasses"
-  >
+  <div class="flex flex-col flex-grow transition-[padding] duration-300" :class="mainContentClasses">
+    <app-header
+      :is-mobile="device.isMobile"
+      :is-sidebar-open="sidebarPanel.isOpen"
+      :is-menubar-open="menuPanel.isOpen"
+      :current-calculator-mode="currentMode" 
+      @update:mode="updateMode"
+      @toggle-sidebar="sidebarPanel.toggle()"
+      @toggle-menubar="menuPanel.toggle()"
+      @open-shortcut-modal="openShortcutModal"
+    />
 
-      <!-- Sidebar -->
-      <div class="relative">
-        <Suspense @resolve="panelStates.sidebar.isLoaded = true">
-          <sidebar-menu
-            :is-mobile="device.isMobile"
-            @sidebar-close="sidebarPanel.close()"
-          />
-
-          <template #fallback>
-            <div 
-            v-if="panelStates.sidebar.isOpen" 
-            class="w-64 h-screen hidden md:flex fixed top-0 left-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-20"
-          ></div>
-          </template>
-        </Suspense>
-      </div>
-
-      <!-- Main Content Area -->
-      <div class="flex flex-col flex-grow transition-[padding] duration-300" :class="mainContentClasses">
-        <!-- App Header - Eagerly loaded for better LCP -->
-        <app-header
+    <div class="relative">
+      <Suspense @resolve="panelStates.sidebar.isLoaded = true">
+        <sidebar-menu
           :is-mobile="device.isMobile"
-          :is-sidebar-open="sidebarPanel.isOpen"
-          :is-menubar-open="menuPanel.isOpen"
-          :settings="settings"
-          @toggle-sidebar="sidebarPanel.toggle()"
-          @toggle-menubar="menuPanel.toggle()"
-          @update:mode="updateMode"
-          @open-shortcut-modal="openShortcutModal"
+          @sidebar-close="sidebarPanel.close()"
         />
-
-        <!-- App View with loading fallback -->
-        <Suspense>
-          <app-view
-            :mode="currentMode"
-            :settings="settings"
-            :is-mobile="device.isMobile"
-          />
-          <template #fallback>
-            <div class="flex-grow flex items-center justify-center">
-              <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-            </div>
-          </template>
-        </Suspense>
-      </div>
-
-      <!-- Main Menu -->
-      <div class="relative">
-        <Suspense @resolve="panelStates.menu.isLoaded = true">
-          <main-menu />
-          <template #fallback>
-            <div 
-            v-if="panelStates.menu.isOpen" 
-            class="w-64 h-screen fixed hidden md:flex top-0 right-0 bg-gray-50 dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 z-20"
+        <template #fallback>
+          <div 
+           v-if="panelStates.sidebar.isOpen" 
+           class="w-64 h-screen hidden md:flex fixed top-0 left-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-20"
           ></div>
-          </template>
-        </Suspense>
-      </div>
-
-      <!-- Toast Notifications -->
-      <Suspense>
-        <toast :is-mobile="device.isMobile" />
+        </template>
       </Suspense>
-      
-      <!-- Keyboard Shortcut Guide -->
-       <Suspense>
+    </div>
+
+    <Suspense>
+      <app-view
+        :mode="currentMode" :settings="settings"
+        :is-mobile="device.isMobile"
+      />
+      <template #fallback>
+        <div class="flex-grow flex items-center justify-center">
+          <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+        </div>
+      </template>
+    </Suspense>
+
+    <div class="relative">
+      <Suspense @resolve="panelStates.menu.isLoaded = true">
+        <main-menu />
+        <template #fallback>
+          <div 
+           v-if="panelStates.menu.isOpen" 
+           class="w-64 h-screen fixed hidden md:flex top-0 right-0 bg-gray-50 dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 z-20"
+          ></div>
+        </template>
+      </Suspense>
+    </div>
+
+    <Suspense>
+      <toast :is-mobile="device.isMobile" />
+    </Suspense>
+    
+    <Suspense>
       <ShortcutGuide v-if="panelStates.isLoaded" v-model="isShortcutModalOpen" />
-       </Suspense>
+    </Suspense>
   </div>
 </template>
 
 <script setup>
-import { onUnmounted, computed, shallowRef, reactive, watch, defineAsyncComponent } from "vue";
+import { onUnmounted, computed, shallowRef, reactive, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
 import { useFullscreen, useLocalStorage } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
@@ -103,7 +88,8 @@ const panelStates = reactive({
   isLoaded: false
 });
 
-const currentMode = shallowRef(settings.calculator.mode);
+let currentMode = shallowRef(settings.calculator.mode); 
+
 const isShortcutModalOpen = shallowRef(false);
 
 const sidebarPanel = usePanel('sidebar');
@@ -141,24 +127,6 @@ const mainContentClasses = computed(() => {
   return classes;
 });
 
-const globalClasses = computed(() => {
-  const classes = [];
-
-  settings.appearance.animationDisabled && classes.push('animation-disabled');
-
-  return classes;
-})
-
-const textSize = computed(() => settings.display.textSize || "medium");
-
-const updateTextSizeClasses = newSize => {
-  const root = document.documentElement;
-  root.classList.remove("ts-small", "ts-normal", "ts-medium", "ts-large");
-  root.classList.add(`ts-${newSize}`);
-};
-
-watch(textSize, updateTextSizeClasses, { immediate: true });
-
 const preloadPanelStates = async () => {
   const defaults = {
     desktop: { isOpen: false },
@@ -182,6 +150,8 @@ const initializeApp = async () => {
     router.isReady(),
     minLoadTime,
   ]);
+  
+  updateMode(settings.calculator.mode);
   
   device.initializeDeviceInfo();
   

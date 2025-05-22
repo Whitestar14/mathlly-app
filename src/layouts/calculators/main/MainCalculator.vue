@@ -12,8 +12,7 @@
         :class="state.mode === 'Programmer' ? 'grid-rows-[1fr_2fr]' : 'grid-rows-[1fr_2.5fr]'"
       >
         <calculator-display
-          :input="input"
-          :preview="preview"
+          :input="input" :preview="preview"
           :error="state.error"
           :is-animating="state.isAnimating"
           :animated-result="animatedResult"
@@ -25,9 +24,7 @@
         />
 
         <calculator-buttons
-          :mode="state.mode"
-          :input-length="input.length"
-          :max-length="maxInputLength"
+          :key="state.mode"  :mode="state.mode" :input-length="state.input.length" :max-length="maxInputLength"
           :active-base="state.activeBase"
           :has-memory="hasMemoryValue"
           @button-click="handleButtonClick"
@@ -46,17 +43,19 @@
 </template>
 
 <script setup>
-import { computed, watch, shallowRef, onMounted, provide } from 'vue';
+import { computed, watch, shallowRef, provide, defineAsyncComponent } from 'vue';
+import { useSessionStorage } from '@vueuse/core';
 import { useHistory } from '@/composables/useHistory';
 import { useMemory } from '@/composables/useMemory';
 import { usePanel } from '@/composables/usePanel';
 import { useCalculatorState } from '@/composables/useCalculatorState';
 import { CalculatorController } from './MainCalculator';
 import { CalculatorFactory } from '@/services/factory/CalculatorFactory';
-import HistoryPanel from '@/layouts/calculators/main/HistoryPanel.vue';
 import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue';
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue';
 import BasePage from '@/components/base/BasePage.vue';
+
+const HistoryPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/HistoryPanel.vue'));
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -78,7 +77,8 @@ const {
   setActiveBase
 } = useCalculatorState(props.mode);
 
-// Use shallowRef for better performance with objects
+const storedInput = useSessionStorage(`calculator-session-input-${props.mode}`, '');
+
 const calculator = shallowRef(CalculatorFactory.create(props.mode, props.settings));
  
 // Provide calculator instance to child components
@@ -111,20 +111,31 @@ const hasMemoryValue = computed(() => memoryService.hasMemory(props.mode).value)
 // History panel methods
 const openHistory = () => history.open();
 
-// Load settings on mount
-onMounted(async () => {
-  await props.settings.loadSettings();
-})
+watch(() => state.input, (newRawInput) => {
+  if (storedInput.value !== newRawInput) {
+    storedInput.value = newRawInput;
+  }
+});
 
-watch(() => props.mode, (newMode) => {
+watch(() => props.mode, (newMode, oldMode) => {
   if (!newMode) return;
-    resetState(newMode)
-    calculator.value = CalculatorFactory.create(newMode, props.settings)
+  const isInitialLoad = oldMode === undefined;
 
-    if (newMode === 'Programmer') setActiveBase('DEC');
-  },
-  { immediate: true }
-)
+  resetState(newMode);
+  calculator.value = CalculatorFactory.create(newMode, props.settings);
+  if (newMode === 'Programmer') {
+    setActiveBase('DEC');
+  }
+  if (isInitialLoad) {
+    if (storedInput.value && state.input !== storedInput.value) {
+      updateState({ input: storedInput.value });
+      calculator.value.input = storedInput.value;
+    }
+  } else { 
+    storedInput.value = "";
+  }
+}, { immediate: true });
+
 
 // Handle history item selection
 const selectHistoryItem = ({ expression }) => {

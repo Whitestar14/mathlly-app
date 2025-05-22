@@ -3,15 +3,16 @@
     <Transition name="fade" mode="out-in">
         <component 
           :is="Component"
-          v-bind="isCalculatorRoute(route.path) ? calculatorProps : {}" 
+          v-bind="isCalculatorRoute(route.path) ? calculatorProps : {}"
+          :key="isCalculatorRoute(route.path) ? props.mode : route.path" 
         />
     </Transition>
   </router-view>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { RouterView } from 'vue-router'
+import { computed } from 'vue';
+import { RouterView } from 'vue-router';
 
 const props = defineProps({
   mode: {
@@ -26,13 +27,13 @@ const props = defineProps({
     type: Boolean,
     required: true,
   }
-})
+});
 
 const calculatorProps = computed(() => ({
   mode: props.mode,
   settings: props.settings,
   isMobile: props.isMobile
-}))
+}));
 
-const isCalculatorRoute = (path) => path.includes('/calculator')
+const isCalculatorRoute = (path) => path === '/calculator' || path.startsWith('/calculator/');
 </script>
