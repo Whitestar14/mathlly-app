@@ -1,4 +1,26 @@
 export const updates = [
+    {
+    version: '0.11.12',
+    date: 'May 23, 2025',
+    features: [
+      '@warning: This update might cause application malfunctions on certain devices. Full database reset is advised',
+      '@milestone: Enhanced PWA capabilities with improved offline support and UI/UX refinements',
+      'Implemented syntax highlighting for calculator display to improve readability with color-coded numbers, operators, and functions',
+      'Enhanced fraction formatting with support for mixed fraction conversion',
+      'Redesigned Settings Page with searchable interface, accordion layout, and detailed setting descriptions',
+      'Added text size customization options (small, normal, medium, large) for improved accessibility',
+      'Refactored panel system for better performance and simplified component architecture',
+      'Improved error handling with enhanced ErrorFallback component',
+      'Optimized performance with strategic use of shallowRef and markRaw to reduce reactivity overhead',
+      'Implemented caching mechanisms in DisplayFormatter and ExpressionFormatter for faster rendering',
+      'Improved responsive design with better adaptations for different screen sizes',
+      'Fixed keyboard input handling by normalizing keys to lowercase',
+      'Restructured settings with a nested organization for better maintainability',
+      'Enhanced animation system with more efficient utility functions',
+      'Improved offline indicator and notification system',
+      'Removed debug mode from keyboard store for production stability'
+    ]
+  },
   {
     version: '0.11.11',
     date: 'May 3, 2025',
