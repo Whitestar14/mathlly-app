@@ -1,4 +1,5 @@
 import Dexie from "dexie";
+import { DEFAULT_SETTINGS } from '@/stores/settings'
 
 const db = new Dexie('mathlly-db');
 
@@ -31,7 +32,7 @@ db.version(4).stores({
           checkForUpdates: settings.checkForUpdates,
         },
         startup: {
-          navigation: settings.startupNavigation,
+          navigation: settings.navigation,
         }
       };
       
@@ -69,32 +70,7 @@ db.on("ready", async () => {
   // If there are no settings, create default settings
   const settingsCount = await db.settings.count();
   if (settingsCount === 0) {
-    await db.settings.add({
-      id: 1,
-      display: {
-        precision: 4,
-        useFractions: false,
-        formatting: {
-          useThousandsSeparator: true,
-          formatBinary: true,
-          formatHexadecimal: true,
-          formatOctal: true,
-        },
-        syntaxHighlighting: true,
-        textSize: "normal"
-      },
-      calculator: {
-        mode: 'Standard',
-      },
-      appearance: {
-        theme: 'system',
-        animationDisabled: false,
-        checkForUpdates: true,
-      },
-      startup: {
-        navigation: 'home',
-      }
-    });
+    await db.settings.add(DEFAULT_SETTINGS);
   }
 });
 
