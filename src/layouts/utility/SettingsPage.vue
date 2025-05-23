@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import { SearchIcon, CircleHelp } from "lucide-vue-next";
+import { SearchIcon, CircleHelp, AlertTriangle } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settings";
 import { filterByQuery } from "@/utils/misc/queryFilter";
 import { DEFAULT_SETTINGS } from "@/stores/settings"
@@ -14,8 +14,8 @@ import Select from "@/components/ui/SelectBar.vue";
 import Switch from "@/components/ui/ToggleBar.vue";
 import Button from "@/components/base/BaseButton.vue";
 import Collapsible from '@/components/base/BaseCollapsible.vue';
-// Import RadioGroup from radix-vue for the segmented control
 import { RadioGroupRoot, RadioGroupItem } from 'radix-vue';
+import { resetDatabase } from "@/data/db";
 
 defineOptions({
   name: "SettingsPage"
@@ -26,12 +26,15 @@ const settingsStore = useSettingsStore();
 const { toast } = useToast();
 const searchQuery = ref('');
 const showUnsavedChangesModal = ref(false);
+const showResetDatabaseModal = ref(false);
+const isResettingDatabase = ref(false);
 
 const settingsManifest = [
   { id: 'display', title: 'Display Settings', icon: 'MonitorIcon', keywords: ['precision', 'decimal places', 'fractions', 'syntax highlighting', 'number formatting', 'thousands separator', 'comma', 'binary', 'hexadecimal', 'octal', 'font', 'appearance', 'text size'] },
   { id: 'calculator', title: 'Calculator Mode', icon: 'CalculatorIcon', keywords: ['mode', 'standard', 'programmer', 'scientific', 'default calculator'] },
   { id: 'startup', title: 'Startup Preferences', icon: 'PowerIcon', keywords: ['launch', 'open page', 'initial screen', 'home', 'calculator page', 'last visited', 'boot'] },
-  { id: 'themes', title: 'Themes & Preferences', icon: 'PaletteIcon', keywords: ['color theme', 'appearance', 'light mode', 'dark mode', 'system theme', 'animations', 'disable transitions', 'visuals', 'text size'] }
+  { id: 'themes', title: 'Themes & Preferences', icon: 'PaletteIcon', keywords: ['color theme', 'appearance', 'light mode', 'dark mode', 'system theme', 'animations', 'disable transitions', 'visuals', 'text size'] },
+  { id: 'advanced', title: 'Advanced Settings', icon: 'SettingsIcon', keywords: ['reset', 'database', 'clear', 'troubleshoot', 'fix', 'issues', 'problems', 'data', 'storage'] }
 ];
 
 const filteredManifest = computed(() =>
@@ -137,6 +140,38 @@ const saveSettings = async () => {
     console.error("Error saving settings:", error);
   }
 };
+
+// Function to show the reset database confirmation modal
+const showResetConfirmation = () => {
+  showResetDatabaseModal.value = true;
+};
+
+// Function to handle database reset
+const handleResetDatabase = async () => {
+  isResettingDatabase.value = true;
+  
+  try {
+    const success = await resetDatabase();
+    
+    if (!success) throw new Error("Failed to reset database");
+  } catch (error) {
+    isResettingDatabase.value = false;
+    showResetDatabaseModal.value = false;
+    
+    toast({
+      type: "error",
+      title: "Reset Failed",
+      description: "There was a problem resetting your database. Please try again."
+    });
+    
+    console.error("Error resetting database:", error);
+  }
+};
+
+// Function to cancel database reset
+const cancelResetDatabase = () => {
+  showResetDatabaseModal.value = false;
+};
 </script>
 
 <template>
@@ -187,7 +222,7 @@ const saveSettings = async () => {
               <div class="mt-2">
                 <RadioGroupRoot 
                   v-model="localSettings.display.textSize" 
-                  class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-800 p-1"
+                  class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-900/30 p-1"
                 >
                   <div class="flex space-x-1">
                     <RadioGroupItem
@@ -396,13 +431,44 @@ const saveSettings = async () => {
           </div>
         </div>
       </Collapsible>
+
+       <!-- New Advanced Settings section with database reset -->
+      <Collapsible
+        v-if="isRendered('advanced')"
+        id="advanced"
+        title="Advanced Settings" 
+        icon="Settings"
+        :defaultOpen="false"
+      >
+        <div class="space-y-6">
+          <div class="p-4 border border-red-200 dark:border-gray-600 bg-red-50 dark:bg-gray-900/20 rounded-lg">
+            <h3 class="text-sm font-medium text-red-800 dark:text-gray-300 flex items-center gap-2 mb-2">
+              <AlertTriangle class="h-4 w-4" />
+              Database Management
+            </h3>
+            
+            <p class="text-sm text-red-700 dark:text-gray-300 mb-3">
+              If you're experiencing issues with the app, you can reset the database to default settings.
+              This will delete all your calculation history and restore default settings.
+            </p>
+            
+            <div class="flex justify-end">
+              <Button 
+                variant="destructive" 
+                size="sm"
+                @click="showResetConfirmation"
+              >
+                Reset Database
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Collapsible>
       
       <div v-if="filteredManifest.length === 0 && searchQuery" class="text-center py-10">
         <p class="text-gray-600 dark:text-gray-400 text-lg">No settings found for "{{ searchQuery }}".</p>
         <p class="text-sm text-gray-500 dark:text-gray-500">Try a different search term.</p>
       </div>
-
-   
 
       <div class="flex justify-end space-x-4 bg-gray-50 dark:bg-gray-900 py-4 border-t border-gray-200 dark:border-gray-700">
         <Button variant="ghost" @click="goBack">Cancel</Button>
@@ -410,20 +476,107 @@ const saveSettings = async () => {
       </div>
     </div>
   </BasePage> 
+  
+  <!-- Unsaved Changes Modal -->
   <BaseModal v-model:open="showUnsavedChangesModal">
-      <template #title>Unsaved Changes</template>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.
-        </p>
+    <template #title>Unsaved Changes</template>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.
+      </p>
+    
+    <div class="flex justify-end space-x-3">
+      <Button variant="outline" @click="cancelNavigation">
+        Stay on Page
+      </Button>
+      <Button variant="destructive" @click="confirmNavigation">
+        Discard Changes
+      </Button>
+    </div>
+  </BaseModal>
+  
+<!-- Reset Database Confirmation Modal -->
+<BaseModal v-model:open="showResetDatabaseModal">
+  <template #title>
+    <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+      <AlertTriangle class="h-5 w-5" />
+      Reset Database
+    </div>
+  </template>
+  
+  <div class="space-y-5">
+    <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+      <p class="text-sm font-medium text-red-800 dark:text-red-300 mb-3">
+        This action will permanently delete your data and cannot be undone.
+      </p>
       
-      <div class="flex justify-end space-x-3">
-        <Button variant="outline" @click="cancelNavigation">
-          Stay on Page
-        </Button>
-        <Button variant="destructive" @click="confirmNavigation">
-          Discard Changes
-        </Button>
+      <div class="space-y-3">
+        <div class="flex items-start gap-2.5">
+          <div class="h-5 w-5 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5">
+            <span class="text-xs font-bold">1</span>
+          </div>
+          <p class="text-sm text-gray-700 dark:text-gray-300">
+            All calculation history will be permanently deleted
+          </p>
+        </div>
+        
+        <div class="flex items-start gap-2.5">
+          <div class="h-5 w-5 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5">
+            <span class="text-xs font-bold">2</span>
+          </div>
+          <p class="text-sm text-gray-700 dark:text-gray-300">
+            All settings will be restored to their default values
+          </p>
+        </div>
+        
+        <div class="flex items-start gap-2.5">
+          <div class="h-5 w-5 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5">
+            <span class="text-xs font-bold">3</span>
+          </div>
+          <p class="text-sm text-gray-700 dark:text-gray-300">
+            The application will reload automatically
+          </p>
+        </div>
       </div>
-    </BaseModal>
+    </div>
+    
+    <div class="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800/50 rounded-lg">
+      <div class="text-yellow-600 dark:text-yellow-400 mt-0.5">
+        <CircleHelp class="h-5 w-5" />
+      </div>
+      <div>
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+          <span class="font-medium">When to use this:</span> If you're experiencing persistent issues with the application such as incorrect calculations, settings not saving, or other unexpected behavior.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+    <Button 
+      variant="outline" 
+      class="w-full sm:w-auto order-2 sm:order-1"
+      @click="cancelResetDatabase"
+      :disabled="isResettingDatabase"
+    >
+      Cancel
+    </Button>
+    <Button 
+      variant="destructive" 
+      class="w-full sm:w-auto order-1 sm:order-2"
+      @click="handleResetDatabase"
+      :loading="isResettingDatabase"
+    >
+      <template v-if="!isResettingDatabase">
+        <span class="flex items-center gap-1.5">
+          <AlertTriangle class="h-4 w-4" />
+          Reset Database
+        </span>
+      </template>
+      <template v-else>
+        Resetting...
+      </template>
+    </Button>
+  </div>
+</BaseModal>
   </div>
 </template>

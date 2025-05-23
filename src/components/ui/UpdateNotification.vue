@@ -8,8 +8,9 @@
     leave-to-class="translate-y-10 opacity-0"
   >
     <div 
-      v-if="showNotification" 
-      class="fixed bottom-4 right-4 z-50 w-full max-w-sm bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+      v-if="showNotification"
+      class="fixed bottom-4 right-4 z-50 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+      style="width:clamp(300px,90vw,32rem);"
     >
       <!-- Header with version badge -->
       <div class="p-4 pb-3 flex items-start justify-between">
@@ -48,7 +49,7 @@
         leave-to-class="max-h-0 opacity-0"
       >
         <div v-if="showDetails" class="px-4 pb-2 overflow-hidden">
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-2 mb-2">
+          <div class="border-t border-gray-200 dark:border-gray-700 pt-2 mb-2 overflow-y-auto" style="max-height: calc(100vh - 12rem);">
             <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">What's new:</h4>
             <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
               <li v-for="(feature, index) in updateFeatures" :key="index" class="flex items-start">
