@@ -45,6 +45,25 @@ db.version(4).stores({
   });
 });
 
+// Function to reset the database
+export async function resetDatabase() {
+  try {
+    // Close the current database connection
+    await db.close();
+    
+    // Delete the database completely
+    await Dexie.delete('mathlly-db');
+    
+    // Reload the page to reinitialize the database with defaults
+    window.location.reload();
+    
+    return true;
+  } catch (error) {
+    console.error("Error resetting database:", error);
+    return false;
+  }
+}
+
 // Perform database upgrade
 db.on("ready", async () => {
   // If there are no settings, create default settings

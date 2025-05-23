@@ -113,7 +113,7 @@ defineEmits(["update:model-value"]);
 
 /* Animation for when the select dropdown is closing */
 .select-content[data-state="closed"] {
-  animation: selectContentHide 0.1s ease-in;
+  animation: selectContentHide 0.2s ease-in;
 }
 
 @keyframes selectContentHide {
