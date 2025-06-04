@@ -12,7 +12,8 @@
         :class="state.mode === 'Programmer' ? 'grid-rows-[1fr_2fr]' : 'grid-rows-[1fr_2.5fr]'"
       >
         <calculator-display
-          :input="input" :preview="preview"
+          :input="input"
+          :preview="preview"
           :error="state.error"
           :is-animating="state.isAnimating"
           :animated-result="animatedResult"
@@ -24,7 +25,9 @@
         />
 
         <calculator-buttons
-          :mode="state.mode" :input-length="state.input.length" :max-length="maxInputLength"
+          :mode="state.mode"
+          :input-length="state.input.length"
+          :max-length="maxInputLength"
           :active-base="state.activeBase"
           :has-memory="hasMemoryValue"
           @button-click="handleButtonClick"
@@ -55,13 +58,13 @@ import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue';
 import BasePage from '@/components/base/BasePage.vue';
 
-const ActivityPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/ActivityPanel.vue'));
-
 const props = defineProps({
   mode: { type: String, required: true },
   settings: { type: Object, required: true },
   isMobile: { type: Boolean, required: true },
 });
+
+const ActivityPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/ActivityPanel.vue'));
 
 // Use composables for state management
 const historyService = useHistory();

@@ -20,7 +20,10 @@
               rel="noopener noreferrer"
               class="flex w-full items-center px-3 py-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300 text-gray-700/90 dark:text-gray-400/90"
             >
-              <component :is="link.icon" class="h-4 w-4 mr-2 text-gray-500/80 dark:text-gray-500/80" />
+              <component
+                :is="link.icon"
+                class="h-4 w-4 mr-2 text-gray-500/80 dark:text-gray-500/80"
+              />
               <span>{{ link.text }}</span>
             </a>
           </div>
@@ -31,7 +34,9 @@
 
     <template #footer>
       <div class="space-y-1.5">
-        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3">Appearance</h3>
+        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3">
+          Appearance
+        </h3>
         <ToggleGroupRoot
           v-model="selectedTheme"
           type="single"

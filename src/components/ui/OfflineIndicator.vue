@@ -13,7 +13,10 @@
         { 'animate-pulse-custom': isAnimating }
       ]"
     >
-      <component :is="networkStatus ? Wifi : WifiOff" class="size-4"/>
+      <component
+        :is="networkStatus ? Wifi : WifiOff"
+        class="size-4"
+      />
     </div>
   </div>
 </template>
@@ -23,10 +26,6 @@ import { ref } from 'vue';
 import { networkStatus } from '@/router/errorHandler';
 import { Wifi, WifiOff } from 'lucide-vue-next';
 import { useTimeoutFn } from '@vueuse/core';
-
-defineProps({
-  isMobile: Boolean
-});
 
 const isAnimating = ref(false);
 

@@ -48,11 +48,23 @@
         leave-from-class="max-h-[200px] opacity-100"
         leave-to-class="max-h-0 opacity-0"
       >
-        <div v-if="showDetails" class="px-4 pb-2 overflow-hidden">
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-2 mb-2 overflow-y-auto" style="max-height: calc(100vh - 12rem);">
-            <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">What's new:</h4>
+        <div
+          v-if="showDetails"
+          class="px-4 pb-2 overflow-hidden"
+        >
+          <div
+            class="border-t border-gray-200 dark:border-gray-700 pt-2 mb-2 overflow-y-auto"
+            style="max-height: calc(100vh - 12rem);"
+          >
+            <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              What's new:
+            </h4>
             <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
-              <li v-for="(feature, index) in updateFeatures" :key="index" class="flex items-start">
+              <li
+                v-for="(feature, index) in updateFeatures"
+                :key="index"
+                class="flex items-start"
+              >
                 <CheckIcon class="h-3.5 w-3.5 text-green-500 dark:text-green-400 mr-1.5 mt-0.5 flex-shrink-0" />
                 <span>{{ feature }}</span>
               </li>
@@ -70,7 +82,10 @@
             @click="toggleDetails"
           >
             <span class="flex items-center">
-              <component :is="showDetails ? ChevronUpIcon : ChevronDownIcon" class="h-4 w-4 mr-1" />
+              <component
+                :is="showDetails ? ChevronUpIcon : ChevronDownIcon"
+                class="h-4 w-4 mr-1"
+              />
               {{ showDetails ? 'Hide' : 'Details' }}
             </span>
           </BaseButton>

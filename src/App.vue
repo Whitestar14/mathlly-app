@@ -1,21 +1,24 @@
 <template>
-  <error-fallback
-    v-if="hasError"
-    :error="error"
-    :is-global-error="true" />
-  <Suspense v-else>
-    <template #default>
-      <AppProvider>
-        <app-setup />
-      </AppProvider>
-    </template>
-    <template #fallback>
-      <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
-        <loader variant="regular" />
-      </div>
-    </template>
-  </Suspense>
-  <UpdateNotification />
+  <div>
+    <error-fallback
+      v-if="hasError"
+      :error="error"
+      :is-global-error="true"
+    />
+    <Suspense v-else>
+      <template #default>
+        <AppProvider>
+          <app-setup />
+        </AppProvider>
+      </template>
+      <template #fallback>
+        <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
+          <loader variant="regular" />
+        </div>
+      </template>
+    </Suspense>
+    <UpdateNotification />
+  </div>
 </template>
 
 <script setup>

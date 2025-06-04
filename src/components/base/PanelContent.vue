@@ -48,7 +48,6 @@
     contentClass: { type: String, default: "" },
     showHeader: { type: Boolean, default: true },
     showFooter: { type: Boolean, default: true },
-    isMobile: { type: Boolean, default: false },
   })
   
   defineEmits(['close'])

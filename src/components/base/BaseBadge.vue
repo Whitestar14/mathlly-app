@@ -7,7 +7,10 @@ const props = defineProps({
     default: 'soon',
     validator: (value) => ['soon', 'new', 'special', 'custom'].includes(value)
   },
-  text: String,
+  text: {
+    type: String,
+    default: ''
+  },
   showNotch: {
     type: Boolean,
     default: false

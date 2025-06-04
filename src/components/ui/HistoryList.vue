@@ -58,8 +58,6 @@ import { useAnimation } from "@/composables/useAnimation";
 import { useToast } from "@/composables/useToast";
 import { useClipboard } from "@vueuse/core";
 
-const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryItem.vue"));
-
 // Props
 const props = defineProps({
   mode: { type: String, default: "Standard" },
@@ -67,6 +65,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["select-item", "history-close"]);
+
+const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryItem.vue"));
 
 // Composables
 const { historyItems, deleteItem } = useHistory();

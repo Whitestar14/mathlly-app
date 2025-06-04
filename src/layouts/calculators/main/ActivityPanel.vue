@@ -1,7 +1,7 @@
 <template>
   <BasePanel 
-    title="Activity"
     id="activity"
+    title="Activity"
     type="drawer"
     position="left"
     :max-height-ratio="0.8" 
@@ -24,7 +24,9 @@
               currentTab === tab.value
                 ? 'text-indigo-600 dark:text-indigo-400'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
-            ]" @click="handleTabChange(tab.value, $event.target)">
+            ]"
+            @click="handleTabChange(tab.value, $event.target)"
+          >
             {{ tab.label }}
           </div>
         </div>
@@ -32,7 +34,6 @@
 
       <!-- Scrollable Content Area -->
       <ScrollAreaRoot class="h-full w-full">
-        
         <ScrollAreaViewport class="h-full w-full p-3">
           <!-- History Tab Content -->
           <div v-if="currentTab === 'history'">
@@ -45,7 +46,10 @@
           </div>
 
           <!-- Memory Tab Content (placeholder) -->
-          <div v-show="currentTab === 'memory'" class="text-center py-4 flex flex-col items-center justify-center h-full">
+          <div
+            v-show="currentTab === 'memory'"
+            class="text-center py-4 flex flex-col items-center justify-center h-full"
+          >
             <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
               <p class="text-gray-500 dark:text-gray-400 font-medium">
                 Memory feature coming soon
@@ -60,31 +64,47 @@
         <!-- Scrollbar -->
         <ScrollAreaScrollbar
           class="flex select-none touch-none p-0.5 bg-gray-100/50 dark:bg-gray-800/50 transition-colors duration-150 ease-out hover:bg-gray-200/50 dark:hover:bg-gray-700/50 data-[orientation=vertical]:w-2 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2"
-          orientation="vertical">
+          orientation="vertical"
+        >
           <ScrollAreaThumb
-            class="flex-1 bg-gray-300 dark:bg-gray-600 rounded-full relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+            class="flex-1 bg-gray-300 dark:bg-gray-600 rounded-full relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]"
+          />
         </ScrollAreaScrollbar>
       </ScrollAreaRoot>
     </div>
 
     <!-- Footer -->
     <template #footer>
-      <div v-if="showClearButton && currentTab === 'history'" class="flex justify-end">
-        <Button v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
+      <div
+        v-if="showClearButton && currentTab === 'history'"
+        class="flex justify-end"
+      >
+        <Button
+          v-tippy="{ content: 'Clear History' }"
+          variant="ghost"
+          size="icon"
           class="hidden md:flex text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
-          @click="showClearConfirmation = true">
+          @click="showClearConfirmation = true"
+        >
           <TrashIcon class="w-4 h-4" />
         </Button>
-        <Button variant="destructive" class="w-full md:hidden" @click="showClearConfirmation = true">
+        <Button
+          variant="destructive"
+          class="w-full md:hidden"
+          @click="showClearConfirmation = true"
+        >
           <TrashIcon class="w-4 h-4 mr-2" />
           Clear History
         </Button>
       </div>
     </template>
   </BasePanel>
-  
+
   <!-- Clear confirmation modal -->
-  <BaseModal v-model:open="showClearConfirmation" description="confirmation-dialog">
+  <BaseModal
+    v-model:open="showClearConfirmation"
+    description="confirmation-dialog"
+  >
     <template #title>
       <div class="flex items-center">
         <AlertTriangleIcon class="h-5 w-5 text-red-500 dark:text-gray-300 mr-2" />
@@ -96,10 +116,17 @@
       be undone.
     </p>
     <div class="flex justify-end space-x-2">
-      <Button variant="outline" class="dark:text-gray-300 transition-colors" @click="showClearConfirmation = false">
+      <Button
+        variant="outline"
+        class="dark:text-gray-300 transition-colors"
+        @click="showClearConfirmation = false"
+      >
         Cancel
       </Button>
-      <Button variant="destructive" @click="handleClear">
+      <Button
+        variant="destructive"
+        @click="handleClear"
+      >
         Clear All
       </Button>
     </div>

@@ -1,6 +1,9 @@
 <template>
   <div class="relative z-20 flex flex-col flex-initial">
-    <div v-if="!isMobile" class="h-full">
+    <div
+      v-if="!isMobile"
+      class="h-full"
+    >
       <!-- Side Panel -->
       <SidePanel
         v-if="type === 'side'"
@@ -9,9 +12,18 @@
         @close="close()"
         @toggle="toggle()"
       >
-      <template #default><slot /></template>
-      <template #header-actions><slot name="header-actions" /></template>
-      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+        <template #default>
+          <slot />
+        </template>
+        <template #header-actions>
+          <slot name="header-actions" />
+        </template>
+        <template
+          v-if="$slots.footer"
+          #footer
+        >
+          <slot name="footer" />
+        </template>
       </SidePanel>
 
       <!-- Desktop Panel -->
@@ -22,23 +34,52 @@
         @close="close()"
         @toggle="toggle()"
       >
-      <template #default><slot /></template>
-      <template #header-actions><slot name="header-actions" /></template>
-      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+        <template #default>
+          <slot />
+        </template>
+        <template #header-actions>
+          <slot name="header-actions" />
+        </template>
+        <template
+          v-if="$slots.footer"
+          #footer
+        >
+          <slot name="footer" />
+        </template>
       </DesktopPanel>
     </div>
 
     <!-- Mobile Panel -->
     <div v-else>
+      <!-- Backdrop (mobile only) -->
+      <Transition :name="animationEnabled ? 'fade' : ''">
+        <div
+          v-show="isOpen"
+          class="fixed inset-0 z-20"
+          :class="backdropClasses"
+          aria-hidden="true"
+          @click="close()"
+        />
+      </Transition>
+
       <!-- Bottom Panel -->
       <BottomPanel
         v-bind="mobileProps"
         @close="close()"
         @toggle="toggle({ expanded: true })"
       >
-      <template #default><slot /></template>
-      <template #header-actions><slot name="header-actions" /></template>
-      <template v-if="$slots.footer" #footer><slot name="footer" /></template>
+        <template #default>
+          <slot />
+        </template>
+        <template #header-actions>
+          <slot name="header-actions" />
+        </template>
+        <template
+          v-if="$slots.footer"
+          #footer
+        >
+          <slot name="footer" />
+        </template>
       </BottomPanel>
     </div>
   </div>
@@ -48,18 +89,6 @@
 import { computed, defineAsyncComponent } from 'vue';
 import { usePanel } from '@/composables/usePanel';
 import { useSettingsStore } from '@/stores/settings';
-
-const SidePanel = defineAsyncComponent(() =>
-  import('@/components/panel/SidePanel.vue')
-);
-
-const DesktopPanel = defineAsyncComponent(() =>
-  import('@/components/panel/DesktopPanel.vue')
-);
-
-const BottomPanel = defineAsyncComponent(() =>
-  import('@/components/panel/BottomPanel.vue')
-);
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -75,6 +104,18 @@ const props = defineProps({
   storageKey: { type: String, default: 'panel' },
   defaultDesktopState: { type: Boolean, default: false },
 });
+
+const SidePanel = defineAsyncComponent(() =>
+  import('@/components/panel/SidePanel.vue')
+);
+
+const DesktopPanel = defineAsyncComponent(() =>
+  import('@/components/panel/DesktopPanel.vue')
+);
+
+const BottomPanel = defineAsyncComponent(() =>
+  import('@/components/panel/BottomPanel.vue')
+);
 
 const settingsStore = useSettingsStore();
 const animationEnabled = computed(() => !settingsStore.appearance.animationDisabled);
@@ -102,7 +143,6 @@ const {
 
 const panelProps = computed(() => ({
   isOpen: isOpen.value,
-  isMobile: isMobile.value,
   title: props.title,
   showHeader: props.showHeader,
   showFooter: props.showFooter,
@@ -112,8 +152,8 @@ const panelProps = computed(() => ({
 
 const mobileProps = computed(() => ({
   ...panelProps.value,
-  panelRef: panel,
-  handleRef: handle,
+  panel: panel,
+  handle: handle,
   isExpanded: isExpanded.value,
   isDragging: isDragging.value,
   translateY: translateY.value,
@@ -121,6 +161,14 @@ const mobileProps = computed(() => ({
   maxHeightRatio: props.maxHeightRatio,
   animationEnabled: animationEnabled.value,
 }));
+
+// Add backdropClasses computed property from BottomPanel.vue
+const backdropClasses = computed(() => [
+  isDragging.value ? 'bg-black/20' : 'bg-black/40',
+  animationEnabled.value
+    ? 'backdrop-blur-sm transition-colors duration-300'
+    : 'bg-black/50',
+]);
 </script>
 
 <style scoped>

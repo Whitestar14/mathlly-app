@@ -19,7 +19,6 @@
           :show-header="showHeader"
           :show-footer="showFooter"
           :content-class="contentClass"
-          :is-mobile="false"
           @close="$emit('close')"
         >
           <template #default>
@@ -28,30 +27,33 @@
           <template #header-actions>
             <slot name="header-actions" />
           </template>
-          <template v-if="$slots.footer" #footer>
+          <template
+            v-if="$slots.footer"
+            #footer
+          >
             <slot name="footer" />
           </template>
         </PanelContent>
       </div>
 
       <!-- Toggle button (desktop only) -->
-        <Button
-          v-tippy="{
-            content: isOpen ? 'Hide Panel' : 'Show Panel',
-            placement: 'left',
-          }"
-          variant="outline"
-          size="icon"
-          class="shadow-sm absolute left-0 bottom-0 -translate-y-1/3 pointer-events-auto"
-          :class="!isOpen ? '-translate-x-1/2 left-1/2' : 'translate-x-1/4'"
-          @click="$emit('toggle')"
-        >
-          <ArrowRightToLine
-            class="h-4 w-4 text-gray-700 dark:text-gray-300 transition-transform duration-300"
-            :class="{ 'rotate-180': isOpen }"
-          />
-        </Button>
-      </div>
+      <Button
+        v-tippy="{
+          content: isOpen ? 'Hide Panel' : 'Show Panel',
+          placement: 'left',
+        }"
+        variant="outline"
+        size="icon"
+        class="shadow-sm absolute left-0 bottom-0 -translate-y-1/3 pointer-events-auto"
+        :class="!isOpen ? '-translate-x-1/2 left-1/2' : 'translate-x-1/4'"
+        @click="$emit('toggle')"
+      >
+        <ArrowRightToLine
+          class="h-4 w-4 text-gray-700 dark:text-gray-300 transition-transform duration-300"
+          :class="{ 'rotate-180': isOpen }"
+        />
+      </Button>
+    </div>
   </Transition>
 </template>
 

@@ -9,7 +9,11 @@
     <!-- Custom header -->
     <template #header-actions>
       <div class="flex justify-between items-center">
-        <TextLogo :clipped="isMobile" size="sm" class="absolute left-2" />
+        <TextLogo
+          :clipped="isMobile"
+          size="sm"
+          class="absolute left-2"
+        />
       </div>
     </template>
 

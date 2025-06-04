@@ -1,27 +1,36 @@
 <template>
   <div class="p-4 text-center">
-    <div v-if="hasMemoryValue" class="space-y-4">
-        <p class="text-gray-500 dark:text-gray-400">Current Memory Value ({{ mode }} Mode):</p>
-        <div class="text-lg font-mono p-3 bg-gray-100 dark:bg-gray-700 rounded break-all">
-          {{ memoryDisplayValue }}
-        </div>
-        <Button 
-            variant="outline" 
-            class="w-full"
-            @click="handleClearMemory">
-            <TrashIcon class="w-4 h-4 mr-2" />
-            Clear Memory (MC)
-        </Button>
+    <div
+      v-if="hasMemoryValue"
+      class="space-y-4"
+    >
+      <p class="text-gray-500 dark:text-gray-400">
+        Current Memory Value ({{ mode }} Mode):
+      </p>
+      <div class="text-lg font-mono p-3 bg-gray-100 dark:bg-gray-700 rounded break-all">
+        {{ memoryDisplayValue }}
+      </div>
+      <Button 
+        variant="outline" 
+        class="w-full"
+        @click="handleClearMemory"
+      >
+        <TrashIcon class="w-4 h-4 mr-2" />
+        Clear Memory (MC)
+      </Button>
     </div>
-    <div v-else class="text-center py-4 flex flex-col items-center justify-center h-full">
-        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
-             <p class="text-gray-500 dark:text-gray-400 font-medium">
-                Memory is Empty
-             </p>
-             <p class="text-gray-400 dark:text-gray-500 text-xs">
-                Use 'MS' to store a value.
-             </p>
-        </div>
+    <div
+      v-else
+      class="text-center py-4 flex flex-col items-center justify-center h-full"
+    >
+      <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
+        <p class="text-gray-500 dark:text-gray-400 font-medium">
+          Memory is Empty
+        </p>
+        <p class="text-gray-400 dark:text-gray-500 text-xs">
+          Use 'MS' to store a value.
+        </p>
+      </div>
     </div>
   </div>
 </template>

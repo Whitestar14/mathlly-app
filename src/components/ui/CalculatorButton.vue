@@ -8,8 +8,8 @@
     @click="$emit('click', value)"
   >
     <component 
-      v-if="icon" 
       :is="icon" 
+      v-if="icon" 
       class="w-6 h-6 mx-auto"
     />
     <span v-else>{{ value }}</span>

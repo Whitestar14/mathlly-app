@@ -19,11 +19,11 @@
               href="https://github.com/Whitestar14/mathlly-app/issues/new?template=bug_report.md"
               target="_blank"
               rel="noopener noreferrer"
-             >
+            >
               <Button
                 variant="primary"
                 class="w-full sm:w-auto"
-                >
+              >
                 Report Bug
               </Button>
             </a>
@@ -44,12 +44,12 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
-              <Button
-                variant="primary"
-                class="w-full sm:w-auto"
+                <Button
+                  variant="primary"
+                  class="w-full sm:w-auto"
                 >
-                Request Feature
-              </Button>
+                  Request Feature
+                </Button>
               </a>
             </div>
           </div>

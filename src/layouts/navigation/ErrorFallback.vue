@@ -1,9 +1,9 @@
 <template>
   <BasePage
     :title="errorState.pageTitle"
-    :showHeader="false"
-    :showFooter="false"
-    mainClass="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-white dark:bg-gray-800 transition-colors duration-300"
+    :show-header="false"
+    :show-footer="false"
+    main-class="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-white dark:bg-gray-800 transition-colors duration-300"
   >
     <div class="space-y-6 max-w-lg">
       <!-- Error Code Visual -->
@@ -28,11 +28,24 @@
         </p>
 
         <!-- Network Status Message -->
-        <p v-if="isOffline && autoRetryActive && !is404Error" class="text-indigo-600 dark:text-indigo-400 text-sm mt-2">
+        <p
+          v-if="isOffline && autoRetryActive && !is404Error"
+          class="text-indigo-600 dark:text-indigo-400 text-sm mt-2"
+        >
           {{ networkStatus ? 'Reconnected! Attempting to reload...' : `Connection lost. Auto-retrying in ${autoRetryCountdownTime}s...` }}
-          <Button @click="cancelAutomaticRetry" variant="link" size="sm" class="text-sm">Cancel Auto-Retry</Button>
+          <Button
+            variant="link"
+            size="sm"
+            class="text-sm"
+            @click="cancelAutomaticRetry"
+          >
+            Cancel Auto-Retry
+          </Button>
         </p>
-        <p v-if="manualRetryFeedbackMessage" class="text-blue-600 dark:text-blue-400 text-sm mt-2">
+        <p
+          v-if="manualRetryFeedbackMessage"
+          class="text-blue-600 dark:text-blue-400 text-sm mt-2"
+        >
           {{ manualRetryFeedbackMessage }}
         </p>
       </div>
@@ -42,8 +55,8 @@
         <Button
           v-if="is404Error"
           variant="ghost"
-          @click="router.back()"
           class="w-full sm:w-auto"
+          @click="router.back()"
         >
           <ArrowLeft class="h-4 w-4" />
           Go Back
@@ -52,21 +65,24 @@
         <Button
           v-if="canAttemptRetry"
           variant="ghost"
-          @click="handleManualRetry"
           :disabled="isManualRetrying"
           :loading="isManualRetrying && !isOffline"
           :aria-label="isOffline ? 'Retry Connection' : 'Try Loading Page Again'"
           class="w-full sm:w-auto"
+          @click="handleManualRetry"
         >
-          <RefreshCwIcon class="h-4 w-4" :class="[isManualRetrying && !isOffline && 'hidden']" />
+          <RefreshCwIcon
+            class="h-4 w-4"
+            :class="[isManualRetrying && !isOffline && 'hidden']"
+          />
           {{ isOffline ? 'Retry Connection' : 'Try Again' }}
         </Button>
         
         <Button
           variant="primary"
-          @click="navigateToHome"
           :disabled="isManualRetrying"
           class="w-full sm:w-auto"
+          @click="navigateToHome"
         >
           <HomeIcon class="h-4 w-4" />
           Go Home
@@ -98,9 +114,6 @@ import { useToast } from '@/composables/useToast'
 import BasePage from '@/components/base/BasePage.vue'
 import Button from '@/components/base/BaseButton.vue'  
 
-const { toast } = useToast()
-const router = useRouter()
-
 const props = defineProps({
   error: {
     type: [Error, Object, String],
@@ -123,6 +136,8 @@ const props = defineProps({
     default: false,
   }
 })
+const { toast } = useToast()
+const router = useRouter()
 
 // --- State Management ---
 const isManualRetrying = ref(false)
