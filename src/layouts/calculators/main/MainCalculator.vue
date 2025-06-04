@@ -19,7 +19,7 @@
           :active-base="state.activeBase"
           :mode="state.mode"
           :display-values="state.displayValues"
-          @open-history="openHistory"
+          @open-activity="openActivity"
           @base-change="handleBaseChange"
         />
 
@@ -32,11 +32,11 @@
         />
       </div>
     </div>
-    <history-panel
+    <ActivityPanel
       :mode="state.mode"
       :is-mobile="isMobile"
-      :is-open="history.isOpen"
-      @history-close="history.close()"
+      :is-open="activityPanel.isOpen"
+      @history-close="activityPanel.close()"
       @select-item="selectHistoryItem"
     />
   </BasePage>
@@ -55,7 +55,7 @@ import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue';
 import BasePage from '@/components/base/BasePage.vue';
 
-const HistoryPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/HistoryPanel.vue'));
+const ActivityPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/ActivityPanel.vue'));
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -66,7 +66,7 @@ const props = defineProps({
 // Use composables for state management
 const historyService = useHistory();
 const memoryService = useMemory();
-const history = usePanel('history-panel');
+const activityPanel = usePanel('activity');
 
 const {
   state,
@@ -83,6 +83,7 @@ const calculator = shallowRef(CalculatorFactory.create(props.mode, props.setting
  
 // Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value));
+provide('calculatorState', state);
 
 // Initialize controller with all dependencies
 const {
@@ -101,15 +102,15 @@ const {
   setActiveBase,
   historyService,
   memoryService,
-  toggleHistory: history.toggle
+  toggleActivity: activityPanel.toggle
 });
 
 // Memoized computed properties
 const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH);
 const hasMemoryValue = computed(() => memoryService.hasMemory(props.mode).value);
 
-// History panel methods
-const openHistory = () => history.open();
+// activityPanel panel methods
+const openActivity = () => activityPanel.open();
 
 watch(() => state.input, (newRawInput) => {
   if (storedInput.value !== newRawInput) {
@@ -139,7 +140,7 @@ watch(() => props.mode, (newMode, oldMode) => {
 }, { immediate: true });
 
 
-// Handle history item selection
+// Handle activityPanel item selection
 const selectHistoryItem = ({ expression }) => {
   if (state.mode === 'Programmer') return
 

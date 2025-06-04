@@ -1,7 +1,7 @@
 <template>
   <BasePanel 
-    title="History"
-    id="history-panel"
+    title="Activity"
+    id="activity"
     type="drawer"
     position="left"
     :max-height-ratio="0.8" 
@@ -10,36 +10,50 @@
   >
     <!-- Content -->
     <div class="flex-1 overflow-hidden relative">
+      <!-- Tab Navigation -->
+      <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 relative">
+        <Indicator :position="indicatorStyle" />                   
+        <div
+          v-for="tab in tabs"
+          :key="tab.value"
+          ref="tabElements"
+          :data-path="tab.value"
+          class="px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer"
+          :class="[
+            currentTab === tab.value
+              ? 'text-indigo-600 dark:text-indigo-400'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
+          ]"
+          @click="handleTabChange(tab.value, $event.target)"
+        >
+          {{ tab.label }}
+        </div>
+      </div>
+
       <!-- Scrollable Content Area -->
       <ScrollAreaRoot class="h-full w-full">
         <ScrollAreaViewport class="h-full w-full p-3">
-          <!-- History Items List -->
-          <TransitionGroup v-if="!isProgrammerMode && historyItems.length > 0" tag="div" class="space-y-2"
-            name="history-list" @before-enter="historyAnimation.onBeforeEnter" @enter="historyAnimation.onEnter" @leave="historyAnimation.onLeave">
-            <history-item v-for="(item, index) in historyItems" :key="item.id" :item="item" :is-mobile="isMobile"
-              :selected-id="selectedItemId" :data-index="index" @select="handleSelectItem" @delete="handleDelete"
-              @copy="copyItem" @copy-json="copyAsJson" />
-          </TransitionGroup>
+          <!-- History Tab Content -->
+          <div v-show="currentTab === 'history'">
+            <HistoryList 
+              :mode="mode" 
+              :is-mobile="isMobile" 
+              @select-item="handleSelectItem"
+              @history-close="$emit('history-close')"
+            />
+          </div>
 
-        <div v-show="!historyItems.length || isProgrammerMode"
-          class="text-center py-4 flex flex-col items-center justify-center h-full">
-          <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
-            <div v-show="isProgrammerMode">
-              <p class="flex justify-center text-sm items-center flex-col gap-1 text-gray-500 dark:text-gray-400">
-                History is disabled in <kbd>Programmer Mode</kbd>
-              </p>
-            </div>
-
-            <div v-show="!isProgrammerMode">
+          <!-- Memory Tab Content (placeholder) -->
+          <div v-show="currentTab === 'memory'" class="text-center py-4 flex flex-col items-center justify-center h-full">
+            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 font-medium min-w-[80%] flex flex-col items-center">
               <p class="text-gray-500 dark:text-gray-400 font-medium">
-                No history items yet
+                Memory feature coming soon
               </p>
               <p class="text-gray-400 dark:text-gray-500 text-xs">
-                Your calculations will appear here as you work
+                Save and recall values for your calculations
               </p>
             </div>
           </div>
-        </div>
         </ScrollAreaViewport>
 
         <!-- Scrollbar -->
@@ -54,7 +68,7 @@
 
     <!-- Footer -->
     <template #footer>
-      <div v-if="showClearButton" class="flex justify-end">
+      <div v-if="showClearButton && currentTab === 'history'" class="flex justify-end">
         <Button v-tippy="{ content: 'Clear History' }" variant="ghost" size="icon"
           class="hidden md:flex text-red-400 hover:text-red-500 hover:bg-red-300/30 dark:hover:text-red-400"
           @click="showClearConfirmation = true">
@@ -92,15 +106,17 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, defineAsyncComponent } from "vue"
+import { ref, computed, watch } from "vue"
 import { TrashIcon, AlertTriangleIcon } from "lucide-vue-next"
 import Button from "@/components/base/BaseButton.vue"
 import BaseModal from "@/components/base/BaseModal.vue"
 import BasePanel from "@/components/base/BasePanel.vue"
+import HistoryList from "@/components/ui/HistoryList.vue"
+import Indicator from "@/components/ui/PillIndicator.vue"
 import { useHistory } from "@/composables/useHistory"
 import { useAnimation } from "@/composables/useAnimation"
 import { useToast } from "@/composables/useToast"
-import { useClipboard } from "@vueuse/core"
+import { usePills } from "@/composables/usePills"
 import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from "radix-vue"
 
 // Props and emits
@@ -112,39 +128,48 @@ const props = defineProps({
 
 const emit = defineEmits(["select-item", "history-close"])
 
-const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryItem.vue"))
+// Tabs configuration
+const tabs = ref([
+  { label: "History", value: "history" },
+  { label: "Memory", value: "memory" },
+]);
+const tabElements = ref([]);
 
 // Composables
-const { historyItems, deleteItem, clearAll, loadHistory } = useHistory()
+const { historyItems, clearAll, loadHistory } = useHistory()
 const { toast } = useToast()
-const { copy } = useClipboard()
-const { setInitialAnimation, createListAnimation } = useAnimation()
+const { setInitialAnimation } = useAnimation()
 
-// Create history animation with custom options
-const historyAnimation = createListAnimation({
-  initialDelay: 50,
-  initialDuration: 400,
-  enterTransform: [-20, 0],
-  leaveTransform: [0, 80],
-  leaveAxis: 'x',
-  moveDuration: 300,
-  moveEasing: 'easeOutQuad',
-  moveDelay: 150
-})
+// Tab navigation using usePills
+const {
+  currentPill,
+  indicatorStyle,
+  handleNavigation
+} = usePills({ 
+  position: "bottom", 
+  updateRoute: false, 
+  defaultPill: "history",
+  containerRef: tabElements
+});
 
 // Local state 
-const selectedItemId = ref(null)
 const showClearConfirmation = ref(false)
 
 // Computed properties
+const currentTab = computed(() => currentPill.value);
 const isProgrammerMode = computed(() => props.mode === "Programmer")
 const showClearButton = computed(() => historyItems.value.length > 0 && !isProgrammerMode.value)
+
+// Handle tab change
+const handleTabChange = (value, tabElement) => {
+  handleNavigation(value, tabElement);
+};
 
 // Watch for panel open/close
 watch(
   () => props.isOpen,
   async (isOpen) => {
-    if (isOpen && !isProgrammerMode.value) {
+    if (isOpen && !isProgrammerMode.value && currentTab.value === 'history') {
       // Reset animation state when panel opens
       setInitialAnimation(true)
       await loadHistory()
@@ -158,32 +183,26 @@ watch(
 watch(
   () => props.mode,
   () => {
-    if (!isProgrammerMode.value && props.isOpen) {
+    if (!isProgrammerMode.value && props.isOpen && currentTab.value === 'history') {
       loadHistory()
     }
   },
 )
 
+// Watch for tab changes
+watch(
+  currentTab,
+  (newTab) => {
+    if (newTab === 'history' && !isProgrammerMode.value && props.isOpen) {
+      loadHistory()
+    }
+  }
+)
+
 // Handle history item selection
 const handleSelectItem = (item) => {
-  if (isProgrammerMode.value) return;
-
-  selectedItemId.value = item.id;
-  setTimeout(() => {
-    selectedItemId.value = null;
-  }, 300);
-
-  emit("select-item", {
-    expression: item.expression.trim(),
-    result: item.result,
-  });
-
-  if (props.isMobile) emit('history-close');
+  emit("select-item", item);
 };
-
-const handleDelete = async (id) => {
-  await deleteItem(id)
-}
 
 const handleClear = async () => {
   await clearAll()
@@ -193,36 +212,4 @@ const handleClear = async () => {
     description: "All history items have been removed",
   })
 }
-
-const copyItem = (item) => {
-  copy(`${item.expression} = ${item.result}`)
-  toast({
-    title: "Copied to clipboard",
-    description: "The calculation has been copied to your clipboard",
-  })
-}
-
-const copyAsJson = (item) => {
-  copy(
-    JSON.stringify(
-      {
-        expression: item.expression,
-        result: item.result,
-        timestamp: item.timestamp,
-      },
-      null,
-      2,
-    ),
-  )
-  toast({
-    title: "Copied as JSON",
-    description: "The calculation has been copied in JSON format",
-  })
-}
 </script>
-
-<style scoped>
-.history-list-move {
-  transition: transform 0.3s cubic-bezier(0.2, 1, 0.2, 1);
-}
-</style>

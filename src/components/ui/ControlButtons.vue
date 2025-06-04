@@ -11,7 +11,7 @@
         class="rounded-none hover:bg-gray-50 group-hover:bg-opacity-100 md:hidden"
         @click="openHistory"
       >
-        <HistoryIcon size="15" />
+        <DraftingCompassIcon size="15" />
       </Button>
       <Separator
         class="h-6 bg-gray-300 dark:bg-gray-600 w-px md:hidden group-has-[.rounded-none:hover]:h-8 transition-[height]"
@@ -31,11 +31,11 @@
 
 <script setup>
 import { Separator } from "radix-vue";
-import { Copy, HistoryIcon } from "lucide-vue-next";
+import { Copy, DraftingCompassIcon } from "lucide-vue-next";
 import Button from "@/components/base/BaseButton.vue";
 
-const emit = defineEmits(["open-history", "copy-to-clipboard"]);
+const emit = defineEmits(["open-activity", "copy-to-clipboard"]);
 
-const openHistory = () => emit("open-history");
+const openHistory = () => emit("open-activity");
 const copyToClipboard = () => emit("copy-to-clipboard");
 </script>
