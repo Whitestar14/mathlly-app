@@ -11,30 +11,31 @@
     <!-- Content -->
     <div class="flex-1 overflow-hidden relative">
       <!-- Tab Navigation -->
-      <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 relative">
-        <Indicator :position="indicatorStyle" />                   
-        <div
-          v-for="tab in tabs"
-          :key="tab.value"
-          ref="tabElements"
-          :data-path="tab.value"
-          class="px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer"
-          :class="[
-            currentTab === tab.value
-              ? 'text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
-          ]"
-          @click="handleTabChange(tab.value, $event.target)"
-        >
-          {{ tab.label }}
+      <div class="sticky backdrop-blur-sm top-0 z-10 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
+        <div class="flex relative justify-evenly">
+          <Indicator :position="indicatorStyle" />                   
+          <div
+            v-for="tab in tabs"
+            :key="tab.value"
+            ref="tabElements"
+            :data-path="tab.value"
+            class="px-4 py-3 text-sm font-medium transition-colors relative cursor-pointer"
+            :class="[
+              currentTab === tab.value
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
+            ]" @click="handleTabChange(tab.value, $event.target)">
+            {{ tab.label }}
+          </div>
         </div>
       </div>
 
       <!-- Scrollable Content Area -->
       <ScrollAreaRoot class="h-full w-full">
+        
         <ScrollAreaViewport class="h-full w-full p-3">
           <!-- History Tab Content -->
-          <div v-show="currentTab === 'history'">
+          <div v-if="currentTab === 'history'">
             <HistoryList 
               :mode="mode" 
               :is-mobile="isMobile" 
