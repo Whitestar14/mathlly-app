@@ -50,7 +50,7 @@
   }
 
   kbd {
-    @apply w-fit bg-gray-200/90 font-mono text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
+    @apply inline bg-gray-200/90 font-mono text-gray-600 dark:bg-gray-700/90 dark:text-gray-400 px-2 py-0.5 rounded-md text-nowrap;
   }
 
   textarea {

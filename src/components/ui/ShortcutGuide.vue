@@ -111,7 +111,7 @@ const shortcutGroups = {
   Global: {
     "ctrl+alt+f": { description: "Toggle Fullscreen" },
     "ctrl+l": { description: "Toggle Sidebar" },
-    "ctrl+h": { description: "Toggle History" },
+    "ctrl+h": { description: "Toggle Activity" },
     "ctrl+,(comma)": { description: "Toggle Menubar" },
     "ctrl+space": { description: "Open the Keyboard Shortcuts" },
     "ctrl+shift+m": { description: "Toggle Theme" },

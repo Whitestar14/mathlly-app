@@ -83,12 +83,7 @@ const precisionOptions = Array.from({ length: 11 }, (_, i) => ({ value: i, label
 const modeOptions = [{ value: "Standard", label: "Standard" }, { value: "Programmer", label: "Programmer" }];
 const themeOptions = [{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }, { value: "system", label: "System" }];
 const startupOptions = [{ value: 'home', label: 'Home' }, { value: 'calculator', label: 'Calculator Page' }, { value: 'last-visited', label: 'Last Visited Page' }];
-const textSizeOptions = [
-  { value: 'small', label: 'Small' },
-  { value: 'normal', label: 'Normal'},
-  { value: 'medium', label: 'Medium' },
-  { value: 'large', label: 'Large' }
-];
+const textSizeOptions = [{ value: 'small', label: 'Small' }, { value: 'normal', label: 'Normal'}, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }];
 
 onMounted(async () => {
   await settingsStore.loadSettings();
