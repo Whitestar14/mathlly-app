@@ -1,5 +1,27 @@
 export const updates = [
     {
+    version: '0.11.13-beta',
+    date: 'June 4, 2025',
+    features: [
+      '@warning: This update includes significant architectural changes. Database backup is recommended before updating',
+      '@milestone: Introduced unified ActivityPanel with tabbed interface for history and memory management',
+      'Refactored MainCalculator component to integrate ActivityPanel with improved event handling and state management',
+      'Added dedicated MemoryView component for comprehensive memory slot management and operations',
+      'Enhanced UpdatePage and ErrorFallback components for improved UI consistency and better error handling',
+      'Streamlined FeedbackPage and SettingsPage layouts with improved form validation and user experience',
+      'Implemented advanced settings panel for database management including backup, restore, and cleanup operations',
+      'Updated keyboard shortcuts system to include activity panel toggle functionality',
+      'Improved memory operations with better formatting and display across calculator modes',
+      'Enhanced tab navigation system using existing usePills composable for consistent UI behavior',
+      'Added comprehensive memory state management with formatted value display',
+      'Improved accessibility with better ARIA labels and keyboard navigation support',
+      'Optimized component performance with strategic use of defineAsyncComponent for lazy loading',
+      'Enhanced error boundaries and fallback mechanisms for better application stability',
+      'Refined animation system for smoother transitions between activity panel tabs',
+      'Updated toast notifications for memory operations with clearer user feedback'
+    ]
+  },
+    {
     version: '0.11.12',
     date: 'May 23, 2025',
     features: [
