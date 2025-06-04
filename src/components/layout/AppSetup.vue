@@ -1,7 +1,9 @@
 <template>
-  <div class="flex flex-col flex-grow transition-[padding] duration-300" :class="mainContentClasses">
+  <div
+    class="flex flex-col flex-grow transition-[padding] duration-300"
+    :class="mainContentClasses"
+  >
     <app-header
-      :is-mobile="device.isMobile"
       :is-sidebar-open="sidebarPanel.isOpen"
       :is-menubar-open="menuPanel.isOpen"
       :current-calculator-mode="currentMode" 
@@ -19,21 +21,22 @@
         />
         <template #fallback>
           <div 
-           v-if="panelStates.sidebar.isOpen" 
-           class="w-64 h-screen hidden md:flex fixed top-0 left-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-20"
-          ></div>
+            v-if="panelStates.sidebar.isOpen" 
+            class="w-64 h-screen hidden md:flex fixed top-0 left-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-20"
+          />
         </template>
       </Suspense>
     </div>
 
     <Suspense>
       <app-view
-        :mode="currentMode" :settings="settings"
+        :mode="currentMode"
+        :settings="settings"
         :is-mobile="device.isMobile"
       />
       <template #fallback>
         <div class="flex-grow flex items-center justify-center">
-          <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+          <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
         </div>
       </template>
     </Suspense>
@@ -43,9 +46,9 @@
         <main-menu />
         <template #fallback>
           <div 
-           v-if="panelStates.menu.isOpen" 
-           class="w-64 h-screen fixed hidden md:flex top-0 right-0 bg-gray-50 dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 z-20"
-          ></div>
+            v-if="panelStates.menu.isOpen" 
+            class="w-64 h-screen fixed hidden md:flex top-0 right-0 bg-gray-50 dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 z-20"
+          />
         </template>
       </Suspense>
     </div>
@@ -55,7 +58,10 @@
     </Suspense>
     
     <Suspense>
-      <ShortcutGuide v-if="panelStates.isLoaded" v-model="isShortcutModalOpen" />
+      <ShortcutGuide
+        v-if="panelStates.isLoaded"
+        v-model="isShortcutModalOpen"
+      />
     </Suspense>
   </div>
 </template>

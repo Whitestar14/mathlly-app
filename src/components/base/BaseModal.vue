@@ -7,8 +7,8 @@
       <DialogOverlay
         v-if="open"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-        @click="closeModal"
         aria-hidden="true"
+        @click="closeModal"
       />
     </Transition>
 
@@ -37,8 +37,8 @@
             variant="ghost"
             size="icon"
             class="absolute right-4 top-4 dark:text-gray-100 p-1"
-            @click="closeModal"
             aria-label="Close dialog"
+            @click="closeModal"
           >
             <XIcon class="h-4 w-4" />
             <span class="sr-only">Close</span>

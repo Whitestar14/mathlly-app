@@ -47,8 +47,13 @@
             :enter="{ opacity: 1, scale: 1, transition: { delay: 0.6, duration: 0.5 } }"
             class="w-full md:w-1/3 flex justify-center mt-8 md:mt-0"
           >
-           <div class="relative hidden md:block">
-            <BaseMedia size="lg" type="svg" class="relative hidden md:block fill-indigo-500 dark:fill-indigo-400 scale-150 md:scale-[2.5] lg:scale-[3.5]" :svg-path="'/icons/sparkles.svg'" />
+            <div class="relative hidden md:block">
+              <BaseMedia
+                size="lg"
+                type="svg"
+                class="relative hidden md:block fill-indigo-500 dark:fill-indigo-400 scale-150 md:scale-[2.5] lg:scale-[3.5]"
+                :svg-path="'/icons/sparkles.svg'"
+              />
             </div>
           </div>
         </div>

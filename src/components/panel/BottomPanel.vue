@@ -1,16 +1,8 @@
 <template>
-  <!-- Backdrop (mobile only) -->
-<Transition :name="animationEnabled ? 'fade' : ''">
   <div
     v-show="isOpen"
-    class="fixed inset-0 z-20"
-    :class="backdropClasses"
-    aria-hidden="true"
-    @click="$emit('close')"
-  />
-</Transition>
-
-  <div v-show="isOpen" class="fixed inset-x-0 z-20">
+    class="fixed inset-x-0 z-20"
+  >
     <div
       ref="panelRef"
       class="bg-white dark:bg-gray-900 fixed inset-x-0 bottom-0 overflow-hidden"
@@ -21,11 +13,17 @@
       <button
         v-if="!(maxHeightRatio === 1)"
         class="absolute right-14 top-3.5 p-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-        @click="$emit('toggle')"
         aria-label="Toggle panel expansion"
+        @click="$emit('toggle')"
       >
-        <Maximize2 v-if="!isExpanded" class="w-4 h-4" />
-        <Minimize2 v-else class="w-4 h-4" />
+        <Maximize2
+          v-if="!isExpanded"
+          class="w-4 h-4"
+        />
+        <Minimize2
+          v-else
+          class="w-4 h-4"
+        />
       </button>
 
       <!-- Draggable Handle - Hide when expanded -->
@@ -35,16 +33,18 @@
         :class="handleClasses"
         aria-label="Drag handle to resize panel"
       >
-        <div class="w-10 h-1 pb-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+        <div class="w-10 h-1 pb-1 rounded-full bg-gray-300 dark:bg-gray-600" />
       </div>
 
-      <div class="h-full" :class="mainClass">
+      <div
+        class="h-full"
+        :class="mainClass"
+      >
         <PanelContent
           :title="title"
           :show-header="showHeader"
           :show-footer="showFooter"
           :content-class="contentClass"
-          :is-mobile="isMobile"
           @close="$emit('close')"
         >
           <template #default>
@@ -53,7 +53,10 @@
           <template #header-actions>
             <slot name="header-actions" />
           </template>
-          <template v-if="$slots.footer" #footer>
+          <template
+            v-if="$slots.footer"
+            #footer
+          >
             <slot name="footer" />
           </template>
         </PanelContent>
@@ -69,14 +72,13 @@ import PanelContent from '@/components/base/PanelContent.vue';
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
-  isMobile: { type: Boolean, default: false },
   title: { type: String, default: '' },
   showHeader: { type: Boolean, default: true },
   showFooter: { type: Boolean, default: true },
   mainClass: { type: String, default: '' },
   contentClass: { type: String, default: '' },
-  panelRef: { type: Object, default: null },
-  handleRef: { type: Object, default: null },
+  panel: { type: Object, default: null },
+  handle: { type: Object, default: null },
   isExpanded: { type: Boolean, default: false },
   panelHeight: { type: Number, default: 300 },
   translateY: { type: Number, default: 0 },
@@ -95,14 +97,14 @@ onMounted(updateRefs);
 watch([panelRef, handleRef], updateRefs);
 
 function updateRefs() {
-  if (props.panelRef && panelRef.value) {
+  if (props.panel && panelRef.value) {
     // eslint-disable-next-line vue/no-mutating-props
-    props.panelRef.value = panelRef.value;
+    props.panel.value = panelRef.value;
   }
-  
-  if (props.handleRef && handleRef.value) {
+
+  if (props.handle && handleRef.value) {
     // eslint-disable-next-line vue/no-mutating-props
-    props.handleRef.value = handleRef.value;
+    props.handle.value = handleRef.value;
   }
 }
 
@@ -120,12 +122,5 @@ const mobilePanelStyle = computed(() => ({
 const handleClasses = computed(() => [
   { 'cursor-grabbing': props.isDragging },
   props.isExpanded || props.maxHeightRatio === 1 ? 'pointer-events-none opacity-0' : 'cursor-grab'
-]);
-
-const backdropClasses = computed(() => [
-  props.isDragging ? 'bg-black/20' : 'bg-black/40',
-  props.animationEnabled
-    ? 'backdrop-blur-sm transition-colors duration-300'
-    : 'bg-black/50',
 ]);
 </script>

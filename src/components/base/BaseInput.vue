@@ -1,9 +1,16 @@
 <template>
   <div class="relative w-full">
     <slot name="prefix">
-      <div v-if="$slots.icon || icon" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+      <div
+        v-if="$slots.icon || icon"
+        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
+      >
         <slot name="icon">
-          <component :is="icon" class="h-4 w-4" v-if="icon" />
+          <component
+            :is="icon"
+            v-if="icon"
+            class="h-4 w-4"
+          />
         </slot>
       </div>
     </slot>
@@ -25,15 +32,19 @@
         $slots.suffix ? 'pr-10' : 'pr-4',
         'py-2'
       ]"
+      v-bind="$attrs"
       @input="$emit('update:modelValue', $event.target.value)"
       @blur="$emit('blur', $event)"
       @focus="$emit('focus', $event)"
-      v-bind="$attrs"
-    />
+    >
     
-    <slot name="suffix"></slot>
+    <slot name="suffix" />
     
-    <div v-if="error" :id="`${id}-error`" class="mt-1 text-sm text-red-500 dark:text-red-400">
+    <div
+      v-if="error"
+      :id="`${id}-error`"
+      class="mt-1 text-sm text-red-500 dark:text-red-400"
+    >
       {{ error }}
     </div>
   </div>

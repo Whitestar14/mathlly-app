@@ -16,7 +16,7 @@ import { CalculatorUtils } from '@/utils/constants/CalculatorConstants'
  * @param {Function} options.setActiveBase - Function to set active base
  * @param {Object} options.historyService - History service
  * @param {Object} options.memoryService - Memory service
- * @param {Function} options.toggleHistory - Function to toggle history panel
+ * @param {Function} options.toggleActivity - Function to toggle Activity panel
  * @returns {Object} Calculator controller API
  */
 export function CalculatorController({
@@ -28,7 +28,7 @@ export function CalculatorController({
   setActiveBase,
   historyService,
   memoryService,
-  toggleHistory
+  toggleActivity
 }) {
   const displayRefresh = useThrottleFn(updateDisplayFn, 100)
 
@@ -247,7 +247,7 @@ export function CalculatorController({
       }
     },
     setBase: handleBaseChange,
-    toggleHistory
+    toggleActivity
   });
 
   watch(

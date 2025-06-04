@@ -3,7 +3,7 @@
     class="min-h-screen flex bg-background dark:bg-background-dark transition-colors duration-300"
     :class="globalClasses"
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>
   

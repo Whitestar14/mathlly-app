@@ -16,7 +16,7 @@
       />
 
       <ControlButtons
-        @open-history="$emit('open-history')"
+        @open-activity="$emit('open-activity')"
         @copy-to-clipboard="copyToClipboard"
       />
 
@@ -63,7 +63,7 @@ const props = defineProps({
   displayValues: { type: Object, default: () => ({}) },
 })
 
-defineEmits(["open-history", "base-change"])
+defineEmits(["open-activity", "base-change"])
 const { toast } = useToast()
 
 const mainDisplay = shallowRef(null)

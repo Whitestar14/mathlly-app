@@ -1,45 +1,48 @@
 <template>
-    <RadixAccordionItem
-      :value="id"
-      :disabled="disabled"
-      class="overflow-hidden"
-      :class="[customClass]"
-    >
-      <RadixAccordionHeader class="flex w-full">
-        <RadixAccordionTrigger
-          class="group flex flex-1 items-center justify-between p-4 text-left font-medium text-gray-700/30 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-indigo-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 transition-colors w-full"
-          :class="headerClass"
-        >
-          <div class="flex items-center space-x-3">
-            <component 
-              v-if="icon" 
-              :is="resolvedIcon" 
-              class="h-5 w-5 text-indigo-600 dark:text-indigo-400" 
-              :class="iconClass"
-              aria-hidden="true"
-            />
-            <slot name="header">
-              <span class="text-base font-medium text-gray-900 dark:text-gray-100">{{ title }}</span>
-            </slot>
-          </div>
-          <slot name="indicator">
-            <ChevronDownIcon 
-              class="h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 ease-[cubic-bezier(0.87,_0,_0.13,_1)] indicator-icon"
-              aria-hidden="true"
-            />
+  <RadixAccordionItem
+    :value="id"
+    :disabled="disabled"
+    class="overflow-hidden"
+    :class="[customClass]"
+  >
+    <RadixAccordionHeader class="flex w-full">
+      <RadixAccordionTrigger
+        class="group flex flex-1 items-center justify-between p-4 text-left font-medium text-gray-700/30 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-indigo-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 transition-colors w-full"
+        :class="headerClass"
+      >
+        <div class="flex items-center space-x-3">
+          <component 
+            :is="resolvedIcon" 
+            v-if="icon" 
+            class="h-5 w-5 text-indigo-600 dark:text-indigo-400" 
+            :class="iconClass"
+            aria-hidden="true"
+          />
+          <slot name="header">
+            <span class="text-base font-medium text-gray-900 dark:text-gray-100">{{ title }}</span>
           </slot>
-        </RadixAccordionTrigger>
-      </RadixAccordionHeader>
-      
-      <RadixAccordionContent 
-        class="overflow-hidden border-t border-gray-200 dark:border-gray-700 text-sm radix-accordion-content" 
-        >
-        <div class="p-4 pt-2 text-gray-700 dark:text-gray-300" :class="contentClass">
-          <slot></slot>
         </div>
-      </RadixAccordionContent>
-    </RadixAccordionItem>
-  </template>
+        <slot name="indicator">
+          <ChevronDownIcon 
+            class="h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 ease-[cubic-bezier(0.87,_0,_0.13,_1)] indicator-icon"
+            aria-hidden="true"
+          />
+        </slot>
+      </RadixAccordionTrigger>
+    </RadixAccordionHeader>
+      
+    <RadixAccordionContent 
+      class="overflow-hidden border-t border-gray-200 dark:border-gray-700 text-sm radix-accordion-content" 
+    >
+      <div
+        class="p-4 pt-2 text-gray-700 dark:text-gray-300"
+        :class="contentClass"
+      >
+        <slot />
+      </div>
+    </RadixAccordionContent>
+  </RadixAccordionItem>
+</template>
   
   <script setup>
   import { computed } from 'vue'

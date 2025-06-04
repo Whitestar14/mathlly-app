@@ -56,7 +56,7 @@ export const useKeyboardStore = defineStore("keyboard", () => {
         description: "Toggle Fullscreen",
       },
       "ctrl+l": { action: "toggleSidebar", description: "Toggle Sidebar" },
-      "ctrl+h": { action: "toggleHistory", description: "Toggle History" },
+      "ctrl+h": { action: "toggleActivity", description: "Toggle Activity" },
       "ctrl+,": { action: "toggleMenubar", description: "Toggle Menubar" },
       "ctrl+ ": { action: "openShortcutModal", description: "Open Shortcuts" },
       "ctrl+shift+m": { action: "toggleTheme", description: "Toggle Theme" },

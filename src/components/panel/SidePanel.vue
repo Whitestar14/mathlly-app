@@ -16,7 +16,6 @@
         :show-header="showHeader"
         :show-footer="showFooter"
         :content-class="contentClass"
-        :is-mobile="isMobile"
         @close="$emit('close')"
       >
         <template #default>
@@ -25,7 +24,10 @@
         <template #header-actions>
           <slot name="header-actions" />
         </template>
-        <template v-if="$slots.footer" #footer>
+        <template
+          v-if="$slots.footer"
+          #footer
+        >
           <slot name="footer" />
         </template>
       </PanelContent>
@@ -44,7 +46,6 @@ defineProps({
   showHeader: { type: Boolean, default: true },
   showFooter: { type: Boolean, default: true },
   contentClass: { type: String, default: '' },
-  mainClass: { type: String, default: '' },
 });
 
 defineEmits(['close']);

@@ -35,8 +35,11 @@ defineProps({
     ]"
     aria-label="button"
   >
-    <Loader2Icon v-if="loading" class="h-4 w-4 animate-spin" />
-    <slot></slot>
+    <Loader2Icon
+      v-if="loading"
+      class="h-4 w-4 animate-spin"
+    />
+    <slot />
   </button>
 </template>
 

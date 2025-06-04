@@ -1,9 +1,9 @@
 <template>
   <div
+    ref="containerRef"
     :class="[
       `loader-${variant} flex flex-col justify-center items-center`,
     ]"
-    ref="containerRef"
     class="h-full font-mono"
   >
     <!-- Expanded Loader (formerly macro) -->
@@ -11,7 +11,10 @@
       <div class="relative flex flex-col items-center justify-center gap-8 pointer-events-none cursor-auto">
         <div class="relative z-10 flex items-center justify-center">
           <div class="relative text-6xl inline-flex">
-            <span ref="bracketLeft" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">{</span>
+            <span
+              ref="bracketLeft"
+              class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0"
+            >{</span>
             <span class="inline-flex *:text-gray-800 *:dark:text-gray-100 *:opacity-0">
               <span ref="letterM">m</span>
               <span ref="letterA">a</span>
@@ -19,11 +22,23 @@
               <span ref="letterH">h</span>
             </span>
             <span class="relative inline-flex items-center justify-center w-[1.2em] *:left-1/2 *:-translate-x-1/2 *:text-indigo-500 *:dark:text-indigo-400 *:font-black *:opacity-0">
-              <span ref="slashTop" class="top-0 origin-bottom">/</span>
-              <span ref="slashBottom" class="bottom-0 origin-top">/</span>
+              <span
+                ref="slashTop"
+                class="top-0 origin-bottom"
+              >/</span>
+              <span
+                ref="slashBottom"
+                class="bottom-0 origin-top"
+              >/</span>
             </span>
-            <span ref="letterY" class="text-gray-800 dark:text-gray-100 opacity-0">y</span>
-            <span ref="bracketRight" class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0">}</span>
+            <span
+              ref="letterY"
+              class="text-gray-800 dark:text-gray-100 opacity-0"
+            >y</span>
+            <span
+              ref="bracketRight"
+              class="text-indigo-500 dark:text-indigo-400 font-medium opacity-0"
+            >}</span>
           </div>
         </div>
       </div>

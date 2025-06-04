@@ -31,9 +31,9 @@
               v-for="(token, index) in formattedTokens"
               :key="index"
               :class="[
-              tokenClassMap[token.type] || '',
-              errorClass,
-            ]"
+                tokenClassMap[token.type] || '',
+                errorClass,
+              ]"
             >
               {{ token.content }}
             </span>
@@ -83,9 +83,8 @@ const props = defineProps({
   mode: { type: String, default: "Standard" }
 });
 
-const settingsStore = useSettingsStore();
 const emit = defineEmits(['scroll-update']);
-
+const settingsStore = useSettingsStore();
 // DOM refs - use shallowRef for better performance with DOM elements
 const displayContainer = shallowRef(null);
 const resultContainer = shallowRef(null);
