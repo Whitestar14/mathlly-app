@@ -11,7 +11,7 @@
 import { watch, onMounted, computed } from 'vue';
 import { createPanelContext } from '@/composables/usePanel';
 import { useDeviceStore } from '@/stores/device';
-import { useSettingsStore } from '@/stores/settings';
+import { useSettingsStore } from '@/stores/settings.ts';
   
 // Get the device store instance
 const device = useDeviceStore();

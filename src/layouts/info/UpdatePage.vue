@@ -160,7 +160,7 @@ import { ref, computed, watch } from 'vue';
 import BaseMedia from '@/components/base/BaseMedia.vue'
 import { ClockIcon, HistoryIcon, ChevronDownIcon, RocketIcon } from 'lucide-vue-next';
 import { updates, upcomingFeatures } from '@/data/changelog';
-import { useVersionStore } from '@/stores/version';
+import { useVersionStore } from '@/stores/version.ts';
 import UpdateCard from '@/components/cards/UpdateCard.vue';
 import BasePage from '@/components/base/BasePage.vue';
 import Button from '@/components/base/BaseButton.vue';

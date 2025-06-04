@@ -1,17 +1,16 @@
-// main.ts
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import VueTippy from 'vue-tippy';
-import router from './router/index.js';
+import router from '@/router';
 import App from '@/App.vue';
-import { useDeviceStore } from './stores/device.js';
+import { useDeviceStore } from '@/stores/device.js';
 import { MotionPlugin } from '@vueuse/motion';
 import '@/assets/css/main.css';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 
 if (process.env.NODE_ENV === 'development') {
-  import('./assets/css/fonts.css');
+  import('@/assets/css/fonts.css');
 }
 
 if ('serviceWorker' in navigator) {

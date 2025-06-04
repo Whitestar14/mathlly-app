@@ -88,7 +88,7 @@
 <script setup>
 import { computed, defineAsyncComponent } from 'vue';
 import { usePanel } from '@/composables/usePanel';
-import { useSettingsStore } from '@/stores/settings';
+import { useSettingsStore } from '@/stores/settings.ts';
 
 const props = defineProps({
   id: { type: String, required: true },

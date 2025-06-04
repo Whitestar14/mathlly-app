@@ -1,6 +1,6 @@
 import { computed, watch, onMounted } from 'vue';
 import { useDark, usePreferredDark } from '@vueuse/core';
-import { useSettingsStore } from '@/stores/settings';
+import { useSettingsStore } from '@/stores/settings.ts';
 
 /**
  * Theme options available in the application

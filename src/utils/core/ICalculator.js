@@ -1,4 +1,4 @@
-import { useSettingsStore } from '@/stores/settings';
+import { useSettingsStore } from '@/stores/settings.ts';
 import { ExpressionEvaluator } from '@/utils/core/ExpressionEvaluator';
 import {
   CalculatorConstants,

@@ -45,31 +45,56 @@
   </BasePage>
 </template>
 
-<script setup>
-import { computed, watch, shallowRef, provide, defineAsyncComponent } from 'vue';
-import { useSessionStorage } from '@vueuse/core';
-import { useHistory } from '@/composables/useHistory';
-import { useMemory } from '@/composables/useMemory';
-import { usePanel } from '@/composables/usePanel';
-import { useCalculatorState } from '@/composables/useCalculatorState';
-import { CalculatorController } from './MainCalculator';
-import { CalculatorFactory } from '@/services/factory/CalculatorFactory';
-import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue';
-import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue';
-import BasePage from '@/components/base/BasePage.vue';
+<script setup lang="ts">
+import { computed, watch, shallowRef, provide, defineAsyncComponent, type Ref, type ComputedRef } from 'vue'
+import { useSessionStorage } from '@vueuse/core'
+import { useHistory } from '@/composables/useHistory'
+import { useMemory } from '@/composables/useMemory'
+import { usePanel } from '@/composables/usePanel'
+import { useCalculatorState, type CalculatorMode, type Base } from '@/composables/useCalculatorState'
+import { CalculatorController, type Calculator, type ControllerReturn } from './MainCalculator'
+import { CalculatorFactory } from '@/services/factory/CalculatorFactory'
+import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
+import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
+import BasePage from '@/components/base/BasePage.vue'
 
-const props = defineProps({
-  mode: { type: String, required: true },
-  settings: { type: Object, required: true },
-  isMobile: { type: Boolean, required: true },
-});
+// Define interfaces for props and components
+interface Props {
+  mode: CalculatorMode
+  settings: Record<string, any>
+  isMobile: boolean
+}
 
-const ActivityPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/ActivityPanel.vue'));
+interface HistoryItem {
+  expression: string
+  result?: string
+}
 
-// Use composables for state management
-const historyService = useHistory();
-const memoryService = useMemory();
-const activityPanel = usePanel('activity');
+interface MemoryService {
+  hasMemory: (mode: string) => Ref<boolean>
+}
+
+interface HistoryService {
+  addToHistory: (expression: string, result: string) => void
+}
+
+interface PanelService {
+  isOpen: Ref<boolean>
+  open: () => void
+  close: () => void
+  toggle: () => void
+}
+
+// Define props
+const props = defineProps<Props>()
+
+// Async component import with proper typing
+const ActivityPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/ActivityPanel.vue'))
+
+// Use composables for state management with proper typing
+const historyService: HistoryService = useHistory()
+const memoryService: MemoryService = useMemory()
+const activityPanel: PanelService = usePanel('activity')
 
 const {
   state,
@@ -78,25 +103,20 @@ const {
   setAnimation,
   updateDisplayValues,
   setActiveBase
-} = useCalculatorState(props.mode);
+} = useCalculatorState(props.mode)
 
-const storedInput = useSessionStorage(`calculator-session-input-${props.mode}`, '');
+// Session storage with proper typing
+const storedInput = useSessionStorage<string>(`calculator-session-input-${props.mode}`, '')
 
-const calculator = shallowRef(CalculatorFactory.create(props.mode, props.settings));
+// Calculator instance with proper typing
+const calculator: Ref<Calculator> = shallowRef(CalculatorFactory.create(props.mode, props.settings))
  
 // Provide calculator instance to child components
-provide('calculator', computed(() => calculator.value));
-provide('calculatorState', state);
+provide('calculator', computed(() => calculator.value))
+provide('calculatorState', state)
 
-// Initialize controller with all dependencies
-const {
-  preview,
-  input,
-  animatedResult,
-  handleClear,
-  handleButtonClick,
-  handleBaseChange,
-} = CalculatorController({
+// Initialize controller with all dependencies and proper typing
+const controllerResult: ControllerReturn = CalculatorController({
   state,
   calculator,
   updateState,
@@ -106,48 +126,64 @@ const {
   historyService,
   memoryService,
   toggleActivity: activityPanel.toggle
-});
+})
 
-// Memoized computed properties
-const maxInputLength = computed(() => calculator.value.MAX_INPUT_LENGTH);
-const hasMemoryValue = computed(() => memoryService.hasMemory(props.mode).value);
+const {
+  preview,
+  input,
+  animatedResult,
+  handleClear,
+  handleButtonClick,
+  handleBaseChange,
+} = controllerResult
 
-// activityPanel panel methods
-const openActivity = () => activityPanel.open();
+// Memoized computed properties with proper typing
+const maxInputLength: ComputedRef<number> = computed(() => calculator.value.MAX_INPUT_LENGTH)
+const hasMemoryValue: ComputedRef<boolean> = computed(() => memoryService.hasMemory(props.mode).value)
 
-watch(() => state.input, (newRawInput) => {
+// Activity panel methods
+const openActivity = (): void => activityPanel.open()
+
+// Watch for input changes with proper typing
+watch(() => state.input, (newRawInput: string) => {
   if (storedInput.value !== newRawInput) {
-    storedInput.value = newRawInput;
+    storedInput.value = newRawInput
   }
-});
+})
 
-watch(() => props.mode, (newMode, oldMode) => {
-  if (!newMode) return;
+// Watch for mode changes with proper typing
+watch(() => props.mode, (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
+  if (!newMode) return
 
-  resetState(newMode);
-  calculator.value = CalculatorFactory.create(newMode, props.settings);
+  resetState(newMode)
+  calculator.value = CalculatorFactory.create(newMode, props.settings)
+  
   if (newMode === 'Programmer') {
-    setActiveBase('DEC');
+    setActiveBase('DEC' as Base)
   }
+  
   if (oldMode === undefined) {
     if (storedInput.value && state.input !== storedInput.value) {
-      updateState({ input: storedInput.value });
-      calculator.value.input = storedInput.value;
+      updateState({ input: storedInput.value })
+      calculator.value.input = storedInput.value
+      
       if (props.mode === "Programmer") {
-      calculator.value.states.DEC.input = storedInput.value;
+        calculator.value.states.DEC.input = storedInput.value
       }
     }
   } else { 
-    storedInput.value = "";
+    storedInput.value = ""
   }
-}, { immediate: true });
+}, { immediate: true })
 
-
-// Handle activityPanel item selection
-const selectHistoryItem = ({ expression }) => {
+// Handle activity item selection with proper typing
+const selectHistoryItem = ({ expression }: HistoryItem): void => {
   if (state.mode === 'Programmer') return
 
-  updateState({input: expression, error: ''})
+  updateState({ 
+    input: expression, 
+    error: '' 
+  })
 
   calculator.value.input = expression
   calculator.value.currentExpression = ''

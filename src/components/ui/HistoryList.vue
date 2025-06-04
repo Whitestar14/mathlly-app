@@ -54,7 +54,7 @@
 <script setup>
 import { ref, computed, defineAsyncComponent } from "vue";
 import { useHistory } from "@/composables/useHistory";
-import { useAnimation } from "@/composables/useAnimation";
+import { useAnimation } from "@/composables/useAnimation.ts";
 import { useToast } from "@/composables/useToast";
 import { useClipboard } from "@vueuse/core";
 

@@ -71,8 +71,8 @@ import { onUnmounted, computed, shallowRef, reactive, defineAsyncComponent } fro
 import { useRouter } from "vue-router";
 import { useFullscreen, useLocalStorage } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
-import { useSettingsStore } from "@/stores/settings";
-import { useKeyboard } from "@/composables/useKeyboard";
+import { useSettingsStore } from "@/stores/settings.ts";
+import { useKeyboard } from "@/composables/useKeyboard.ts";
 import { usePanel } from "@/composables/usePanel";
 import { useTheme } from "@/composables/useTheme";
 import AppHeader from "@/components/layout/AppHeader.vue";

@@ -66,53 +66,86 @@
   </div>
 </template>
 
-<script setup>
-import { inject, computed, onMounted, watch, onUnmounted, shallowRef } from "vue"
+<script setup lang="ts">
+import { inject, computed, onMounted, watch, onUnmounted, shallowRef, type Ref, type ComputedRef } from "vue"
 import { useElementSize, useScroll, useThrottleFn, useMemoize } from '@vueuse/core'
-import { useAnimation } from '@/composables/useAnimation'
+import { useAnimation, type SlideAnimationControls } from '@/composables/useAnimation'
 import { useSettingsStore } from '@/stores/settings'
 import { SyntaxHighlighter } from '@/services/display/SyntaxHighlighter'
 
-const props = defineProps({
-  input: { type: String, default: "" },
-  preview: { type: String, default: "" },
-  error: { type: String, default: "" },
-  isAnimating: { type: Boolean, default: false },
-  animatedResult: { type: String, default: "" },
-  activeBase: { type: String, default: "DEC" },
-  mode: { type: String, default: "Standard" }
-});
+// Define interfaces for props and emits
+interface Props {
+input?: string
+  preview?: string
+  error?: string
+  isAnimating?: boolean
+  animatedResult?: string
+  activeBase?: string
+  mode?: string
+}
 
-const emit = defineEmits(['scroll-update']);
-const settingsStore = useSettingsStore();
+interface ScrollUpdatePayload {
+  canScrollLeft: boolean
+  canScrollRight: boolean
+}
+
+interface Token {
+  type: string
+  content: string
+}
+
+interface Calculator {
+  operations: {
+    parenthesesTracker: any
+  }
+}
+
+// Define props with defaults
+const props = withDefaults(defineProps<Props>(), {
+  input: "",
+  preview: "",
+  error: "",
+  isAnimating: false,
+  animatedResult: "",
+  activeBase: "DEC",
+  mode: "Standard"
+})
+
+// Define emits
+const emit = defineEmits<{
+  'scroll-update': [payload: ScrollUpdatePayload]
+}>()
+
+const settingsStore = useSettingsStore()
+
 // DOM refs - use shallowRef for better performance with DOM elements
-const displayContainer = shallowRef(null);
-const resultContainer = shallowRef(null);
-const inputContainer = shallowRef(null);
-const previewContainer = shallowRef(null);
+const displayContainer: Ref<HTMLElement | null> = shallowRef(null)
+const resultContainer: Ref<HTMLElement | null> = shallowRef(null)
+const inputContainer: Ref<HTMLElement | null> = shallowRef(null)
+const previewContainer: Ref<HTMLElement | null> = shallowRef(null)
 
 // Animation service - created once and reused
-const animationService = (() => {
-  const { createSlideAnimation } = useAnimation();
-  return createSlideAnimation();
-})();
+const animationService: SlideAnimationControls = (() => {
+  const { createSlideAnimation } = useAnimation()
+  return createSlideAnimation()
+})()
 
-// Inject calculator
-const calculator = inject('calculator');
-const parenthesesTracker = computed(() => calculator.value.operations.parenthesesTracker);
+// Inject calculator with proper typing
+const calculator = inject<Ref<Calculator>>('calculator')
+const parenthesesTracker = computed(() => calculator?.value?.operations?.parenthesesTracker)
 
 // Use VueUse for better performance
-const { width } = useElementSize(displayContainer);
+const { width } = useElementSize(displayContainer)
 const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
   throttle: 16,
   onScroll: useThrottleFn(updateScrollState, 100)
-});
+})
 
 // Check if syntax highlighting is enabled - non-reactive if setting doesn't change often
-const syntaxHighlightingEnabled = computed(() => settingsStore.display.syntaxHighlighting);
+const syntaxHighlightingEnabled: ComputedRef<boolean> = computed(() => settingsStore.display.syntaxHighlighting)
 
 // Pre-compute token class map for better performance
-const tokenClassMap = {
+const tokenClassMap: Record<string, string> = {
   'open': 'paren-open syntax-parenthesis',
   'close': 'paren-close syntax-parenthesis',
   'ghost': 'paren-ghost syntax-ghost',
@@ -123,97 +156,103 @@ const tokenClassMap = {
   'decimal': 'syntax-decimal',
   'text': 'syntax-text',
   'space': ''
-};
+}
 
 // Memoize font size calculation for better performance
-const getFontSizeClass = useMemoize((value, mode, activeBase) => {
-  if (!value) return 'text-3xl';
+const getFontSizeClass = useMemoize((value: string, mode: string, activeBase: string): string => {
+  if (!value) return 'text-3xl'
 
-  const length = value.toString().length;
+  const length = value.toString().length
 
   if (mode === 'Standard') {
-    if (length > 70) return 'text-xl';
-    if (length > 50) return 'text-2xl';
-    return 'text-3xl';
+    if (length > 70) return 'text-xl'
+    if (length > 50) return 'text-2xl'
+    return 'text-3xl'
   }
-  return activeBase === 'BIN' ? 'text-2xl' : 'text-3xl';
-}, { max: 20 });
+  return activeBase === 'BIN' ? 'text-2xl' : 'text-3xl'
+})
 
-const formattedTokens = computed(() => {
-  if (!syntaxHighlightingEnabled.value) return [];
+const formattedTokens: ComputedRef<Token[]> = computed(() => {
+  if (!syntaxHighlightingEnabled.value) return []
   
   return SyntaxHighlighter.format(
     props.input, 
-    parenthesesTracker.value, 
+    parenthesesTracker?.value, 
     true,
     {
       base: props.activeBase,
       mode: props.mode
     }
-  );
-});
+  )
+})
 
-const displayClass = computed(() => [
+const displayClass: ComputedRef<string[]> = computed(() => [
   'mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
   getFontSizeClass(props.input, props.mode, props.activeBase),
   errorClass.value
-]);
+])
 
-const errorClass = computed(() => props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors');
+const errorClass: ComputedRef<string> = computed(() => 
+  props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors'
+)
 
-function updateScrollState() {
-  if (!displayContainer.value) return;
+function updateScrollState(): void {
+  if (!displayContainer.value) return
 
-  const canScrollLeft = scrollLeft.value > 0;
+  const canScrollLeft = scrollLeft.value > 0
   const canScrollRight = !arrivedState.right &&
-    (displayContainer.value.scrollWidth - displayContainer.value.clientWidth - scrollLeft.value) > 2;
+    (displayContainer.value.scrollWidth - displayContainer.value.clientWidth - scrollLeft.value) > 2
 
-  emit('scroll-update', { canScrollLeft, canScrollRight });
+  emit('scroll-update', { canScrollLeft, canScrollRight })
 }
 
-function scrollToEnd() {
+function scrollToEnd(): void {
   if (displayContainer.value) {
-    displayContainer.value.scrollLeft = displayContainer.value.scrollWidth;
+    displayContainer.value.scrollLeft = displayContainer.value.scrollWidth
   }
 }
 
-function scrollToPrevious() {
+function scrollToPrevious(): void {
   if (displayContainer.value) {
-    const newScrollLeft = Math.max(0, scrollLeft.value - width.value / 2);
-    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+    const newScrollLeft = Math.max(0, scrollLeft.value - width.value / 2)
+    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
   }
 }
 
-function scrollToNext() {
+function scrollToNext(): void {
   if (displayContainer.value) {
     const newScrollLeft = Math.min(
       displayContainer.value.scrollWidth - width.value,
       scrollLeft.value + width.value / 2
-    );
-    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+    )
+    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
   }
 }
 
-function animateSlide() {
-  animationService.animateSlide(resultContainer.value, inputContainer.value);
+function animateSlide(): void {
+  animationService.animateSlide(resultContainer.value, inputContainer.value)
 }
 
-function resetPositions() {
-  animationService.resetPositions(resultContainer.value, inputContainer.value);
+function resetPositions(): void {
+  animationService.resetPositions(resultContainer.value, inputContainer.value)
 }
 
-watch(() => props.isAnimating, (newValue) => {
-  newValue ? animateSlide() : resetPositions();
-}, { flush: 'post' });
+watch(() => props.isAnimating, (newValue: boolean) => {
+  newValue ? animateSlide() : resetPositions()
+}, { flush: 'post' })
 
-function clearCache() {
-  if (syntaxHighlightingEnabled.value) SyntaxHighlighter.clearCache();
+function clearCache(): void {
+  if (syntaxHighlightingEnabled.value) SyntaxHighlighter.clearCache()
 }
 
-watch([() => props.mode, () => props.activeBase], clearCache, { deep: false });
+watch([() => props.mode, () => props.activeBase], clearCache, { deep: false })
 
-onMounted(updateScrollState);
-onUnmounted(clearCache);
+onMounted(updateScrollState)
+onUnmounted(clearCache)
 
-defineExpose({scrollToEnd, scrollToPrevious, scrollToNext});
+defineExpose({
+  scrollToEnd, 
+  scrollToPrevious, 
+  scrollToNext
+})
 </script>

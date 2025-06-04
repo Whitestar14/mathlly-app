@@ -106,7 +106,7 @@ import { useClipboard } from "@vueuse/core";
 import { ArrowDownUp, Copy, ClipboardPaste } from "lucide-vue-next";
 import { useToast } from "@/composables/useToast";
 import { usePills } from "@/composables/usePills";
-import { useKeyboard } from "@/composables/useKeyboard";
+import { useKeyboard } from "@/composables/useKeyboard.ts";
 import BaseButton from "@/components/base/BaseButton.vue";
 import Indicator from "@/components/ui/PillIndicator.vue"
 

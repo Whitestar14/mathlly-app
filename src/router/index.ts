@@ -1,11 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
-import { setupRouteErrorHandling, routeError, routePath } from './errorHandler';
-import db from '@/data/db';
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue'
+import { setupRouteErrorHandling, routeError, routePath } from './errorHandler'
+import db from '@/data/db.ts'
 
-let isInitialNavigation = true;
+let isInitialNavigation = true
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
@@ -58,12 +58,12 @@ const routes = [
       isRouteError: true,
     }),
     beforeEnter: (_, __, next) => {
-      if (routeError.value) next();
+      if (routeError.value) next()
       else {
         console.warn(
           'Direct access to /error page without active error. Redirecting to home.'
-        );
-        next('/');
+        )
+        next('/')
       }
     },
     meta: { transition: 'fade', errorPage: true },
@@ -76,70 +76,69 @@ const routes = [
         status: 404,
         message: 'Page not found',
         originalError: new Error('Not Found'),
-      };
+      }
 
-      routeError.value = error;
-      routePath.value = to.fullPath;
+      routeError.value = error
+      routePath.value = to.fullPath
 
-      return { name: 'error' };
+      return { name: 'error' }
     },
   },
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
-  fallback: ErrorFallback,
   routes,
   scrollBehavior() {
-    return {};
+    return {}
   },
-});
+})
 
-setupRouteErrorHandling(router);
+setupRouteErrorHandling(router)
 
 router.afterEach((to) => {
-  const excludedRoutes = ['not-found', 'settings', 'error', 'feedback'];
+  const excludedRoutes = ['not-found', 'settings', 'error', 'feedback']
 
-  if (!excludedRoutes.includes(to.name) && to.path !== '/') {
-    localStorage.setItem('path-lstv', to.fullPath);
+  if (!excludedRoutes.includes(to.name as string) && to.path !== '/') {
+    localStorage.setItem('path-lstv', to.fullPath)
   }
 
-  isInitialNavigation = false;
-});
+  isInitialNavigation = false
+})
 
 router.beforeEach(async (to, _, next) => {
   if (to.path === '/' && isInitialNavigation) {
     try {
-      const settings = await db.settings.get(1);
+      const settings = await db.settings.get(1)
 
       if (settings && settings.startup) {
-        const startupNav = settings.startup.navigation;
+        const startupNav = settings.startup.navigation
 
         if (startupNav === 'last-visited') {
-          const lastVisitedPath = localStorage.getItem('path-lstv');
+          const lastVisitedPath = localStorage.getItem('path-lstv')
 
           if (lastVisitedPath && lastVisitedPath !== '/') {
-            return next(lastVisitedPath);
+            return next(lastVisitedPath)
           }
 
           if (settings.calculator) {
-            return next('/calculator');
+            return next('/calculator')
           }
         }
 
         if (startupNav === 'calculator') {
-          return next('/calculator');
+          return next('/calculator')
         }
       }
 
-      next();
+      next()
     } catch (error) {
-      console.error('Error in navigation guard:', error);
-      next();
+      console.error('Error in navigation guard:', error)
+      next()
     }
   } else {
-    next();
+    next()
   }
-});
+})
 
-export default router;
+export default router

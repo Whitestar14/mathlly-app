@@ -1,5 +1,30 @@
-import { defineStore } from "pinia";
-import { ref, computed, markRaw } from "vue";
+import { defineStore } from "pinia"
+import { ref, computed, markRaw, type Ref, type ComputedRef } from "vue"
+
+// Define interfaces for keyboard shortcuts
+interface ShortcutAction {
+  action: string
+  payload?: string
+  description: string
+}
+
+interface ShortcutRegistry {
+  global: Record<string, ShortcutAction>
+  calculator: Record<string, ShortcutAction>
+  programmer: Record<string, ShortcutAction>
+  tools: Record<string, ShortcutAction>
+}
+
+// Define base validator type
+type BaseValidator = RegExp
+
+// Define base validators interface
+interface BaseValidators {
+  BIN: BaseValidator
+  OCT: BaseValidator
+  DEC: BaseValidator
+  HEX: BaseValidator
+}
 
 /**
  * Store for managing keyboard shortcuts and input validation
@@ -7,20 +32,18 @@ import { ref, computed, markRaw } from "vue";
 export const useKeyboardStore = defineStore("keyboard", () => {
   /**
    * Base validation regular expressions for programmer mode
-   * @type {Object}
    */
-  const BASE_VALIDATORS = markRaw({
+  const BASE_VALIDATORS: BaseValidators = markRaw({
     BIN: /^[0-1]$/,
     OCT: /^[0-7]$/,
     DEC: /^[0-9]$/,
     HEX: /^[0-9a-fA-F]$/,
-  });
+  })
 
   /**
    * Keys that are always allowed regardless of context
-   * @type {string[]}
    */
-  const COMMON_KEYS = markRaw([
+  const COMMON_KEYS: readonly string[] = markRaw([
     "backspace", 
     "enter", 
     "escape", 
@@ -31,25 +54,23 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     "(", 
     ")", 
     "%"
-  ]);
+  ])
 
   /**
    * Key normalization mapping
-   * @type {Object}
    */
-  const KEY_MAP = markRaw({
+  const KEY_MAP: Record<string, string> = markRaw({
     enter: "enter",
     backspace: "backspace",
     escape: "escape",
     "*": "×",
     "/": "÷",
-  });
+  })
 
   /**
    * Registered keyboard shortcuts by context
-   * @type {import('vue').Ref<Object>}
    */
-  const shortcuts = ref({
+  const shortcuts: Ref<ShortcutRegistry> = ref({
     global: {
       "ctrl+alt+f": {
         action: "toggleFullscreen",
@@ -101,94 +122,85 @@ export const useKeyboardStore = defineStore("keyboard", () => {
       "ctrl+v": { action: "paste", description: "Paste from Clipboard" },
       "ctrl+c": { action: "copy", description: "Copy Result" },
     },
-  });
+  })
 
   /**
    * Whether keyboard shortcuts are enabled
-   * @type {import('vue').Ref<boolean>}
    */
-  const isEnabled = ref(true);
+  const isEnabled: Ref<boolean> = ref(true)
   
   /**
    * Current context stack (hierarchical)
-   * @type {import('vue').Ref<string[]>}
    */
-  const contextStack = ref(["global"]);
+  const contextStack: Ref<string[]> = ref(["global"])
   
   /**
    * Active shortcuts based on current context stack
-   * @type {import('vue').ComputedRef<Object>}
    */
-  const activeShortcuts = computed(() => {
+  const activeShortcuts: ComputedRef<Record<string, ShortcutAction>> = computed(() => {
     return contextStack.value.reduce((acc, context) => {
-      return { ...acc, ...(shortcuts.value[context] || {}) };
-    }, {});
-  });
+      const contextShortcuts = shortcuts.value[context as keyof ShortcutRegistry] || {}
+      return { ...acc, ...contextShortcuts }
+    }, {} as Record<string, ShortcutAction>)
+  })
 
   /**
    * Current active context (excluding global)
-   * @type {import('vue').ComputedRef<string>}
    */
-  const currentContext = computed(() => {
-    return contextStack.value[contextStack.value.length - 1];
-  });
+  const currentContext: ComputedRef<string> = computed(() => {
+    return contextStack.value[contextStack.value.length - 1]
+  })
 
   /**
    * Sets the current keyboard context
-   * @param {string} ctx - Context to set
    */
-  function setContext(ctx) {    
+  function setContext(ctx: string): void {    
     // Remove existing instance of context if it exists
-    contextStack.value = contextStack.value.filter((c) => c !== ctx);
+    contextStack.value = contextStack.value.filter((c) => c !== ctx)
     
     // Add new context to top of stack
-    contextStack.value.push(ctx);
+    contextStack.value.push(ctx)
   }
 
   /**
    * Clears a context from the stack
-   * @param {string} ctx - Context to clear
    */
-  function clearContext(ctx) {    
-    contextStack.value = contextStack.value.filter((c) => c !== ctx);
+  function clearContext(ctx: string): void {    
+    contextStack.value = contextStack.value.filter((c) => c !== ctx)
     
     // Ensure global context is always present
     if (contextStack.value.length === 0) {
-      contextStack.value = ["global"];
+      contextStack.value = ["global"]
     }
   }
 
   /**
    * Validates if a key is valid input in the current context
-   * @param {string} key - Key to validate
-   * @returns {boolean} Whether the key is valid input
    */
-  function isValidInput(key) {
+  function isValidInput(key: string): boolean {
     // Normalize the key to handle special cases
-    const normalizedKey = key?.toLowerCase?.();
+    const normalizedKey = key?.toLowerCase?.()
 
     // Always allow common keys
-    if (COMMON_KEYS.includes(normalizedKey)) return true;
+    if (COMMON_KEYS.includes(normalizedKey)) return true
 
     // If not in programmer mode, allow all numeric input
     if (!contextStack.value.includes("programmer")) {
-      return /^[0-9.]$/.test(normalizedKey);
+      return /^[0-9.]$/.test(normalizedKey)
     }
 
     // For programmer mode, validate against current base
-    const validator = BASE_VALIDATORS[currentContext.value];
+    const validator = BASE_VALIDATORS[currentContext.value as keyof BaseValidators]
     
     // Ensure validation happens against the normalized key
-    return validator?.test(normalizedKey) ?? false;
+    return validator?.test(normalizedKey) ?? false
   }
 
   /**
    * Normalizes key names for consistency
-   * @param {string} key - Key to normalize
-   * @returns {string} Normalized key name
    */
-  function normalizeKey(key) {
-    return KEY_MAP[key] || key;
+  function normalizeKey(key: string): string {
+    return KEY_MAP[key] || key
   }
 
   return {
@@ -201,5 +213,5 @@ export const useKeyboardStore = defineStore("keyboard", () => {
     clearContext,
     isValidInput,
     normalizeKey,
-  };
-});
+  }
+})

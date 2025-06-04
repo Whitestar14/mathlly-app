@@ -116,8 +116,8 @@ import {
   ChevronUpIcon,
   CheckIcon
 } from 'lucide-vue-next';
-import { useVersionStore } from '@/stores/version';
-import { useSettingsStore } from '@/stores/settings';
+import { useVersionStore } from '@/stores/version.ts';
+import { useSettingsStore } from '@/stores/settings.ts';
 import { updates } from '@/data/changelog';
 import BaseButton from '@/components/base/BaseButton.vue';
 
