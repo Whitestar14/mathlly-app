@@ -32,7 +32,7 @@
 
 <script setup>
 import { TagIcon, CheckCircle2 } from 'lucide-vue-next';
-import Badge from '@/components/base/BaseBadge'
+import Badge from '@/components/base/BaseBadge.vue'
 defineProps({
   version: {
     type: String,

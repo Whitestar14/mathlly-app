@@ -14,7 +14,11 @@
     <meta name="application-name" content="Mathlly" />
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- Themes and colors will be handled and populated by webpack manifest -->
+    <!-- Themes and colors -->
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="msapplication-TileColor" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     <link rel="icon" type="image/icon" href="/img/icons/favicon.ico" />
     
@@ -36,14 +40,12 @@
     <meta name="twitter:creator" content="@xijibomi" />
     
     <!-- Web App Manifest -->
-    <link rel="manifest" href="<%= BASE_URL %>manifest.json" />
+    <link rel="manifest" href="/manifest.json" />
     
-    <!-- Preconnect to important domains -->
-    <% if (process.env.NODE_ENV === 'production') { %>
+    <!-- Preconnect to important domains and load fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap" rel="stylesheet">
-    <% } %>  
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap" rel="stylesheet"> -->
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://mathlly-app.vercel.app" />
@@ -53,6 +55,6 @@
       <strong>We're sorry but Mathlly doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>
-    <!-- built files will be auto injected -->
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

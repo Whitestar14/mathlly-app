@@ -1,17 +1,17 @@
-// main.js
+// main.ts
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import VueTippy from 'vue-tippy';
-import router from '@/router';
+import router from './router/index.js';
 import App from '@/App.vue';
-import { useDeviceStore } from '@/stores/device';
+import { useDeviceStore } from './stores/device.js';
 import { MotionPlugin } from '@vueuse/motion';
 import '@/assets/css/main.css';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 
 if (process.env.NODE_ENV === 'development') {
-  import('@/assets/css/fonts.css');
+  import('./assets/css/fonts.css');
 }
 
 if ('serviceWorker' in navigator) {
@@ -19,7 +19,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .register('/service-worker.js')
       .then((registration) => {
-        const dispatchUpdateAvailableEvent = (reg) => {
+        const dispatchUpdateAvailableEvent = (reg: ServiceWorkerRegistration) => {
           const event = new CustomEvent('sw-update-available', { detail: reg });
           window.dispatchEvent(event);
         };
@@ -55,7 +55,7 @@ const pinia = createPinia();
 
 app.use(MotionPlugin).use(pinia).use(router);
 
-const props = {
+const props: any = {
   placement: 'top',
   theme: 'custom',
   arrow: true,

@@ -70,7 +70,7 @@ import {
   DialogTitle,
 } from "radix-vue"
 import { useEventListener } from "@vueuse/core"
-import Button from "@/components/base/BaseButton"
+import Button from "@/components/base/BaseButton.vue"
 import { XIcon } from "lucide-vue-next"
 
 const props = defineProps({

@@ -1,12 +1,12 @@
 /* ==========================================================================
    Tailwind Directives
    ========================================================================== */
+/* CSS Stylesheet Imports */
+@import './buttons.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* CSS Stylesheet Imports */
-@import url(./buttons.css);
 
 /* ==========================================================================
    Base Styles
