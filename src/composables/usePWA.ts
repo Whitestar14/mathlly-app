@@ -1,11 +1,9 @@
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useIntervalFn, useLocalStorage } from '@vueuse/core'
 import { useVersionStore } from '@/stores/version'
 import { useSettingsStore } from '@/stores/settings'
 
-// Import the virtual module - this should work now with devOptions enabled
 let useRegisterSW: any
-let updateServiceWorker: any
 
 // Dynamically import the PWA register module
 async function initializePWA() {
@@ -142,6 +140,8 @@ export function usePWA() {
         },
         onNeedRefresh() {
           needRefresh.value = true
+          // When PWA detects an update, populate the update info
+          populateUpdateInfo()
         },
         onOfflineReady() {
           offlineReady.value = true
@@ -187,66 +187,152 @@ export function usePWA() {
     return { pause, resume }
   }
 
-  /**
-   * Check for version updates from changelog
-   */
-  const checkForVersionUpdates = async (): Promise<void> => {
-    try {
-      // For now, we'll skip the changelog import since it's not in the context
-      // You can uncomment this when the changelog is available
-      // if (updates.length > 0) {
-      //   const latestUpdate = updates[0]
-      //   latestVersion.value = latestUpdate?.version || ''
-      //   
-      //   if (isNewerVersion(latestVersion.value, currentVersion.value)) {
-      //     updateFeatures.value = latestUpdate?.features || []
-      //   }
-      // }
+/**
+ * Check for version updates from generated version-info.json
+ */
+const checkForVersionUpdates = async (): Promise<void> => {
+  if (!updatesEnabled.value) return
+  
+  try {
+    const response = await fetch(`/version-info.json?t=${Date.now()}`)
+    if (response.ok) {
+      const versionData = await response.json()
+      const fetchedVersion = versionData.version || ''
       
-      // Fallback to version-info.json if available
-      try {
-        const response = await fetch(`/version-info.json?t=${Date.now()}`)
-        if (response.ok) {
-          const versionData = await response.json()
-          latestVersion.value = versionData.full || ''
+      console.log('[PWA] Checking versions:', {
+        current: currentVersion.value,
+        fetched: fetchedVersion,
+        hasChangelog: versionData.hasChangelog,
+        source: versionData.source,
+        updateType: versionData.updateType
+      })
+      
+      if (fetchedVersion && isNewerVersion(fetchedVersion, currentVersion.value)) {
+        latestVersion.value = fetchedVersion
+        
+        // Handle different update types with better messaging
+        if (versionData.hasChangelog && versionData.features?.length > 0) {
+          updateFeatures.value = versionData.features
+        } else if (versionData.updateType === 'beta-to-stable') {
+          // Special handling for beta to stable transitions
+          updateFeatures.value = [
+            'Stable release - all features tested and verified',
+            'Improved stability and performance',
+            'Bug fixes from beta testing'
+          ]
+        } else {
+          updateFeatures.value = versionData.message ? [versionData.message] : ['General improvements and bug fixes']
         }
-      } catch {
-        // Ignore fetch errors in development
+        
+        console.log('[PWA] Update available:', {
+          version: fetchedVersion,
+          type: versionData.updateType || (versionData.hasChangelog ? 'changelog' : 'build-only'),
+          features: updateFeatures.value.length
+        })
       }
-    } catch (error) {
-      console.error('[PWA] Failed to check for version updates:', error)
     }
+  } catch (error) {
+    console.warn('[PWA] Failed to check for version updates:', error)
   }
+}
 
-  /**
-   * Compare version strings
-   */
-  const isNewerVersion = (latest: string, current: string): boolean => {
-    if (!latest || !current) return false
-    
-    const normalizeVersion = (v: string) => v.replace(/^v/, '')
-    const latestParts = normalizeVersion(latest).split('.').map(Number)
-    const currentParts = normalizeVersion(current).split('.').map(Number)
-    
-    for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
-      const latestPart = latestParts[i] || 0
-      const currentPart = currentParts[i] || 0
-      
-      if (latestPart > currentPart) return true
-      if (latestPart < currentPart) return false
-    }
-    
-    return false
+/**
+ * Populate update information when PWA update is detected
+ */
+const populateUpdateInfo = async () => {
+  // Always try to get real version info first
+  await checkForVersionUpdates()
+  
+  // If PWA detected an update but we still don't have version info,
+  // it's likely a service worker-only update
+  if (needRefresh.value && !latestVersion.value) {
+    console.log('[PWA] Service worker update detected without version change')
+    latestVersion.value = `${currentVersion.value} (SW Update)`
+    updateFeatures.value = [
+      'Updated service worker for better offline functionality',
+      'Improved caching and performance',
+      'Enhanced app reliability'
+    ]
   }
+}
+
+/**
+ * Compare version strings with proper prerelease handling
+ */
+const isNewerVersion = (latest: string, current: string): boolean => {
+  if (!latest || !current) return false
+  
+  type PrereleaseType = 'alpha' | 'beta' | 'rc' | null;
+
+  const parseVersionForComparison = (v: string) => {
+    const cleaned = v.replace(/^v/, '')
+    const match = cleaned.match(/^(\d+)\.(\d+)\.(\d+)(?:-(beta|alpha|rc)(\d*))?$/)
+    
+    if (!match) return null
+    
+    return {
+      major: parseInt(match[1], 10),
+      minor: parseInt(match[2], 10),
+      patch: parseInt(match[3], 10),
+      prerelease: (match[4] as PrereleaseType) || null,
+      prereleaseNumber: match[5] ? parseInt(match[5], 10) : 0,
+      isStable: !match[4]
+    }
+  }
+  
+  const latestParsed = parseVersionForComparison(latest)
+  const currentParsed = parseVersionForComparison(current)
+  
+  if (!latestParsed || !currentParsed) return false
+  
+  // Compare major.minor.patch first
+  if (latestParsed.major !== currentParsed.major) {
+    return latestParsed.major > currentParsed.major
+  }
+  if (latestParsed.minor !== currentParsed.minor) {
+    return latestParsed.minor > currentParsed.minor
+  }
+  if (latestParsed.patch !== currentParsed.patch) {
+    return latestParsed.patch > currentParsed.patch
+  }
+  
+  // Same version number, check prerelease status
+  // Stable versions are newer than prerelease versions
+  if (currentParsed.prerelease && latestParsed.isStable) {
+    return true // beta -> stable is an update
+  }
+  
+  if (currentParsed.isStable && latestParsed.prerelease) {
+    return false // stable -> beta is not an update
+  }
+  
+  // Both prerelease, compare prerelease numbers
+  if (currentParsed.prerelease && latestParsed.prerelease) {
+    // alpha < beta < rc
+    const prereleaseOrder: Record<'alpha' | 'beta' | 'rc', number> = { alpha: 1, beta: 2, rc: 3 };
+    if (currentParsed.prerelease === latestParsed.prerelease) {
+      return latestParsed.prereleaseNumber > currentParsed.prereleaseNumber;
+    }
+    return prereleaseOrder[latestParsed.prerelease as 'alpha' | 'beta' | 'rc'] > prereleaseOrder[currentParsed.prerelease as 'alpha' | 'beta' | 'rc'];
+  }
+  
+  return false
+}
 
   /**
    * Check if update should be shown
    */
   const shouldShowUpdate = computed(() => {
+    // Check if dismissal has expired
+    const dismissedUntil = localStorage.getItem('update-dismissed-until')
+    if (dismissedUntil && Date.now() < parseInt(dismissedUntil)) {
+      return false
+    }
+    
     // Service worker update available
     if (needRefresh.value) return true
     
-    // Version update available and not dismissed
+    // Version update available and not permanently dismissed
     if (isNewerVersion(latestVersion.value, currentVersion.value)) {
       return dismissedVersion.value !== latestVersion.value
     }
@@ -275,9 +361,16 @@ export function usePWA() {
    */
   const dismissUpdate = (): void => {
     if (latestVersion.value) {
+      // Only dismiss for this session, not permanently
       dismissedVersion.value = latestVersion.value
+      
+      // Set a shorter dismissal period (e.g., 1 hour)
+      const dismissalExpiry = Date.now() + (60 * 60 * 1000) // 1 hour
+      localStorage.setItem('update-dismissed-until', dismissalExpiry.toString())
     }
     needRefresh.value = false
+    latestVersion.value = ''
+    updateFeatures.value = []
   }
 
   // Initialize PWA on first call
@@ -297,7 +390,9 @@ export function usePWA() {
     
     // Methods
     updateApp,
+    isNewerVersion,
     dismissUpdate,
-    checkForVersionUpdates
+    checkForVersionUpdates,
+    populateUpdateInfo // Export for testing
   }
 }

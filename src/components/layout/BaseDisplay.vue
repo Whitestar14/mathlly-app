@@ -48,16 +48,8 @@ interface FormattedValues {
   [key: string]: string
 }
 
-// Define emits with proper typing
-interface Emits {
-  'base-change': [base: Base]
-}
-
 // Define props with proper typing
 const props = defineProps<Props>()
-
-// Define emits with proper typing
-const emit = defineEmits<Emits>()
 
 // Define available bases as a readonly array with proper typing
 const bases = markRaw(['HEX', 'DEC', 'OCT', 'BIN'] as const)

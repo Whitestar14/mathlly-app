@@ -1,114 +1,226 @@
 <template>
   <Transition
-    enter-active-class="transform transition duration-300 ease-out"
-    enter-from-class="translate-y-10 opacity-0"
-    enter-to-class="translate-y-0 opacity-100"
-    leave-active-class="transform transition duration-200 ease-in"
-    leave-from-class="translate-y-0 opacity-100"
-    leave-to-class="translate-y-10 opacity-0"
+    enter-active-class="transform transition duration-500 ease-out"
+    enter-from-class="translate-y-full opacity-0 scale-95"
+    enter-to-class="translate-y-0 opacity-100 scale-100"
+    leave-active-class="transform transition duration-300 ease-in"
+    leave-from-class="translate-y-0 opacity-100 scale-100"
+    leave-to-class="translate-y-full opacity-0 scale-95"
   >
     <div 
       v-if="shouldShowUpdate"
-      class="fixed bottom-4 right-4 z-50 w-full max-w-sm bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
-      style="width: clamp(300px, 90vw, 32rem);"
+      class="fixed bottom-3 left-3 right-3 z-50 sm:bottom-6 sm:right-6 sm:left-auto sm:w-full sm:max-w-sm"
     >
-      <!-- Header -->
-      <div class="p-4 pb-3 flex items-start justify-between">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-full">
-            <RefreshCwIcon class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
-              Update Available
-              <span 
-                v-if="latestVersion" 
-                class="ml-2 px-2 py-0.5 text-xs rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300"
-              >
-                {{ latestVersion }}
-              </span>
-            </h3>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {{ needRefresh ? 'A new version is ready to install' : 'New features available' }}
-            </p>
+      <!-- Main Card -->
+      <div class="relative bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden">
+        <!-- Gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent dark:from-gray-800/10 pointer-events-none"></div>
+        
+        <!-- Header Section -->
+        <div class="relative p-3 sm:p-5">
+          <div class="flex items-start gap-2.5 sm:gap-3">
+            <!-- Icon -->
+            <div class="relative flex-shrink-0 mt-0.5">
+              <div class="absolute inset-0 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl blur-sm opacity-60"></div>
+              <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-2 sm:p-2.5 rounded-xl shadow-lg">
+                <RefreshCwIcon class="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <!-- Title Row -->
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                  Update Available
+                </h3>
+                
+                <div class="flex items-center gap-1 flex-shrink-0">
+                  <!-- Details Toggle Icon -->
+                  <BaseButton
+                    v-if="updateFeatures.length > 0"
+                    variant="ghost"
+                    size="icon"
+                    @click="toggleDetails"
+                    class="h-7 w-7"
+                  >
+                    <ChevronDownIcon 
+                      class="h-4 w-4 transition-transform duration-300 ease-out"
+                      :class="{ 'rotate-180': showDetails }"
+                    />
+                  </BaseButton>
+                  
+                  <!-- Close Button -->
+                  <BaseButton
+                    variant="ghost"
+                    size="icon"
+                    @click="dismissUpdate"
+                    class="h-7 w-7"
+                  >
+                    <XIcon class="h-4 w-4" />
+                  </BaseButton>
+                </div>
+              </div>
+              
+              <!-- Version Progression -->
+              <div class="flex items-center gap-1.5 mb-2 sm:mb-3 overflow-hidden">
+                <span 
+                  v-if="currentVersion" 
+                  class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border border-gray-200/50 dark:border-gray-600/50 flex-shrink-0"
+                >
+                  {{ formatVersion(currentVersion) }}
+                </span>
+                <ArrowRightIcon v-if="currentVersion && latestVersion" class="h-3 w-3 text-gray-400 flex-shrink-0" />
+                <span 
+                  v-if="latestVersion" 
+                  class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-md bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-700/50 shadow-sm flex-shrink-0"
+                >
+                  <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
+                  {{ formatVersion(latestVersion) }}
+                </span>
+              </div>
+              
+              <!-- Description -->
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-2 sm:mb-3">
+                {{ getUpdateDescription() }}
+              </p>
+              
+              <!-- Quick Feature Preview (Mobile-First) -->
+              <div v-if="updateFeatures.length > 0" class="space-y-2">
+                <!-- Collapsed Preview -->
+                <div v-if="!showDetails" class="flex flex-wrap gap-1">
+                  <span
+                    v-for="(feature, index) in getPreviewFeatures()"
+                    :key="index"
+                    class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50"
+                  >
+                    <SparklesIcon class="h-2.5 w-2.5 mr-1 flex-shrink-0" />
+                    <span class="truncate">{{ feature }}</span>
+                  </span>
+                  <span
+                    v-if="updateFeatures.length > getPreviewCount()"
+                    class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                  >
+                    +{{ updateFeatures.length - getPreviewCount() }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <button
-          class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:ring-offset-2 rounded-md"
-          @click="dismissUpdate"
-        >
-          <span class="sr-only">Close</span>
-          <XIcon class="h-5 w-5" />
-        </button>
-      </div>
-      
-      <!-- Update details -->
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="max-h-0 opacity-0"
-        enter-to-class="max-h-[200px] opacity-100"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="max-h-[200px] opacity-100"
-        leave-to-class="max-h-0 opacity-0"
-      >
-        <div v-if="showDetails && updateFeatures.length > 0" class="px-4 pb-2 overflow-hidden">
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-2 mb-2 overflow-y-auto" style="max-height: calc(100vh - 12rem);">
-            <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              What's new:
-            </h4>
-            <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
-              <li
-                v-for="(feature, index) in updateFeatures"
-                :key="index"
-                class="flex items-start"
-              >
-                <CheckIcon class="h-3.5 w-3.5 text-green-500 dark:text-green-400 mr-1.5 mt-0.5 flex-shrink-0" />
-                <span>{{ feature }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </Transition>
-      
-      <!-- Action buttons -->
-      <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-right sm:px-6 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex justify-between items-center">
-          <button
-            v-if="updateFeatures.length > 0"
-            class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:ring-offset-2 rounded-md px-2 py-1"
-            @click="toggleDetails"
+        
+        <!-- Expandable Details -->
+        <div class="overflow-hidden">
+          <Transition
+            enter-active-class="transition-all duration-400 ease-out"
+            enter-from-class="max-h-0 opacity-0"
+            enter-to-class="max-h-64 opacity-100"
+            leave-active-class="transition-all duration-300 ease-in"
+            leave-from-class="max-h-64 opacity-100"
+            leave-to-class="max-h-0 opacity-0"
           >
-            {{ showDetails ? 'Hide details' : 'Show details' }}
-          </button>
-          <div class="flex space-x-2">
-            <button
-              class="btn btn-ghost btn-sm text-xs px-3 py-1.5"
+            <div v-if="showDetails && updateFeatures.length > 0" class="relative">
+              <!-- Divider -->
+              <div class="px-3 sm:px-5">
+                <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
+              </div>
+              
+              <!-- Details Content -->
+              <div class="px-3 sm:px-5 py-3 sm:py-4">
+                <div class="max-h-40 overflow-y-auto scrollbar-thin">
+                  <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3 flex items-center">
+                    <div class="w-1 h-1 bg-indigo-500 rounded-full mr-2"></div>
+                    What's new in {{ formatVersion(latestVersion) }}
+                  </h4>
+                  
+                  <!-- Feature List -->
+                  <div class="space-y-2 sm:space-y-2.5">
+                    <div
+                      v-for="(feature, index) in updateFeatures"
+                      :key="index"
+                      class="flex items-start group"
+                    >
+                      <div class="relative mt-1.5 mr-2.5 sm:mr-3 flex-shrink-0">
+                        <div class="absolute inset-0 bg-green-400 rounded-full blur-sm opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                        <CheckIcon class="relative h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-600 dark:text-green-400" />
+                      </div>
+                      <span class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{{ feature }}</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Release Notes Link -->
+                  <div v-if="hasReleaseNotes" class="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <BaseButton
+                      variant="link"
+                      size="sm"
+                      @click="openReleaseNotes"
+                      class="text-xs p-0 h-auto"
+                    >
+                      <BookOpenIcon class="h-3 w-3 mr-1.5" />
+                      <span class="hidden sm:inline">View full release notes</span>
+                      <span class="sm:hidden">Release notes</span>
+                      <ExternalLinkIcon class="h-3 w-3 ml-1" />
+                    </BaseButton>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </div>
+        
+        <!-- Action Bar -->
+        <div class="relative px-3 sm:px-5 py-2.5 sm:py-4 bg-gradient-to-r from-gray-50/50 to-gray-100/30 dark:from-gray-800/30 dark:to-gray-900/50 border-t border-gray-200/30 dark:border-gray-700/30">
+          <!-- Action Buttons -->
+          <div class="flex gap-2 justify-end">
+            <BaseButton
+              variant="outline"
+              size="sm"
               @click="dismissUpdate"
+              class="text-xs"
             >
               Later
-            </button>
-            <button
-              class="btn btn-primary btn-sm text-xs px-3 py-1.5"
+            </BaseButton>
+            
+            <BaseButton
+              variant="primary"
+              size="sm"
               :disabled="isUpdating"
+              :loading="isUpdating"
               @click="handleUpdate"
+              class="text-xs min-w-[90px]"
             >
-              <RefreshCwIcon 
-                v-if="isUpdating" 
-                class="h-3.5 w-3.5 mr-1 animate-spin" 
+              <DownloadIcon 
+                v-if="!isUpdating"
+                class="h-3.5 w-3.5 mr-1.5" 
               />
-              {{ isUpdating ? 'Updating...' : 'Update' }}
-            </button>
+              {{ isUpdating ? 'Updating...' : 'Update Now' }}
+            </BaseButton>
           </div>
         </div>
+        
+        <!-- Bottom accent -->
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-60"></div>
       </div>
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RefreshCwIcon, XIcon, CheckIcon } from 'lucide-vue-next'
+import { ref, computed, type Ref, type ComputedRef } from 'vue'
+import { 
+  RefreshCwIcon, 
+  XIcon, 
+  CheckIcon, 
+  ChevronDownIcon, 
+  ArrowRightIcon,
+  SparklesIcon,
+  DownloadIcon,
+  BookOpenIcon,
+  ExternalLinkIcon
+} from 'lucide-vue-next'
 import { usePWA } from '@/composables/usePWA'
+import { useWindowSize } from '@vueuse/core'
+import BaseButton from '@/components/base/BaseButton.vue'
 
 // Use the PWA composable
 const {
@@ -117,24 +229,111 @@ const {
   updateFeatures,
   shouldShowUpdate,
   updateApp,
-  dismissUpdate
+  dismissUpdate,
+  currentVersion
 } = usePWA()
 
-// Local state
-const showDetails = ref(false)
-const isUpdating = ref(false)
+// Responsive utilities
+const { width } = useWindowSize()
+
+// Local state with explicit types
+const showDetails: Ref<boolean> = ref(false)
+const isUpdating: Ref<boolean> = ref(false)
+
+// Computed properties with explicit types
+const hasReleaseNotes: ComputedRef<boolean> = computed(() => {
+  return Boolean(latestVersion.value && updateFeatures.value.length > 0)
+})
+
+const isMobile: ComputedRef<boolean> = computed(() => width.value < 640)
+
+/**
+ * Get preview feature count based on screen size
+ */
+const getPreviewCount = (): number => {
+  if (isMobile.value) return 1
+  return 2
+}
+
+/**
+ * Get preview features for collapsed state
+ */
+const getPreviewFeatures = (): string[] => {
+  const count = getPreviewCount()
+  return updateFeatures.value.slice(0, count).map((feature: string) => {
+    // Truncate long features for preview
+    if (isMobile.value && feature.length > 25) {
+      return `${feature.substring(0, 25)}...`
+    }
+    if (!isMobile.value && feature.length > 30) {
+      return `${feature.substring(0, 30)}...`
+    }
+    return feature
+  })
+}
+
+/**
+ * Format version string for display
+ */
+const formatVersion = (version: string | null | undefined): string => {
+  if (!version) return ''
+  
+  const cleanVersion = version.replace(/^v/, '')
+  
+  if (cleanVersion.includes('beta')) {
+    const [versionNum] = cleanVersion.split('-')
+    return `${versionNum} β`
+  }
+  
+  if (cleanVersion.includes('alpha')) {
+    const [versionNum] = cleanVersion.split('-')
+    return `${versionNum} α`
+  }
+  
+  return cleanVersion
+}
+
+/**
+ * Get contextual update description
+ */
+const getUpdateDescription = (): string => {
+  // Check if this is a version update first
+  if (latestVersion.value && currentVersion.value && 
+      latestVersion.value !== currentVersion.value && 
+      !latestVersion.value.includes('SW Update')) {
+    
+    // Check for beta to stable transition
+    if (currentVersion.value.includes('beta') && !latestVersion.value.includes('beta')) {
+      return 'Stable release ready - enhanced stability and performance'
+    }
+    
+    if (updateFeatures.value.length > 0) {
+      const featureText = isMobile.value ? 'updates' : 'features and improvements'
+      return `${updateFeatures.value.length} new ${featureText} available`
+    }
+    
+    return 'New version available with improvements'
+  }
+  
+  // This is a service worker update
+  if (needRefresh.value) {
+    return isMobile.value ? 'App update ready' : 'App update ready - improved offline functionality'
+  }
+  
+  return 'Enhanced experience awaits with the latest version'
+}
 
 /**
  * Toggle update details visibility
  */
-const toggleDetails = () => {
+const toggleDetails = (): void => {
   showDetails.value = !showDetails.value
 }
 
 /**
- * Handle update button click
+ * Handle update button click with loading state
  */
-const handleUpdate = async () => {
+const handleUpdate = async (): Promise<void> => {
   if (isUpdating.value) return
   
   isUpdating.value = true
@@ -147,4 +346,82 @@ const handleUpdate = async () => {
     isUpdating.value = false
   }
 }
+
+/**
+ * Open release notes
+ */
+const openReleaseNotes = (): void => {
+  const url = `https://github.com/Whitestar14/mathlly-app/releases/tag/v${latestVersion.value}`
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
 </script>
+
+<style scoped>
+/* Custom scrollbar for details section */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(156 163 175 / 0.5) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(156 163 175 / 0.5);
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(156 163 175 / 0.7);
+}
+
+/* Dark mode scrollbar */
+.dark .scrollbar-thin {
+  scrollbar-color: rgb(75 85 99 / 0.5) transparent;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(75 85 99 / 0.5);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(75 85 99 / 0.7);
+}
+
+/* Enhanced backdrop blur support */
+@supports (backdrop-filter: blur(12px)) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(12px)) {
+  .backdrop-blur-xl {
+    background-color: rgba(255, 255, 255, 0.98);
+  }
+  
+  .dark .backdrop-blur-xl {
+    background-color: rgba(17, 24, 39, 0.98);
+  }
+}
+
+/* Feature tag animations */
+.inline-flex.items-center.px-2 {
+  transition: all 0.2s ease;
+}
+
+.inline-flex.items-center.px-2:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .inline-flex.items-center.px-2:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+</style>

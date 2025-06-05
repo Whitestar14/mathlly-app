@@ -18,10 +18,12 @@
       </template>
     </Suspense>
     <UpdateNotification />
+    <!-- PWA Test Panel (development only) -->
+    <PWATestPanel v-show="false" />
   </div>
 </template>
 
-<script setup>
+<script setup> 
 import { shallowRef, onErrorCaptured } from 'vue';
 import { hasError } from "@/router/errorHandler"
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
@@ -29,8 +31,11 @@ import AppProvider from '@/components/panel/AppProvider.vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import UpdateNotification from '@/components/ui/UpdateNotification.vue';
+import PWATestPanel from '@/components/dev/PWATestPanel.vue'
 
 const error = shallowRef(null);
+
+const isDev = shallowRef(import.meta.env.DEV)
 
 onErrorCaptured((err, instance, info) => {
   console.error("[Global Error Boundary Caught]:", err, instance, info);
