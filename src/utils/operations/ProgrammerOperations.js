@@ -1,5 +1,5 @@
-import { ParenthesesTracker } from "@/utils/core/ParenthesesTracker";
-import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants";
+import { ParenthesesTracker } from "@/utils/core/ParenthesesTracker.ts";
+import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants.ts";
 
 /**
  * Handles operations for the programmer calculator mode

@@ -1,70 +1,36 @@
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
-import VueTippy from 'vue-tippy';
-import router from '@/router';
-import App from '@/App.vue';
-import { useDeviceStore } from '@/stores/device.js';
-import { MotionPlugin } from '@vueuse/motion';
-import '@/assets/css/main.css';
-import 'tippy.js/dist/tippy.css';
-import 'tippy.js/animations/scale.css';
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import VueTippy from 'vue-tippy'
+import router from '@/router'
+import App from '@/App.vue'
+import { useDeviceStore } from '@/stores/device'
+import { MotionPlugin } from '@vueuse/motion'
+import '@/assets/css/main.css'
+import 'tippy.js/dist/tippy.css'
+import 'tippy.js/animations/scale.css'
 
+// Import fonts conditionally
 if (process.env.NODE_ENV === 'development') {
-  import('@/assets/css/fonts.css');
+  import('@/assets/css/fonts.css')
 }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/service-worker.js')
-      .then((registration) => {
-        const dispatchUpdateAvailableEvent = (reg: ServiceWorkerRegistration) => {
-          const event = new CustomEvent('sw-update-available', { detail: reg });
-          window.dispatchEvent(event);
-        };
+const app = createApp(App)
+const pinia = createPinia()
 
-        if (registration.waiting && navigator.serviceWorker.controller) {
-          dispatchUpdateAvailableEvent(registration);
-        }
+app.use(MotionPlugin).use(pinia).use(router)
 
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed') {
-                if (
-                  registration.waiting === newWorker &&
-                  navigator.serviceWorker.controller
-                ) {
-                  dispatchUpdateAvailableEvent(registration);
-                }
-              }
-            });
-          }
-        });
-      })
-      .catch((error) => {
-        console.error('SW registration failed:', error);
-      });
-  });
-}
-
-const app = createApp(App);
-const pinia = createPinia();
-
-app.use(MotionPlugin).use(pinia).use(router);
-
-const props: any = {
+// Configure VueTippy
+const tippyProps = {
   placement: 'top',
   theme: 'custom',
   arrow: true,
   animation: 'scale',
   delay: [200, 0],
   onShow() {
-    const device = useDeviceStore();
-    return !device.isMobile;
+    const device = useDeviceStore()
+    return !device.isMobile
   },
-};
+}
 
-app.use(VueTippy, { defaultProps: props });
-app.mount('#app');
+app.use(VueTippy, { defaultProps: tippyProps })
+app.mount('#app')

@@ -1,7 +1,7 @@
-import { ICalculator } from "@/utils/core/ICalculator";
+import { ICalculator } from "@/utils/core/ICalculator.ts";
 import { StandardOperations } from "@/utils/operations/StandardOperations";
 import { StandardCalculations } from "@/utils/calculations/StandardCalculations";
-import { CalculatorConstants } from "@/utils/constants/CalculatorConstants";
+import { CalculatorConstants } from "@/utils/constants/CalculatorConstants.ts";
 
 /**
  * Calculator implementation for standard mode

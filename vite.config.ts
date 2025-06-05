@@ -35,6 +35,7 @@ export default defineConfig({
         skipWaiting: false,
         clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globIgnores: ['**/version-info.json'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
@@ -61,14 +62,22 @@ export default defineConfig({
             },
           }
         ]
-      }
+      },
+      // Enable development support - this is crucial
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html'
+      },
+      // Use the correct filename for the service worker
+      filename: 'sw.js'
     }),
     visualizer({
       filename: 'dist/stats.html',
-      open: true,
+      open: false, // Don't auto-open in dev
       gzipSize: true,
       brotliSize: true,
-      template: 'treemap' // or 'sunburst', 'network'
+      template: 'treemap'
     }) as PluginOption
   ],
   resolve: {

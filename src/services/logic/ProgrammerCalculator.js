@@ -1,7 +1,7 @@
-import { ICalculator } from "@/utils/core/ICalculator";
+import { ICalculator } from "@/utils/core/ICalculator.ts";
 import { ProgrammerOperations } from "@/utils/operations/ProgrammerOperations";
 import { ProgrammerCalculations } from "@/utils/calculations/ProgrammerCalculations";
-import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants";
+import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants.ts";
 import {
   BinCalculator,
   DecCalculator,
