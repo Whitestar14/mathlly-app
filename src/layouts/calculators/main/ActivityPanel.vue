@@ -144,7 +144,7 @@ import Indicator from "@/components/ui/PillIndicator.vue"
 import { useHistory } from "@/composables/useHistory"
 import { useAnimation } from "@/composables/useAnimation.ts"
 import { useToast } from "@/composables/useToast"
-import { usePills } from "@/composables/usePills"
+import { usePills } from "@/composables/usePills.ts"
 import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from "radix-vue"
 
 // Props and emits

@@ -60,7 +60,7 @@
     <Suspense>
       <ShortcutGuide
         v-if="panelStates.isLoaded"
-        v-model="isShortcutModalOpen"
+        v-model:show="isShortcutModalOpen"
       />
     </Suspense>
   </div>

@@ -15,7 +15,7 @@
                 ? 'text-indigo-600 dark:text-indigo-400'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
             ]"
-            @click="handleTabChange(tab.value, $event.target)"
+            @click="handleTabChange(tab.value, $event.target as HTMLElement)"
           >
             {{ tab.label }}
           </div>
@@ -45,7 +45,7 @@
                       ? 'Enter text to encode...'
                       : 'Enter Base64 to decode...'
                     "
-                    @input="e => input = e.target.value"
+                    @input="handleInput"
                   />
                   <div class="absolute bottom-4 right-2">
                     <BaseButton
@@ -100,103 +100,226 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, watch, nextTick } from "vue";
+<script setup lang="ts">
+import { ref, computed, watch, nextTick, type Ref, type ComputedRef } from "vue";
 import { useClipboard } from "@vueuse/core";
-import { ArrowDownUp, Copy, ClipboardPaste } from "lucide-vue-next";
+import { Copy, ClipboardPaste, ArrowDownUp } from "lucide-vue-next";
+import { usePills } from "@/composables/usePills.ts";
 import { useToast } from "@/composables/useToast";
-import { usePills } from "@/composables/usePills";
-import { useKeyboard } from "@/composables/useKeyboard.ts";
 import BaseButton from "@/components/base/BaseButton.vue";
-import Indicator from "@/components/ui/PillIndicator.vue"
+import Indicator from "@/components/ui/PillIndicator.vue";
 
-defineOptions({ name: "Base64Tool" });
+/**
+ * Tab configuration interface
+ */
+interface Tab {
+  value: 'encode' | 'decode';
+  label: string;
+}
 
-const tabs = ref([
-  { label: "Encode", value: "encode" },
-  { label: "Decode", value: "decode" },
-]);
-const tabElements = ref([]);
-const input = ref("");
-const output = ref("");
-const inputArea = ref(null);
+/**
+ * Available tabs for the Base64 tool
+ */
+const tabs: Tab[] = [
+  { value: "encode", label: "Encode" },
+  { value: "decode", label: "Decode" },
+];
+
+// Reactive state
+const input: Ref<string> = ref("");
+const output: Ref<string> = ref("");
+const currentTab: Ref<'encode' | 'decode'> = ref("encode");
+const tabElements: Ref<HTMLElement[]> = ref([]);
+const inputArea: Ref<HTMLTextAreaElement | null> = ref(null);
+
+// Composables
 const { copy } = useClipboard();
-const { toast } = useToast();
+const { showToast } = useToast();
 
+// Pills system for tab navigation
 const {
   currentPill,
   indicatorStyle,
-  handleNavigation
-} = usePills({ 
-  position: "bottom", 
-  updateRoute: false, 
+  handleNavigation,
+  initializePills,
+} = usePills({
+  position: "top",
+  updateRoute: false,
   defaultPill: "encode",
-  containerRef: tabElements
-});
-
-const currentTab = computed({
-  get: () => {
-    return currentPill.value;
+  containerRef: tabElements,
+  onNavigate: (tabValue: string) => {
+    currentTab.value = tabValue as 'encode' | 'decode';
   },
 });
 
-const handleTabChange = (value, tabElement) => {
-  handleNavigation(value, tabElement);
+/**
+ * Computed property to determine if input is valid Base64
+ */
+const isValidBase64: ComputedRef<boolean> = computed(() => {
+  if (!input.value.trim()) return true;
+  
+  try {
+    // Check if it's valid Base64 format
+    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+    return base64Regex.test(input.value.replace(/\s/g, ''));
+  } catch {
+    return false;
+  }
+});
+
+/**
+ * Encode text to Base64
+ */
+const encodeToBase64 = (text: string): string => {
+  try {
+    return btoa(unescape(encodeURIComponent(text)));
+  } catch (error) {
+    console.error("Encoding error:", error);
+    throw new Error("Failed to encode text");
+  }
 };
 
+/**
+ * Decode Base64 to text
+ */
+const decodeFromBase64 = (base64: string): string => {
+  try {
+    const cleanBase64 = base64.replace(/\s/g, '');
+    return decodeURIComponent(escape(atob(cleanBase64)));
+  } catch (error) {
+    console.error("Decoding error:", error);
+    throw new Error("Invalid Base64 string");
+  }
+};
 
-watch(currentTab, () => {
-  output.value = "";
+/**
+ * Process the input based on current tab
+ */
+const processInput = (): void => {
+  if (!input.value.trim()) {
+    output.value = "";
+    return;
+  }
+
+  try {
+    if (currentTab.value === "encode") {
+      output.value = encodeToBase64(input.value);
+    } else {
+      if (!isValidBase64.value) {
+        throw new Error("Invalid Base64 format");
+      }
+      output.value = decodeFromBase64(input.value);
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Processing failed";
+    showToast(errorMessage, "error");
+    output.value = "";
+  }
+};
+
+/**
+ * Handle input changes with debouncing
+ */
+const handleInput = (): void => {
+  processInput();
+};
+
+/**
+ * Handle manual process button click
+ */
+const handleProcess = (): void => {
+  processInput();
+  if (output.value) {
+    showToast(
+      `Successfully ${currentTab.value === "encode" ? "encoded" : "decoded"}!`,
+      "success"
+    );
+  }
+};
+
+/**
+ * Handle tab change
+ */
+const handleTabChange = async (tabValue: string, element: HTMLElement): Promise<void> => {
+  await handleNavigation(tabValue, element);
+  
+  // Auto-process if there's input
+  if (input.value.trim()) {
+    processInput();
+  }
+  
+  // Focus input area
   nextTick(() => {
     inputArea.value?.focus();
   });
-});
+};
 
-const handleProcess = () => {
+/**
+ * Copy output to clipboard
+ */
+const handleCopy = async (): Promise<void> => {
+  if (!output.value) {
+    showToast("Nothing to copy", "warning");
+    return;
+  }
+
   try {
-    if (!input.value.trim()) return;
-
-    output.value =
-      currentTab.value === "encode" ? btoa(input.value) : atob(input.value);
+    await copy(output.value);
+    showToast("Copied to clipboard!", "success");
   } catch (error) {
-    toast({
-      type: "error",
-      description: `Invalid ${currentTab.value === "encode" ? "text" : "Base64"
-        } input`,
-    });
+    console.error("Copy failed:", error);
+    showToast("Failed to copy", "error");
   }
 };
 
-const handleCopy = async () => {
-  if (!output.value) return;
-  await copy(output.value);
-  toast({
-    title: "Copied!",
-    description: "Output copied to clipboard",
-  });
-};
-
-const handleSwap = () => {
-  [input.value, output.value] = [output.value, input.value];
-};
-
-const pasteFromClipboard = async () => {
+/**
+ * Paste from clipboard to input
+ */
+const pasteFromClipboard = async (): Promise<void> => {
   try {
     const text = await navigator.clipboard.readText();
     input.value = text;
-  } catch (err) {
-    toast({
-      type: "error",
-      description: "Failed to paste from clipboard",
-      variant: "destructive",
-    });
+    processInput();
+    showToast("Pasted from clipboard!", "success");
+  } catch (error) {
+    console.error("Paste failed:", error);
+    showToast("Failed to paste", "error");
   }
 };
 
-useKeyboard("tools", {
-  process: handleProcess,
-  swap: handleSwap,
-  paste: pasteFromClipboard,
-  copy: handleCopy,
+/**
+ * Swap input and output
+ */
+const handleSwap = (): void => {
+  if (!output.value) {
+    showToast("Nothing to swap", "warning");
+    return;
+  }
+
+  const temp = input.value;
+  input.value = output.value;
+  output.value = temp;
+
+  // Switch tab if needed
+  const newTab = currentTab.value === "encode" ? "decode" : "encode";
+  const targetElement = tabElements.value.find(
+    (el) => el.dataset.path === newTab
+  );
+  
+  if (targetElement) {
+    handleTabChange(newTab, targetElement);
+  }
+
+  showToast("Input and output swapped!", "success");
+};
+
+// Watch for tab changes to update pills
+watch(currentTab, (newTab) => {
+  currentPill.value = newTab;
+});
+
+// Initialize pills system on mount
+nextTick(() => {
+  initializePills("encode", tabElements);
 });
 </script>

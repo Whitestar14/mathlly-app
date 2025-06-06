@@ -1,17 +1,26 @@
-import { ref, watch, nextTick, computed, markRaw } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, watch, nextTick, computed, markRaw, type Ref, type ComputedRef } from 'vue';
+import { useRoute, useRouter, type RouteLocationNormalizedLoaded, type Router } from 'vue-router';
 import {
   useElementVisibility,
   useResizeObserver,
   useMutationObserver,
   useDebounceFn,
+  type MaybeRefOrGetter,
 } from '@vueuse/core';
 
 /**
  * Style configuration for different indicator positions
- * @type {Object}
  */
-const STYLE_MAP = markRaw({
+interface StyleConfig {
+  dimension: 'top' | 'left';
+  offset: 'verticalOffset' | 'horizontalOffset';
+  align: 'left' | 'right' | 'top' | 'bottom';
+}
+
+/**
+ * Style configuration map for different indicator positions
+ */
+const STYLE_MAP: Record<string, StyleConfig> = markRaw({
   left: { dimension: 'top', offset: 'verticalOffset', align: 'left' },
   right: { dimension: 'top', offset: 'verticalOffset', align: 'right' },
   top: { dimension: 'left', offset: 'horizontalOffset', align: 'top' },
@@ -19,21 +28,55 @@ const STYLE_MAP = markRaw({
 });
 
 /**
- * A composable for creating a navigation pill system with animated indicators
- *
- * @param {Object} options - Configuration options
- * @param {Function} [options.onNavigate=null] - Callback when navigation occurs
- * @param {number} [options.verticalOffset=7] - Vertical offset for the indicator
- * @param {number} [options.horizontalOffset=7] - Horizontal offset for the indicator
- * @param {string} [options.position="left"] - Position of the indicator ('left', 'right', 'top', 'bottom')
- * @param {string} [options.defaultPill=""] - Default pill to select
- * @param {boolean} [options.updateRoute=true] - Whether to update the route on navigation
- * @param {string[]} [options.hideIndicatorPaths=[]] - Paths where the indicator should be hidden
- * @param {import('vue').Ref} [options.containerRef=null] - Reference to the container element
- *
- * @returns {Object} Pills composable API
+ * Cache entry for element offset calculations
  */
-export function usePills(options = {}) {
+interface CacheEntry {
+  offset: number;
+  timestamp: number;
+}
+
+/**
+ * Pills composable options interface
+ */
+interface PillsOptions {
+  /** Callback when navigation occurs */
+  onNavigate?: ((path: string) => void) | null;
+  /** Vertical offset for the indicator */
+  verticalOffset?: number;
+  /** Horizontal offset for the indicator */
+  horizontalOffset?: number;
+  /** Position of the indicator */
+  position?: 'left' | 'right' | 'top' | 'bottom';
+  /** Default pill to select */
+  defaultPill?: string;
+  /** Whether to update the route on navigation */
+  updateRoute?: boolean;
+  /** Paths where the indicator should be hidden */
+  hideIndicatorPaths?: string[];
+  /** Reference to the container element */
+  containerRef?: Ref<HTMLElement | HTMLElement[] | null> | null;
+}
+
+/**
+ * Pills composable return interface
+ */
+interface PillsComposable {
+  /** Current selected pill */
+  currentPill: Ref<string>;
+  /** Indicator position value */
+  indicatorPosition: Ref<number>;
+  /** Handle navigation to a new pill */
+  handleNavigation: (path: string, element: HTMLElement | null) => Promise<void>;
+  /** Computed indicator style object */
+  indicatorStyle: ComputedRef<Record<string, string>>;
+  /** Initialize the pills system */
+  initializePills: (initialPillId?: string | null, elementsRef?: Ref<any> | null) => Promise<boolean>;
+}
+
+/**
+ * A composable for creating a navigation pill system with animated indicators
+ */
+export function usePills(options: PillsOptions = {}): PillsComposable {
   // Destructure options with defaults
   const {
     onNavigate = null,
@@ -47,31 +90,30 @@ export function usePills(options = {}) {
   } = options;
 
   // State
-  const currentPill = ref(defaultPill);
-  const indicatorPosition = ref(0);
-  const showIndicator = ref(false);
-  const isInitialized = ref(false);
-  const activeElementRef = ref(null);
+  const currentPill: Ref<string> = ref(defaultPill);
+  const indicatorPosition: Ref<number> = ref(0);
+  const showIndicator: Ref<boolean> = ref(false);
+  const isInitialized: Ref<boolean> = ref(false);
+  const activeElementRef: Ref<HTMLElement | null> = ref(null);
 
   // Vue Router
-  const route = useRoute();
-  const router = useRouter();
+  const route: RouteLocationNormalizedLoaded = useRoute();
+  const router: Router = useRouter();
 
   // Element visibility tracking
   const isElementVisible = useElementVisibility(activeElementRef);
 
-  const elementCache = new WeakMap();
+  const elementCache = new WeakMap<HTMLElement, CacheEntry>();
+
   /**
    * Calculates the offset position for the indicator
-   * @param {HTMLElement} element - The element to calculate offset for
-   * @returns {number} The calculated offset
    */
-  const getOffset = (element) => {
+  const getOffset = (element: HTMLElement): number => {
     if (!element) return 0;
 
     // Check cache first
     if (elementCache.has(element)) {
-      const cached = elementCache.get(element);
+      const cached = elementCache.get(element)!;
       // Only recalculate if element might have moved
       if (Date.now() - cached.timestamp < 100) {
         return cached.offset;
@@ -82,8 +124,7 @@ export function usePills(options = {}) {
     const isVertical = position === 'left' || position === 'right';
     const size = isVertical ? element.offsetHeight : element.offsetWidth;
     const offset = isVertical ? element.offsetTop : element.offsetLeft;
-    const result =
-      offset + size / 2 - (isVertical ? verticalOffset : horizontalOffset);
+    const result = offset + size / 2 - (isVertical ? verticalOffset : horizontalOffset);
 
     // Cache result
     elementCache.set(element, {
@@ -96,18 +137,15 @@ export function usePills(options = {}) {
 
   /**
    * Updates the current pill selection
-   * @param {string} path - The path to select
    */
-  const selectPill = (path) => {
+  const selectPill = (path: string): void => {
     currentPill.value = path;
   };
 
   /**
    * Handles navigation to a new pill
-   * @param {string} path - The path to navigate to
-   * @param {HTMLElement} element - The element that triggered navigation
    */
-  const handleNavigation = async (path, element) => {
+  const handleNavigation = async (path: string, element: HTMLElement | null): Promise<void> => {
     selectPill(path);
 
     if (updateRoute) {
@@ -123,10 +161,8 @@ export function usePills(options = {}) {
 
   /**
    * Updates the indicator position based on the active element
-   * @param {HTMLElement} element - The element to position the indicator against
-   * @param {boolean} [force=false] - Force update even if element is not visible
    */
-  const updateIndicator = (element, force = false) => {
+  const updateIndicator = (element: HTMLElement | null, force: boolean = false): void => {
     // Early return if no element and not forced
     if (!element && !force) {
       showIndicator.value = false;
@@ -145,35 +181,32 @@ export function usePills(options = {}) {
     // Only show indicator if element is visible
     showIndicator.value = isElementVisible.value;
     if (showIndicator.value) {
-        indicatorPosition.value = getOffset(element);
+      indicatorPosition.value = getOffset(element);
     }
   };
 
   /**
    * Initializes the pills system
-   * @param {string} [initialPillId=null] - Initial pill ID to select
-   * @param {import('vue').Ref} [elementsRef=null] - Reference to elements container
-   * @returns {boolean} Success status
    */
-  const initializePills = async (initialPillId = null, elementsRef = null) => {
+  const initializePills = async (
+    initialPillId: string | null = null,
+    elementsRef: Ref<any> | null = null
+  ): Promise<boolean> => {
     await nextTick();
 
     // Determine which pill ID to use
-    const pillId =
-      initialPillId ||
-      (isInitialized.value
-        ? currentPill.value
-        : defaultPill || currentPill.value);
+    const pillId = initialPillId || 
+      (isInitialized.value ? currentPill.value : defaultPill || currentPill.value);
 
-    let pillElement = null;
+    let pillElement: HTMLElement | null = null;
     const targetRef = elementsRef || containerRef;
 
     // Try to find the element in the provided ref
     if (targetRef?.value) {
       if (Array.isArray(targetRef.value)) {
         pillElement = targetRef.value.find(
-          (el) => el?.dataset?.path === pillId
-        );
+          (el: HTMLElement) => el?.dataset?.path === pillId
+        ) || null;
       } else if (targetRef.value.querySelector) {
         pillElement = targetRef.value.querySelector(`[data-path="${pillId}"]`);
       }
@@ -196,12 +229,12 @@ export function usePills(options = {}) {
   };
 
   // Computed styles for the indicator
-  const indicatorStyle = computed(() => {
+  const indicatorStyle: ComputedRef<Record<string, string>> = computed(() => {
     const style = STYLE_MAP[position];
     if (!style) return {};
 
     // Base style with position
-    const result = {
+    const result: Record<string, string> = {
       [style.dimension]: `${indicatorPosition.value}px`,
       display: showIndicator.value ? '' : 'none',
     };
@@ -219,13 +252,13 @@ export function usePills(options = {}) {
   // Watch for route changes to update the selected pill
   watch(
     () => route.path,
-    (newPath) => {
+    (newPath: string) => {
       if (updateRoute) {
         selectPill(newPath);
         nextTick(() => {
           const activeElement = document.querySelector(
             `[data-path="${newPath}"]`
-          );
+          ) as HTMLElement | null;
           if (activeElement) {
             updateIndicator(activeElement);
           } else {
@@ -238,7 +271,7 @@ export function usePills(options = {}) {
   );
 
   // Watch for visibility changes of the active element
-  watch(isElementVisible, async (newIsVisible) => {
+  watch(isElementVisible, async (newIsVisible: boolean) => {
     if (newIsVisible) {
       await nextTick();
       await initializePills();
@@ -255,7 +288,7 @@ export function usePills(options = {}) {
 
     const activeElement = document.querySelector(
       `[data-path="${currentPill.value}"]`
-    );
+    ) as HTMLElement | null;
     if (activeElement) {
       activeElementRef.value = activeElement;
     }
@@ -263,7 +296,7 @@ export function usePills(options = {}) {
 
   // Set up resize observer if container ref is provided
   if (containerRef) {
-    useResizeObserver(containerRef, optimize);
+    useResizeObserver(containerRef as MaybeRefOrGetter<Element>, optimize);
   }
 
   // Set up mutation observer to handle DOM changes

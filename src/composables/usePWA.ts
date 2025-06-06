@@ -247,7 +247,7 @@ const populateUpdateInfo = async () => {
   // it's likely a service worker-only update
   if (needRefresh.value && !latestVersion.value) {
     console.log('[PWA] Service worker update detected without version change')
-    latestVersion.value = `${currentVersion.value} (SW Update)`
+    latestVersion.value = 'Service Worker Update'
     updateFeatures.value = [
       'Updated service worker for better offline functionality',
       'Improved caching and performance',
@@ -261,6 +261,9 @@ const populateUpdateInfo = async () => {
  */
 const isNewerVersion = (latest: string, current: string): boolean => {
   if (!latest || !current) return false
+  
+  // If it's a service worker update, don't compare versions
+  if (latest === 'Service Worker Update') return false
   
   type PrereleaseType = 'alpha' | 'beta' | 'rc' | null;
 
@@ -329,11 +332,11 @@ const isNewerVersion = (latest: string, current: string): boolean => {
       return false
     }
     
-    // Service worker update available
+    // Service worker update available (this takes priority)
     if (needRefresh.value) return true
     
     // Version update available and not permanently dismissed
-    if (isNewerVersion(latestVersion.value, currentVersion.value)) {
+    if (latestVersion.value && isNewerVersion(latestVersion.value, currentVersion.value)) {
       return dismissedVersion.value !== latestVersion.value
     }
     

@@ -1,152 +1,265 @@
 <template>
   <BaseModal
-    :open="modelValue"
-    @update:open="$emit('update:modelValue', $event)"
+    :open="show"
+    @update:open="handleModalUpdate"
   >
     <template #title>
-      <div class="flex items-center">
-        <div>
-          <h2 class="text-xl font-medium text-gray-900 dark:text-white">
-            Keyboard Shortcuts
-          </h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Quick access to available shortcuts
-          </p>
-        </div>
-      </div>
+      Keyboard Shortcuts
     </template>
 
-    <div class="mt-4">
-      <div class="flex border-b border-gray-200 dark:border-gray-700 relative">
-        <Indicator :position="indicatorStyle" />
-        <button
-          v-for="category in Object.keys(shortcutGroups)"
-          :key="category"
-          ref="tabElements"
-          :data-path="category"
-          class="px-4 py-3 text-sm font-medium transition-colors relative"
-          :class="[
-            currentPill === category
-              ? 'text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
-          ]"
-          @click="handleTabChange(category, $event.target)"
-        >
-          {{ category }}
-        </button>
+    <div class="space-y-6">
+      <!-- Search -->
+      <div class="relative">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search shortcuts..."
+          class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        />
+        <SearchIcon class="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
       </div>
 
-      <div class="relative overflow-hidden h-[250px] overflow-y-auto">
-        <TransitionGroup
-          enter-active-class="transition-transform duration-200 ease-out"
-          enter-from-class="opacity-0 translate-x-4"
-          enter-to-class="opacity-100 translate-x-0"
-          leave-active-class="transition-transform duration-200 ease-in"
-          leave-from-class="opacity-100 translate-x-0"
-          leave-to-class="opacity-0 -translate-x-4"
+      <!-- Shortcuts Grid -->
+      <div class="grid gap-6 md:grid-cols-2">
+        <div
+          v-for="category in filteredCategories"
+          :key="category.title"
+          class="space-y-3"
         >
-          <div
-            v-for="(group, category) in shortcutGroups"
-            v-show="currentPill === category"
-            :key="category"
-            class="p-4 space-y-2"
-          >
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <component
+              :is="category.icon"
+              class="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400"
+            />
+            {{ category.title }}
+          </h3>
+          
+          <div class="space-y-2">
             <div
-              v-for="(shortcut, key) in group"
-              :key="key"
-              class="flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/50"
+              v-for="shortcut in category.shortcuts"
+              :key="shortcut.description"
+              class="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
             >
-              <span class="text-sm text-gray-700 dark:text-gray-400">
+              <span class="text-sm text-gray-700 dark:text-gray-300">
                 {{ shortcut.description }}
               </span>
-
-              <div class="flex items-center gap-1.5">
-                <template v-if="key.includes('+')">
-                  <div
-                    v-for="(part, index) in key.split('+')"
-                    :key="index"
-                    class="inline-flex items-center"
-                  >
-                    <kbd
-                      class="px-2 py-1 text-xs font-medium bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
-                    >
-                      {{ part }}
-                    </kbd>
-                    <span
-                      v-if="index < key.split('+').length - 1"
-                      class="text-gray-400 dark:text-gray-500"
-                    >+</span>
-                  </div>
-                </template>
+              <div class="flex items-center space-x-1">
                 <kbd
-                  v-else
-                  class="px-2 py-1 text-xs font-medium bg-white dark:bg-gray-800 text-primary dark:text-primary-light rounded border border-gray-200 dark:border-gray-700 shadow-sm"
+                  v-for="key in shortcut.keys"
+                  :key="key"
+                  class="px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-600"
                 >
-                  {{ key }}
+                  {{ formatKey(key) }}
                 </kbd>
               </div>
             </div>
           </div>
-        </TransitionGroup>
+        </div>
+      </div>
+
+      <!-- No results -->
+      <div
+        v-if="filteredCategories.length === 0"
+        class="text-center py-8 text-gray-500 dark:text-gray-400"
+      >
+        <SearchIcon class="h-12 w-12 mx-auto mb-3 opacity-50" />
+        <p>No shortcuts found for "{{ searchQuery }}"</p>
+      </div>
+
+      <!-- Footer -->
+      <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+          Press <kbd class="px-1 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded">Esc</kbd> to close this dialog
+        </p>
       </div>
     </div>
   </BaseModal>
 </template>
 
-<script setup>
-import { shallowRef } from "vue";
-import BaseModal from "@/components/base/BaseModal.vue";
-import { usePills } from "@/composables/usePills";
-import Indicator from "@/components/ui/PillIndicator.vue";
+<script setup lang="ts">
+import { ref, computed, type Ref, type ComputedRef } from 'vue';
+import {
+  SearchIcon,
+  KeyboardIcon,
+  CalculatorIcon,
+  NavigationIcon,
+  SettingsIcon,
+  type LucideIcon
+} from 'lucide-vue-next';
+import BaseModal from '@/components/base/BaseModal.vue';
 
-defineProps({
-  modelValue: Boolean,
+/**
+ * Keyboard shortcut interface
+ */
+interface KeyboardShortcut {
+  description: string;
+  keys: string[];
+  category?: string;
+}
+
+/**
+ * Shortcut category interface
+ */
+interface ShortcutCategory {
+  title: string;
+  icon: LucideIcon;
+  shortcuts: KeyboardShortcut[];
+}
+
+/**
+ * Component props interface
+ */
+interface Props {
+  show?: boolean;
+}
+
+/**
+ * Component emits interface
+ */
+interface Emits {
+  (e: 'close'): void;
+  (e: 'update:show', value: boolean): void;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  show: false
 });
 
-defineEmits(['update:modelValue']);
+const emit = defineEmits<Emits>();
 
-const tabElements = shallowRef([]);
+// Reactive state
+const searchQuery: Ref<string> = ref('');
 
-const shortcutGroups = {
-  Global: {
-    "ctrl+alt+f": { description: "Toggle Fullscreen" },
-    "ctrl+l": { description: "Toggle Sidebar" },
-    "ctrl+h": { description: "Toggle Activity" },
-    "ctrl+,(comma)": { description: "Toggle Menubar" },
-    "ctrl+space": { description: "Open the Keyboard Shortcuts" },
-    "ctrl+shift+m": { description: "Toggle Theme" },
-  },
-  Calculator: {
-    escape: { description: "Clear Input" },
-    enter: { description: "Calculate Result" },
-    backspace: { description: "Delete Last Character" },
-  },
-  Programmer: {
-    "ctrl+1": { description: "Switch to Hexadecimal" },
-    "ctrl+2": { description: "Switch to Decimal" },
-    "ctrl+3": { description: "Switch to Octal" },
-    "ctrl+4": { description: "Switch to Binary" },
-  },
-  Tools: {
-    "ctrl+enter": { description: "Process Current Input" },
-    "ctrl+v": { description: "Paste from Clipboard" },
-    "ctrl+c": { description: "Copy Result" },
-    "ctrl+s": { description: "Swap Input/Output" },
-  },
+/**
+ * Handle modal open/close updates
+ */
+const handleModalUpdate = (isOpen: boolean): void => {
+  emit('update:show', isOpen);
+  if (!isOpen) {
+    emit('close');
+  }
 };
 
-const { 
-  currentPill, 
-  indicatorStyle, 
-  handleNavigation 
-} = usePills({
-  position: "bottom",
-  updateRoute: false,
-  defaultPill: "Global",
-  containerRef: tabElements
+/**
+ * Keyboard shortcuts data organized by categories
+ */
+const shortcutCategories: ShortcutCategory[] = [
+  {
+    title: 'Navigation',
+    icon: NavigationIcon,
+    shortcuts: [
+      { description: 'Open Calculator', keys: ['Ctrl', 'K'] },
+      { description: 'Toggle Sidebar', keys: ['Ctrl', 'B'] },
+      { description: 'Go to Home', keys: ['Ctrl', 'H'] },
+      { description: 'Go to Settings', keys: ['Ctrl', ','] },
+      { description: 'Open Shortcuts', keys: ['Ctrl', '/'] },
+      { description: 'Toggle Theme', keys: ['Ctrl', 'Shift', 'T'] },
+    ]
+  },
+  {
+    title: 'Calculator',
+    icon: CalculatorIcon,
+    shortcuts: [
+      { description: 'Clear All', keys: ['Escape'] },
+      { description: 'Clear Entry', keys: ['Delete'] },
+      { description: 'Backspace', keys: ['Backspace'] },
+      { description: 'Calculate', keys: ['Enter'] },
+      { description: 'Toggle Sign', keys: ['F9'] },
+      { description: 'Square Root', keys: ['@'] },
+      { description: 'Percentage', keys: ['%'] },
+      { description: 'Memory Clear', keys: ['Ctrl', 'L'] },
+      { description: 'Memory Recall', keys: ['Ctrl', 'R'] },
+      { description: 'Memory Store', keys: ['Ctrl', 'M'] },
+      { description: 'Memory Add', keys: ['Ctrl', 'P'] },
+      { description: 'Memory Subtract', keys: ['Ctrl', 'Q'] },
+    ]
+  },
+  {
+    title: 'Calculator Modes',
+    icon: SettingsIcon,
+    shortcuts: [
+      { description: 'Standard Mode', keys: ['Alt', '1'] },
+      { description: 'Programmer Mode', keys: ['Alt', '2'] },
+      { description: 'Toggle History', keys: ['Ctrl', 'H'] },
+      { description: 'Toggle Memory', keys: ['Ctrl', 'M'] },
+    ]
+  },
+  {
+    title: 'Programmer Mode',
+    icon: KeyboardIcon,
+    shortcuts: [
+      { description: 'Hexadecimal', keys: ['Alt', 'H'] },
+      { description: 'Decimal', keys: ['Alt', 'D'] },
+      { description: 'Octal', keys: ['Alt', 'O'] },
+      { description: 'Binary', keys: ['Alt', 'B'] },
+      { description: 'Bitwise AND', keys: ['&'] },
+      { description: 'Bitwise OR', keys: ['|'] },
+      { description: 'Bitwise XOR', keys: ['^'] },
+      { description: 'Bitwise NOT', keys: ['~'] },
+      { description: 'Left Shift', keys: ['<'] },
+      { description: 'Right Shift', keys: ['>'] },
+    ]
+  },
+  {
+    title: 'General',
+    icon: SettingsIcon,
+    shortcuts: [
+      { description: 'Copy Result', keys: ['Ctrl', 'C'] },
+      { description: 'Paste', keys: ['Ctrl', 'V'] },
+      { description: 'Select All', keys: ['Ctrl', 'A'] },
+      { description: 'Undo', keys: ['Ctrl', 'Z'] },
+      { description: 'Redo', keys: ['Ctrl', 'Y'] },
+      { description: 'Find', keys: ['Ctrl', 'F'] },
+      { description: 'Refresh', keys: ['F5'] },
+      { description: 'Full Screen', keys: ['F11'] },
+    ]
+  }
+];
+
+/**
+ * Format key display for different operating systems
+ */
+const formatKey = (key: string): string => {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  
+  const keyMap: Record<string, string> = {
+    'Ctrl': isMac ? '⌘' : 'Ctrl',
+    'Alt': isMac ? '⌥' : 'Alt',
+    'Shift': isMac ? '⇧' : 'Shift',
+    'Meta': isMac ? '⌘' : 'Win',
+    'Enter': '↵',
+    'Escape': 'Esc',
+    'Backspace': '⌫',
+    'Delete': isMac ? '⌦' : 'Del',
+    'ArrowUp': '↑',
+    'ArrowDown': '↓',
+    'ArrowLeft': '←',
+    'ArrowRight': '→',
+    'Tab': '⇥',
+    'Space': '␣',
+  };
+  
+  return keyMap[key] || key;
+};
+
+/**
+ * Filter categories based on search query
+ */
+const filteredCategories: ComputedRef<ShortcutCategory[]> = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return shortcutCategories;
+  }
+  
+  const query = searchQuery.value.toLowerCase();
+  
+  return shortcutCategories
+    .map(category => ({
+      ...category,
+      shortcuts: category.shortcuts.filter(shortcut =>
+        shortcut.description.toLowerCase().includes(query) ||
+        shortcut.keys.some(key => key.toLowerCase().includes(query))
+      )
+    }))
+    .filter(category => category.shortcuts.length > 0);
 });
-
-const handleTabChange = (category, tabElement) => {
-  handleNavigation(category, tabElement); 
-};
 </script>

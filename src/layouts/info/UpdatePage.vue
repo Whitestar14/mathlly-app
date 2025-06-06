@@ -14,8 +14,8 @@
               :enter="{ opacity: 1, y: 0, transition: { delay: 0.2 } }"
               class="self-center md:self-start mb-2"
             >
-              <Badge
-                type="custom"
+              <BaseBadge
+                variant="custom"
                 :text="`v${version.versionInfo.full}`"
                 :show-notch="true"
               />
@@ -125,81 +125,70 @@
       </div>
     </section>
 
-    <!-- Coming Soon Section -->
-    <section class="mt-16">
-      <h3 class="text-xl font-medium tracking-tight mb-6 flex items-center">
-        <RocketIcon class="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-        Coming Soon
-      </h3>
-      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <ul class="space-y-4">
-          <li
-            v-for="(feature, index) in upcomingFeatures"
-            :key="index"
-            class="flex items-start group"
-          >
-            <ClockIcon class="h-4 w-4 text-indigo-500 dark:text-indigo-400 mt-1 mr-3 shrink-0 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors" />
-            <div>
-              <span class="text-sm text-gray-700 dark:text-gray-300">{{ feature }}</span>
-              <div class="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
-                <div
-                  class="h-full bg-indigo-500/30 dark:bg-indigo-500/50 rounded-full"
-                  :style="`width: ${Math.floor(Math.random() * 90) + 10}%`"
-                />
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </section>
   </BasePage>
 </template>
 
-<script setup>
-import { ref, computed, watch } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, type Ref, type ComputedRef } from 'vue';
 import BaseMedia from '@/components/base/BaseMedia.vue'
-import { ClockIcon, HistoryIcon, ChevronDownIcon, RocketIcon } from 'lucide-vue-next';
-import { updates, upcomingFeatures } from '@/data/changelog';
-import { useVersionStore } from '@/stores/version.ts';
+import { HistoryIcon, ChevronDownIcon } from 'lucide-vue-next';
+import { updates } from '@/data/changelog.json';
+import { useVersionStore } from '@/stores/version';
 import UpdateCard from '@/components/cards/UpdateCard.vue';
 import BasePage from '@/components/base/BasePage.vue';
 import Button from '@/components/base/BaseButton.vue';
 import SelectBar from '@/components/ui/SelectBar.vue';
-import Badge from '@/components/base/BaseBadge.vue';
+import BaseBadge from '@/components/base/BaseBadge.vue';
 
-const UPDATES_PER_PAGE = 5;
-const visibleCount = ref(UPDATES_PER_PAGE);
-const selectedFilter = ref('all');
+// TypeScript interfaces
+interface FilterOption {
+  label: string;
+  value: string;
+}
+
+interface UpdateItem {
+  version: string;
+  date: string;
+  features: string[];
+}
+
+// Constants
+const UPDATES_PER_PAGE: number = 5;
+
+// Reactive state with proper typing
+const visibleCount: Ref<number> = ref(UPDATES_PER_PAGE);
+const selectedFilter: Ref<string> = ref('all');
 const version = useVersionStore();
 
-// Filter options
-const filters = [
+// Filter options with proper typing
+const filters: FilterOption[] = [
   { label: 'All', value: 'all' },
   { label: 'Major', value: 'major' },
   { label: 'Recent', value: 'recent' }
 ];
 
-watch(selectedFilter, () => {
+// Watch with proper typing
+watch(selectedFilter, (): void => {
   visibleCount.value = UPDATES_PER_PAGE;
 });
 
 // Filter updates based on selected filter
-const filteredUpdates = computed(() => {
-  let result = [...updates];
+const filteredUpdates: ComputedRef<UpdateItem[]> = computed(() => {
+  let result: UpdateItem[] = [...updates];
   
   if (selectedFilter.value === 'major') {
     // Filter to only show major version updates (x.0.0)
-    result = result.filter(update => {
-      const versionParts = update.version.split('.');
+    result = result.filter((update: UpdateItem) => {
+      const versionParts: string[] = update.version.split('.');
       return versionParts[1] === '0' && versionParts[2] === '0';
     });
   } else if (selectedFilter.value === 'recent') {
     // Show only the most recent 3 months of updates
-    const threeMonthsAgo = new Date();
+    const threeMonthsAgo: Date = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     
-    result = result.filter(update => {
-      const updateDate = new Date(update.date);
+    result = result.filter((update: UpdateItem) => {
+      const updateDate: Date = new Date(update.date);
       return updateDate >= threeMonthsAgo;
     });
   }
@@ -207,20 +196,20 @@ const filteredUpdates = computed(() => {
   return result.slice(0, visibleCount.value);
 });
 
-const hasMoreUpdates = computed(() => {
-  let totalFilteredUpdates = updates;
+const hasMoreUpdates: ComputedRef<boolean> = computed(() => {
+  let totalFilteredUpdates: UpdateItem[] = updates;
   
   if (selectedFilter.value === 'major') {
-    totalFilteredUpdates = updates.filter(update => {
-      const versionParts = update.version.split('.');
+    totalFilteredUpdates = updates.filter((update: UpdateItem) => {
+      const versionParts: string[] = update.version.split('.');
       return versionParts[1] === '0' && versionParts[2] === '0';
     });
   } else if (selectedFilter.value === 'recent') {
-    const threeMonthsAgo = new Date();
+    const threeMonthsAgo: Date = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     
-    totalFilteredUpdates = updates.filter(update => {
-      const updateDate = new Date(update.date);
+    totalFilteredUpdates = updates.filter((update: UpdateItem) => {
+      const updateDate: Date = new Date(update.date);
       return updateDate >= threeMonthsAgo;
     });
   }
@@ -228,7 +217,7 @@ const hasMoreUpdates = computed(() => {
   return visibleCount.value < totalFilteredUpdates.length;
 });
 
-function showMoreUpdates() {
+function showMoreUpdates(): void {
   visibleCount.value += UPDATES_PER_PAGE;
 }
 </script>
