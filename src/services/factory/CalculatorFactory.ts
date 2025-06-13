@@ -1,5 +1,5 @@
-import { StandardCalculator } from '@/services/logic/StandardCalculator'
-import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator'
+import { StandardCalculator } from '@/services/logic/StandardCalculator.ts'
+import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator.ts'
 import type { CalculatorMode } from '@/composables/useCalculatorState'
 
 // Define interfaces for calculator settings and factory

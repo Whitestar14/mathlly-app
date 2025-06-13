@@ -7,7 +7,7 @@
       <component 
         :is="Component"
         v-bind="isCalculatorRoute(route.path) ? calculatorProps : {}"
-        :key="isCalculatorRoute(route.path) ? props.mode : route.path" 
+        :key="isCalculatorRoute(route.path) ? props.mode : route.path"
       />
     </Transition>
   </router-view>

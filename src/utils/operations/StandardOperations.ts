@@ -2,11 +2,13 @@
  * Handles standard calculator operations
  */
 export class StandardOperations {
+  calculator: any;
+
   /**
    * Creates a new StandardOperations instance
    * @param {Object} calculator - The calculator instance to operate on
    */
-  constructor(calculator) {
+  constructor(calculator: any) {
     this.calculator = calculator;
   }
 
@@ -15,16 +17,14 @@ export class StandardOperations {
    * @param {string} num - The number or decimal point to add
    * @returns {Object} Updated input state and error message
    */
-  handleNumber(num) {
+  handleNumber(num: string): Record<string, any> {
     if (this.calculator.input === "0" && num !== ".") {
       this.calculator.input = num;
       return this.createResponse();
     }
-
     if (!this.validateNumberInput(num)) {
       return this.createResponse();
     }
-
     this.calculator.input += num;
     return this.createResponse();
   }
@@ -34,10 +34,9 @@ export class StandardOperations {
    * @param {string} op - The operator to add (+, -, ×, ÷)
    * @returns {Object} Updated input state and error message
    */
-  handleOperator(op) {
+  handleOperator(op: string): Record<string, any> {
     const lastChar = this.calculator.input.trim().slice(-1);
     const isLastCharOperator = this.isOperator(lastChar);
-
     if (
       op === "-" &&
       isLastCharOperator &&
@@ -46,11 +45,9 @@ export class StandardOperations {
       this.calculator.input += ` ${op} `;
       return this.createResponse();
     }
-
     this.calculator.input = isLastCharOperator
       ? this.calculator.input.slice(0, -3) + ` ${op} `
       : this.calculator.input + ` ${op} `;
-
     return this.createResponse();
   }
 
@@ -58,7 +55,7 @@ export class StandardOperations {
    * Handles backspace operation
    * @returns {Object} Updated input state and error message
    */
-  handleBackspace() {
+  handleBackspace(): Record<string, any> {
     if (
       this.calculator.input === "0" ||
       this.calculator.input === "Error" ||
@@ -66,7 +63,6 @@ export class StandardOperations {
     ) {
       return this.createResponse();
     }
-
     const operatorMatch = this.calculator.input.match(
       /(.*?)(\s*[+\-×÷]\s*)(\d)$/
     );
@@ -75,7 +71,6 @@ export class StandardOperations {
       : this.calculator.input.length === 1
       ? "0"
       : this.calculator.input.slice(0, -1);
-
     return this.createResponse();
   }
 
@@ -83,17 +78,14 @@ export class StandardOperations {
    * Toggles the sign of the current number
    * @returns {Object} Updated input state and error message
    */
-  handleToggleSign() {
+  handleToggleSign(): Record<string, any> {
     const currentInput = this.calculator.input;
-    
     if (currentInput !== "0" && currentInput !== "Error") {
       const parts = currentInput.split(/([+×÷])/);
       const lastPart = parts[parts.length - 1].trim();
-
       if (lastPart) {
         if (lastPart.startsWith("-")) parts[parts.length - 1] = lastPart.slice(1);
         else parts[parts.length - 1] = "- " + lastPart;
-
         this.calculator.input = parts.join(" ").trim();
       }
     }
@@ -104,8 +96,8 @@ export class StandardOperations {
    * Squares the current value
    * @returns {Object} Updated input state and error message
    */
-  handleSquare() {
-    return this.handleOperation((value) => {
+  handleSquare(): Record<string, any> {
+    return this.handleOperation((value: number) => {
       if (!Number.isFinite(value)) throw new Error("Overflow");
       return Math.pow(value, 2);
     });
@@ -115,8 +107,8 @@ export class StandardOperations {
    * Calculates the square root of the current value
    * @returns {Object} Updated input state and error message
    */
-  handleSquareRoot() {
-    return this.handleOperation((value) => {
+  handleSquareRoot(): Record<string, any> {
+    return this.handleOperation((value: number) => {
       if (value < 0)
         throw new Error("Cannot calculate square root of negative number");
       return Math.sqrt(value);
@@ -127,8 +119,8 @@ export class StandardOperations {
    * Calculates the reciprocal (1/x) of the current value
    * @returns {Object} Updated input state and error message
    */
-  handleReciprocal() {
-    return this.handleOperation((value) => {
+  handleReciprocal(): Record<string, any> {
+    return this.handleOperation((value: number) => {
       if (value === 0) throw new Error("Cannot divide by zero");
       return 1 / value;
     });
@@ -138,8 +130,8 @@ export class StandardOperations {
    * Converts the current value to a percentage
    * @returns {Object} Updated input state and error message
    */
-  handlePercentage() {
-    return this.handleOperation((value) => value / 100);
+  handlePercentage(): Record<string, any> {
+    return this.handleOperation((value: number) => value / 100);
   }
 
   /**
@@ -147,7 +139,7 @@ export class StandardOperations {
    * @param {Function} operation - Function that takes a number and returns a transformed number
    * @returns {Object} Updated input state and error message
    */
-  handleOperation(operation) {
+  handleOperation(operation: (value: number) => number): Record<string, any> {
     try {
       const value = this.calculator.evaluateExpression(this.calculator.input);
       const result = operation(value);
@@ -156,7 +148,7 @@ export class StandardOperations {
       }
       this.calculator.input = this.calculator.formatResult(result);
       return this.createResponse();
-    } catch (err) {
+    } catch (err: any) {
       if (err.message === "Overflow")
         return {
           input: this.calculator.input,
@@ -171,7 +163,7 @@ export class StandardOperations {
    * @param {string} num - The number to validate
    * @returns {boolean} Whether the number can be added
    */
-  validateNumberInput(num) {
+  validateNumberInput(num: string): boolean {
     if (num === ".") {
       const parts = this.calculator.input.split(/[+\-×÷]+/);
       return !parts[parts.length - 1].includes(".");
@@ -184,7 +176,7 @@ export class StandardOperations {
    * @param {string} char - Character to check
    * @returns {boolean} Whether the character is an operator
    */
-  isOperator(char) {
+  isOperator(char: string): boolean {
     // Import from CalculatorUtils
     return ["+", "-", "×", "÷"].includes(char);
   }
@@ -194,7 +186,7 @@ export class StandardOperations {
    * @param {string} [error=""] - Optional error message
    * @returns {Object} Standardized response with input and error
    */
-  createResponse(error = "") {
+  createResponse(error: string = ""): Record<string, any> {
     return { 
       input: this.calculator.input, 
       error: error 

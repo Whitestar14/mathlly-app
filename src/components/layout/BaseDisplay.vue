@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-4 gap-1 text-xs mt-1">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 text-xs mt-1">
     <button
       v-for="base in bases"
       :key="base"
@@ -18,7 +18,7 @@
       >{{ base }}</span>
       <span
         :class="[
-          'monospace',
+          'monospace truncate ml-1',
           activeBase === base
             ? 'text-indigo-500 dark:text-indigo-300 font-medium'
             : 'text-gray-800 dark:text-gray-300',
@@ -27,6 +27,7 @@
     </button>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { computed, markRaw, type ComputedRef } from 'vue'

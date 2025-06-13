@@ -1,6 +1,6 @@
 import { ICalculator } from "@/utils/core/ICalculator.ts";
-import { StandardOperations } from "@/utils/operations/StandardOperations";
-import { StandardCalculations } from "@/utils/calculations/StandardCalculations";
+import { StandardOperations } from "@/utils/operations/StandardOperations.ts";
+import { StandardCalculations } from "@/utils/calculations/StandardCalculations.ts";
 import { CalculatorConstants } from "@/utils/constants/CalculatorConstants.ts";
 
 /**
@@ -10,15 +10,18 @@ import { CalculatorConstants } from "@/utils/constants/CalculatorConstants.ts";
  * @extends ICalculator
  */
 export class StandardCalculator extends ICalculator {
+  MAX_INPUT_LENGTH: number;
+  calculations: StandardCalculations;
+  operations: StandardOperations;
+
   /**
    * Create a new standard calculator
    * 
    * @param {Object} settings - Calculator settings
    */
-  constructor(settings) {
+  constructor(settings: any) {
     super(settings);
     this.MAX_INPUT_LENGTH = CalculatorConstants.MAX_INPUT_LENGTH.STANDARD;
-    
     // Use composition for calculations and operations
     this.calculations = new StandardCalculations(settings);
     this.operations = new StandardOperations(this);
@@ -30,7 +33,7 @@ export class StandardCalculator extends ICalculator {
    * @param {*} result - Result to format
    * @returns {string} Formatted result
    */
-  formatResult(result) {
+  formatResult(result: any): string {
     return this.calculations.formatResult(result);
   }
 
@@ -39,18 +42,17 @@ export class StandardCalculator extends ICalculator {
    * 
    * @returns {Object} Calculation result
    */
-  handleEquals() {
+  handleEquals(): Record<string, any> {
     try {
       this.currentExpression = this.input;
       const result = this.evaluateExpression(this.currentExpression);
       this.input = this.formatResult(result);
-
       return this.normalizeResponse({
         expression: this.currentExpression,
         result: this.input,
         input: this.input
       });
-    } catch (err) {
+    } catch (err: any) {
       return this.createErrorResponse(err, this.input);
     }
   }
@@ -61,7 +63,7 @@ export class StandardCalculator extends ICalculator {
    * @param {string} op - Operator symbol
    * @returns {Object} Updated state
    */
-  handleOperator(op) {
+  handleOperator(op: string): Record<string, any> {
     return this.normalizeResponse(this.operations.handleOperator(op));
   }
 
@@ -71,7 +73,7 @@ export class StandardCalculator extends ICalculator {
    * @param {string} num - Number or digit
    * @returns {Object} Updated state
    */
-  handleNumber(num) {
+  handleNumber(num: string): Record<string, any> {
     return this.normalizeResponse(this.operations.handleNumber(num));
   }
 
@@ -80,7 +82,7 @@ export class StandardCalculator extends ICalculator {
    * 
    * @returns {Object} Updated state
    */
-  handleBackspace() {
+  handleBackspace(): Record<string, any> {
     return this.normalizeResponse(this.operations.handleBackspace());
   }
 
@@ -89,7 +91,7 @@ export class StandardCalculator extends ICalculator {
    * 
    * @returns {Object} Updated state
    */
-  handleSquare() {
+  handleSquare(): Record<string, any> {
     return this.normalizeResponse(this.operations.handleSquare());
   }
 
@@ -98,7 +100,7 @@ export class StandardCalculator extends ICalculator {
    * 
    * @returns {Object} Updated state
    */
-  handleSquareRoot() {
+  handleSquareRoot(): Record<string, any> {
     return this.normalizeResponse(this.operations.handleSquareRoot());
   }
 
@@ -107,7 +109,7 @@ export class StandardCalculator extends ICalculator {
    * 
    * @returns {Object} Updated state
    */
-  handleReciprocal() {
+  handleReciprocal(): Record<string, any> {
     return this.normalizeResponse(this.operations.handleReciprocal());
   }
 
@@ -116,7 +118,7 @@ export class StandardCalculator extends ICalculator {
    * 
    * @returns {Object} Updated state
    */
-  handlePercentage() {
+  handlePercentage(): Record<string, any> {
     return this.normalizeResponse(this.operations.handlePercentage());
   }
 }

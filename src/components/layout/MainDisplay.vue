@@ -160,7 +160,7 @@ const tokenClassMap: Record<string, string> = {
 
 // Memoize font size calculation for better performance
 const getFontSizeClass = useMemoize((value: string, mode: string, activeBase: string): string => {
-  if (!value) return 'text-3xl'
+  if (!value) return mode === 'Standard' ? 'text-3xl' : 'text-2xl'
 
   const length = value.toString().length
 
@@ -168,8 +168,12 @@ const getFontSizeClass = useMemoize((value: string, mode: string, activeBase: st
     if (length > 70) return 'text-xl'
     if (length > 50) return 'text-2xl'
     return 'text-3xl'
+  } else {
+    // Programmer mode: use smaller font sizes
+    if (length > 70) return 'text-base'
+    if (length > 50) return 'text-lg'
+    return activeBase === 'BIN' ? 'text-lg' : 'text-2xl'
   }
-  return activeBase === 'BIN' ? 'text-2xl' : 'text-3xl'
 })
 
 const formattedTokens: ComputedRef<Token[]> = computed(() => {
