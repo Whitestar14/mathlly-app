@@ -93,7 +93,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { CodeIcon } from 'lucide-vue-next';
-import HorizontalDockToolbar from './HorizontalDockToolbar.vue';
+import HorizontalDockToolbar from './DockToolbar.vue';
 import DevPanel from './DevPanel.vue';
 
 interface Tool {
