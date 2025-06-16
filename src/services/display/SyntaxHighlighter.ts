@@ -38,14 +38,12 @@ export class SyntaxHighlighter {
    * @param expr - The expression to format
    * @param parenthesesTracker - Tracker for parentheses state
    * @param syntaxHighlightingEnabled - Whether syntax highlighting is enabled
-   * @param options - Additional formatting options
    * @returns Formatted tokens for rendering
    */
   static format(
     expr: string, 
     parenthesesTracker: ParenthesesTracker | null, 
     syntaxHighlightingEnabled: boolean = true,
-    options: FormatOptions = {}
   ): Token[] {
     if (!expr) {
       return [{ type: 'text', content: '0' }]
@@ -59,7 +57,7 @@ export class SyntaxHighlighter {
       return formatCache.get(cacheKey)!
     }
 
-    const parts = this.formatParentheses(expr, parenthesesTracker)
+    const parts = this.formatParentheses(expr)
 
     const result = syntaxHighlightingEnabled 
       ? this.applySyntaxHighlighting(parts)
@@ -109,10 +107,9 @@ export class SyntaxHighlighter {
   /**
    * Format an expression with parentheses
    * @param expr - The expression to format
-   * @param parenthesesTracker - Tracker for parentheses state (unused in current implementation)
    * @returns Formatted parts
    */
-  static formatParentheses(expr: string, parenthesesTracker?: ParenthesesTracker | null): FormattedPart[] {
+  static formatParentheses(expr: string): FormattedPart[] {
     const parenthesesCache = CacheManager.getCache<FormattedPart[]>(this.CACHE_NAMES.PARENTHESES, 50)
     
     if (parenthesesCache.has(expr)) {
@@ -255,8 +252,8 @@ export class SyntaxHighlighter {
       }
 
       if (
-        BUTTON_TYPES.OPERATORS.includes(char) ||
-        BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(char)
+        BUTTON_TYPES.OPERATORS.includes(char as (typeof BUTTON_TYPES.OPERATORS)[number]) ||
+        BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(char as (typeof BUTTON_TYPES.PROGRAMMER_OPERATORS)[number])
       ) {
         pushToken()
         tokens.push(this.classifyToken(char))
@@ -287,9 +284,9 @@ export class SyntaxHighlighter {
     if (token === ' ') return { type: 'space', content: token }
     if (token === '.') return { type: 'decimal', content: token }
     if (REGEX.NUMBER.test(token)) return { type: 'number', content: token }
-    if (BUTTON_TYPES.OPERATORS.includes(token)) return { type: 'operator', content: token }
-    if (BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token)) return { type: 'programmer-operator', content: token }
-    if (BUTTON_TYPES.FUNCTIONS.includes(token)) return { type: 'function', content: token }
+    if (BUTTON_TYPES.OPERATORS.includes(token as (typeof BUTTON_TYPES.OPERATORS)[number])) return { type: 'operator', content: token }
+    if (BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token as (typeof BUTTON_TYPES.PROGRAMMER_OPERATORS)[number])) return { type: 'programmer-operator', content: token }
+    if ((BUTTON_TYPES.FUNCTIONS as readonly string[]).includes(token)) return { type: 'function', content: token }
     
     return { type: 'text', content: token }
   }

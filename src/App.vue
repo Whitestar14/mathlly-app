@@ -19,24 +19,24 @@
     </Suspense>
     <UpdateNotification />
     <!-- PWA Test Panel (development only) -->
-    <PWATestPanel v-show="false" />
+    <PWATestPanel v-show="isDev" />
   </div>
 </template>
 
 <script setup lang="ts"> 
-import { shallowRef, onErrorCaptured, type Ref } from 'vue';
-import { hasError } from "@/router/errorHandler"
+import { shallowRef, onErrorCaptured, type Ref, type ComponentPublicInstance } from 'vue';
+import { hasError } from "@/router/errorHandler";
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';
 import AppProvider from '@/components/panel/AppProvider.vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import UpdateNotification from '@/components/ui/UpdateNotification.vue';
-import PWATestPanel from '@/components/dev/PWATestPanel.vue'
+import PWATestPanel from '@/components/dev/PWATestPanel.vue';
 
 const error: Ref<Error | null> = shallowRef(null);
-const isDev: Ref<boolean> = shallowRef(import.meta.env.DEV)
+const isDev: Ref<boolean> = shallowRef(import.meta.env.DEV);
 
-onErrorCaptured((err: Error, instance: any, info: string) => {
+onErrorCaptured((err: Error, instance: ComponentPublicInstance | null, info: string): boolean => {
   console.error("[Global Error Boundary Caught]:", err, instance, info);
   error.value = err;
   hasError.value = true;

@@ -5,7 +5,6 @@ import {
   useResizeObserver,
   useMutationObserver,
   useDebounceFn,
-  type MaybeRefOrGetter,
 } from '@vueuse/core';
 
 /**
@@ -296,7 +295,15 @@ export function usePills(options: PillsOptions = {}): PillsComposable {
 
   // Set up resize observer if container ref is provided
   if (containerRef) {
-    useResizeObserver(containerRef as MaybeRefOrGetter<Element>, optimize);
+    // Normalize containerRef to a single element or null
+    const getSingleElement = () => {
+      const value = containerRef.value;
+      if (Array.isArray(value)) {
+        return value[0] ?? null;
+      }
+      return value ?? null;
+    };
+    useResizeObserver(getSingleElement, optimize);
   }
 
   // Set up mutation observer to handle DOM changes
@@ -308,7 +315,6 @@ export function usePills(options: PillsOptions = {}): PillsComposable {
       subtree: true,
       attributeFilter: ['class', 'style', 'hidden'],
     },
-    { passive: true }
   );
 
   // Return the public API

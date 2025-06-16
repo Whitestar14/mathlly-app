@@ -1,25 +1,49 @@
-import { computed, watch, onMounted } from 'vue';
-import { useDark, usePreferredDark } from '@vueuse/core';
-import { useSettingsStore } from '@/stores/settings.ts';
+import { computed, watch, onMounted, type ComputedRef } from 'vue';
+import { useDark, usePreferredDark, type RemovableRef } from '@vueuse/core';
+import { useSettingsStore } from '@/stores/settings';
 
 /**
  * Theme options available in the application
- * @type {Object}
  */
 const THEME_OPTIONS = {
   LIGHT: 'light',
   DARK: 'dark',
   SYSTEM: 'system'
-};
+} as const;
+
+// Create a type from the theme options
+export type ThemeOption = typeof THEME_OPTIONS[keyof typeof THEME_OPTIONS];
+
+/**
+ * Settings store interface for theme management
+ */
+interface SettingsStore {
+  appearance: {
+    theme: ThemeOption;
+  };
+  updateSetting: (key: string, value: ThemeOption) => Promise<void>;
+}
+
+/**
+ * Theme composable return type
+ */
+export interface UseThemeReturn {
+  isDark: RemovableRef<boolean>;
+  selectedTheme: ComputedRef<ThemeOption>;
+  isSystemTheme: ComputedRef<boolean>;
+  toggleTheme: () => Promise<void>;
+  setTheme: (newTheme: ThemeOption) => Promise<void>;
+  themeOptions: typeof THEME_OPTIONS;
+}
 
 /**
  * Composable for managing application theme with system preference detection
  * 
- * @returns {Object} Theme management API
+ * @returns {UseThemeReturn} Theme management API
  */
-export function useTheme() {
+export function useTheme(): UseThemeReturn {
   // Get settings store for persistence
-  const settings = useSettingsStore();
+  const settings = useSettingsStore() as SettingsStore;
   
   // Use VueUse's dark mode composable
   const isDark = useDark();
@@ -29,27 +53,25 @@ export function useTheme() {
 
   /**
    * Current theme with getter/setter for two-way binding
-   * @type {import('vue').ComputedRef<string>}
    */
-  const selectedTheme = computed({
-    get: () => settings.appearance.theme,
-    set: async (newTheme) => {
+  const selectedTheme: ComputedRef<ThemeOption> = computed({
+    get: (): ThemeOption => settings.appearance.theme,
+    set: async (newTheme: ThemeOption): Promise<void> => {
       await settings.updateSetting('appearance.theme', newTheme);
     },
   });
 
   /**
    * Whether the current theme is system-based
-   * @type {import('vue').ComputedRef<boolean>}
    */
-  const isSystemTheme = computed(() => 
+  const isSystemTheme: ComputedRef<boolean> = computed(() => 
     selectedTheme.value === THEME_OPTIONS.SYSTEM
   );
 
   /**
    * Apply theme changes when settings change
    */
-  watch(selectedTheme, (newTheme) => {
+  watch(selectedTheme, (newTheme: ThemeOption) => {
     if (newTheme === THEME_OPTIONS.DARK) {
       isDark.value = true;
     } else if (newTheme === THEME_OPTIONS.LIGHT) {
@@ -62,7 +84,7 @@ export function useTheme() {
   /**
    * Update theme when system preference changes (if using system theme)
    */
-  watch(prefersDark, (newPrefersDark) => {
+  watch(prefersDark, (newPrefersDark: boolean) => {
     if (selectedTheme.value === THEME_OPTIONS.SYSTEM) {
       isDark.value = newPrefersDark;
     }
@@ -70,19 +92,16 @@ export function useTheme() {
 
   /**
    * Toggle between light and dark themes
-   * @async
    */
-  const toggleTheme = async () => {
-    const newTheme = isDark.value ? THEME_OPTIONS.LIGHT : THEME_OPTIONS.DARK;
+  const toggleTheme = async (): Promise<void> => {
+    const newTheme: ThemeOption = isDark.value ? THEME_OPTIONS.LIGHT : THEME_OPTIONS.DARK;
     await settings.updateSetting('appearance.theme', newTheme);
   };
 
   /**
    * Set a specific theme
-   * @async
-   * @param {string} newTheme - Theme to set ('light', 'dark', or 'system')
    */
-  const setTheme = async (newTheme) => {
+  const setTheme = async (newTheme: ThemeOption): Promise<void> => {
     if (Object.values(THEME_OPTIONS).includes(newTheme)) {
       await settings.updateSetting('appearance.theme', newTheme);
     } else {

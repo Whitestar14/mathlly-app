@@ -11,18 +11,7 @@ interface CalculatorSettings {
   mode?: CalculatorMode
 }
 
-// Define base calculator interface that both calculator types should implement
-interface BaseCalculator {
-  input: string
-  currentExpression: string
-  MAX_INPUT_LENGTH: number
-  handleButtonClick: (button: string) => CalculatorResult
-  evaluateExpression: (expression: string, base?: string) => any
-  formatResult: (result: any, base?: string) => string
-  states?: Record<string, any>
-}
-
-// Define calculator result interface
+// Define calculator result interface - must match what actual calculators return
 interface CalculatorResult {
   input: string
   error?: string
@@ -31,19 +20,130 @@ interface CalculatorResult {
   displayValues?: Record<string, any>
 }
 
+// Define base calculator interface that both calculator types should implement
+interface BaseCalculator {
+  input: string
+  currentExpression: string
+  MAX_INPUT_LENGTH: number
+  handleButtonClick: (button: string) => CalculatorResult
+  evaluateExpression: (expression: string, base?: string) => any
+  formatResult: (result: any, base?: string) => string
+  // Add convertToBase method to base interface since memory operations need it
+  convertToBase?: (value: string, fromBase: string, toBase: string) => string
+}
+
+// Define standard calculator interface
+interface StandardCalculatorInterface extends BaseCalculator {
+  // Add convertToBase method for memory operations compatibility
+  convertToBase: (value: string, fromBase: string, toBase: string) => string
+}
+
 // Define programmer calculator specific interface
 interface ProgrammerCalculatorInterface extends BaseCalculator {
   handleBaseChange: (newBase: string) => CalculatorResult
   updateDisplayValues: (input: string) => Record<string, any>
-  states: Record<string, { input: string; [key: string]: any }>
+  states: Record<string, { input: string; display: string }>
+  convertToBase: (value: string, fromBase: string, toBase: string) => string
 }
 
-// Union type for all calculator types
-type Calculator = StandardCalculator | ProgrammerCalculator
+// Union type for all calculator types - this is the main Calculator type
+export type Calculator = StandardCalculatorInterface | ProgrammerCalculatorInterface
 
 // Type guard to check if calculator is a programmer calculator
-function isProgrammerCalculator(calculator: Calculator): calculator is ProgrammerCalculator {
-  return 'handleBaseChange' in calculator && 'updateDisplayValues' in calculator
+export function isProgrammerCalculator(calculator: Calculator): calculator is ProgrammerCalculatorInterface {
+  return 'handleBaseChange' in calculator && 'updateDisplayValues' in calculator && 'states' in calculator
+}
+
+/**
+ * Wrapper class to add missing methods to StandardCalculator
+ */
+class StandardCalculatorWrapper implements StandardCalculatorInterface {
+  private calculator: StandardCalculator
+
+  constructor(calculator: StandardCalculator) {
+    this.calculator = calculator
+  }
+
+  get input(): string {
+    return this.calculator.input
+  }
+
+  set input(value: string) {
+    this.calculator.input = value
+  }
+
+  get currentExpression(): string {
+    return this.calculator.currentExpression
+  }
+
+  set currentExpression(value: string) {
+    this.calculator.currentExpression = value
+  }
+
+  get MAX_INPUT_LENGTH(): number {
+    return this.calculator.MAX_INPUT_LENGTH
+  }
+
+  handleButtonClick(button: string): CalculatorResult {
+    const result = this.calculator.handleButtonClick(button)
+    // Ensure 'input' property is present in the result
+    return {
+      input: this.input,
+      ...result
+    }
+  }
+
+  evaluateExpression(expression: string, base?: string): any {
+    return this.calculator.evaluateExpression(expression, base)
+  }
+
+  formatResult(result: any): string {
+    return this.calculator.formatResult(result)
+  }
+
+  // Add convertToBase method for memory operations
+  convertToBase(value: string, fromBase: string, toBase: string): string {
+    // For standard calculator, we'll implement basic base conversion
+    // This is mainly used for memory operations
+    try {
+      let decimalValue: number
+
+      // Convert from source base to decimal
+      switch (fromBase.toUpperCase()) {
+        case 'DEC':
+          decimalValue = parseFloat(value)
+          break
+        case 'HEX':
+          decimalValue = parseInt(value, 16)
+          break
+        case 'OCT':
+          decimalValue = parseInt(value, 8)
+          break
+        case 'BIN':
+          decimalValue = parseInt(value, 2)
+          break
+        default:
+          decimalValue = parseFloat(value)
+      }
+
+      // Convert from decimal to target base
+      switch (toBase.toUpperCase()) {
+        case 'DEC':
+          return decimalValue.toString()
+        case 'HEX':
+          return decimalValue.toString(16).toUpperCase()
+        case 'OCT':
+          return decimalValue.toString(8)
+        case 'BIN':
+          return decimalValue.toString(2)
+        default:
+          return decimalValue.toString()
+      }
+    } catch (error) {
+      console.error('Error converting base:', error)
+      return '0'
+    }
+  }
 }
 
 /**
@@ -71,10 +171,12 @@ export class CalculatorFactory {
     try {
       switch (mode) {
         case 'Standard':
-          return new StandardCalculator(settings)
+          // Wrap StandardCalculator to add missing methods
+          const standardCalc = new StandardCalculator(settings)
+          return new StandardCalculatorWrapper(standardCalc)
         
         case 'Programmer':
-          return new ProgrammerCalculator(settings)
+          return new ProgrammerCalculator(settings) as unknown as ProgrammerCalculatorInterface
         
         case 'Scientific':
           // If you have a ScientificCalculator class, add it here
@@ -161,9 +263,6 @@ export type {
   CalculatorSettings,
   BaseCalculator,
   CalculatorResult,
-  ProgrammerCalculatorInterface,
-  Calculator
+  StandardCalculatorInterface,
+  ProgrammerCalculatorInterface
 }
-
-// Export utility functions
-export { isProgrammerCalculator }

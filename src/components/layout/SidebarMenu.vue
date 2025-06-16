@@ -167,13 +167,13 @@ const categories = markRaw([
   {
     title: "Navigation",
     items: [
-      { name: "Home", path: "/", icon: CompassIcon, isNew: false },
+      { name: "Home", path: "/", icon: CompassIcon, comingSoon: false, isNew: false },
     ]
   },
   {
     title: "Calculators",
     items: [
-      { name: "Calculator", path: "/calculator", icon: Code2Icon, isNew: false },
+      { name: "Calculator", path: "/calculator", icon: Code2Icon, comingSoon: false, isNew: false },
       {
         name: "Functions",
         path: "/functions",
@@ -203,6 +203,7 @@ const categories = markRaw([
         path: "/tools/base64",
         icon: BinaryIcon,
         isNew: true,
+        comingSoon: false,
         description: "Encode and decode Base64 strings",
       },
     ],
@@ -210,8 +211,8 @@ const categories = markRaw([
   {
     title: "Information",
     items: [
-      { name: "Updates", path: "/info/update", icon: SparklesIcon },
-      { name: "About", path: "/info/about", icon: InfoIcon },
+      { name: "Updates", path: "/info/update", comingSoon: false, icon: SparklesIcon },
+      { name: "About", path: "/info/about", comingSoon: false, icon: InfoIcon },
     ],
   },
 ]);

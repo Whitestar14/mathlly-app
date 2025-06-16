@@ -1,35 +1,63 @@
-import { ref, readonly, onUnmounted } from 'vue';
+import { ref, readonly, onUnmounted, type Ref } from 'vue';
 import { useTimeoutFn, useThrottleFn } from '@vueuse/core';
 
 // Constants
 const DEFAULT_DURATION = 5000;
 const MAX_TOASTS = 5;
 
+// Types
+export type ToastType = 'info' | 'success' | 'warning' | 'error';
+
+export interface ToastData {
+  id?: number;
+  message?: string;
+  description?: string;
+  title?: string;
+  type?: ToastType;
+  dismissible?: boolean;
+  duration?: number;
+}
+
+export interface Toast extends Required<Omit<ToastData, 'description'>> {
+  description?: string;
+}
+
+export interface ToastOptions {
+  title?: string;
+  type?: ToastType;
+  dismissible?: boolean;
+  duration?: number;
+}
+
 // Shared toast state - only create once for the entire application
-const toasts = ref([]);
-const timeoutCleanups = new Map();
+const toasts: Ref<Toast[]> = ref([]);
+const timeoutCleanups = new Map<number, () => void>();
 
 /**
  * Composable for managing toast notifications
  */
 export function useToast() {
   // Create a throttled function for adding toasts to prevent spam
-  const addToast = useThrottleFn((toastData) => {
+  const addToast = useThrottleFn((toastData: ToastData) => {
     const id = Date.now();
     
     // Limit the number of toasts
     if (toasts.value.length >= MAX_TOASTS) {
       // Remove the oldest toast
       const oldestToast = toasts.value[0];
-      removeToast(oldestToast.id);
+      if (oldestToast) {
+        removeToast(oldestToast.id);
+      }
     }
 
     // Add the new toast with defaults
-    const newToast = { 
+    const newToast: Toast = { 
       id, 
       type: 'info',
       dismissible: true,
       duration: DEFAULT_DURATION,
+      message: '',
+      title: '',
       ...toastData
     };
     
@@ -49,14 +77,17 @@ export function useToast() {
   /**
    * Remove a toast by ID
    */
-  const removeToast = (id) => {
+  const removeToast = (id: number): void => {
     const index = toasts.value.findIndex((t) => t.id === id);
     if (index !== -1) {
       toasts.value.splice(index, 1);
       
       // Clean up timeout if exists
       if (timeoutCleanups.has(id)) {
-        timeoutCleanups.get(id)();
+        const cleanup = timeoutCleanups.get(id);
+        if (cleanup) {
+          cleanup();
+        }
         timeoutCleanups.delete(id);
       }
     }
@@ -65,7 +96,7 @@ export function useToast() {
   /**
    * Clear all toasts
    */
-  const clearAll = () => {
+  const clearAll = (): void => {
     // Clean up all timeouts
     timeoutCleanups.forEach(cleanup => cleanup());
     timeoutCleanups.clear();
@@ -81,7 +112,7 @@ export function useToast() {
   });
 
   // Create a single toast method with type parameter instead of separate methods
-  const toast = (message, options = {}) => {
+  const toast = (message: string | ToastData, options: ToastOptions = {}): void => {
     if (typeof message === 'object') {
       // Support old API: toast({message, type, ...})
       addToast(message);
@@ -92,10 +123,17 @@ export function useToast() {
   };
 
   // Shorthand methods that use the main toast method
-  const success = (message, options = {}) => toast(message, { type: 'success', ...options });
-  const error = (message, options = {}) => toast(message, { type: 'error', ...options });
-  const warning = (message, options = {}) => toast(message, { type: 'warning', ...options });
-  const info = (message, options = {}) => toast(message, { type: 'info', ...options });
+  const success = (message: string, options: ToastOptions = {}): void => 
+    toast(message, { type: 'success', ...options });
+    
+  const error = (message: string, options: ToastOptions = {}): void => 
+    toast(message, { type: 'error', ...options });
+    
+  const warning = (message: string, options: ToastOptions = {}): void => 
+    toast(message, { type: 'warning', ...options });
+    
+  const info = (message: string, options: ToastOptions = {}): void => 
+    toast(message, { type: 'info', ...options });
 
   return {
     toast,

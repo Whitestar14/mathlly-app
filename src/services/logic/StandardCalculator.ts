@@ -121,4 +121,13 @@ export class StandardCalculator extends ICalculator {
   handlePercentage(): Record<string, any> {
     return this.normalizeResponse(this.operations.handlePercentage());
   }
+
+  /**
+   * Handle sign toggle operation
+   * 
+   * @returns {Object} Updated state
+   */
+  handleToggleSign(): Record<string, any> {
+    return this.normalizeResponse(this.operations.handleToggleSign());
+  }
 }

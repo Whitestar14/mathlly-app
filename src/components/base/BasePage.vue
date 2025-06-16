@@ -22,11 +22,6 @@
           <h1 class="text-xl font-medium">
             {{ title }}
           </h1>
-          <!-- Optional badge in header -->
-          <BaseBadge
-            v-if="badge"
-            v-bind="badgeProps"
-          />
         </div>
       </div>
     </header>
@@ -50,10 +45,8 @@
 import { computed, type ComputedRef } from 'vue'
 import { useRouter, type Router } from 'vue-router'
 import { ArrowLeftIcon } from 'lucide-vue-next'
-import { useTitle } from '@/composables/useTitle.ts'
-import { useBadge, type BadgeOptions } from '@/composables/useBadge.ts'
+import { useTitle } from '@/composables/useTitle'
 import Button from '@/components/base/BaseButton.vue'
-import BaseBadge from '@/components/base/BaseBadge.vue'
 
 interface Props {
   title?: string;
@@ -62,7 +55,6 @@ interface Props {
   showBackButton?: boolean;
   mainClass?: string;
   isToolLayout?: boolean;
-  badge?: BadgeOptions | boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -79,14 +71,6 @@ const router: Router = useRouter()
 
 const titleComputed: ComputedRef<string> = computed(() => props.title)
 useTitle(titleComputed)
-
-// Badge configuration
-const badgeProps = computed(() => {
-  if (!props.badge || props.badge === true) return null;
-  
-  const { getBadgeProps } = useBadge(props.badge as BadgeOptions);
-  return getBadgeProps.value;
-});
 
 const goBack = (): void => {
   router.go(-1)

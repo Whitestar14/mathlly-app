@@ -66,7 +66,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onUnmounted, computed, shallowRef, reactive, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
 import { useFullscreen, useLocalStorage } from "@vueuse/core";
@@ -75,6 +75,7 @@ import { useSettingsStore } from "@/stores/settings.ts";
 import { useKeyboard } from "@/composables/useKeyboard.ts";
 import { usePanel } from "@/composables/usePanel";
 import { useTheme } from "@/composables/useTheme";
+import type { CalculatorMode } from "@/composables/useCalculatorState";
 import AppHeader from "@/components/layout/AppHeader.vue";
 
 const SidebarMenu = defineAsyncComponent(() => import("@/components/layout/SidebarMenu.vue"));
@@ -106,7 +107,11 @@ const panelStates = reactive({
 });
 
 const isShortcutModalOpen = shallowRef(false);
-const currentMode = shallowRef(settings.calculator.mode); 
+
+// Fix: Ensure currentMode is properly typed as CalculatorMode
+const currentMode = shallowRef<CalculatorMode>(
+  (settings.calculator.mode as CalculatorMode) || 'Standard'
+);
 
 const sidebarPanel = usePanel('sidebar');
 const menuPanel = usePanel('menu');
@@ -115,8 +120,16 @@ function openShortcutModal() {
   isShortcutModalOpen.value = true;
 }
 
-function updateMode(newMode) {
-  currentMode.value = newMode;
+// Fix: Ensure the parameter is properly typed
+function updateMode(newMode: string | CalculatorMode) {
+  // Type guard to ensure we have a valid CalculatorMode
+  const validModes: CalculatorMode[] = ['Standard', 'Scientific', 'Programmer'];
+  if (validModes.includes(newMode as CalculatorMode)) {
+    currentMode.value = newMode as CalculatorMode;
+  } else {
+    console.warn(`Invalid calculator mode: ${newMode}. Defaulting to Standard.`);
+    currentMode.value = 'Standard';
+  }
 }
 
 useKeyboard("global", {

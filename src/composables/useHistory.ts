@@ -1,37 +1,52 @@
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, type Ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import db from '@/data/db';
 
 /**
+ * History item interface
+ */
+export interface HistoryItem {
+  id?: number
+  expression: string
+  result: string
+  timestamp: number
+}
+
+/**
  * Maximum number of history items to keep
- * @type {number}
  */
 const MAX_HISTORY_ITEMS = 100;
 
 /**
  * Shared history items state across component instances
- * @type {import('vue').Ref<Array>}
  */
-const historyItems = ref([]);
+const historyItems: Ref<HistoryItem[]> = ref([]);
 
 /**
  * Flag to track if history is currently loading
- * @type {import('vue').Ref<boolean>}
  */
-const isLoading = ref(false);
+const isLoading: Ref<boolean> = ref(false);
+
+/**
+ * History service interface
+ */
+export interface UseHistoryReturn {
+  historyItems: Ref<HistoryItem[]>
+  isLoading: Ref<boolean>
+  addToHistory: (expression: string, result: string) => Promise<void>
+  deleteItem: (id: number) => Promise<boolean>
+  clearAll: () => Promise<boolean>
+  loadHistory: () => Promise<boolean>
+}
 
 /**
  * Composable for managing calculation history with IndexedDB persistence
- * 
- * @returns {Object} History management API
  */
-export function useHistory() {
+export function useHistory(): UseHistoryReturn {
   /**
    * Loads history items from the database
-   * @async
-   * @returns {Promise<boolean>} Success status
    */
-  const loadHistory = async () => {
+  const loadHistory = async (): Promise<boolean> => {
     // Prevent multiple simultaneous loads
     if (isLoading.value) return false;
     
@@ -44,7 +59,12 @@ export function useHistory() {
         .limit(MAX_HISTORY_ITEMS)
         .toArray();
 
-      historyItems.value = items;
+      historyItems.value = items.map(item => ({
+        id: item.id,
+        expression: item.expression ?? '',
+        result: item.result ?? '',
+        timestamp: item.timestamp
+      }));
       return true;
     } catch (error) {
       console.error('Error loading history:', error);
@@ -58,11 +78,8 @@ export function useHistory() {
 
   /**
    * Adds a new calculation to history with debouncing to prevent duplicates
-   * @async
-   * @param {string} expression - The math expression
-   * @param {string} result - The calculated result
    */
-  const addToHistory = useDebounceFn(async (expression, result) => {
+  const addToHistory = useDebounceFn(async (expression: string, result: string): Promise<void> => {
     try {
       // Prevent duplicate entries
       const lastItem = historyItems.value[0];
@@ -85,7 +102,6 @@ export function useHistory() {
       }
 
       // Ensure database consistency by scheduling a reload
-      // Use Promise instead of setTimeout for better reliability
       Promise.resolve().then(() => {
         // Only reload if we're not in the middle of another operation
         if (!isLoading.value) {
@@ -99,11 +115,8 @@ export function useHistory() {
 
   /**
    * Deletes a specific history item
-   * @async
-   * @param {number} id - The ID of the item to delete
-   * @returns {Promise<boolean>} Success status
    */
-  const deleteItem = async (id) => {
+  const deleteItem = async (id: number): Promise<boolean> => {
     try {
       await db.history.delete(id);
       // Update local state to reflect changes
@@ -119,10 +132,8 @@ export function useHistory() {
 
   /**
    * Clears all history items
-   * @async
-   * @returns {Promise<boolean>} Success status
    */
-  const clearAll = async () => {
+  const clearAll = async (): Promise<boolean> => {
     try {
       await db.history.clear();
       historyItems.value = [];

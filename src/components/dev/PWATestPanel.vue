@@ -1,6 +1,14 @@
 <template>
-  <div class="fixed top-4 left-4 z-50 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border max-w-xs">
-    <h3 class="text-sm font-semibold mb-3">PWA Test Panel</h3>
+  <div v-if="isPanelVisible" class="fixed top-4 left-4 z-50 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border max-w-xs">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-sm font-semibold">PWA Test Panel</h3>
+      <button 
+        @click="togglePanelVisibility" 
+        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+      >
+        ✕
+      </button>
+    </div>
     
     <div class="space-y-2 text-xs">
       <div>
@@ -77,6 +85,12 @@ const {
   isNewerVersion,
   populateUpdateInfo
 } = usePWA()
+
+const isPanelVisible = ref(true)
+
+const togglePanelVisibility = () => {
+  isPanelVisible.value = !isPanelVisible.value
+}
 
 // Test version comparison
 const isVersionNewer = computed(() => {

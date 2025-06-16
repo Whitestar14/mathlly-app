@@ -1,20 +1,85 @@
-import { shallowRef, computed, nextTick, watch, provide, inject, reactive, readonly, onUnmounted, markRaw } from 'vue';
-import { useLocalStorage, useDebounceFn } from '@vueuse/core';
+import { shallowRef, computed, nextTick, watch, provide, inject, reactive, readonly, onUnmounted, markRaw, type Ref, type ComputedRef } from 'vue';
+import { useLocalStorage, useDebounceFn, type RemovableRef } from '@vueuse/core';
 import { useDraggable } from '@/utils/misc/draggable';
+
+// Types
+export interface PanelOptions {
+  storageKey?: string;
+  defaultDesktopState?: boolean;
+  initialIsMobile?: boolean;
+  animation?: () => boolean;
+  maxHeightRatio?: number;
+  snapThreshold?: number;
+  maxHeight?: number;
+}
+
+export interface PanelPreferences {
+  desktop: { isOpen: boolean };
+  mobile: { isOpen: boolean };
+}
+
+// Create a type based on the return type of useDraggable
+type DraggableReturn = ReturnType<typeof useDraggable>;
+
+export interface PanelAPI {
+  isOpen: Ref<boolean>;
+  isMobile: Ref<boolean>;
+  isExpanded: Ref<boolean>;
+  panel: Ref<HTMLElement | null>;
+  handle: Ref<HTMLElement | null>;
+  open: (isMobile?: boolean) => Promise<void>;
+  close: (isMobile?: boolean) => Promise<void>;
+  toggle: (options?: ToggleOptions) => void;
+  handleResize: (newIsMobile: boolean) => void;
+  updatePanelDimensions: () => void;
+  isDragging: Ref<boolean>;
+  translateY: Ref<number>;
+  panelHeight: Ref<number>;
+  maxPanelHeight: Ref<number>;
+}
+
+export interface ToggleOptions {
+  expanded?: boolean;
+  isMobile?: boolean;
+}
+
+export interface PanelContextState {
+  panels: Record<string, PanelAPI>;
+  options: Record<string, PanelOptions>;
+  isMobile: boolean;
+}
+
+export interface PanelContextActions {
+  registerPanel: (id: string, options?: PanelOptions) => PanelAPI | undefined;
+  unregisterPanel: (id: string) => void;
+  openPanel: (id: string) => void;
+  closePanel: (id: string) => void;
+  togglePanel: (id: string, options?: ToggleOptions) => void;
+  closeAllPanels: () => void;
+  getInstance: (id: string) => PanelAPI | undefined;
+  provide: (id: string, action: string, fallback?: any) => any;
+  setMobile: (isMobile: boolean) => void;
+}
+
+export interface PanelContext {
+  state: Readonly<PanelContextState>;
+  actions: PanelContextActions;
+}
+
+export interface LightweightPanelAPI {
+  readonly isOpen: boolean;
+  readonly isMobile: boolean;
+  readonly panels: Record<string, PanelAPI>;
+  readonly options: PanelOptions | undefined;
+  open: () => void;
+  close: () => void;
+  toggle: (options?: ToggleOptions) => void;
+}
 
 /**
  * Unified panel composable managing state, persistence, responsiveness, and dragging.
- * @param {object} options - Configuration options.
- * @param {string} options.storageKey - Key for localStorage persistence.
- * @param {boolean} [options.defaultDesktopState=true] - Default open state on desktop.
- * @param {boolean} options.initialIsMobile - Initial mobile state.
- * @param {function} [options.animation] - Function indicating if sheet animation is enabled.
- * @param {number} [options.maxHeightRatio=0.8] - Max height ratio for mobile draggable panel.
- * @param {number} [options.snapThreshold=0.3] - Snap threshold for mobile draggable panel.
- * @param {number} [options.maxHeight] - Optional fixed max height in pixels for mobile draggable panel.
- * @returns {object} Panel management API.
  */
-export function createPanel(options = {}) {
+export function createPanel(options: PanelOptions = {}): PanelAPI {
   const {
     storageKey,
     defaultDesktopState = false,
@@ -35,38 +100,42 @@ export function createPanel(options = {}) {
       isDragging: shallowRef(false),
       translateY: shallowRef(0),
       panelHeight: shallowRef(0),
-      maxPanelHeight: computed(() => 0),
+      maxPanelHeight: shallowRef(0),
       isExpanded: shallowRef(false),
       handle: shallowRef(null),
       panel: shallowRef(null),
-      open: () => {},
-      close: () => {},
+      open: async () => {},
+      close: async () => {},
       toggle: () => {},
       handleResize: () => {},
       updatePanelDimensions: () => {},
-    });
+    }) as PanelAPI;
   }
 
   // --- State Persistence ---
   // Use localStorage to remember open state per device type
-  const preferences = useLocalStorage(`${storageKey}-preferences`, {
+  const preferences: RemovableRef<PanelPreferences> = useLocalStorage(`${storageKey}-preferences`, {
     desktop: { isOpen: defaultDesktopState },
     mobile: { isOpen: false },
   });
 
   // Current device context - use shallowRef for better performance
-  const currentIsMobile = shallowRef(initialIsMobile);
-  const deviceContext = computed(() => currentIsMobile.value ? 'mobile' : 'desktop');
+  const currentIsMobile: Ref<boolean> = shallowRef(initialIsMobile);
+  const deviceContext: ComputedRef<'mobile' | 'desktop'> = computed(() => 
+    currentIsMobile.value ? 'mobile' : 'desktop'
+  );
 
   // Initialize panel state from stored preferences based on device type
-  const isOpen = shallowRef(currentIsMobile.value ? false : preferences.value.desktop.isOpen);
+  const isOpen: Ref<boolean> = shallowRef(
+    currentIsMobile.value ? false : preferences.value.desktop.isOpen
+  );
   
   // New expanded state for mobile panels
-  const isExpanded = shallowRef(false);
+  const isExpanded: Ref<boolean> = shallowRef(false);
 
   // References for draggable functionality - use shallowRef for DOM elements
-  const handle = shallowRef(null);
-  const panel = shallowRef(null);
+  const handle: Ref<HTMLElement | null> = shallowRef(null);
+  const panel: Ref<HTMLElement | null> = shallowRef(null);
 
   /**
    * Updates the persisted preferences based on the current isOpen state and device type.
@@ -76,7 +145,7 @@ export function createPanel(options = {}) {
     preferences.value[deviceContext.value].isOpen = isOpen.value;
   }, 300);
 
-  const draggable = useDraggable({
+  const draggable: DraggableReturn = useDraggable({
     panel, 
     handle, 
     isOpen,
@@ -88,10 +157,8 @@ export function createPanel(options = {}) {
 
   /**
    * Closes the panel, handling animations if applicable.
-   * @param {boolean} [isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
-   * @returns {Promise<void>}
    */
-  const close = async (isMobile = currentIsMobile.value) => {
+  const close = async (isMobile: boolean = currentIsMobile.value): Promise<void> => {
     currentIsMobile.value = isMobile;
 
     if (isMobile && animation() && draggable?.animateClose) {
@@ -107,10 +174,8 @@ export function createPanel(options = {}) {
 
   /**
    * Opens the panel, handling animations and draggable setup if applicable.
-   * @param {boolean} [isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
-   * @returns {Promise<void>}
    */
-  const open = async (isMobile = currentIsMobile.value) => {
+  const open = async (isMobile: boolean = currentIsMobile.value): Promise<void> => {
     currentIsMobile.value = isMobile;
     isOpen.value = true;
     updatePreferences();
@@ -128,11 +193,8 @@ export function createPanel(options = {}) {
 
   /**
    * Toggles the panel's open/closed state or expanded state.
-   * @param {object} [options] - Options object.
-   * @param {boolean} [options.expanded] - If true, toggles expanded state; otherwise toggles open/close.
-   * @param {boolean} [options.isMobile=currentIsMobile.value] - Explicitly set mobile context if needed.
    */
-  const toggle = (options = {}) => {
+  const toggle = (options: ToggleOptions = {}): void => {
     const { expanded = false, isMobile = currentIsMobile.value } = options;
     if (expanded) {
       if (!currentIsMobile.value || !isOpen.value) return;
@@ -148,9 +210,8 @@ export function createPanel(options = {}) {
 
   /**
    * Handles responsive changes, updating state and draggable elements.
-   * @param {boolean} newIsMobile - The new mobile state.
    */
-  const handleResize = (newIsMobile) => {
+  const handleResize = (newIsMobile: boolean): void => {
     if (currentIsMobile.value === newIsMobile) return;
     currentIsMobile.value = newIsMobile;
       
@@ -173,7 +234,7 @@ export function createPanel(options = {}) {
   // Single watcher for state changes to reduce reactivity overhead
   watch([isOpen, isExpanded], updatePreferences, { flush: 'post' });
 
-  const api = {
+  const api: PanelAPI = {
     isOpen,
     isMobile: currentIsMobile,
     isExpanded,
@@ -188,7 +249,7 @@ export function createPanel(options = {}) {
     isDragging: draggable?.isDragging ?? shallowRef(false),
     translateY: draggable?.translateY ?? shallowRef(0),
     panelHeight: draggable?.panelHeight ?? shallowRef(0),
-    maxPanelHeight: draggable?.maxPanelHeight ?? computed(() => 0),
+    maxPanelHeight: draggable?.maxPanelHeight ?? shallowRef(0),
   };
 
   return api;
@@ -201,25 +262,19 @@ const PanelActionsSymbol = Symbol('PanelActions');
 /**
  * Creates a central context for managing multiple panel states.
  * This should be instantiated once in a top-level component (like PanelProvider).
- * @returns {object} Context state and actions.
  */
-export function createPanelContext() {
-  const state = reactive({
-    /** @type {Record<string, ReturnType<typeof usePanel>>} */
+export function createPanelContext(): PanelContext {
+  const state = reactive<PanelContextState>({
     panels: {},
     options: {},
     isMobile: false,
   });
 
-  const actions = {
+  const actions: PanelContextActions = {
     /**
      * Registers a new panel instance with the context.
-     * Called automatically by the usePanel hook when a panel is first accessed.
-     * @param {string} id - Unique identifier for the panel.
-     * @param {object} options - Configuration options passed to usePanelUnified.
-     * @returns {object|undefined} The panel instance or undefined if already registered.
      */
-    registerPanel(id, options = {}) {
+    registerPanel(id: string, options: PanelOptions = {}): PanelAPI | undefined {
       if (state.panels[id]) {
         console.warn(`Panel with id "${id}" already registered. Registration skipped.`);
         return state.panels[id];
@@ -233,9 +288,8 @@ export function createPanelContext() {
 
     /**
      * Unregisters a panel instance. Typically called on component unmount.
-     * @param {string} id - Identifier of the panel to unregister.
      */
-    unregisterPanel(id) {
+    unregisterPanel(id: string): void {
       if (state.panels[id]) {
         delete state.panels[id];
         delete state.options[id];
@@ -244,53 +298,43 @@ export function createPanelContext() {
 
     /**
      * Opens a specific panel.
-     * @param {string} id - Panel identifier.
      */
-    openPanel(id) {
+    openPanel(id: string): void {
       state.panels[id]?.open();
     },
 
     /**
      * Closes a specific panel.
-     * @param {string} id - Panel identifier.
      */
-    closePanel(id) {
+    closePanel(id: string): void {
       state.panels[id]?.close();
     },
 
     /**
      * Toggles a specific panel.
-     * @param {string} id - Panel identifier.
-     * @param {object} [options] - Toggle options.
      */
-    togglePanel(id, options) {
+    togglePanel(id: string, options?: ToggleOptions): void {
       state.panels[id]?.toggle(options);
     },
 
     /**
      * Closes all registered panels.
      */
-    closeAllPanels() {
-      Object.keys(state.panels).forEach(this.closePanel);
+    closeAllPanels(): void {
+      Object.keys(state.panels).forEach(id => this.closePanel(id));
     },
 
     /**
      * Retrieves a panel instance by its ID.
-     * @param {string} id - Panel identifier.
-     * @returns {ReturnType<typeof usePanel> | undefined} The panel instance or undefined.
      */
-    getInstance(id) {
+    getInstance(id: string): PanelAPI | undefined {
       return state.panels[id];
     },
 
     /**
      * Returns the function based on the id of a panel's instance
-     * @param {string} id - Panel identifier
-     * @param {string} action - Property or method name to access
-     * @param {any} [fallback=null] - Fallback value if property/method doesn't exist
-     * @returns {any} The property value, method result, or fallback
      */
-    provide(id, action, fallback = null) {
+    provide(id: string, action: string, fallback: any = null): any {
       const instance = this.getInstance(id);
       if (!instance) {
         if (fallback !== null) return fallback;
@@ -298,7 +342,7 @@ export function createPanelContext() {
         return undefined;
       }
       
-      const prop = instance[action];
+      const prop = (instance as any)[action];
       if (typeof prop === 'function' && fallback === null) {
         return prop.call(instance);
       }
@@ -307,10 +351,8 @@ export function createPanelContext() {
 
     /**
      * Updates the global mobile state and notifies all panel instances.
-     * Called by PanelProvider when the device state changes.
-     * @param {boolean} isMobile - The new mobile state.
      */
-    setMobile: useDebounceFn(function(isMobile) {
+    setMobile: useDebounceFn(function(this: PanelContextActions, isMobile: boolean): void {
       if (state.isMobile === isMobile) return;
       state.isMobile = isMobile;
       
@@ -329,17 +371,16 @@ export function createPanelContext() {
   provide(PanelStateSymbol, readonly(state));
   provide(PanelActionsSymbol, actions);
 
-  return { state: readonly(state), actions };
+  return { state, actions };
 }
 
 /**
  * Hook to access the central panel state and actions.
  * Throws an error if used outside of a PanelProvider.
- * @returns {{ state: Readonly<typeof state>, actions: typeof actions }} Panel context.
  */
-export function usePanelContext() {
-  const state = inject(PanelStateSymbol);
-  const actions = inject(PanelActionsSymbol);
+export function usePanelContext(): PanelContext {
+  const state = inject<Readonly<PanelContextState>>(PanelStateSymbol);
+  const actions = inject<PanelContextActions>(PanelActionsSymbol);
   if (!state || !actions) {
     throw new Error('usePanelContext() must be used within a <PanelProvider> component.');
   }
@@ -349,12 +390,8 @@ export function usePanelContext() {
 /**
  * Hook to interact with a specific panel instance managed by the context.
  * Returns a stable API object that dynamically accesses the underlying panel's state/methods.
- * @param {string} id - The unique identifier for the panel.
- * @param {object} [options={}] - Configuration options for the panel.
- * @param {boolean} [api=true] - Determines returning api getters or default setup object
- * @returns {object} A stable panel API object.
  */
-export function usePanel(id, options = {}, api = true) {
+export function usePanel(id: string, options: PanelOptions = {}, api: boolean = true): PanelAPI | LightweightPanelAPI | Record<string, never> {
   if (!id) {
     console.warn("usePanel() requires an id");
     return {};
@@ -366,45 +403,45 @@ export function usePanel(id, options = {}, api = true) {
   // Handle different initialization scenarios
   if (hasRegistrationOptions && state.panels[id]) {
     console.warn(`Panel "${id}" already registered. Using existing instance.`);
-    return actions.getInstance(id);
+    return actions.getInstance(id)!;
   } 
   
   if (hasRegistrationOptions && !state.panels[id] && !api) {
-    return actions.registerPanel(id, options);
+    return actions.registerPanel(id, options)!;
   } 
   
   if (!hasRegistrationOptions && api) {
     // Create a lightweight API object with computed getters
-    const panel = {
-      get isOpen() {
+    const panel: LightweightPanelAPI = {
+      get isOpen(): boolean {
         return actions.provide(id, "isOpen", false);
       },
-      get isMobile() {
+      get isMobile(): boolean {
         return state.isMobile;
       },
-      get panels() {
+      get panels(): Record<string, PanelAPI> {
         return state.panels;
       },
-      get options() {
+      get options(): PanelOptions | undefined {
         return state.options[id];
       },
 
-      open: () => actions.openPanel(id),
-      close: () => actions.closePanel(id),
-      toggle: (options) => actions.togglePanel(id, options)
+      open: (): void => actions.openPanel(id),
+      close: (): void => actions.closePanel(id),
+      toggle: (options?: ToggleOptions): void => actions.togglePanel(id, options)
     };
     
-      // Automatically unregister panel on component unmount
-      onUnmounted(() => {
-        actions.unregisterPanel(id);
-      });
-      
-      return panel;
-    } 
+    // Automatically unregister panel on component unmount
+    onUnmounted(() => {
+      actions.unregisterPanel(id);
+    });
     
-    if (!hasRegistrationOptions && !state.panels[id]) {
-      console.log(`usePanel HOOK: Called for "${id}" without options. Waiting for registration call.`);
-    }
+    return panel;
+  } 
+  
+  if (!hasRegistrationOptions && !state.panels[id]) {
+    console.log(`usePanel HOOK: Called for "${id}" without options. Waiting for registration call.`);
+  }
 
   // Automatically unregister panel on component unmount
   onUnmounted(() => {

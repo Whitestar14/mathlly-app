@@ -51,31 +51,60 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, defineAsyncComponent } from "vue";
-import { useHistory } from "@/composables/useHistory";
-import { useAnimation } from "@/composables/useAnimation.ts";
+<script setup lang="ts">
+import { ref, computed, defineAsyncComponent, type Ref, type ComputedRef } from "vue";
+import { useHistory, type HistoryItem } from "@/composables/useHistory";
+import { useAnimation } from "@/composables/useAnimation";
 import { useToast } from "@/composables/useToast";
 import { useClipboard } from "@vueuse/core";
 
+// Types
+interface Props {
+  mode: string;
+  isMobile: boolean;
+}
+
+interface Emits {
+  (e: 'select-item', item: HistoryItem): void;
+  (e: 'history-close'): void;
+}
+
+interface AnimationController {
+  onBeforeEnter: (el: Element) => void;
+  onEnter: (el: Element, done: () => void) => void;
+  onLeave: (el: Element, done: () => void) => void;
+}
+
+interface ToastService {
+  toast: (options: {
+    title: string;
+    description: string;
+  }) => void;
+}
+
+interface ClipboardService {
+  copy: (text: string) => Promise<void>;
+}
+
 // Props
-const props = defineProps({
-  mode: { type: String, default: "Standard" },
-  isMobile: { type: Boolean, default: false },
+const props = withDefaults(defineProps<Props>(), {
+  mode: "Standard",
+  isMobile: false,
 });
 
-const emit = defineEmits(["select-item", "history-close"]);
+const emit = defineEmits<Emits>();
 
+// Async component
 const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryItem.vue"));
 
 // Composables
 const { historyItems, deleteItem } = useHistory();
-const { toast } = useToast();
-const { copy } = useClipboard();
+const { toast }: ToastService = useToast();
+const { copy }: ClipboardService = useClipboard();
 const { createListAnimation } = useAnimation();
 
 // Create history animation with custom options
-const historyAnimation = createListAnimation({
+const historyAnimation: AnimationController = createListAnimation({
   initialDelay: 50,
   initialDuration: 400,
   enterTransform: [-20, 0],
@@ -87,43 +116,58 @@ const historyAnimation = createListAnimation({
 });
 
 // Local state 
-const selectedItemId = ref(null);
+const selectedItemId: Ref<number | null> = ref(null);
 
 // Computed properties
-const isProgrammerMode = computed(() => props.mode === "Programmer");
+const isProgrammerMode: ComputedRef<boolean> = computed(() => props.mode === "Programmer");
 
 // Handle history item selection
-const handleSelectItem = (item) => {
+const handleSelectItem = (item: HistoryItem): void => {
   if (isProgrammerMode.value) return;
 
-  selectedItemId.value = item.id;
-  setTimeout(() => {
-    selectedItemId.value = null;
-  }, 300);
+  if (item.id !== undefined) {
+    selectedItemId.value = item.id;
+    setTimeout(() => {
+      selectedItemId.value = null;
+    }, 300);
+  }
 
-  emit("select-item", {
+  const selectionData: HistoryItem = {
     expression: item.expression.trim(),
     result: item.result,
-  });
+    timestamp: item.timestamp,
+  };
 
-  if (props.isMobile) emit('history-close');
+  emit("select-item", selectionData);
+
+  if (props.isMobile) {
+    emit('history-close');
+  }
 };
 
-const handleDelete = async (id) => {
+const handleDelete = async (id: number): Promise<void> => {
   await deleteItem(id);
 };
 
-const copyItem = (item) => {
-  copy(`${item.expression} = ${item.result}`);
-  toast({
-    title: "Copied to clipboard",
-    description: "The calculation has been copied to your clipboard",
-  });
+const copyItem = async (item: HistoryItem): Promise<void> => {
+  try {
+    await copy(`${item.expression} = ${item.result}`);
+    toast({
+      title: "Copied to clipboard",
+      description: "The calculation has been copied to your clipboard",
+    });
+  } catch (error) {
+    console.error('Failed to copy item:', error);
+    toast({
+      title: "Copy failed",
+      description: "Failed to copy the calculation to clipboard",
+    });
+  }
 };
 
-const copyAsJson = (item) => {
-  copy(
-    JSON.stringify(
+const copyAsJson = async (item: HistoryItem): Promise<void> => {
+  try {
+    const jsonData = JSON.stringify(
       {
         expression: item.expression,
         result: item.result,
@@ -131,12 +175,20 @@ const copyAsJson = (item) => {
       },
       null,
       2,
-    ),
-  );
-  toast({
-    title: "Copied as JSON",
-    description: "The calculation has been copied in JSON format",
-  });
+    );
+    
+    await copy(jsonData);
+    toast({
+      title: "Copied as JSON",
+      description: "The calculation has been copied in JSON format",
+    });
+  } catch (error) {
+    console.error('Failed to copy as JSON:', error);
+    toast({
+      title: "Copy failed",
+      description: "Failed to copy the calculation as JSON",
+    });
+  }
 };
 </script>
 

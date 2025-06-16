@@ -7,36 +7,35 @@
       <component 
         :is="Component"
         v-bind="isCalculatorRoute(route.path) ? calculatorProps : {}"
-        :key="isCalculatorRoute(route.path) ? props.mode : route.path"
       />
     </Transition>
   </router-view>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { RouterView } from 'vue-router';
 
-const props = defineProps({
-  mode: {
-    type: String,
-    required: true,
-  },
-  settings: {
-    type: Object,
-    required: true,
-  },
-  isMobile: {
-    type: Boolean,
-    required: true,
-  }
-});
+interface Props {
+  mode: string;
+  settings: Record<string, any>;
+  isMobile: boolean;
+}
 
-const calculatorProps = computed(() => ({
+const props = defineProps<Props>();
+
+interface CalculatorProps {
+  mode: string;
+  settings: Record<string, any>;
+  isMobile: boolean;
+}
+
+const calculatorProps = computed((): CalculatorProps => ({
   mode: props.mode,
   settings: props.settings,
   isMobile: props.isMobile
 }));
 
-const isCalculatorRoute = (path) => path === '/calculator' || path.startsWith('/calculator/');
+const isCalculatorRoute = (path: string): boolean => 
+  path === '/calculator' || path.startsWith('/calculator/');
 </script>

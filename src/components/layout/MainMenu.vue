@@ -60,15 +60,16 @@
   </BasePanel>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   Sun,
   Moon,
   AppWindowMac,
   AtSign,
   GithubIcon,
+  type LucideIcon,
 } from "lucide-vue-next";
-import { useTheme } from "@/composables/useTheme";
+import { useTheme, type ThemeOption } from "@/composables/useTheme";
 import BasePanel from "@/components/base/BasePanel.vue";
 import {
   ScrollAreaRoot,
@@ -77,17 +78,33 @@ import {
   ToggleGroupRoot,
   ToggleGroupItem
 } from "radix-vue";
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted} from 'vue';
 
+// Types
+interface ThemeItem {
+  id: ThemeOption;
+  title: string;
+  icon: LucideIcon;
+}
+
+interface ExternalLink {
+  url: string;
+  text: string;
+  icon: LucideIcon;
+}
+
+// Theme management
 const { selectedTheme, isDark } = useTheme();
 
-const themeItems = [
+// Theme items configuration
+const themeItems: ThemeItem[] = [
   { id: "light", title: "Light", icon: Sun },
   { id: "dark", title: "Dark", icon: Moon },
   { id: "system", title: "System", icon: AppWindowMac }
 ];
 
-const externalLinks = [
+// External links configuration
+const externalLinks: ExternalLink[] = [
   {
     url: "https://github.com/Whitestar14/mathlly-app",
     text: "Star on GitHub",
@@ -100,10 +117,13 @@ const externalLinks = [
   }
 ];
 
+// Media query handling for system theme
+let mediaQueryCleanup: (() => void) | null = null;
+
 onMounted(() => {
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const mediaQuery: MediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
   
-  const handleChange = (e) => {
+  const handleChange = (e: MediaQueryListEvent): void => {
     if (selectedTheme.value === 'system') {
       isDark.value = e.matches;
     }
@@ -111,8 +131,16 @@ onMounted(() => {
   
   mediaQuery.addEventListener('change', handleChange);
   
-  return () => {
+  // Store cleanup function
+  mediaQueryCleanup = (): void => {
     mediaQuery.removeEventListener('change', handleChange);
   };
+});
+
+onUnmounted(() => {
+  if (mediaQueryCleanup) {
+    mediaQueryCleanup();
+    mediaQueryCleanup = null;
+  }
 });
 </script>

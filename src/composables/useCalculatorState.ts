@@ -7,39 +7,39 @@ const DEFAULT_MODE = 'Standard'
 const BASES = ['DEC', 'BIN', 'HEX', 'OCT'] as const
 
 // Define types
-type Base = typeof BASES[number]
-type CalculatorMode = 'Standard' | 'Scientific' | 'Programmer'
-
-/**
- * Calculator state interface
- */
-interface CalculatorState {
-  input: string
-  error: string
-  isAnimating: boolean
-  animatedResult: string
-  activeBase: Base
-  displayValues: Record<Base, { input: string; display: string }>
-  mode: CalculatorMode
-}
+export type Base = typeof BASES[number]
+export type CalculatorMode = 'Standard' | 'Scientific' | 'Programmer'
 
 /**
  * Display values for different bases
  */
-interface BaseDisplayValues {
+export interface BaseDisplayValues {
   input: string
   display: string
 }
 
 /**
+ * Calculator state interface
+ */
+export interface CalculatorState {
+  input: string
+  error: string
+  isAnimating: boolean
+  animatedResult: string
+  activeBase: Base
+  displayValues: Record<Base, BaseDisplayValues>
+  mode: CalculatorMode
+}
+
+/**
  * Partial state updates interface
  */
-type StateUpdates = Partial<CalculatorState>
+export type StateUpdates = Partial<CalculatorState>
 
 /**
  * Calculator state composable return type
  */
-interface UseCalculatorStateReturn {
+export interface UseCalculatorStateReturn {
   state: DeepReadonly<CalculatorState>
   updateState: (updates: StateUpdates) => void
   resetState: (mode?: CalculatorMode) => void
@@ -183,16 +183,6 @@ export function useCalculatorState(initialMode?: CalculatorMode): UseCalculatorS
     updateDisplayValues,
     setActiveBase
   }
-}
-
-// Export types for external use
-export type {
-  CalculatorState,
-  BaseDisplayValues,
-  StateUpdates,
-  UseCalculatorStateReturn,
-  Base,
-  CalculatorMode
 }
 
 // Export constants

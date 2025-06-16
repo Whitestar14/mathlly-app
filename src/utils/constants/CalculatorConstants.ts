@@ -1,4 +1,4 @@
-import { bignumber, type BigNumber } from 'mathjs'
+import { bignumber } from 'mathjs'
 
 /**
  * Numeric bases enumeration

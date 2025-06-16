@@ -1,54 +1,84 @@
-import { ref, computed } from 'vue';
-import { evaluate, bignumber } from 'mathjs';
+import { ref, computed, type Ref, type ComputedRef } from 'vue';
+import { evaluate, bignumber, type BigNumber } from 'mathjs';
+import type { CalculatorMode } from '@/composables/useCalculatorState';
+import type { Calculator } from '@/services/factory/CalculatorFactory';
+
+// Types
+export interface MemoryValues {
+  Standard: number | BigNumber;
+  Programmer: number | BigNumber;
+  Scientific: number | BigNumber;
+}
+
+export interface DisplayValues {
+  [key: string]: {
+    input: string;
+    display: string;
+  };
+}
+
+export interface MemoryOperationParams {
+  mode: CalculatorMode;
+  calculator: Calculator;
+  currentInput: string;
+  activeBase?: string;
+}
+
+export interface MemoryOperationResult {
+  input: string;
+  error?: string;
+  displayValues?: DisplayValues;
+}
+
+export interface UseMemoryReturn {
+  hasMemory: (mode: CalculatorMode) => ComputedRef<boolean>;
+  handleMemoryOperation: (params: {
+    operation: string;
+    mode: CalculatorMode;
+    calculator: Calculator;
+    currentInput: string;
+    activeBase?: string;
+  }) => MemoryOperationResult;
+}
 
 // Create a shared state for memory across the application
-const memoryValues = ref({
+const memoryValues: Ref<MemoryValues> = ref({
   Standard: 0,
   Programmer: 0,
+  Scientific: 0,
 });
 
 /**
  * Composable for calculator memory operations
- * @returns {Object} Memory operations and state
  */
-export function useMemory() {
+export function useMemory(): UseMemoryReturn {
   /**
    * Check if a specific calculator mode has memory
-   * @param {string} mode - Calculator mode
-   * @returns {Object} Computed boolean indicating if memory exists
    */
-  const hasMemory = (mode) => computed(() => memoryValues.value[mode] !== 0);
+  const hasMemory = (mode: CalculatorMode): ComputedRef<boolean> => 
+    computed(() => memoryValues.value[mode] !== 0);
 
   /**
    * Clear memory for a specific mode
-   * @param {string} mode - Calculator mode
-   * @returns {boolean} Success indicator
    */
-  const clear = (mode) => {
+  const clear = (mode: CalculatorMode): boolean => {
     memoryValues.value[mode] = 0;
     return true;
   };
 
   /**
    * Recall memory value for a specific mode
-   * @param {string} mode - Calculator mode
-   * @returns {number|Object} Memory value
    */
-  const recall = (mode) => {
+  const recall = (mode: CalculatorMode): number | BigNumber => {
     return memoryValues.value[mode];
   };
 
   /**
    * Store value in memory for a specific mode
-   * @param {string} mode - Calculator mode
-   * @param {number|string|Object} value - Value to store
-   * @returns {boolean} Success indicator
    */
-  const store = (mode, value) => {
+  const store = (mode: CalculatorMode, value: number | string | BigNumber): boolean => {
     try {
-      const numericValue =
-        typeof value === 'object' && value.toString ? value.toString() : value;
-
+      const numericValue = typeof value === 'object' && value.toString ? value.toString() : value;
       memoryValues.value[mode] = bignumber(numericValue);
       return true;
     } catch (error) {
@@ -59,11 +89,8 @@ export function useMemory() {
 
   /**
    * Add value to memory for a specific mode
-   * @param {string} mode - Calculator mode
-   * @param {number|string|Object} value - Value to add
-   * @returns {boolean} Success indicator
    */
-  const add = (mode, value) => {
+  const add = (mode: CalculatorMode, value: number | string | BigNumber): boolean => {
     try {
       const result = evaluate(`${memoryValues.value[mode]} + ${value}`);
       memoryValues.value[mode] = result;
@@ -76,11 +103,8 @@ export function useMemory() {
 
   /**
    * Subtract value from memory for a specific mode
-   * @param {string} mode - Calculator mode
-   * @param {number|string|Object} value - Value to subtract
-   * @returns {boolean} Success indicator
    */
-  const subtract = (mode, value) => {
+  const subtract = (mode: CalculatorMode, value: number | string | BigNumber): boolean => {
     try {
       const result = evaluate(`${memoryValues.value[mode]} - ${value}`);
       memoryValues.value[mode] = result;
@@ -93,52 +117,46 @@ export function useMemory() {
 
   /**
    * Create a standardized response object
-   * @param {string} input - Current input
-   * @param {string} [error=""] - Error message if any
-   * @param {Object} [displayValues=null] - Display values for programmer mode
-   * @returns {Object} Standardized response
    */
-  const createResponse = (input, error = '', displayValues = null) => {
-    const response = { input, error };
+  const createResponse = (
+    input: string, 
+    error: string = '', 
+    displayValues: DisplayValues | null = null
+  ): MemoryOperationResult => {
+    const response: MemoryOperationResult = { input };
+    if (error) response.error = error;
     if (displayValues) response.displayValues = displayValues;
     return response;
   };
 
   /**
    * Handle memory clear operation
-   * @param {string} mode - Calculator mode
-   * @param {string} currentInput - Current calculator input
-   * @returns {Object} Operation result
    */
-  const handleMemoryClear = (mode, currentInput) => {
+  const handleMemoryClear = (mode: CalculatorMode, currentInput: string): MemoryOperationResult => {
     clear(mode);
     return createResponse(currentInput);
   };
 
   /**
    * Handle memory recall for programmer mode
-   * @param {Object} calculator - Calculator instance
-   * @param {string} activeBase - Current active base
-   * @param {number|Object} memoryValue - Value from memory
-   * @returns {Object} Operation result with converted values
    */
   const handleProgrammerMemoryRecall = (
-    calculator,
-    activeBase,
-    memoryValue
-  ) => {
+    calculator: Calculator,
+    activeBase: string,
+    memoryValue: number | BigNumber
+  ): MemoryOperationResult => {
     try {
       // Convert the memory value to a decimal number string
       const decimalValue = memoryValue.toString();
 
       // Convert to all bases and create display values
-      const newStates = {};
+      const newStates: DisplayValues = {};
       const bases = ['DEC', 'HEX', 'OCT', 'BIN'];
 
       bases.forEach((base) => {
         try {
-          // Always convert from DEC to the target base
-          const converted = calculator.convertToBase(decimalValue, 'DEC', base);
+          // Use the convertToBase method that should now exist on all calculators
+          const converted = calculator.convertToBase!(decimalValue, 'DEC', base);
           newStates[base] = { input: converted, display: converted };
         } catch (e) {
           console.error(`Error converting to ${base}:`, e);
@@ -147,15 +165,15 @@ export function useMemory() {
       });
 
       // Return the value in active base as input with all display values
-      const activeBaseValue = calculator.convertToBase(
+      const activeBaseValue = calculator.convertToBase!(
         decimalValue,
         'DEC',
         activeBase
       );
 
       // Important: Update calculator's internal state to match the recalled value
-      if (calculator.states) {
-        calculator.states = { ...newStates };
+      if ('states' in calculator) {
+        (calculator as any).states = { ...newStates };
         calculator.input = activeBaseValue;
         calculator.currentExpression = activeBaseValue;
       }
@@ -169,11 +187,11 @@ export function useMemory() {
 
   /**
    * Handle memory recall for standard mode
-   * @param {Object} calculator - Calculator instance
-   * @param {number|Object} memoryValue - Value from memory
-   * @returns {Object} Operation result with formatted value
    */
-  const handleStandardMemoryRecall = (calculator, memoryValue) => {
+  const handleStandardMemoryRecall = (
+    calculator: Calculator, 
+    memoryValue: number | BigNumber
+  ): MemoryOperationResult => {
     try {
       const formattedValue = calculator.formatResult(memoryValue);
 
@@ -190,14 +208,14 @@ export function useMemory() {
 
   /**
    * Evaluate expression based on calculator mode
-   * @param {string} mode - Calculator mode
-   * @param {Object} calculator - Calculator instance
-   * @param {string} input - Expression to evaluate
-   * @param {string} [activeBase] - Active base for programmer mode
-   * @returns {*} Evaluation result
    */
-  const evaluateExpression = (mode, calculator, input, activeBase) => {
-    if (mode === 'Programmer') {
+  const evaluateExpression = (
+    mode: CalculatorMode, 
+    calculator: Calculator, 
+    input: string, 
+    activeBase?: string
+  ): any => {
+    if (mode === 'Programmer' && activeBase) {
       return calculator.evaluateExpression(input, activeBase);
     } else {
       return calculator.evaluateExpression(input);
@@ -206,13 +224,13 @@ export function useMemory() {
 
   /**
    * Convert programmer value to decimal if needed
-   * @param {*} value - Value to convert
-   * @param {Object} calculator - Calculator instance
-   * @param {string} activeBase - Current active base
-   * @returns {string} Decimal value
    */
-  const convertToDecimal = (value, calculator, activeBase) => {
-    if (activeBase !== 'DEC') {
+  const convertToDecimal = (
+    value: any, 
+    calculator: Calculator, 
+    activeBase: string
+  ): string => {
+    if (activeBase !== 'DEC' && calculator.convertToBase) {
       return calculator.convertToBase(value, activeBase, 'DEC');
     }
     return value.toString();
@@ -220,15 +238,10 @@ export function useMemory() {
 
   /**
    * Handle memory store operation
-   * @param {Object} params - Operation parameters
-   * @returns {Object} Operation result
    */
-  const handleMemoryStore = ({
-    mode,
-    calculator,
-    currentInput,
-    activeBase,
-  }) => {
+  const handleMemoryStore = (params: MemoryOperationParams): MemoryOperationResult => {
+    const { mode, calculator, currentInput, activeBase } = params;
+    
     try {
       const storeValue = evaluateExpression(
         mode,
@@ -238,10 +251,9 @@ export function useMemory() {
       );
 
       // Convert to decimal for storage if in programmer mode
-      const valueToStore =
-        mode === 'Programmer'
-          ? convertToDecimal(storeValue, calculator, activeBase)
-          : storeValue;
+      const valueToStore = mode === 'Programmer' && activeBase
+        ? convertToDecimal(storeValue, calculator, activeBase)
+        : storeValue;
 
       if (store(mode, valueToStore)) {
         return createResponse(currentInput);
@@ -256,10 +268,10 @@ export function useMemory() {
 
   /**
    * Handle memory add operation
-   * @param {Object} params - Operation parameters
-   * @returns {Object} Operation result
    */
-  const handleMemoryAdd = ({ mode, calculator, currentInput, activeBase }) => {
+  const handleMemoryAdd = (params: MemoryOperationParams): MemoryOperationResult => {
+    const { mode, calculator, currentInput, activeBase } = params;
+    
     try {
       const addValue = evaluateExpression(
         mode,
@@ -269,10 +281,9 @@ export function useMemory() {
       );
 
       // Convert to decimal for storage if in programmer mode
-      const valueToAdd =
-        mode === 'Programmer'
-          ? convertToDecimal(addValue, calculator, activeBase)
-          : addValue;
+      const valueToAdd = mode === 'Programmer' && activeBase
+        ? convertToDecimal(addValue, calculator, activeBase)
+        : addValue;
 
       if (add(mode, valueToAdd)) {
         return createResponse(currentInput);
@@ -287,15 +298,10 @@ export function useMemory() {
 
   /**
    * Handle memory subtract operation
-   * @param {Object} params - Operation parameters
-   * @returns {Object} Operation result
    */
-  const handleMemorySubtract = ({
-    mode,
-    calculator,
-    currentInput,
-    activeBase,
-  }) => {
+  const handleMemorySubtract = (params: MemoryOperationParams): MemoryOperationResult => {
+    const { mode, calculator, currentInput, activeBase } = params;
+    
     try {
       const subtractValue = evaluateExpression(
         mode,
@@ -305,10 +311,9 @@ export function useMemory() {
       );
 
       // Convert to decimal for storage if in programmer mode
-      const valueToSubtract =
-        mode === 'Programmer'
-          ? convertToDecimal(subtractValue, calculator, activeBase)
-          : subtractValue;
+      const valueToSubtract = mode === 'Programmer' && activeBase
+        ? convertToDecimal(subtractValue, calculator, activeBase)
+        : subtractValue;
 
       if (subtract(mode, valueToSubtract)) {
         return createResponse(currentInput);
@@ -323,16 +328,16 @@ export function useMemory() {
 
   /**
    * Handle memory operations
-   * @param {Object} params - Operation parameters
-   * @returns {Object} Operation result
    */
-  const handleMemoryOperation = ({
-    operation,
-    mode,
-    calculator,
-    currentInput,
-    activeBase,
-  }) => {
+  const handleMemoryOperation = (params: {
+    operation: string;
+    mode: CalculatorMode;
+    calculator: Calculator;
+    currentInput: string;
+    activeBase?: string;
+  }): MemoryOperationResult => {
+    const { operation, mode, calculator, currentInput, activeBase } = params;
+    
     try {
       switch (operation) {
         case 'MC':
@@ -344,7 +349,7 @@ export function useMemory() {
             return createResponse(currentInput);
           }
 
-          return mode === 'Programmer'
+          return mode === 'Programmer' && activeBase
             ? handleProgrammerMemoryRecall(calculator, activeBase, memoryValue)
             : handleStandardMemoryRecall(calculator, memoryValue);
         }

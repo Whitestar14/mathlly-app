@@ -3,24 +3,19 @@ import { useKeyboard } from '@/composables/useKeyboard'
 import { useEventListener, useMemoize, useThrottleFn } from '@vueuse/core'
 import { DisplayFormatter } from '@/services/display/DisplayFormatter'
 import { CalculatorUtils } from '@/utils/constants/CalculatorConstants'
-
-// Define interfaces for calculator functionality
-interface CalculatorState {
-  input: string
-  error: string
-  mode: string
-  activeBase: string
-  animatedResult?: string
-  displayValues?: Record<string, any>
-}
-
-interface Calculator {
-  handleButtonClick: (btn: string) => CalculatorResult
-  handleBaseChange: (newBase: string) => CalculatorResult
-  updateDisplayValues: (input: string) => Record<string, any>
-  evaluateExpression: (input: string, activeBase?: string) => any
-  formatResult: (result: any, activeBase?: string) => string
-}
+import type { Calculator } from '@/services/factory/CalculatorFactory'
+import { isProgrammerCalculator } from '@/services/factory/CalculatorFactory'
+// Import types from useCalculatorState to align interfaces
+import type { 
+  CalculatorState, 
+  Base,
+  CalculatorMode
+} from '@/composables/useCalculatorState'
+// Import memory types to align interfaces
+import type { 
+  UseMemoryReturn,
+  MemoryOperationResult 
+} from '@/composables/useMemory'
 
 interface CalculatorResult {
   input: string
@@ -30,26 +25,17 @@ interface CalculatorResult {
   displayValues?: Record<string, any>
 }
 
-interface MemoryOperation {
+// Use the same interface structure as useMemory
+interface MemoryOperationParams {
   operation: string
-  mode: string
+  mode: CalculatorMode
   calculator: Calculator
   currentInput: string
-  activeBase: string
-}
-
-interface MemoryOperationResult {
-  input: string
-  error?: string
-  displayValues?: Record<string, any>
+  activeBase?: string
 }
 
 interface HistoryService {
   addToHistory: (expression: string, result: string) => void
-}
-
-interface MemoryService {
-  handleMemoryOperation: (options: MemoryOperation) => MemoryOperationResult
 }
 
 interface ControllerOptions {
@@ -58,9 +44,9 @@ interface ControllerOptions {
   updateState: (updates: Partial<CalculatorState>) => void
   setAnimation: (result: string) => void
   updateDisplayValues: (values: Record<string, any>) => void
-  setActiveBase: (base: string) => void
+  setActiveBase: (base: Base) => void
   historyService: HistoryService
-  memoryService: MemoryService
+  memoryService: UseMemoryReturn // Use the actual return type from useMemory
   toggleActivity: () => void
 }
 
@@ -70,14 +56,11 @@ interface ControllerReturn {
   animatedResult: ComputedRef<string>
   handleButtonClick: (btn: string) => void
   handleClear: () => void
-  handleBaseChange: (newBase: string) => void
+  handleBaseChange: (newBase: Base) => void
 }
 
 /**
  * Provides unified calculator functionality for MainCalculator component
- * 
- * @param options - Configuration options
- * @returns Calculator controller API
  */
 export function CalculatorController(options: ControllerOptions): ControllerReturn {
   const {
@@ -101,7 +84,7 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
     try {
       // Handle memory operations
       if (['MC', 'MR', 'M+', 'M-', 'MS'].includes(btn)) {
-        const result = handleMemoryOperation({
+        const result = memoryService.handleMemoryOperation({
           operation: btn,
           mode: state.mode,
           calculator: calculator.value,
@@ -157,15 +140,6 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
   }
 
   /**
-   * Handle memory operations
-   * @param options - Memory operation options
-   * @returns Operation result
-   */
-  const handleMemoryOperation = (options: MemoryOperation): MemoryOperationResult => {
-    return memoryService.handleMemoryOperation(options)
-  }
-
-  /**
    * Handle clear button - simplified
    */
   const handleClear = (): void => {
@@ -183,8 +157,8 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
   /**
    * Handle base change for programmer mode - optimized
    */
-  const handleBaseChange = (newBase: string): void => {
-    if (state.mode === 'Programmer') {
+  const handleBaseChange = (newBase: Base): void => {
+    if (state.mode === 'Programmer' && isProgrammerCalculator(calculator.value)) {
       const result = calculator.value.handleBaseChange(newBase)
       setActiveBase(newBase)
       
@@ -200,7 +174,7 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
    * Update programmer display values - extracted for throttling
    */
   function updateDisplayFn(): void {
-    if (state.mode === 'Programmer' && state.input !== 'Error') {
+    if (state.mode === 'Programmer' && state.input !== 'Error' && isProgrammerCalculator(calculator.value)) {
       try {
         const updatedValues = calculator.value.updateDisplayValues(state.input)
         updateDisplayValues(updatedValues)
@@ -243,8 +217,6 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
 
   /**
    * Format text for display with centralized formatting logic
-   * @param value - The value to format
-   * @returns Formatted text
    */
   const formatDisplayText = useMemoize(
     (value: string | number): string => {
@@ -261,7 +233,7 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
   )
 
   /**
-   * Computed preview value with proper formatting - using shallowRef for better performance
+   * Computed preview value with proper formatting
    */
   const preview: ComputedRef<string> = computed(() => {
     const rawPreview = calculatePreview(state.input, state.mode, state.activeBase)
@@ -277,8 +249,9 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
     return formatDisplayText(state.input || '0')
   })
 
-  const mode = shallowRef(state.mode)
-  const activeBase = shallowRef(state.activeBase)
+  // Use proper CalculatorMode type
+  const mode = shallowRef<CalculatorMode>(state.mode)
+  const activeBase = shallowRef<Base>(state.activeBase)
 
   /**
    * Set up keyboard handlers
@@ -306,7 +279,7 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
 
   watch(
     () => state.mode,
-    (newMode: string) => {
+    (newMode: CalculatorMode) => {
       mode.value = newMode
       if (newMode === 'Programmer') {
         setContext('programmer')
@@ -319,7 +292,7 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
 
   watch(
     () => state.activeBase,
-    (newBase: string) => {
+    (newBase: Base) => {
       activeBase.value = newBase
     }
   )
@@ -339,24 +312,26 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
 
     const combo = [
       e.ctrlKey && 'ctrl',
-      e.shiftKey && 'shift',
       e.altKey && 'alt',
-      e.key
-    ]
-      .filter(Boolean)
-      .join('+')
+      e.shiftKey && 'shift',
+      e.key.toLowerCase()
+    ].filter(Boolean).join('+')
 
-    if (shortcuts[combo]) {
+    const action = shortcuts[combo]
+    if (action) {
       e.preventDefault()
-      shortcuts[combo]()
+      action()
     }
   }, 100)
 
-  // Add keyboard event listener
+  // Set up keyboard event listener
   useEventListener('keydown', handleKeyboardShortcuts)
 
+  /**
+   * Computed animated result for display animations
+   */
   const animatedResult: ComputedRef<string> = computed(() => {
-    if (!state.animatedResult) return ""
+    if (!state.animatedResult) return ''
     return formatDisplayText(state.animatedResult)
   })
 
@@ -366,19 +341,15 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
     animatedResult,
     handleButtonClick,
     handleClear,
-    handleBaseChange,
+    handleBaseChange
   }
 }
 
 // Export types for external use
 export type {
-  CalculatorState,
-  Calculator,
-  CalculatorResult,
-  MemoryOperation,
-  MemoryOperationResult,
-  HistoryService,
-  MemoryService,
   ControllerOptions,
-  ControllerReturn
+  ControllerReturn,
+  CalculatorResult,
+  MemoryOperationParams,
+  MemoryOperationResult
 }

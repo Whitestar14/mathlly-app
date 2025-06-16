@@ -134,7 +134,7 @@ const inputArea: Ref<HTMLTextAreaElement | null> = ref(null);
 
 // Composables
 const { copy } = useClipboard();
-const { showToast } = useToast();
+const { toast } = useToast();
 
 // Pills system for tab navigation
 const {
@@ -143,7 +143,7 @@ const {
   handleNavigation,
   initializePills,
 } = usePills({
-  position: "top",
+  position: "bottom",
   updateRoute: false,
   defaultPill: "encode",
   containerRef: tabElements,
@@ -212,7 +212,7 @@ const processInput = (): void => {
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Processing failed";
-    showToast(errorMessage, "error");
+    toast(errorMessage, {type: "error"});
     output.value = "";
   }
 };
@@ -230,9 +230,9 @@ const handleInput = (): void => {
 const handleProcess = (): void => {
   processInput();
   if (output.value) {
-    showToast(
+    toast(
       `Successfully ${currentTab.value === "encode" ? "encoded" : "decoded"}!`,
-      "success"
+      { type: "success" }
     );
   }
 };
@@ -259,16 +259,16 @@ const handleTabChange = async (tabValue: string, element: HTMLElement): Promise<
  */
 const handleCopy = async (): Promise<void> => {
   if (!output.value) {
-    showToast("Nothing to copy", "warning");
+    toast("Nothing to copy", { type: "warning" });
     return;
   }
 
   try {
     await copy(output.value);
-    showToast("Copied to clipboard!", "success");
+    toast("Copied to clipboard!", { type: "success" });
   } catch (error) {
     console.error("Copy failed:", error);
-    showToast("Failed to copy", "error");
+    toast("Failed to copy", { type: "error" });
   }
 };
 
@@ -280,10 +280,10 @@ const pasteFromClipboard = async (): Promise<void> => {
     const text = await navigator.clipboard.readText();
     input.value = text;
     processInput();
-    showToast("Pasted from clipboard!", "success");
+    toast("Pasted from clipboard!", { type: "success" });
   } catch (error) {
     console.error("Paste failed:", error);
-    showToast("Failed to paste", "error");
+    toast("Failed to paste", { type: "error" });
   }
 };
 
@@ -292,7 +292,7 @@ const pasteFromClipboard = async (): Promise<void> => {
  */
 const handleSwap = (): void => {
   if (!output.value) {
-    showToast("Nothing to swap", "warning");
+    toast("Nothing to swap", { type: "warning" });
     return;
   }
 
@@ -310,7 +310,7 @@ const handleSwap = (): void => {
     handleTabChange(newTab, targetElement);
   }
 
-  showToast("Input and output swapped!", "success");
+  toast("Input and output swapped!", { type: "success" });
 };
 
 // Watch for tab changes to update pills

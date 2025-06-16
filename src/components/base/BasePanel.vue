@@ -9,8 +9,8 @@
         v-if="type === 'side'"
         v-bind="panelProps"
         :position="position"
-        @close="close()"
-        @toggle="toggle()"
+        @close="close"
+        @toggle="toggle"
       >
         <template #default>
           <slot />
@@ -31,8 +31,8 @@
         v-if="type === 'drawer'"
         v-bind="panelProps"
         :position="position"
-        @close="close()"
-        @toggle="toggle()"
+        @close="close"
+        @toggle="toggle"
       >
         <template #default>
           <slot />
@@ -58,14 +58,14 @@
           class="fixed inset-0 z-20"
           :class="backdropClasses"
           aria-hidden="true"
-          @click="close()"
+          @click="() => close()"
         />
       </Transition>
 
       <!-- Bottom Panel -->
       <BottomPanel
         v-bind="mobileProps"
-        @close="close()"
+        @close="close"
         @toggle="toggle({ expanded: true })"
       >
         <template #default>
@@ -85,24 +85,39 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue';
-import { usePanel } from '@/composables/usePanel';
+import { usePanel, type PanelAPI } from '@/composables/usePanel';
 import { useSettingsStore } from '@/stores/settings.ts';
 
-const props = defineProps({
-  id: { type: String, required: true },
-  showHeader: { type: Boolean, default: true },
-  showFooter: { type: Boolean, default: true },
-  title: { type: String, default: '' },
-  mainClass: { type: String, default: '' },
-  contentClass: { type: String, default: '' },
-  type: { type: String, default: 'drawer' },
-  position: { type: String, default: 'right' },
-  maxHeightRatio: { type: Number, default: 0.8 },
-  snapThreshold: { type: Number, default: 0.3 },
-  storageKey: { type: String, default: 'panel' },
-  defaultDesktopState: { type: Boolean, default: false },
+// Define props interface
+interface Props {
+  id: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  title?: string;
+  mainClass?: string;
+  contentClass?: string;
+  type?: string;
+  position?: string;
+  maxHeightRatio?: number;
+  snapThreshold?: number;
+  storageKey?: string;
+  defaultDesktopState?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  showHeader: true,
+  showFooter: true,
+  title: '',
+  mainClass: '',
+  contentClass: '',
+  type: 'drawer',
+  position: 'right',
+  maxHeightRatio: 0.8,
+  snapThreshold: 0.3,
+  storageKey: 'panel',
+  defaultDesktopState: false,
 });
 
 const SidePanel = defineAsyncComponent(() =>
@@ -128,6 +143,10 @@ const options = {
   animation: () => animationEnabled.value,
 };
 
+// Get the panel instance and cast to PanelAPI
+const panelInstance = usePanel(props.id, options, false) as PanelAPI;
+
+// Extract properties from the panel instance
 const {
   isOpen,
   isMobile,
@@ -139,7 +158,7 @@ const {
   isDragging,
   panelHeight,
   translateY
-} = usePanel(props.id, options, false);
+} = panelInstance;
 
 const panelProps = computed(() => ({
   isOpen: isOpen.value,
