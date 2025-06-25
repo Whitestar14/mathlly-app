@@ -32,4 +32,20 @@
   .calc-memory-btn {
     @apply text-sm tracking-wider text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 disabled:dark:hover:bg-transparent;
   }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .calc-btn {
+      @apply text-lg px-2 py-1;
+    }
+    
+    .calc-btn-grid {
+      @apply min-h-6;
+    }
+    
+    .calc-memory-btn,
+    .calc-base-btn {
+      @apply text-xs;
+    }
+  }
 }

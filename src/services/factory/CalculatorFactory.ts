@@ -1,5 +1,6 @@
 import { StandardCalculator } from '@/services/logic/StandardCalculator.ts'
 import { ProgrammerCalculator } from '@/services/logic/ProgrammerCalculator.ts'
+import { ScientificCalculator } from '@/services/logic/ScientificCalculator.ts'
 import type { CalculatorMode } from '@/composables/useCalculatorState'
 
 // Define interfaces for calculator settings and factory
@@ -46,12 +47,30 @@ interface ProgrammerCalculatorInterface extends BaseCalculator {
   convertToBase: (value: string, fromBase: string, toBase: string) => string
 }
 
-// Union type for all calculator types - this is the main Calculator type
-export type Calculator = StandardCalculatorInterface | ProgrammerCalculatorInterface
+// ADD: Define scientific calculator specific interface
+interface ScientificCalculatorInterface extends BaseCalculator {
+  angleMode: 'RAD' | 'DEG';
+  notationMode: 'F-E' | 'SCI';
+  hyperbolicMode: boolean;
+  setAngleMode: (mode: 'RAD' | 'DEG') => void;
+  setNotationMode: (mode: 'F-E' | 'SCI') => void;
+  toggleHyperbolic: () => void;
+  handleScientificFunction: (func: string) => CalculatorResult;
+  handleConstant: (constant: string) => CalculatorResult;
+  convertToBase: (value: string, fromBase: string, toBase: string) => string;
+}
+
+// UPDATE: Union type for all calculator types - this is the main Calculator type
+export type Calculator = StandardCalculatorInterface | ProgrammerCalculatorInterface | ScientificCalculatorInterface
 
 // Type guard to check if calculator is a programmer calculator
 export function isProgrammerCalculator(calculator: Calculator): calculator is ProgrammerCalculatorInterface {
   return 'handleBaseChange' in calculator && 'updateDisplayValues' in calculator && 'states' in calculator
+}
+
+// ADD: Type guard to check if calculator is a scientific calculator
+export function isScientificCalculator(calculator: Calculator): calculator is ScientificCalculatorInterface {
+  return 'angleMode' in calculator && 'setAngleMode' in calculator && 'handleScientificFunction' in calculator;
 }
 
 /**
@@ -146,6 +165,135 @@ class StandardCalculatorWrapper implements StandardCalculatorInterface {
   }
 }
 
+// ADD: Wrapper class to add missing methods to ScientificCalculator
+class ScientificCalculatorWrapper implements ScientificCalculatorInterface {
+  private calculator: ScientificCalculator
+
+  constructor(calculator: ScientificCalculator) {
+    this.calculator = calculator
+  }
+
+  get input(): string {
+    return this.calculator.input
+  }
+
+  set input(value: string) {
+    this.calculator.input = value
+  }
+
+  get currentExpression(): string {
+    return this.calculator.currentExpression
+  }
+
+  set currentExpression(value: string) {
+    this.calculator.currentExpression = value
+  }
+
+  get MAX_INPUT_LENGTH(): number {
+    return this.calculator.MAX_INPUT_LENGTH
+  }
+
+  get angleMode(): 'RAD' | 'DEG' {
+    return this.calculator.angleMode
+  }
+
+  get notationMode(): 'F-E' | 'SCI' {
+    return this.calculator.notationMode
+  }
+
+  get hyperbolicMode(): boolean {
+    return this.calculator.hyperbolicMode
+  }
+
+  setAngleMode(mode: 'RAD' | 'DEG'): void {
+    this.calculator.setAngleMode(mode)
+  }
+
+  setNotationMode(mode: 'F-E' | 'SCI'): void {
+    this.calculator.setNotationMode(mode)
+  }
+
+  toggleHyperbolic(): void {
+    this.calculator.toggleHyperbolic()
+  }
+
+  handleButtonClick(button: string): CalculatorResult {
+    const result = this.calculator.handleButtonClick(button)
+    return {
+      input: this.input,
+      ...result
+    }
+  }
+
+  handleScientificFunction(func: string): CalculatorResult {
+    const result = this.calculator.handleScientificFunction(func)
+    return {
+      input: this.input,
+      ...result
+    }
+  }
+
+  handleConstant(constant: string): CalculatorResult {
+    const result = this.calculator.handleConstant(constant)
+    return {
+      input: this.input,
+      ...result
+    }
+  }
+
+  evaluateExpression(expression: string, base?: string): any {
+    return this.calculator.evaluateExpression(expression, base)
+  }
+
+  formatResult(result: any): string {
+    return this.calculator.formatResult(result)
+  }
+
+  // Add convertToBase method for memory operations compatibility
+  convertToBase(value: string, fromBase: string, toBase: string): string {
+    // For scientific calculator, we'll implement basic base conversion
+    // This is mainly used for memory operations
+    try {
+      let decimalValue: number
+
+      // Convert from source base to decimal
+      switch (fromBase.toUpperCase()) {
+        case 'DEC':
+          decimalValue = parseFloat(value)
+          break
+        case 'HEX':
+          decimalValue = parseInt(value, 16)
+          break
+        case 'OCT':
+          decimalValue = parseInt(value, 8)
+          break
+        case 'BIN':
+          decimalValue = parseInt(value, 2)
+          break
+        default:
+          decimalValue = parseFloat(value)
+      }
+
+      // Convert from decimal to target base
+      switch (toBase.toUpperCase()) {
+        case 'DEC':
+          return decimalValue.toString()
+        case 'HEX':
+          return decimalValue.toString(16).toUpperCase()
+        case 'OCT':
+          return decimalValue.toString(8)
+        case 'BIN':
+          return decimalValue.toString(2)
+        default:
+          return decimalValue.toString()
+      }
+    } catch (error) {
+      console.error('Error converting base:', error)
+      return '0'
+    }
+  }
+}
+
 /**
  * Calculator factory for creating calculator instances
  */
@@ -179,9 +327,9 @@ export class CalculatorFactory {
           return new ProgrammerCalculator(settings) as unknown as ProgrammerCalculatorInterface
         
         case 'Scientific':
-          // If you have a ScientificCalculator class, add it here
-          // return new ScientificCalculator(settings)
-          throw new Error('Scientific calculator mode not yet implemented')
+          // ADD: Wrap ScientificCalculator to add missing methods
+          const scientificCalc = new ScientificCalculator(settings)
+          return new ScientificCalculatorWrapper(scientificCalc)
         
         default:
           // TypeScript will ensure this is never reached with proper typing
@@ -198,7 +346,7 @@ export class CalculatorFactory {
    * @returns Array of available calculator modes
    */
   static getAvailableModes(): CalculatorMode[] {
-    return ['Standard', 'Programmer'] // Add 'Scientific' when implemented
+    return ['Standard', 'Programmer', 'Scientific'] // ADD: Now includes Scientific
   }
 
   /**
@@ -236,9 +384,16 @@ export class CalculatorFactory {
         }
       
       case 'Scientific':
+        // ADD: Scientific calculator specific defaults
         return {
           ...baseSettings,
           angleUnit: 'degrees' as const,
+          precision: 10, // Higher precision for scientific calculations
+          notationMode: 'F-E',
+          display: {
+            precision: 10,
+            useFractions: false
+          }
           // Add scientific calculator specific defaults
         }
       
@@ -264,5 +419,6 @@ export type {
   BaseCalculator,
   CalculatorResult,
   StandardCalculatorInterface,
-  ProgrammerCalculatorInterface
+  ProgrammerCalculatorInterface,
+  ScientificCalculatorInterface // ADD: Export new interface
 }

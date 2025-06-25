@@ -6,10 +6,17 @@
     main-class="flex"
     :is-tool-layout="true"
   >
+    <!-- Calculator Mode Switcher - teleports to header -->
+    <CalculatorModeSwitcher />
+    
     <div class="flex-grow flex-initial bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300">
       <div
         class="grid grid-cols-1 h-full p-4 gap-1 mx-auto"
-        :class="state.mode === 'Programmer' ? 'grid-rows-[1fr_2fr]' : 'grid-rows-[1fr_2.5fr]'"
+        :class="state.mode === 'Programmer' 
+          ? 'grid-rows-[1fr_2fr]' 
+          : (state.mode === 'Scientific' || state.mode === 'Standard' 
+          ? 'grid-rows-[1fr_3fr]' 
+          : '')"
       >
         <calculator-display
           :input="input"
@@ -52,11 +59,15 @@ import { useHistory, type HistoryItem } from '@/composables/useHistory'
 import { useMemory, type UseMemoryReturn } from '@/composables/useMemory'
 import { usePanel, type LightweightPanelAPI } from '@/composables/usePanel'
 import { useCalculatorState, type CalculatorMode, type Base } from '@/composables/useCalculatorState'
+import { useCalculatorModeSwitcher } from '@/composables/useCalculatorModeSwitcher'
 import { CalculatorController, type ControllerReturn } from './MainCalculator'
 import { CalculatorFactory, type Calculator } from '@/services/factory/CalculatorFactory'
 import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import BasePage from '@/components/base/BasePage.vue'
+
+// Import the calculator mode switcher component
+const CalculatorModeSwitcher = defineAsyncComponent(() => import('@/components/calculator/CalculatorModeSwitcher.vue'))
 
 // Types
 interface Props {
@@ -82,6 +93,9 @@ const memoryService: UseMemoryReturn = useMemory()
 // Get the panel instance - cast to the correct type
 const activityPanelResult = usePanel('activity')
 const activityPanel = activityPanelResult as LightweightPanelAPI
+
+// Get calculator mode switcher context
+const { currentMode, updateMode } = useCalculatorModeSwitcher()
 
 const {
   state,
@@ -138,11 +152,8 @@ watch(() => state.input, (newRawInput: string) => {
   }
 })
 
-// Watch for mode changes with proper typing - Fix the string to CalculatorMode issue
-watch(() => props.mode, (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
-  if (!newMode) return
-
-  // Ensure newMode is properly typed as CalculatorMode
+// Centralized mode change handler
+const handleModeChange = (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
   const validatedMode: CalculatorMode = newMode as CalculatorMode
 
   resetState(validatedMode)
@@ -168,6 +179,26 @@ watch(() => props.mode, (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
   } else { 
     storedInput.value = ""
   }
+}
+
+// Watch for mode changes from the switcher and sync with props
+watch(() => currentMode.value, (newMode: CalculatorMode) => {
+  if (newMode !== props.mode) {
+    // The mode change came from the switcher, handle it
+    handleModeChange(newMode)
+  }
+})
+
+// Watch for mode changes from props and sync with switcher
+watch(() => props.mode, (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
+  if (!newMode) return
+
+  // Sync the switcher with the prop change
+  if (currentMode.value !== newMode) {
+    updateMode(newMode)
+  }
+
+  handleModeChange(newMode, oldMode)
 }, { immediate: true })
 
 // Handle activity item selection with proper typing

@@ -17,7 +17,27 @@ export const BUTTON_TYPES = {
   OPERATORS: ['+', '-', '×', '÷', '%'] as const,
   FUNCTIONS: ['AC', 'CE', 'backspace', '=', '±'] as const,
   MEMORY: ['MC', 'MR', 'M+', 'M-', 'MS'] as const,
-  PROGRAMMER_OPERATORS: ['<<', '>>', '&', '|', '^', '~'] as const
+  PROGRAMMER_OPERATORS: ['<<', '>>', '&', '|', '^', '~'] as const,
+  SCIENTIFIC_FUNCTIONS: [
+    // Basic trig
+    'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
+    // Reciprocal trig
+    'csc', 'sec', 'cot', 'acsc', 'asec', 'acot',
+    // Hyperbolic
+    'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+    // Reciprocal hyperbolic
+    'csch', 'sech', 'coth', 'acsch', 'asech', 'acoth',
+    // Logarithmic
+    'log', 'ln', 'log2', 'exp',
+    // Power functions
+    '10^x', '2^x', 'e^x', 'x^y', 'x²', 'x³',
+    // Root functions
+    '√', '∛', 'y√x',
+    // Other functions
+    'abs', 'ceil', 'floor', 'round', 'factorial', '1/x',
+    // Utility functions
+    'rand', 'gcd', 'lcm', 'mod', 'dms', 'deg'
+  ] as const
 } as const
 
 /**
@@ -30,7 +50,14 @@ export const REGEX = {
   LAST_OPERATOR: /\s*[+\-×÷%<<>>]\s*$/,
   DECIMAL_POINT: /\./,
   SHIFT_OPERATOR: /\s*[<>]{2}\s*$/,
-  PARENTHESIS: /[()]/
+  PARENTHESIS: /[()]/,
+  SCIENTIFIC_FUNCTION: /^(sin|cos|tan|asin|acos|atan|csc|sec|cot|acsc|asec|acot|sinh|cosh|tanh|asinh|acosh|atanh|csch|sech|coth|acsch|asech|acoth|log|ln|log2|exp|sqrt|cbrt|abs|ceil|floor|round|factorial|gcd|lcm)\(/,
+  TRIG_FUNCTION: /^(sin|cos|tan|asin|acos|atan|csc|sec|cot|acsc|asec|acot)\(/,
+  HYPERBOLIC_FUNCTION: /^(sinh|cosh|tanh|asinh|acosh|atanh|csch|sech|coth|acsch|asech|acoth)\(/,
+  LOG_FUNCTION: /^(log|ln|log2|exp)\(/,
+  POWER_FUNCTION: /\^/,
+  FACTORIAL: /\d+!/,
+  CONSTANT: /π|e/
 } as const
 
 /**
@@ -43,7 +70,43 @@ export const ERROR_MESSAGES = {
   MAX_INPUT_LENGTH: "Maximum input length reached",
   NEGATIVE_SQUARE_ROOT: "Cannot calculate square root of negative number",
   OPERATION_ERROR: "Operation error",
-  INVALID_BASE: "Invalid base for conversion"
+  INVALID_BASE: "Invalid base for conversion",
+  DOMAIN_ERROR: "Domain error: Invalid input for function",
+  INVALID_ANGLE: "Invalid angle value",
+  INVALID_LOGARITHM: "Cannot calculate logarithm of non-positive number"
+} as const
+
+/**
+ * Function name mappings for display to internal representation
+ */
+export const FUNCTION_MAPPINGS = {
+  'sin⁻¹': 'asin',
+  'cos⁻¹': 'acos',
+  'tan⁻¹': 'atan',
+  'csc⁻¹': 'acsc',
+  'sec⁻¹': 'asec',
+  'cot⁻¹': 'acot',
+  'sinh⁻¹': 'asinh',
+  'cosh⁻¹': 'acosh',
+  'tanh⁻¹': 'atanh',
+  'csch⁻¹': 'acsch',
+  'sech⁻¹': 'asech',
+  'coth⁻¹': 'acoth',  
+  'log₂': 'log2',
+  'exp': 'exp',
+  '10ˣ': '10^',
+  '2ˣ': '2^',
+  'eˣ': 'e^',
+  'ln': 'ln',    
+  '²√x': '√',
+  '³√x': '∛',
+  'ʸ√x': 'y√x',
+  '¹⁄ₓ': '1/x',
+  'xʸ': 'x^y',
+  '⌈x⌉': 'ceil',
+  '⌊x⌋': 'floor',
+  '→DMS': 'dms',
+  '→DEG': 'deg'
 } as const
 
 /**
@@ -86,7 +149,12 @@ export const CalculatorConstants = {
   /**
    * Error messages
    */
-  ERROR_MESSAGES
+  ERROR_MESSAGES,
+
+  /**
+   * Function mappings
+   */
+  FUNCTION_MAPPINGS
 } as const
 
 // Type definitions
@@ -238,16 +306,6 @@ export const CalculatorUtils = {
   },
   
   /**
-   * Get last part of an expression
-   * @param expr - Expression to analyze
-   * @returns Last part of expression
-   */
-  getLastExpressionPart(expr: string): string {
-    const parts = this.splitExpression(expr)
-    return parts[parts.length - 1].trim()
-  },
-  
-  /**
    * Check if expression ends with an operator
    * @param expr - Expression to check
    * @returns True if expression ends with an operator
@@ -367,7 +425,7 @@ export const CalculatorUtils = {
       const isNegative = typeof value === 'string' && value.startsWith('-')
       const absValue = isNegative ? value.substring(1) : value
       
-            // Convert from source base to decimal first
+      // Convert from source base to decimal first
       let decimalValue: number
       
       if (fromBase === 'DEC') {
@@ -392,5 +450,123 @@ export const CalculatorUtils = {
       console.error('Base conversion error:', err)
       return '0'
     }
+  },
+
+  /**
+   * Check if a string represents a scientific function
+   * @param str - String to check
+   * @returns True if string is a scientific function
+   */
+  isScientificFunction(str: string): boolean {
+    return REGEX.SCIENTIFIC_FUNCTION.test(str)
+  },
+
+  /**
+   * Check if a string represents a trigonometric function
+   * @param str - String to check
+   * @returns True if string is a trigonometric function
+   */
+  isTrigFunction(str: string): boolean {
+    return REGEX.TRIG_FUNCTION.test(str)
+  },
+
+  /**
+   * Check if a string represents a hyperbolic function
+   * @param str - String to check
+   * @returns True if string is a hyperbolic function
+   */
+  isHyperbolicFunction(str: string): boolean {
+    return REGEX.HYPERBOLIC_FUNCTION.test(str)
+  },
+
+  /**
+   * Check if a string represents a logarithmic function
+   * @param str - String to check
+   * @returns True if string is a logarithmic function
+   */
+  isLogFunction(str: string): boolean {
+    return REGEX.LOG_FUNCTION.test(str)
+  },
+
+  /**
+   * Validate angle input based on mode
+   * @param angle - Angle value
+   * @param mode - Angle mode (RAD, DEG, GRAD)
+   * @returns True if angle is valid
+   */
+  isValidAngle(angle: number, mode: 'RAD' | 'DEG' | 'GRAD'): boolean {
+    if (!isFinite(angle)) return false
+    
+    switch (mode) {
+      case 'DEG':
+        return angle >= -360 && angle <= 360
+      case 'GRAD':
+        return angle >= -400 && angle <= 400
+      case 'RAD':
+      default:
+        return angle >= -2 * Math.PI && angle <= 2 * Math.PI
+    }
+  },
+
+  /**
+   * Format error message for scientific functions
+   * @param error - Error object
+   * @param functionName - Name of the function that caused the error
+   * @returns Formatted error message
+   */
+  formatScientificError(error: Error | string | null | undefined, functionName?: string): string {
+    if (!error) return ERROR_MESSAGES.OPERATION_ERROR
+    
+    const errorMessage = typeof error === 'string' ? error : error.message
+    
+    // Handle specific scientific function errors
+    if (errorMessage.includes("domain") || errorMessage.includes("Domain")) {
+      return ERROR_MESSAGES.DOMAIN_ERROR
+    }
+    
+    if (errorMessage.includes("logarithm") && errorMessage.includes("negative")) {
+      return ERROR_MESSAGES.INVALID_LOGARITHM
+    }
+    
+    if (functionName && this.isTrigFunction(functionName) && errorMessage.includes("invalid")) {
+      return ERROR_MESSAGES.INVALID_ANGLE
+    }
+    
+    return this.formatError(error, ERROR_MESSAGES.OPERATION_ERROR)
+  },
+
+  /**
+   * Map display function names to actual function names
+   * @param func - Function name to map
+   * @returns Mapped function name
+   */
+  mapFunctionName(func: string): string {
+    return FUNCTION_MAPPINGS[func as keyof typeof FUNCTION_MAPPINGS] || func
+  },
+
+  /**
+   * Handle special backspace cases for functions and operators
+   * @param currentInput - Current input string
+   * @returns Object with handled flag and updated input
+   */
+  handleSpecialBackspace(currentInput: string): { handled: boolean; input: string } {
+    // Check for function names to remove completely
+    const functionMatches = currentInput.match(/(\w+)\($/) || currentInput.match(/(\w+)\($/)
+    if (functionMatches) {
+      return {
+        handled: true,
+        input: currentInput.slice(0, -functionMatches[1].length - 1)
+      }
+    }
+    
+    // Check for operators with spaces
+    if (/ [+\-×÷] $/.test(currentInput)) {
+      return {
+        handled: true,
+        input: currentInput.slice(0, -3)
+      }
+    }
+    
+    return { handled: false, input: currentInput }
   }
 } as const

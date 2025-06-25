@@ -6,8 +6,6 @@
     <app-header
       :is-sidebar-open="sidebarPanel.isOpen"
       :is-menubar-open="menuPanel.isOpen"
-      :current-calculator-mode="currentMode" 
-      @update:mode="updateMode"
       @toggle-sidebar="sidebarPanel.toggle()"
       @toggle-menubar="menuPanel.toggle()"
       @open-shortcut-modal="openShortcutModal"
@@ -30,7 +28,7 @@
 
     <Suspense>
       <app-view
-        :mode="currentMode"
+        :mode="modeSwitcher.currentMode.value"
         :settings="settings"
         :is-mobile="device.isMobile"
       />
@@ -75,6 +73,7 @@ import { useSettingsStore } from "@/stores/settings.ts";
 import { useKeyboard } from "@/composables/useKeyboard.ts";
 import { usePanel } from "@/composables/usePanel";
 import { useTheme } from "@/composables/useTheme";
+import { provideCalculatorModeSwitcher } from "@/composables/useCalculatorModeSwitcher";
 import type { CalculatorMode } from "@/composables/useCalculatorState";
 import AppHeader from "@/components/layout/AppHeader.vue";
 
@@ -100,6 +99,11 @@ device.initializeDeviceInfo();
 
 const { toggleTheme } = useTheme();
 
+// Provide calculator mode switcher context
+const modeSwitcher = provideCalculatorModeSwitcher(
+  (settings.calculator.mode as CalculatorMode) || 'Standard'
+);
+
 const panelStates = reactive({
   sidebar: { isOpen: false, isLoaded: false },
   menu: { isOpen: false, isLoaded: false },
@@ -108,28 +112,11 @@ const panelStates = reactive({
 
 const isShortcutModalOpen = shallowRef(false);
 
-// Fix: Ensure currentMode is properly typed as CalculatorMode
-const currentMode = shallowRef<CalculatorMode>(
-  (settings.calculator.mode as CalculatorMode) || 'Standard'
-);
-
 const sidebarPanel = usePanel('sidebar');
 const menuPanel = usePanel('menu');
 
 function openShortcutModal() {
   isShortcutModalOpen.value = true;
-}
-
-// Fix: Ensure the parameter is properly typed
-function updateMode(newMode: string | CalculatorMode) {
-  // Type guard to ensure we have a valid CalculatorMode
-  const validModes: CalculatorMode[] = ['Standard', 'Scientific', 'Programmer'];
-  if (validModes.includes(newMode as CalculatorMode)) {
-    currentMode.value = newMode as CalculatorMode;
-  } else {
-    console.warn(`Invalid calculator mode: ${newMode}. Defaulting to Standard.`);
-    currentMode.value = 'Standard';
-  }
 }
 
 useKeyboard("global", {

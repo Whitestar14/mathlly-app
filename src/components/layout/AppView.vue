@@ -17,7 +17,6 @@ import { computed } from 'vue';
 import { RouterView } from 'vue-router';
 
 interface Props {
-  mode: string;
   settings: Record<string, any>;
   isMobile: boolean;
 }
@@ -25,13 +24,11 @@ interface Props {
 const props = defineProps<Props>();
 
 interface CalculatorProps {
-  mode: string;
   settings: Record<string, any>;
   isMobile: boolean;
 }
 
 const calculatorProps = computed((): CalculatorProps => ({
-  mode: props.mode,
   settings: props.settings,
   isMobile: props.isMobile
 }));

@@ -23,8 +23,10 @@
         :icon="btn.icon"
         :disabled="btn.checkMaxLength ? isMaxLengthReached : false"
         :variant="btn.variant"
-        @click="handleClick(btn.value)"
-      />
+        @click="handleClick"
+      >
+        <span v-html="btn.display || btn.value"></span>
+      </CalcButton>
 
       <!-- Second row -->
       <CalcButton 
@@ -33,19 +35,23 @@
         :value="btn.value"
         :disabled="isMaxLengthReached"
         :variant="btn.variant"
-        @click="handleClick(btn.value)"
-      />
+        @click="handleClick"
+      >
+        <span v-html="btn.display || btn.value"></span>
+      </CalcButton>
 
       <!-- Number pad and operations -->
-      <template v-for="(row, rowIndex) in numberRows">
+      <template v-for="(row, rowIndex) in numberRows" :key="`row-${rowIndex}`">
         <CalcButton 
           v-for="(btn, btnIndex) in row" 
           :key="`row-${rowIndex}-btn-${btnIndex}`"
           :value="btn.value"
-          :disabled="isMaxLengthReached"
+          :disabled="isMaxLengthReached && btn.variant === 'number'"
           :variant="btn.variant"
-          @click="handleClick(btn.value)"
-        />
+          @click="handleClick"
+        >
+          <span v-html="btn.display || btn.value"></span>
+        </CalcButton>
       </template>
     </div>
   </div>
@@ -54,7 +60,6 @@
 <script setup>
 import { computed, markRaw } from "vue";
 import { Delete } from 'lucide-vue-next';
-import { numberRows } from './NumberRows'
 import CalcButton from '@/components/ui/CalculatorButton.vue';
 
 const props = defineProps({
@@ -84,14 +89,45 @@ const firstRow = markRaw([
   { value: '%', variant: 'function', checkMaxLength: true },
   { value: 'CE', variant: 'function' },
   { value: 'C', variant: 'function' },
-  { value: 'backspace', variant: 'function', icon: Delete }
+  { value: 'backspace', variant: 'function', icon: Delete, display: '⌫' }
 ]);
 
 const secondRow = markRaw([
-  { value: '1/x', variant: 'function' },
-  { value: 'x²', variant: 'function' },
-  { value: '√', variant: 'function' },
+  { value: '1/x', variant: 'function', display: '¹⁄ₓ' },
+  { value: 'x²', variant: 'function', display: 'x²' },
+  { value: '√', variant: 'function', display: '√x' },
   { value: '÷', variant: 'operator' }
+]);
+
+const numberRows = markRaw([
+  // Row 1: 7, 8, 9, ×
+  [
+    { value: '7', variant: 'number' },
+    { value: '8', variant: 'number' },
+    { value: '9', variant: 'number' },
+    { value: '×', variant: 'operator' }
+  ],
+  // Row 2: 4, 5, 6, -
+  [
+    { value: '4', variant: 'number' },
+    { value: '5', variant: 'number' },
+    { value: '6', variant: 'number' },
+    { value: '-', variant: 'operator' }
+  ],
+  // Row 3: 1, 2, 3, +
+  [
+    { value: '1', variant: 'number' },
+    { value: '2', variant: 'number' },
+    { value: '3', variant: 'number' },
+    { value: '+', variant: 'operator' }
+  ],
+  // Row 4: ±, 0, ., =
+  [
+    { value: '±', variant: 'function' },
+    { value: '0', variant: 'number' },
+    { value: '.', variant: 'number' },
+    { value: '=', variant: 'operator' }
+  ]
 ]);
 
 const handleClick = (value) => {
