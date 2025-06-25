@@ -1,6 +1,7 @@
 import { isNegative, isNaN } from 'mathjs';
 import { ExpressionEvaluator } from '@/utils/core/ExpressionEvaluator.ts';
-import { CalculatorConstants, CalculatorUtils, BaseType } from '@/utils/constants/CalculatorConstants.ts';
+import { CalculatorConstants, BaseType } from '@/utils/constants/CalculatorConstants.ts';
+import { CalculatorUtils } from '../constants/CalculatorUtils';
 
 /**
  * Handles calculations for programmer calculator

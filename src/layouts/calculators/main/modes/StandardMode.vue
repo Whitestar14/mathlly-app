@@ -2,35 +2,34 @@
   <div class="flex flex-col gap-1">
     <!-- Memory buttons row -->
     <div class="grid grid-cols-5 gap-1">
-      <button
+      <CalcButton
         v-for="op in memoryOperations"
         :key="op"
-        class="calc-btn calc-memory-btn calc-btn-grid"
+        :value="op"
+        variant="memory"
         :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
-        @click="handleClick(op)"
+        @click="handleClick"
       >
         {{ op }}
-      </button>
+      </CalcButton>
     </div>
     
     <!-- Calculator buttons grid -->
     <div class="grid grid-cols-4 gap-1 flex-grow">
       <!-- First row -->
       <CalcButton 
-        v-for="(btn, index) in firstRow" 
+        v-for="(btn, index) in standardFirstRow" 
         :key="index"
         :value="btn.value"
         :icon="btn.icon"
         :disabled="btn.checkMaxLength ? isMaxLengthReached : false"
         :variant="btn.variant"
         @click="handleClick"
-      >
-        <span v-html="btn.display || btn.value"></span>
-      </CalcButton>
+      />
 
       <!-- Second row -->
       <CalcButton 
-        v-for="(btn, index) in secondRow" 
+        v-for="(btn, index) in standardSecondRow" 
         :key="index"
         :value="btn.value"
         :disabled="isMaxLengthReached"
@@ -49,18 +48,21 @@
           :disabled="isMaxLengthReached && btn.variant === 'number'"
           :variant="btn.variant"
           @click="handleClick"
-        >
-          <span v-html="btn.display || btn.value"></span>
-        </CalcButton>
+        />
       </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, markRaw } from "vue";
-import { Delete } from 'lucide-vue-next';
+import { computed } from "vue";
 import CalcButton from '@/components/ui/CalculatorButton.vue';
+import { 
+  numberRows, 
+  standardFirstRow, 
+  standardSecondRow, 
+  memoryOperations 
+} from './NumberRows';
 
 const props = defineProps({
   inputLength: {
@@ -82,53 +84,6 @@ const emit = defineEmits(['button-click', 'clear']);
 const isMaxLengthReached = computed(() => 
   props.inputLength >= props.maxLength
 );
-
-const memoryOperations = markRaw(['MC', 'MR', 'M+', 'M-', 'MS']);
-
-const firstRow = markRaw([
-  { value: '%', variant: 'function', checkMaxLength: true },
-  { value: 'CE', variant: 'function' },
-  { value: 'C', variant: 'function' },
-  { value: 'backspace', variant: 'function', icon: Delete, display: '⌫' }
-]);
-
-const secondRow = markRaw([
-  { value: '1/x', variant: 'function', display: '¹⁄ₓ' },
-  { value: 'x²', variant: 'function', display: 'x²' },
-  { value: '√', variant: 'function', display: '√x' },
-  { value: '÷', variant: 'operator' }
-]);
-
-const numberRows = markRaw([
-  // Row 1: 7, 8, 9, ×
-  [
-    { value: '7', variant: 'number' },
-    { value: '8', variant: 'number' },
-    { value: '9', variant: 'number' },
-    { value: '×', variant: 'operator' }
-  ],
-  // Row 2: 4, 5, 6, -
-  [
-    { value: '4', variant: 'number' },
-    { value: '5', variant: 'number' },
-    { value: '6', variant: 'number' },
-    { value: '-', variant: 'operator' }
-  ],
-  // Row 3: 1, 2, 3, +
-  [
-    { value: '1', variant: 'number' },
-    { value: '2', variant: 'number' },
-    { value: '3', variant: 'number' },
-    { value: '+', variant: 'operator' }
-  ],
-  // Row 4: ±, 0, ., =
-  [
-    { value: '±', variant: 'function' },
-    { value: '0', variant: 'number' },
-    { value: '.', variant: 'number' },
-    { value: '=', variant: 'operator' }
-  ]
-]);
 
 const handleClick = (value) => {
   if (value === 'C') {

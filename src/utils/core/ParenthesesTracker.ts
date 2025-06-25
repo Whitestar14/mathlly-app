@@ -29,14 +29,11 @@ export class ParenthesesTracker {
  * @param position - Position of the opening parenthesis
  */
 open(position: number): void {
-  console.log('🔓 ParenthesesTracker.open() called with position:', position)
   this.count++
   this.groups.push({
     start: position,
     content: ""
   })
-  console.log('📊 New parentheses count:', this.count)
-  console.log('📋 Groups:', this.groups)
 }
 
 /**
@@ -44,21 +41,15 @@ open(position: number): void {
  * @param position - Position of the closing parenthesis
  * @returns True if successfully closed, false if no matching opening parenthesis
  */
-close(position: number): boolean {
-  console.log('🔒 ParenthesesTracker.close() called with position:', position)
-  console.log('📍 Call stack:', new Error().stack) // This will show us what called close()
-  
+close(position: number): boolean {  
   if (this.count > 0) {
     this.count--
     const group = this.groups[this.groups.length - 1]
     if (group) {
       group.end = position
     }
-    console.log('✅ Successfully closed parenthesis')
-    console.log('📊 New parentheses count:', this.count)
     return true
   }
-  console.log('❌ No matching opening parenthesis to close')
   return false
 }
 
@@ -118,7 +109,7 @@ close(position: number): boolean {
     if (!contentAfterOpen) return false
     
     const lastChar = expr.trim().slice(-1)
-    return /[0-9A-Fa-f)]/.test(lastChar)
+    return /[0-9A-Fa-fπe)]/.test(lastChar)
   }
 
   /**
@@ -155,7 +146,7 @@ close(position: number): boolean {
           return { input: newInput, error: "" }
         } else {
           const lastChar = currentInput.slice(-1)
-          const needsMultiplication = /[0-9A-Fa-f)]/.test(lastChar)
+          const needsMultiplication = /[0-9A-Fa-fπe)]/.test(lastChar);
           const newInput = `${currentInput}${needsMultiplication ? " × " : ""}(`
           this.open(position + (needsMultiplication ? 3 : 1))
           return { input: newInput, error: "" }
@@ -211,40 +202,40 @@ close(position: number): boolean {
    * @param expr - Expression to analyze
    * @returns The last expression part or null if none found
    */
-  static getLastExpressionPart(expr: string): string | null {
+static getLastExpressionPart(expr: string): string | null {
     // Handle nested parentheses properly
-    let parenCount = 0
+    let parenCount = 0;
     
     // Scan from right to left to find the last complete expression
     for (let i = expr.length - 1; i >= 0; i--) {
-      const char = expr[i]
+      const char = expr[i];
       
       if (char === ')') {
-        parenCount++
+        parenCount++;
       } else if (char === '(') {
-        parenCount--
+        parenCount--;
         if (parenCount === 0) {
           // Found a complete parenthesized expression
           // Look for function name before the opening parenthesis
-          let funcStart = i
-          while (funcStart > 0 && /[a-zA-Z√∛]/.test(expr[funcStart - 1])) {
-            funcStart--
+          let funcStart = i;
+          while (funcStart > 0 && /[a-zA-Z√∛πe]/.test(expr[funcStart - 1])) {
+            funcStart--;
           }
-          return expr.substring(funcStart)
+          return expr.substring(funcStart);
         }
       } else if (parenCount === 0 && /[+\-×÷]/.test(char)) {
         // Found an operator at the top level
-        break
+        break;
       }
     }
     
     // If no parenthesized expression found, try to match the last number
-    const lastNumberMatch = expr.match(/(\d+(?:\.\d+)?)(?!.*\d)/)
+    const lastNumberMatch = expr.match(/(\d+(?:\.\d+)?)(?!.*\d)/);
     if (lastNumberMatch) {
-      return lastNumberMatch[0]
+      return lastNumberMatch[0];
     }
     
-    return null
+    return null;
   }
 }
 

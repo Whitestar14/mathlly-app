@@ -1,7 +1,8 @@
 import { ICalculator } from "@/utils/core/ICalculator.ts";
 import { ScientificOperations } from "@/utils/operations/ScientificOperations.ts";
 import { ScientificCalculations } from "@/utils/calculations/ScientificCalculations.ts";
-import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants.ts";
+import { CalculatorConstants } from "@/utils/constants/CalculatorConstants.ts";
+import { CalculatorUtils } from '@/utils/constants/CalculatorUtils';
 
 /**
  * Calculator implementation for scientific mode
@@ -13,7 +14,7 @@ export class ScientificCalculator extends ICalculator {
   MAX_INPUT_LENGTH: number;
   calculations: ScientificCalculations;
   operations: ScientificOperations;
-  angleMode: 'RAD' | 'DEG' | 'GRAD' = 'RAD';
+  angleMode: 'RAD' | 'DEG' | 'GRAD' = 'DEG';
   notationMode: 'F-E' | 'SCI' = 'F-E';
   hyperbolicMode: boolean = false;
 
@@ -30,7 +31,7 @@ export class ScientificCalculator extends ICalculator {
     this.operations = new ScientificOperations(this);
     
     // Initialize scientific modes
-    this.angleMode = settings.angleUnit === 'degrees' ? 'DEG' : 'RAD';
+    this.angleMode = settings.angleUnit === 'radians' ? 'RAD' : 'DEG';
   }
 
   /**
@@ -52,8 +53,8 @@ export class ScientificCalculator extends ICalculator {
   /**
    * Toggle hyperbolic mode
    */
-  toggleHyperbolic(state: boolean): void {
-    this.hyperbolicMode = state;
+  toggleHyperbolic(state?: boolean): void {
+    this.hyperbolicMode = state !== undefined ? state : !this.hyperbolicMode;
   }
 
   /**
@@ -77,59 +78,41 @@ export class ScientificCalculator extends ICalculator {
     }
   }
 
-handleEquals(): Record<string, any> {
-  console.log('🟰 handleEquals() called!')
-  console.log('📍 Call stack:', new Error().stack)
-  console.log('📝 Current input:', this.input)
-  
-  try {
-    // Get parentheses count from operations
-    const openCount = this.operations.getParenthesesCount();
-    console.log('🔢 Open parentheses count:', openCount)
-    
-    // Add missing closing parentheses if needed
-    const finalExpr = openCount > 0 ? this.input + ")".repeat(openCount) : this.input;
-    console.log('📐 Final expression with auto-closed parens:', finalExpr)
-    
-    this.currentExpression = finalExpr;
-    const result = this.evaluateExpression(finalExpr);
-    this.input = this.formatResult(result);
-    
-    // Reset parentheses tracker in operations
-    this.operations.resetParentheses();
-    
-    return this.normalizeResponse({
-      expression: this.currentExpression,
-      result: this.input,
-      input: this.input
-    });
-  } catch (err: any) {
-    return this.createErrorResponse(err, this.input);
+  /**
+   * Handle equals operation
+   * 
+   * @returns {Object} Calculation result
+   */
+  handleEquals(): Record<string, any> {
+    try {
+      // Get parentheses count from operations
+      const openCount = this.operations.getParenthesesCount();
+      // Add missing closing parentheses if needed
+      const finalExpr = openCount > 0 ? this.input + ")".repeat(openCount) : this.input;
+      
+      this.currentExpression = finalExpr;
+      const result = this.evaluateExpression(finalExpr);
+      this.input = this.formatResult(result);
+      
+      // Reset parentheses tracker in operations
+      this.operations.resetParentheses();
+      
+      return this.normalizeResponse({
+        expression: this.currentExpression,
+        result: this.input,
+        input: this.input
+      });
+    } catch (err: any) {
+      return this.createErrorResponse(err, this.input);
+    }
   }
-}
 
-    /**
+  /**
    * Process button input and route to appropriate handler
    */
   processButton(btn: string): Record<string, any> {
     try {
       this.error = '';
-
-      // Handle scientific mode toggles
-      if (btn === 'RAD' || btn === 'DEG' || btn === 'GRAD') {
-        this.setAngleMode(btn as 'RAD' | 'DEG' | 'GRAD');
-        return { input: this.input, angleMode: this.angleMode };
-      }
-      
-      if (btn === 'F-E' || btn === 'SCI') {
-        this.setNotationMode(btn as 'F-E' | 'SCI');
-        return { input: this.input, notationMode: this.notationMode };
-      }
-      
-      if (btn === 'HYP') {
-        this.toggleHyperbolic(!this.hyperbolicMode);
-        return { input: this.input, hyperbolicMode: this.hyperbolicMode };
-      }
 
       // Handle parentheses
       if (btn === '(') {
@@ -165,35 +148,22 @@ handleEquals(): Record<string, any> {
         return this.operations.handleBackspace();
       }
 
-      // Handle scientific functions - expanded list
+      // Handle scientific functions
       const scientificFunctions = [
-        // Basic trig functions
         'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-        // Reciprocal trig functions
-        'csc', 'sec', 'cot', 'acsc', 'asec', 'acot',
-        // Hyperbolic functions
         'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-        // Reciprocal hyperbolic functions
+        'csc', 'sec', 'cot', 'acsc', 'asec', 'acot',
         'csch', 'sech', 'coth', 'acsch', 'asech', 'acoth',
-        // Logarithmic and exponential functions
         'log', 'ln', 'log2', 'exp', '10^x', '2^x', 'e^x',
-        // Power and root functions
         'x^y', 'y√x', 'n!', '|x|', 'x²', 'x³', '√', '∛', '1/x',
-        // Additional mathematical functions
-        'abs', 'ceil', 'floor', 'round', 'rand', 'gcd', 'lcm',
-        // Angle conversion functions
-        'dms', 'deg', 'mod'
+        'mod', 'rand', 'dms', 'deg', 'abs', 'ceil', 'floor', 'round', 'gcd', 'lcm'
       ];
 
-      // Handle display variants of scientific functions
-      const displayVariants = [
-        'sin⁻¹', 'cos⁻¹', 'tan⁻¹', 'csc⁻¹', 'sec⁻¹', 'cot⁻¹',
-        'sinh⁻¹', 'cosh⁻¹', 'tanh⁻¹', 'csch⁻¹', 'sech⁻¹', 'coth⁻¹',
-        'log₂', '10ˣ', '2ˣ', 'eˣ', 'xʸ', 'ʸ√x', '²√x', '³√x', '¹⁄ₓ',
-        '⌈x⌉', '⌊x⌋', '→DMS', '→DEG'
-      ];
-
-      if (scientificFunctions.includes(btn) || displayVariants.includes(btn)) {
+      if (scientificFunctions.includes(btn) || 
+          ['sin⁻¹', 'cos⁻¹', 'tan⁻¹', 'sinh⁻¹', 'cosh⁻¹', 'tanh⁻¹',
+           'csc⁻¹', 'sec⁻¹', 'cot⁻¹', 'csch⁻¹', 'sech⁻¹', 'coth⁻¹',
+           'log₂', '10ˣ', '2ˣ', 'eˣ', 'xʸ', 'ʸ√x', '²√x', '³√x', '¹⁄ₓ',
+           '⌈x⌉', '⌊x⌋', '→DMS', '→DEG'].includes(btn)) {
         return this.operations.handleScientificFunction(btn);
       }
 
@@ -210,6 +180,11 @@ handleEquals(): Record<string, any> {
       // Handle sign toggle
       if (btn === '±') {
         return this.operations.handleToggleSign();
+      }
+
+      // Handle comma for function arguments
+      if (btn === ',') {
+        return this.operations.handleComma();
       }
 
       // Default to number handling
@@ -259,4 +234,3 @@ handleEquals(): Record<string, any> {
     };
   }
 }
-

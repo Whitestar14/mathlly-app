@@ -49,7 +49,7 @@ interface ProgrammerCalculatorInterface extends BaseCalculator {
 
 // ADD: Define scientific calculator specific interface
 interface ScientificCalculatorInterface extends BaseCalculator {
-  angleMode: 'RAD' | 'DEG';
+  angleMode: 'RAD' | 'DEG' | 'GRAD';
   notationMode: 'F-E' | 'SCI';
   hyperbolicMode: boolean;
   setAngleMode: (mode: 'RAD' | 'DEG') => void;
@@ -193,7 +193,7 @@ class ScientificCalculatorWrapper implements ScientificCalculatorInterface {
     return this.calculator.MAX_INPUT_LENGTH
   }
 
-  get angleMode(): 'RAD' | 'DEG' {
+  get angleMode(): 'RAD' | 'DEG' | 'GRAD' {
     return this.calculator.angleMode
   }
 
@@ -241,8 +241,8 @@ class ScientificCalculatorWrapper implements ScientificCalculatorInterface {
     }
   }
 
-  evaluateExpression(expression: string, base?: string): any {
-    return this.calculator.evaluateExpression(expression, base)
+  evaluateExpression(expression: string): any {
+    return this.calculator.evaluateExpression(expression)
   }
 
   formatResult(result: any): string {

@@ -12,12 +12,44 @@ export class StandardOperations {
     this.calculator = calculator;
   }
 
+    /**
+ * Handle comma input for function arguments
+ */
+handleComma(): Record<string, any> {
+  try {
+    const currentInput = this.calculator.input;
+    
+    // Don't allow comma at the start or if input is empty/error
+    if (currentInput === '0' || currentInput === 'Error' || !currentInput.trim()) {
+      return this.createResponse();
+    }
+    
+    const lastChar = currentInput.trim().slice(-1);
+    
+    // Don't allow comma after operators or opening parenthesis
+    if (this.isOperator(lastChar) || lastChar === '(' || lastChar === ',') {
+      return this.createResponse();
+    }
+    
+    // Add comma with proper spacing
+    this.calculator.input = `${currentInput}, `;
+    
+    return this.createResponse();
+  } catch (err: any) {
+    return { input: "Error", error: err.message };
+  }
+}
+
   /**
    * Handles numeric input including decimal point
    * @param {string} num - The number or decimal point to add
    * @returns {Object} Updated input state and error message
    */
   handleNumber(num: string): Record<string, any> {
+    if (num === ',') {
+      return this.handleComma();
+    }
+    
     if (this.calculator.input === "0" && num !== ".") {
       this.calculator.input = num;
       return this.createResponse();
@@ -29,27 +61,69 @@ export class StandardOperations {
     return this.createResponse();
   }
 
-  /**
-   * Handles arithmetic operator input
-   * @param {string} op - The operator to add (+, -, ×, ÷)
-   * @returns {Object} Updated input state and error message
-   */
-  handleOperator(op: string): Record<string, any> {
-    const lastChar = this.calculator.input.trim().slice(-1);
-    const isLastCharOperator = this.isOperator(lastChar);
-    if (
-      op === "-" &&
-      isLastCharOperator &&
-      ["×", "÷", "+"].includes(lastChar)
-    ) {
-      this.calculator.input += ` ${op} `;
-      return this.createResponse();
-    }
-    this.calculator.input = isLastCharOperator
-      ? this.calculator.input.slice(0, -3) + ` ${op} `
-      : this.calculator.input + ` ${op} `;
+/**
+ * Handles arithmetic operator input
+ * @param {string} op - The operator to add (+, -, ×, ÷)
+ * @returns {Object} Updated input state and error message
+ */
+handleOperator(op: string): Record<string, any> {
+  const currentInput = this.calculator.input.trim();
+  
+  // Don't allow operators on empty input or error states
+  if (currentInput === "0" || currentInput === "Error" || !currentInput) {
     return this.createResponse();
   }
+  
+  // Parse the current state
+  const state = this.parseOperatorState(currentInput);
+  
+  if (op === "-" && state.canAddNegative) {
+    // Add negative sign after another operator
+    this.calculator.input = `${state.baseExpression} ${state.lastOperator} ${op} `;
+  } else {
+    // Replace any existing operator sequence with the new operator
+    this.calculator.input = `${state.baseExpression} ${op} `;
+  }
+  
+  return this.createResponse();
+}
+
+/**
+ * Parse the current operator state of the input
+ * @param {string} input - Current input to parse
+ * @returns {Object} Parsed state information
+ */
+private parseOperatorState(input: string): {
+  baseExpression: string;
+  lastOperator: string | null;
+  hasNegative: boolean;
+  canAddNegative: boolean;
+} {
+  // Match patterns like "8 + ", "8 × - ", etc.
+  const operatorPattern = /^(.*?)\s*([+\-×÷])\s*(-\s*)?$/;
+  const match = input.match(operatorPattern);
+  
+  if (!match) {
+    // No operators at the end
+    return {
+      baseExpression: input,
+      lastOperator: null,
+      hasNegative: false,
+      canAddNegative: false
+    };
+  }
+  
+  const [, baseExpression, lastOperator, negativeSign] = match;
+  const hasNegative = !!negativeSign;
+  const canAddNegative = !hasNegative && ['×', '÷', '+'].includes(lastOperator);
+  
+  return {
+    baseExpression,
+    lastOperator,
+    hasNegative,
+    canAddNegative
+  };
+}
 
   /**
    * Handles backspace operation

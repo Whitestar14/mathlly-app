@@ -16,6 +16,7 @@
           @button-click="handleButtonClick"
           @clear="handleClear"
           @base-change="handleBaseChange"
+          @mode-toggle="handleModeToggle"
         />
       </Transition>
     </template>
@@ -24,7 +25,7 @@
       <div class="h-full flex-auto grid grid-cols-4 gap-1">
         <div 
           v-for="n in 24" 
-          :key="n" 
+                    :key="n" 
           class="animate-pulse calc-btn-grid bg-gray-200 dark:bg-gray-700 rounded-lg"
         />
       </div>
@@ -59,7 +60,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['button-click', 'clear', 'base-change']);
+const emit = defineEmits(['button-click', 'clear', 'base-change', 'mode-toggle']);
 
 const StandardMode = defineAsyncComponent(() => import('./modes/StandardMode.vue'));
 const ScientificMode = defineAsyncComponent(() => import('./modes/ScientificMode.vue'));
@@ -81,4 +82,5 @@ const modeComponent = computed(() => {
 const handleButtonClick = (value) => emit('button-click', value);
 const handleClear = () => emit('clear');
 const handleBaseChange = (base) => emit('base-change', base);
+const handleModeToggle = (data) => emit('mode-toggle', data);
 </script>

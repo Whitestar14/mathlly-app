@@ -4,7 +4,7 @@
       v-for="base in bases"
       :key="base"
       :class="[
-        'flex justify-between items-center p-2 rounded transition-colors duration-200',
+        'flex justify-between items-center p-2 rounded-lg transition-colors duration-200',
         baseButtonClasses(base),
       ]"
       @click="$emit('base-change', base)"

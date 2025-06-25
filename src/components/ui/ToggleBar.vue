@@ -6,8 +6,8 @@
     @update:checked="updateChecked"
   >
     <SwitchThumb
-      class="inline-block h-4 w-4 transform rounded-full bg-white dark:bg-gray-900 transition-transform"
-      :class="modelValue ? 'translate-x-5' : 'translate-x-1'"
+      class="inline-block transform rounded-full bg-white dark:bg-gray-900 transition-transform"
+      :class="modelValue ? 'translate-x-5 w-4 h-4' : 'translate-x-1.5 w-3 h-3'"
     />
   </SwitchRoot>
 </template>

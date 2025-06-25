@@ -2,8 +2,8 @@ import { useSettingsStore } from '@/stores/settings'
 import { ExpressionEvaluator } from '@/utils/core/ExpressionEvaluator'
 import {
   CalculatorConstants,
-  CalculatorUtils,
 } from '@/utils/constants/CalculatorConstants'
+import { CalculatorUtils } from '../constants/CalculatorUtils'
 
 /**
  * Interface for calculator implementations.

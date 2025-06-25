@@ -1,6 +1,6 @@
 import { StandardOperations } from "@/utils/operations/StandardOperations.ts"
 import { ParenthesesTracker } from "@/utils/core/ParenthesesTracker.ts"
-import { CalculatorUtils, FUNCTION_MAPPINGS } from "@/utils/constants/CalculatorConstants.ts"
+import { CalculatorUtils } from '../constants/CalculatorUtils'
 
 /**
  * Handles scientific calculator operations
@@ -26,11 +26,9 @@ export class ScientificOperations extends StandardOperations {
   handleScientificFunction(func: string): Record<string, any> {
     try {
     const currentInput = this.calculator.input;
-    console.log('🔍 handleScientificFunction called with:', func);
     
     // Map display symbols to function names
     const funcName = CalculatorUtils.mapFunctionName(func);
-    console.log('🗺️ Mapped function name:', funcName);
        
       // Handle special cases for functions that need different treatment
       switch (funcName) {
@@ -58,6 +56,8 @@ export class ScientificOperations extends StandardOperations {
           return this.handle2PowerOperation()
         case 'e^x':
           return this.handleEPowerOperation()
+        case 'y√x':
+          return this.handleNthRootOperation()
         case 'mod':
           return this.handleModuloOperation()
         case 'rand':
@@ -71,7 +71,6 @@ export class ScientificOperations extends StandardOperations {
       // For functions that need parentheses (sin, cos, log, etc.)
     if (currentInput === '0' || currentInput === 'Error') {
       this.calculator.input = `${funcName}(`;
-      console.log('✅ New input (empty case):', this.calculator.input);
       this.parenthesesTracker.open(funcName.length);
     } else {
       // Check if the last character is an operator or opening parenthesis
@@ -80,18 +79,15 @@ export class ScientificOperations extends StandardOperations {
       
       if (isLastCharOperator) {
         this.calculator.input = `${currentInput}${funcName}(`;
-        console.log('✅ New input (after operator):', this.calculator.input);
         this.parenthesesTracker.open(currentInput.length + funcName.length);
       } else {
         this.calculator.input = `${currentInput} × ${funcName}(`;
-        console.log('✅ New input (multiply case):', this.calculator.input);
         this.parenthesesTracker.open(currentInput.length + funcName.length + 3);
       }
     }
     
     return this.createResponse();
   } catch (err: any) {
-    console.error('❌ Error in handleScientificFunction:', err);
     return { input: "Error", error: err.message };
   }
 }
@@ -153,34 +149,34 @@ export class ScientificOperations extends StandardOperations {
    */
   handleDMSOperation(): Record<string, any> {
     try {
-      const currentInput = this.calculator.input
+      const currentInput = this.calculator.input;
       
       if (currentInput === '0' || currentInput === 'Error') {
-        this.calculator.input = "dms("
-        this.parenthesesTracker.open(4)
+        this.calculator.input = "dms(";
+        this.parenthesesTracker.open(4);
       } else {
         // Check if we need to wrap the current expression in parentheses
-        const needsParentheses = ParenthesesTracker.needsParentheses(currentInput)
+        const needsParentheses = ParenthesesTracker.needsParentheses(currentInput);
         
         if (needsParentheses) {
-          this.calculator.input = `dms(${currentInput})`
+          this.calculator.input = `dms(${currentInput})`;
         } else {
           // If the last part is a number or closing parenthesis, convert that
-          const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput)
+          const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput);
           if (lastPart) {
-            const lastPartIndex = currentInput.lastIndexOf(lastPart)
+            const lastPartIndex = currentInput.lastIndexOf(lastPart);
             this.calculator.input = 
               currentInput.substring(0, lastPartIndex) + 
-              `dms(${lastPart})`
+              `dms(${lastPart})`;
           } else {
-            this.calculator.input = `dms(${currentInput})`
+            this.calculator.input = `dms(${currentInput})`;
           }
         }
       }
       
-      return this.createResponse()
+      return this.createResponse();
     } catch (err: any) {
-      return { input: "Error", error: err.message }
+      return { input: "Error", error: err.message };
     }
   }
 
@@ -189,34 +185,34 @@ export class ScientificOperations extends StandardOperations {
    */
   handleDegreeOperation(): Record<string, any> {
     try {
-      const currentInput = this.calculator.input
+      const currentInput = this.calculator.input;
       
       if (currentInput === '0' || currentInput === 'Error') {
-        this.calculator.input = "deg("
-        this.parenthesesTracker.open(4)
+        this.calculator.input = "deg(";
+        this.parenthesesTracker.open(4);
       } else {
         // Check if we need to wrap the current expression in parentheses
-        const needsParentheses = ParenthesesTracker.needsParentheses(currentInput)
+        const needsParentheses = ParenthesesTracker.needsParentheses(currentInput);
         
         if (needsParentheses) {
-          this.calculator.input = `deg(${currentInput})`
+          this.calculator.input = `deg(${currentInput})`;
         } else {
           // If the last part is a number or closing parenthesis, convert that
-          const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput)
+          const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput);
           if (lastPart) {
-            const lastPartIndex = currentInput.lastIndexOf(lastPart)
+            const lastPartIndex = currentInput.lastIndexOf(lastPart);
             this.calculator.input = 
               currentInput.substring(0, lastPartIndex) + 
-              `deg(${lastPart})`
+              `deg(${lastPart})`;
           } else {
-            this.calculator.input = `deg(${currentInput})`
+            this.calculator.input = `deg(${currentInput})`;
           }
         }
       }
       
-      return this.createResponse()
+      return this.createResponse();
     } catch (err: any) {
-      return { input: "Error", error: err.message }
+      return { input: "Error", error: err.message };
     }
   }
 
@@ -327,126 +323,92 @@ export class ScientificOperations extends StandardOperations {
    */
   handleReciprocalOperation(): Record<string, any> {
     try {
-      const currentInput = this.calculator.input
+      const currentInput = this.calculator.input;
       
       if (currentInput === '0' || currentInput === 'Error') {
-        this.calculator.input = "1/("
-        this.parenthesesTracker.open(1)
+        this.calculator.input = "1/(";
+        this.parenthesesTracker.open(1);
       } else {
         // Check if we're in the middle of an operation
-        const lastChar = currentInput.trim().slice(-1)
-        const isLastCharOperator = this.isOperator(lastChar) || lastChar === '('
+        const lastChar = currentInput.trim().slice(-1);
+        const isLastCharOperator = this.isOperator(lastChar) || lastChar === '(';
         
         if (isLastCharOperator) {
           // If we're after an operator, just start a new reciprocal
-          this.calculator.input += "1/("
-          this.parenthesesTracker.open(currentInput.length + 1)
+          this.calculator.input += "1/(";
+          this.parenthesesTracker.open(currentInput.length + 1);
         } else {
           // Otherwise check if we need to wrap the current part in parentheses
-          const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput)
+          const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput);
           if (lastPart) {
-            const lastPartIndex = currentInput.lastIndexOf(lastPart)
+            const lastPartIndex = currentInput.lastIndexOf(lastPart);
             // Don't wrap if the part is already a reciprocal expression
             if (lastPart.startsWith('1/(') && lastPart.endsWith(')')) {
-              return this.createResponse()
+              return this.createResponse();
             }
             this.calculator.input = 
               currentInput.substring(0, lastPartIndex) + 
-              `1/(${lastPart})`
+              `1/(${lastPart})`;
           } else {
-            this.calculator.input = `1/(${currentInput})`
+            this.calculator.input = `1/(${currentInput})`;
           }
         }
       }
       
-      return this.createResponse()
+      return this.createResponse();
     } catch (err: any) {
-      return { input: "Error", error: err.message }
+      return { input: "Error", error: err.message };
     }
   }
 
-/**
- * Handle square root operation (√) as part of an expression
- */
-handleSquareRootOperation(): Record<string, any> {
-  try {
-    const currentInput = this.calculator.input
-    console.log('🔍 handleSquareRootOperation - START')
-    console.log('📝 Current input:', currentInput)
-    
+  /**
+   * Handle square root operation (√) as part of an expression
+   */
+  handleSquareRootOperation(): Record<string, any> {
+    try {
+      const currentInput = this.calculator.input;
     if (currentInput === '0' || currentInput === 'Error') {
-      console.log('🎯 Case: Empty/Error state')
       this.calculator.input = "√("
       this.parenthesesTracker.open(1)
-      console.log('✅ New input:', this.calculator.input)
-      console.log('📊 Parentheses count:', this.parenthesesTracker.getOpenCount())
     } else {
       const lastChar = currentInput.trim().slice(-1)
       const isLastCharOperator = this.isOperator(lastChar) || lastChar === '('
       
-      console.log('🔤 Last character:', `"${lastChar}"`)
-      console.log('⚡ Is last char operator/paren:', isLastCharOperator)
-      
       if (isLastCharOperator) {
-        console.log('🎯 Case: After operator or opening parenthesis')
         const newInput = `${currentInput}√(`
         this.calculator.input = newInput
         const parenPosition = currentInput.length + 1
         this.parenthesesTracker.open(parenPosition)
-        console.log('✅ New input:', this.calculator.input)
-        console.log('📍 Paren position:', parenPosition)
-        console.log('📊 Parentheses count:', this.parenthesesTracker.getOpenCount())
       } else {
         // Check if we're inside an unclosed parenthesis
         const openParenCount = ParenthesesTracker.getOpenParenthesesCount(currentInput)
-        console.log('🔢 Open parentheses count:', openParenCount)
         
         if (openParenCount > 0) {
-          console.log('🎯 Case: Inside unclosed parentheses')
           const lastOpenParen = currentInput.lastIndexOf('(')
           const contentAfterLastParen = currentInput.slice(lastOpenParen + 1).trim()
           
-          console.log('📍 Last open paren at index:', lastOpenParen)
-          console.log('📝 Content after last paren:', `"${contentAfterLastParen}"`)
-          
           if (!contentAfterLastParen || this.isOperator(contentAfterLastParen.slice(-1))) {
-            console.log('🎯 Sub-case: Empty after paren or ends with operator - direct nesting')
             const newInput = `${currentInput}√(`
             this.calculator.input = newInput
             const parenPosition = currentInput.length + 1
             this.parenthesesTracker.open(parenPosition)
-            console.log('✅ New input:', this.calculator.input)
-            console.log('📍 Paren position:', parenPosition)
           } else {
-            console.log('🎯 Sub-case: Has content - multiply')
             const newInput = `${currentInput} × √(`
             this.calculator.input = newInput
             const parenPosition = currentInput.length + 3
             this.parenthesesTracker.open(parenPosition)
-            console.log('✅ New input:', this.calculator.input)
-            console.log('📍 Paren position:', parenPosition)
           }
         } else {
-          console.log('🎯 Case: No open parentheses - multiply')
           const newInput = `${currentInput} × √(`
           this.calculator.input = newInput
           const parenPosition = currentInput.length + 3
           this.parenthesesTracker.open(parenPosition)
-          console.log('✅ New input:', this.calculator.input)
-          console.log('📍 Paren position:', parenPosition)
         }
-        
-        console.log('📊 Final parentheses count:', this.parenthesesTracker.getOpenCount())
       }
     }
     
-    console.log('🏁 handleSquareRootOperation - END')
-    console.log('📤 Final input:', this.calculator.input)
-    console.log('---')
-    
     return this.createResponse()
   } catch (err: any) {
-    console.error('❌ Error in handleSquareRootOperation:', err)
     return { input: "Error", error: err.message }
   }
 }
@@ -575,32 +537,32 @@ handleSquareRootOperation(): Record<string, any> {
    */
   handlePowerOperation(): Record<string, any> {
     try {
-      const currentInput = this.calculator.input
+      const currentInput = this.calculator.input;
       
       if (currentInput === '0' || currentInput === 'Error') {
-        this.calculator.input = "0^("
-        this.parenthesesTracker.open(2)
+        this.calculator.input = "0^(";
+        this.parenthesesTracker.open(2);
       } else {
         // Check if we're in the middle of an operation
-        const lastChar = currentInput.trim().slice(-1)
+        const lastChar = currentInput.trim().slice(-1);
         if (this.isOperator(lastChar) || lastChar === '(' || lastChar === '^') {
-          return this.createResponse() // Don't allow operator after operator or power
+          return this.createResponse(); // Don't allow operator after operator or power
         }
         
         // Get the last expression part to check if it's already part of a power expression
-        const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput)
+        const lastPart = ParenthesesTracker.getLastExpressionPart(currentInput);
         if (!lastPart || (lastPart.includes('^(') && !lastPart.endsWith(')'))) {
-          return this.createResponse() // Invalid state for power
+          return this.createResponse(); // Invalid state for power
         }
         
         // Add power operator and opening parenthesis
-        this.calculator.input += '^('
-        this.parenthesesTracker.open(currentInput.length + 2)
+        this.calculator.input += '^(';
+        this.parenthesesTracker.open(currentInput.length + 2);
       }
       
-      return this.createResponse()
+      return this.createResponse();
     } catch (err: any) {
-      return { input: "Error", error: err.message }
+      return { input: "Error", error: err.message };
     }
   }
 
@@ -659,8 +621,8 @@ handleSquareRootOperation(): Record<string, any> {
           this.parenthesesTracker.open(currentInput.length + baseLength + 4)
         }
       }
-      
-      return this.createResponse()
+
+      return this.createResponse();
     } catch (err: any) {
       return { input: "Error", error: err.message }
     }
@@ -687,38 +649,87 @@ handleSquareRootOperation(): Record<string, any> {
     return this.handleBasePowerOperation('e')
   }
 
-    /**
-   * Handle constant input (π, e)
-   */
-  handleConstant(constant: string): Record<string, any> {
-    try {
-      if (this.calculator.input === '0' || this.calculator.input === 'Error') {
-        this.calculator.input = constant
+/**
+ * Handle nth root operation (y√x) as part of an expression
+ * Creates nthroot(base, index) structure with proper validation
+ */
+handleNthRootOperation(): Record<string, any> {
+  try {
+    const currentInput = this.calculator.input;
+    
+    if (currentInput === '0' || currentInput === 'Error') {
+      this.calculator.input = "nthroot(";
+      this.parenthesesTracker.open(8);
+    } else {
+      const lastChar = currentInput.trim().slice(-1);
+      const isLastCharOperator = this.isOperator(lastChar) || lastChar === '(';
+      
+      if (isLastCharOperator) {
+        this.calculator.input = `${currentInput}nthroot(`;
+        this.parenthesesTracker.open(currentInput.length + 8);
       } else {
-        const lastChar = this.calculator.input.trim().slice(-1)
-        const isLastCharOperator = this.isOperator(lastChar) || lastChar === '('
+        const openParenCount = ParenthesesTracker.getOpenParenthesesCount(currentInput);
         
-        if (isLastCharOperator) {
-          this.calculator.input += constant
+        if (openParenCount > 0) {
+          const lastOpenParen = currentInput.lastIndexOf('(');
+          const contentAfterLastParen = currentInput.slice(lastOpenParen + 1).trim();
+          
+          if (!contentAfterLastParen || this.isOperator(contentAfterLastParen.slice(-1))) {
+            this.calculator.input = `${currentInput}nthroot(`;
+            this.parenthesesTracker.open(currentInput.length + 8);
+          } else {
+            this.calculator.input = `${currentInput} × nthroot(`;
+            this.parenthesesTracker.open(currentInput.length + 10);
+          }
         } else {
-          this.calculator.input += ` × ${constant}`
+          this.calculator.input = `${currentInput} × nthroot(`;
+          this.parenthesesTracker.open(currentInput.length + 10);
         }
       }
-      return this.createResponse()
-    } catch (err: any) {
-      return { input: "Error", error: err.message }
     }
+    
+    return this.createResponse();
+  } catch (err: any) {
+    return { input: "Error", error: err.message };
   }
+}
+
+/**
+ * Handle constant input (π, e)
+ */
+handleConstant(constant: string): Record<string, any> {
+  try {
+    const currentInput = this.calculator.input;
+    
+    if (currentInput === '0' || currentInput === 'Error') {
+      this.calculator.input = constant;
+    } else {
+      const lastChar = currentInput.trim().slice(-1);
+      const isLastCharOperator = this.isOperator(lastChar) || lastChar === '(';
+      
+      if (isLastCharOperator) {
+        this.calculator.input += constant;
+      } else {
+        // Check if the last character is a number, closing parenthesis, or another constant
+        if (/[0-9)\]πe]/.test(lastChar)) {
+          this.calculator.input += ` × ${constant}`;
+        } else {
+          this.calculator.input += constant;
+        }
+      }
+    }
+    
+    return this.createResponse();
+  } catch (err: any) {
+    return { input: "Error", error: err.message };
+  }
+}
 
   /**
    * Handle parenthesis operations
    */
 handleParenthesis(parenthesis: string): Record<string, any> {
-  console.log('🎯 handleParenthesis called with:', parenthesis)
-  console.log('📍 Call stack:', new Error().stack)
-  
   const result = this.parenthesesTracker.handleParenthesisInput(this.calculator.input, parenthesis)
-  console.log('currentResult:', result);
   this.calculator.input = result.input
   return this.createResponse()
 }
@@ -728,36 +739,48 @@ handleParenthesis(parenthesis: string): Record<string, any> {
    */
   handleBackspace(): Record<string, any> {
     try {
-      const currentInput = this.calculator.input
+      const currentInput = this.calculator.input;
       
       if (currentInput === "0" || currentInput === "Error") {
-        return this.createResponse(currentInput)
+        return this.createResponse(currentInput);
       }
       
-      // Check if parentheses tracker can handle the backspace
-      const parenthesesResult = this.parenthesesTracker.handleParenthesesBackspace(currentInput)
-      if (parenthesesResult.handled) {
-        this.calculator.input = parenthesesResult.input
-        return this.createResponse()
+      // Use CalculatorUtils for special backspace handling
+      const specialBackspace = CalculatorUtils.handleSpecialBackspace(currentInput);
+      if (specialBackspace.handled) {
+        this.calculator.input = specialBackspace.input;
+        
+        // Update parentheses tracker if a function was removed
+        if (specialBackspace.input.length < currentInput.length - 1) {
+          // A function was removed, adjust parentheses tracker
+          if (this.parenthesesTracker.getOpenCount() > 0) {
+            this.parenthesesTracker.close(specialBackspace.input.length);
+          }
+        }
+        
+        return this.createResponse();
       }
       
-      // Handle special backspace cases using CalculatorUtils
-      const specialResult = CalculatorUtils.handleSpecialBackspace(currentInput)
-      if (specialResult.handled) {
-        this.calculator.input = specialResult.input
-        return this.createResponse()
+      // Check if we're removing a parenthesis for tracker updates
+      const lastChar = currentInput.slice(-1);
+      if (lastChar === '(') {
+        if (this.parenthesesTracker.getOpenCount() > 0) {
+          this.parenthesesTracker.close(currentInput.length - 1);
+        }
+      } else if (lastChar === ')') {
+        this.parenthesesTracker.open(currentInput.length - 1);
       }
       
       // Default backspace behavior
       if (currentInput.length === 1) {
-        this.calculator.input = "0"
+        this.calculator.input = "0";
       } else {
-        this.calculator.input = currentInput.slice(0, -1)
+        this.calculator.input = currentInput.slice(0, -1);
       }
       
-      return this.createResponse()
+      return this.createResponse();
     } catch (err: any) {
-      return { input: "Error", error: err.message }
+      return { input: "Error", error: err.message };
     }
   }
 

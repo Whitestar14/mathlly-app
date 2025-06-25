@@ -1,5 +1,5 @@
 import { useSettingsStore } from "@/stores/settings"
-import { CacheManager } from '@/utils/cache/CacheManager'
+import { CacheManager } from '@/services/cache/CacheManager'
 
 // Define interfaces for formatting options
 interface FormattingOptions {

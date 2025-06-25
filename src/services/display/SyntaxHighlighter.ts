@@ -1,7 +1,7 @@
+import { CacheManager } from '@/services/cache/CacheManager'
 import { CalculatorConstants } from '@/utils/constants/CalculatorConstants'
-import { CacheManager } from '@/utils/cache/CacheManager'
+import type { ParenthesesTracker } from '@/utils/core/ParenthesesTracker'
 
-// Define interfaces for syntax highlighting
 interface Token {
   type: string
   content: string
@@ -9,13 +9,9 @@ interface Token {
 }
 
 interface FormattedPart {
-  type: 'text' | 'open' | 'close' | 'ghost'
+  type: string
   content: string
   level: number
-}
-
-interface ParenthesesTracker {
-  openCount?: number
 }
 
 interface FormatOptions {
@@ -23,9 +19,6 @@ interface FormatOptions {
   mode?: string
 }
 
-/**
- * Class for syntax highlighting of mathematical expressions
- */
 export class SyntaxHighlighter {
   static readonly CACHE_NAMES = {
     FORMAT: 'expression-format',
@@ -38,18 +31,20 @@ export class SyntaxHighlighter {
    * @param expr - The expression to format
    * @param parenthesesTracker - Tracker for parentheses state
    * @param syntaxHighlightingEnabled - Whether syntax highlighting is enabled
+   * @param options - Additional formatting options (mode, base)
    * @returns Formatted tokens for rendering
    */
   static format(
     expr: string, 
     parenthesesTracker: ParenthesesTracker | null, 
     syntaxHighlightingEnabled: boolean = true,
+    options: FormatOptions = {}
   ): Token[] {
     if (!expr) {
       return [{ type: 'text', content: '0' }]
     }
     
-    const cacheKey = `${expr}-${parenthesesTracker?.openCount || 0}-${syntaxHighlightingEnabled}`
+    const cacheKey = `${expr}-${parenthesesTracker?.getOpenCount() || 0}-${syntaxHighlightingEnabled}-${options.mode || 'Standard'}-${options.base || 'DEC'}`
     
     const formatCache = CacheManager.getCache<Token[]>(this.CACHE_NAMES.FORMAT, 100)
 
@@ -57,10 +52,10 @@ export class SyntaxHighlighter {
       return formatCache.get(cacheKey)!
     }
 
-    const parts = this.formatParentheses(expr)
+    const parts = this.formatParentheses(expr, options)
 
     const result = syntaxHighlightingEnabled 
-      ? this.applySyntaxHighlighting(parts)
+      ? this.applySyntaxHighlighting(parts, options)
       : parts
     
     formatCache.set(cacheKey, result)
@@ -71,22 +66,23 @@ export class SyntaxHighlighter {
   /**
    * Apply syntax highlighting to formatted parts
    * @param parts - Formatted parts from parentheses formatting
+   * @param options - Additional formatting options
    * @returns Parts with syntax highlighting applied to text parts
    */
-  static applySyntaxHighlighting(parts: FormattedPart[]): Token[] {
+  static applySyntaxHighlighting(parts: FormattedPart[], options: FormatOptions = {}): Token[] {
     const tokensCache = CacheManager.getCache<Token[]>(this.CACHE_NAMES.TOKENS, 50)
     
     const result: Token[] = []
     
     for (const part of parts) {
       if (part.type === 'text') {
-        const cacheKey = part.content
+        const cacheKey = `${part.content}-${options.mode || 'Standard'}`
         
         let tokens: Token[]
         if (tokensCache.has(cacheKey)) {
           tokens = tokensCache.get(cacheKey)!
         } else {
-          tokens = this.tokenize(part.content)
+          tokens = this.tokenize(part.content, options)
           tokensCache.set(cacheKey, tokens)
         }
         
@@ -107,13 +103,15 @@ export class SyntaxHighlighter {
   /**
    * Format an expression with parentheses
    * @param expr - The expression to format
+   * @param options - Additional formatting options
    * @returns Formatted parts
    */
-  static formatParentheses(expr: string): FormattedPart[] {
+  static formatParentheses(expr: string, options: FormatOptions = {}): FormattedPart[] {
     const parenthesesCache = CacheManager.getCache<FormattedPart[]>(this.CACHE_NAMES.PARENTHESES, 50)
     
-    if (parenthesesCache.has(expr)) {
-      return parenthesesCache.get(expr)!
+    const cacheKey = `${expr}-${options.mode || 'Standard'}`
+    if (parenthesesCache.has(cacheKey)) {
+      return parenthesesCache.get(cacheKey)!
     }
     
     const parts: FormattedPart[] = []
@@ -125,6 +123,8 @@ export class SyntaxHighlighter {
     const isOperator = (char: string, nextChar?: string): boolean => {
       if (REGEX.OPERATOR.test(char)) return true
       if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) return true
+      // Scientific mode: handle power operator
+      if (options.mode === 'Scientific' && char === '^') return true
       return false
     }
     
@@ -132,22 +132,22 @@ export class SyntaxHighlighter {
       const char = expr[i]
       const nextChar = expr[i + 1]
 
-      if (char === '(') {
+      if (char === '(' || char === '|') {
         if (i > currentIndex) {
           const beforeText = expr.slice(currentIndex, i).trim()
           if (beforeText) parts.push({ type: 'text', content: beforeText, level: nestLevel })
         }
         
-        parts.push({ type: 'open', content: '(', level: nestLevel })
+        parts.push({ type: 'open', content: char, level: nestLevel })
         currentIndex = i + 1
         nestLevel++
-      } else if (char === ')') {
+      } else if (char === ')' || (char === '|' && nestLevel > 0)) {
         if (i > currentIndex) {
           const content = expr.slice(currentIndex, i).trim()
           if (content) parts.push({ type: 'text', content: content, level: nestLevel })
         }
         
-        parts.push({ type: 'close', content: ')', level: --nestLevel })
+        parts.push({ type: 'close', content: char, level: --nestLevel })
         currentIndex = i + 1
       } else if (isOperator(char, nextChar)) {
         if (i > currentIndex) {
@@ -174,9 +174,9 @@ export class SyntaxHighlighter {
       parts.push({ type: 'ghost', content: ')', level: --nestLevel })
     }
   
-    const result = this.cleanupParts(parts)
+    const result = this.cleanupParts(parts, options)
     
-    parenthesesCache.set(expr, result)
+    parenthesesCache.set(cacheKey, result)
     
     return result
   }
@@ -184,9 +184,10 @@ export class SyntaxHighlighter {
   /**
    * Clean up formatted parts
    * @param parts - The parts to clean up
+   * @param options - Additional formatting options
    * @returns Cleaned up parts
    */
-  static cleanupParts(parts: FormattedPart[]): FormattedPart[] {
+  static cleanupParts(parts: FormattedPart[], options: FormatOptions = {}): FormattedPart[] {
     const result: FormattedPart[] = []
     const { REGEX } = CalculatorConstants
     
@@ -202,10 +203,17 @@ export class SyntaxHighlighter {
         continue
       }
       
-      if (part.type === 'text' && 
-          (REGEX.OPERATOR.test(part.content.trim()[0]) || /^<<|^>>/.test(part.content.trim()))) {
-        if (prevPart?.type === 'text') {
-          prevPart.content = prevPart.content.trimEnd()
+      if (part.type === 'text') {
+        const trimmedContent = part.content.trim()
+        const firstChar = trimmedContent[0]
+        
+        // Handle various operators based on mode
+        if (REGEX.OPERATOR.test(firstChar) || 
+            /^<<|^>>/.test(trimmedContent) ||
+            (options.mode === 'Scientific' && firstChar === '^')) {
+          if (prevPart?.type === 'text') {
+            prevPart.content = prevPart.content.trimEnd()
+          }
         }
       }
       
@@ -218,18 +226,20 @@ export class SyntaxHighlighter {
   /**
    * Tokenize a text string for syntax highlighting
    * @param text - The text to tokenize
+   * @param options - Additional formatting options
    * @returns Array of token objects
    */
-  static tokenize(text: string): Token[] {
+  static tokenize(text: string, options: FormatOptions = {}): Token[] {
     if (!text) return []
     
     const tokens: Token[] = []
     let currentToken = ''
     const { REGEX, BUTTON_TYPES } = CalculatorConstants
+    const isScientificMode = options.mode === 'Scientific'
 
     const pushToken = (): void => {
       if (currentToken) {
-        tokens.push(this.classifyToken(currentToken))
+        tokens.push(this.classifyToken(currentToken, options))
         currentToken = ''
       }
     }
@@ -238,12 +248,14 @@ export class SyntaxHighlighter {
       const char = text[i]
       const nextChar = text[i + 1]
 
+      // Handle decimal points
       if (char === '.') {
         pushToken()
         tokens.push({ type: 'decimal', content: '.' })
         continue
       }
 
+      // Handle shift operators (programmer mode)
       if ((char === '<' && nextChar === '<') || (char === '>' && nextChar === '>')) {
         pushToken()
         tokens.push({ type: 'programmer-operator', content: char + nextChar })
@@ -251,18 +263,46 @@ export class SyntaxHighlighter {
         continue
       }
 
-      if (
-        BUTTON_TYPES.OPERATORS.includes(char as (typeof BUTTON_TYPES.OPERATORS)[number]) ||
-        BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(char as (typeof BUTTON_TYPES.PROGRAMMER_OPERATORS)[number])
-      ) {
+      // Handle power operator (scientific mode)
+      if (isScientificMode && char === '^') {
         pushToken()
-        tokens.push(this.classifyToken(char))
+        tokens.push({ type: 'power-operator', content: '^' })
         continue
       }
 
-      if (REGEX.PARENTHESIS.test(char)) {
+      // Handle factorial (scientific mode)
+      if (isScientificMode && char === '!') {
+        pushToken()
+        tokens.push({ type: 'factorial', content: '!' })
+        continue
+      }
+
+      // Handle standard operators
+      if (BUTTON_TYPES.OPERATORS.includes(char as any) ||
+          BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(char as any)) {
+        pushToken()
+        tokens.push(this.classifyToken(char, options))
+        continue
+      }
+
+      // Handle parentheses and absolute value bars
+      if (REGEX.PARENTHESIS.test(char) || char === '|') {
         pushToken()
         tokens.push({ type: 'parenthesis', content: char })
+        continue
+      }
+
+      // Handle scientific constants
+      if (isScientificMode && (char === 'π' || char === 'e')) {
+        pushToken()
+        tokens.push({ type: 'constant', content: char })
+        continue
+      }
+
+      // Handle scientific symbols
+      if (isScientificMode && (char === '√' || char === '∛')) {
+        pushToken()
+        tokens.push({ type: 'root-function', content: char })
         continue
       }
 
@@ -276,17 +316,42 @@ export class SyntaxHighlighter {
   /**
    * Classify a token based on its content
    * @param token - The token to classify
+   * @param options - Additional formatting options
    * @returns Classified token object
    */
-  static classifyToken(token: string): Token {
+  static classifyToken(token: string, options: FormatOptions = {}): Token {
     const { REGEX, BUTTON_TYPES } = CalculatorConstants
+    const isScientificMode = options.mode === 'Scientific'
     
     if (token === ' ') return { type: 'space', content: token }
     if (token === '.') return { type: 'decimal', content: token }
     if (REGEX.NUMBER.test(token)) return { type: 'number', content: token }
-    if (BUTTON_TYPES.OPERATORS.includes(token as (typeof BUTTON_TYPES.OPERATORS)[number])) return { type: 'operator', content: token }
-    if (BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token as (typeof BUTTON_TYPES.PROGRAMMER_OPERATORS)[number])) return { type: 'programmer-operator', content: token }
-    if ((BUTTON_TYPES.FUNCTIONS as readonly string[]).includes(token)) return { type: 'function', content: token }
+    
+    // Scientific mode specific classifications
+    if (isScientificMode) {
+      // Check for scientific functions
+      if (BUTTON_TYPES.SCIENTIFIC_FUNCTIONS.includes(token as any)) {
+        if (REGEX.TRIG_FUNCTION.test(token + '(')) return { type: 'trig-function', content: token }
+        if (REGEX.HYPERBOLIC_FUNCTION.test(token + '(')) return { type: 'hyperbolic-function', content: token }
+        if (REGEX.LOG_FUNCTION.test(token + '(')) return { type: 'log-function', content: token }
+        return { type: 'scientific-function', content: token }
+      }
+      
+      // Check for constants
+      if (token === 'π' || token === 'e') return { type: 'constant', content: token }
+      
+      // Check for special scientific operators
+      if (token === '^') return { type: 'power-operator', content: token }
+      if (token === '!') return { type: 'factorial', content: token }
+      if (token === '√' || token === '∛') return { type: 'root-function', content: token }
+      
+      // Check for modulo
+      if (token === 'mod') return { type: 'modulo-operator', content: token }
+    }
+    
+    // Standard classifications
+    if (BUTTON_TYPES.OPERATORS.includes(token as any)) return { type: 'operator', content: token }
+    if (BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token as any)) return { type: 'programmer-operator', content: token }
     
     return { type: 'text', content: token }
   }
@@ -298,6 +363,3 @@ export class SyntaxHighlighter {
     CacheManager?.clearAllCaches?.()
   }
 }
-
-// Export types for external use
-export type { Token, FormattedPart, ParenthesesTracker, FormatOptions }

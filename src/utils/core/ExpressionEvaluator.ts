@@ -1,6 +1,7 @@
 import { evaluate, bignumber } from 'mathjs'
-import { CalculatorConstants, CalculatorUtils } from '@/utils/constants/CalculatorConstants'
-import { CacheManager } from '@/utils/cache/CacheManager'
+import { CalculatorConstants } from '@/utils/constants/CalculatorConstants'
+import { CalculatorUtils } from '../constants/CalculatorUtils'
+import { CacheManager } from '@/services/cache/CacheManager'
 
 /**
  * Singleton expression evaluator with memoization using CacheManager

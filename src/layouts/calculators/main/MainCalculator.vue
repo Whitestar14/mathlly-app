@@ -14,9 +14,9 @@
         class="grid grid-cols-1 h-full p-4 gap-1 mx-auto"
         :class="state.mode === 'Programmer' 
           ? 'grid-rows-[1fr_2fr]' 
-          : (state.mode === 'Scientific' || state.mode === 'Standard' 
+          : (state.mode === 'Standard' 
           ? 'grid-rows-[1fr_3fr]' 
-          : '')"
+          : 'grid-rows-[1fr_4fr]')"
       >
         <calculator-display
           :input="input"
@@ -39,6 +39,7 @@
           :has-memory="hasMemoryValue"
           @button-click="handleButtonClick"
           @clear="handleClear"
+          @mode-toggle="handleModeToggle"
         />
       </div>
     </div>
@@ -61,7 +62,7 @@ import { usePanel, type LightweightPanelAPI } from '@/composables/usePanel'
 import { useCalculatorState, type CalculatorMode, type Base } from '@/composables/useCalculatorState'
 import { useCalculatorModeSwitcher } from '@/composables/useCalculatorModeSwitcher'
 import { CalculatorController, type ControllerReturn } from './MainCalculator'
-import { CalculatorFactory, type Calculator } from '@/services/factory/CalculatorFactory'
+import { CalculatorFactory, type Calculator, isScientificCalculator } from '@/services/factory/CalculatorFactory'
 import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import BasePage from '@/components/base/BasePage.vue'
@@ -144,6 +145,25 @@ const hasMemoryValue: ComputedRef<boolean> = computed(() => memoryService.hasMem
 
 // Activity panel methods
 const openActivity = (): void => activityPanel.open()
+
+// Handle mode toggles for scientific calculator
+const handleModeToggle = (data: { type: string; value: any }) => {
+  if (!isScientificCalculator(calculator.value)) {
+    return;
+  }
+
+  switch (data.type) {
+    case 'angle':
+      calculator.value.setAngleMode(data.value);
+      break;
+    case 'notation':
+      calculator.value.setNotationMode(data.value);
+      break;
+    case 'hyperbolic':
+      calculator.value.toggleHyperbolic(data.value);
+      break;
+  }
+};
 
 // Watch for input changes with proper typing
 watch(() => state.input, (newRawInput: string) => {

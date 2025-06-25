@@ -1,114 +1,112 @@
 <template>
   <div class="flex flex-col gap-1">
-    <!-- Mode toggles row -->
-    <div class="grid grid-cols-3 gap-1 mb-1">
+    <!-- Mode toggles row - Fixed height -->
+    <div class="grid grid-cols-3 gap-1 h-8">
       <button
-        class="calc-btn calc-function-btn calc-btn-grid text-xs"
-        :class="{ 'calc-active-btn': true }"
+        class="calc-function-btn calc-btn calc-btn-top"
+        :class="{ 'active': angleMode !== 'DEG' }"
         @click="cycleAngleMode"
       >
-        {{ angleMode }}
+        <span>{{ angleMode }}</span>
       </button>
       <button
-        class="calc-btn calc-function-btn calc-btn-grid text-xs"
-        :class="{ 'calc-active-btn': notationMode === 'SCI' }"
-        @click="handleModeToggle('F-E')"
+        class="calc-function-btn calc-btn calc-btn-top"
+        :class="{ 'active': notationMode === 'SCI' }"
+        @click="toggleNotationMode"
       >
-        {{ notationMode }}
+        <span>{{ notationMode }}</span>
       </button>
-      <!-- Memory dropdown -->
-      <DropdownMenuRoot>
-        <DropdownMenuTrigger as-child>
-          <button class="calc-btn calc-function-btn calc-btn-grid text-xs flex items-center justify-center gap-1">
-            <span>M</span>
-            <LucideChevronDown class="h-3 w-3" />
-          </button>
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuContent class="bg-gray-800 border border-gray-700 rounded-md shadow-lg p-1 w-[120px]">
-          <div class="grid grid-cols-1 gap-1">
-            <button
-              v-for="op in memoryOperations"
-              :key="op"
-              class="calc-btn calc-memory-btn calc-btn-grid text-xs"
-              :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
-              @click="handleClick(op)"
-            >
-              {{ op }}
-            </button>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenuRoot>
+      
+      <!-- Memory dropdown with uniform styling -->
+      <BaseDropdown
+        label="M"
+        content-class="w-auto"
+        trigger-class="calc-function-btn calc-btn calc-btn-top w-full h-full"
+        :use-default-styling="false"
+        @item-select="handleClick"
+      >
+        <div class="grid grid-cols-5 gap-1 p-1 min-w-[200px]">
+          <BaseDropdownItem
+            v-for="op in memoryOperations"
+            :key="op"
+            :label="op"
+            :value="op"
+            :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
+            item-class="calc-dropdown-item-small"
+            @select="handleClick"
+          />
+        </div>
+      </BaseDropdown>
     </div>
     
-    <!-- Function dropdown buttons -->
-    <div class="grid grid-cols-2 gap-1 mb-1">
+    <!-- Function dropdown buttons - Fixed height -->
+    <div class="grid grid-cols-2 gap-1 h-10">
       <!-- Trigonometry dropdown -->
-      <DropdownMenuRoot>
-        <DropdownMenuTrigger as-child>
-          <button class="calc-btn calc-function-btn calc-btn-grid w-full flex items-center justify-center gap-1">
-            <LucideTriangle class="h-4 w-4" />
-            <span class="text-sm">Trigonometry</span>
-            <LucideChevronDown class="h-3 w-3" />
-          </button>
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuContent class="bg-gray-800 border border-gray-700 rounded-md shadow-lg p-1 w-[200px]">
-          <!-- Toggle buttons inside dropdown -->
-          <div class="grid grid-cols-2 gap-1 mb-2">
-            <button
-              class="calc-btn calc-function-btn calc-btn-grid text-xs"
+      <BaseDropdown
+        label="Trigonometry"
+        :icon="LucideTriangle"
+        full-width
+        content-class="w-[220px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg"
+        trigger-class="calc-function-btn calc-btn w-full h-full"
+        @item-select="handleTrigFunction"
+      >
+        <template #header>
+          <div class="grid grid-cols-2 gap-1 p-2">
+            <CalcButton
+              value="HYP"
+              variant="function"
+              size="sm"
               :class="{ 'calc-active-btn': hyperbolicMode }"
-              @click="handleModeToggle('HYP')"
+              @click="toggleHyperbolicMode"
             >
               HYP
-            </button>
-            <button
-              class="calc-btn calc-function-btn calc-btn-grid text-xs"
+            </CalcButton>
+            <CalcButton
+              value="2nd"
+              variant="function"
+              size="sm"
               :class="{ 'calc-active-btn': trigSecondFunctionActive }"
               @click="toggleTrigSecondFunction"
             >
               2ⁿᵈ
-            </button>
+            </CalcButton>
           </div>
-          
-          <!-- Trig functions grid -->
-          <div class="grid grid-cols-3 gap-1">
-            <button
-              v-for="func in currentTrigFunctions"
-              :key="func.value"
-              class="calc-btn calc-function-btn calc-btn-grid text-xs py-2"
-              @click="handleTrigFunction(func.value)"
-            >
-              <span v-html="func.display || func.value"></span>
-            </button>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenuRoot>
+        </template>
+        
+        <div class="grid grid-cols-3 gap-0.5 p-1">
+          <BaseDropdownItem
+            v-for="func in currentTrigFunctions"
+            :key="func.value"
+            :value="func.value"
+            item-class="calc-dropdown-item"
+            @select="handleTrigFunction"
+          >
+            <span v-html="func.display || func.value"></span>
+          </BaseDropdownItem>
+        </div>
+      </BaseDropdown>
       
       <!-- Functions dropdown -->
-      <DropdownMenuRoot>
-        <DropdownMenuTrigger as-child>
-          <button class="calc-btn calc-function-btn calc-btn-grid w-full flex items-center justify-center gap-1">
-            <LucideSquareFunction class="h-4 w-4" />
-            <span class="text-sm">Functions</span>
-            <LucideChevronDown class="h-3 w-3" />
-          </button>
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuContent class="bg-gray-800 border border-gray-700 rounded-md shadow-lg p-1 w-[200px]">
-          <div class="grid grid-cols-2 gap-1">
-            <button
-              v-for="func in functionsList"
-              :key="func.value"
-              class="calc-btn calc-function-btn calc-btn-grid text-xs py-2"
-              @click="handleClick(func.value)"
-            >
-              <span v-html="func.display || func.value"></span>
-            </button>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenuRoot>
+      <BaseDropdown
+        label="Functions"
+        :icon="LucideSquareFunction"
+        full-width
+        content-class="w-[240px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg"
+        trigger-class="calc-function-btn calc-btn w-full h-full"
+        @item-select="handleClick"
+      >
+        <div class="grid grid-cols-2 gap-1 p-0.5">
+          <BaseDropdownItem
+            v-for="func in functionsList"
+            :key="func.value"
+            :value="func.value"
+            item-class="calc-dropdown-item"
+            @select="handleClick"
+          >
+            <span v-html="func.display || func.value"></span>
+          </BaseDropdownItem>
+        </div>
+      </BaseDropdown>
     </div>
 
     <div class="grid grid-cols-5 gap-1 flex-grow">
@@ -128,7 +126,7 @@
           :key="func.primary"
           :value="secondFunctionActive ? func.secondary : func.primary"
           variant="function"
-          @click="handleClick(secondFunctionActive ? func.secondary : func.primary)"
+          @click="handleClick"
         >
           <span v-html="secondFunctionActive ? func.secondaryDisplay : func.primaryDisplay"></span>
         </CalcButton>
@@ -136,44 +134,45 @@
 
       <!-- Main calculator grid -->
       <div class="col-span-4 grid grid-cols-4 gap-1">
-        <!-- Function and clear row -->
+        <!-- First row -->
         <CalcButton 
-          v-for="(btn, index) in functionRow" 
+          v-for="(btn, index) in reactiveButtonRow" 
+          :key="index"
+          :value="btn.value"
+          :variant="btn.variant"
+          @click="handleClick"
+        >
+          <span>{{ btn.display || btn.value }}</span>
+        </CalcButton>
+
+        <!-- Second row -->
+        <CalcButton 
+          v-for="(btn, index) in scientificSecondRow" 
           :key="index"
           :value="btn.value"
           :icon="btn.icon"
           :variant="btn.variant"
-          @click="handleClick(btn.value)"
+          @click="handleClick"
         />
 
-        <!-- Constants and operations row -->
+        <!-- Third row -->
         <CalcButton 
-          v-for="(btn, index) in constantsRow" 
-          :key="index"
-          :value="btn.value"
-          :icon="btn.icon"
-          :variant="btn.variant"
-          @click="handleClick(btn.value)"
-        />
-
-        <!-- Additional functions row -->
-        <CalcButton 
-          v-for="(btn, index) in additionalFunctionsRow" 
+          v-for="(btn, index) in scientificThirdRow" 
           :key="index"
           :value="btn.value"
           :variant="btn.variant"
-          @click="handleClick(btn.value)"
+          @click="handleClick"
         />
 
         <!-- Number pad and operations -->
-        <template v-for="(row, rowIndex) in numberRows">
+        <template v-for="(row, rowIndex) in numberRows" :key="`row-${rowIndex}`">
           <CalcButton 
             v-for="(btn, btnIndex) in row" 
             :key="`row-${rowIndex}-btn-${btnIndex}`"
-            :value="btn.value"
-            :disabled="btn.checkMaxLength ? isMaxLengthReached : false"
+                        :value="btn.value"
+            :disabled="isMaxLengthReached && btn.variant === 'number'"
             :variant="btn.variant"
-            @click="handleClick(btn.value)"
+            @click="handleClick"
           />
         </template>
       </div>
@@ -182,20 +181,27 @@
 </template>
 
 <script setup>
-import { ref, computed, markRaw } from "vue";
+import { ref, computed } from "vue";
 import CalcButton from '@/components/ui/CalculatorButton.vue';
+import BaseDropdown from '@/components/base/BaseDropdown.vue';
+import BaseDropdownItem from '@/components/base/BaseDropdownItem.vue';
 import { 
-  LucideDelete, 
   LucideTriangle, 
-  LucideSquareFunction, 
-  LucideChevronDown 
+  LucideSquareFunction
 } from 'lucide-vue-next';
-import { numberRows } from './NumberRows';
-import {
-  DropdownMenuRoot,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from 'radix-vue';
+import { 
+  numberRows,
+  scientificFirstRow,
+  scientificSecondRow,
+  scientificThirdRow,
+  memoryOperations,
+  scientificFunctions,
+  primaryTrigFunctions,
+  secondaryTrigFunctions,
+  primaryHyperbolicFunctions,
+  secondaryHyperbolicFunctions,
+  functionsList
+} from './NumberRows';
 
 const props = defineProps({
   inputLength: {
@@ -225,110 +231,16 @@ const isMaxLengthReached = computed(() =>
   props.inputLength >= props.maxLength
 );
 
-const memoryOperations = markRaw(['MC', 'MR', 'M+', 'M-', 'MS']);
-
-// Scientific functions column
-const scientificFunctions = markRaw([
-  { 
-    primary: 'x²', 
-    secondary: 'x³', 
-    primaryDisplay: 'x²', 
-    secondaryDisplay: 'x³' 
-  },
-  { 
-    primary: '√', 
-    secondary: '∛', 
-    primaryDisplay: '²√x', 
-    secondaryDisplay: '³√x' 
-  },
-  { 
-    primary: 'x^y', 
-    secondary: 'y√x', 
-    primaryDisplay: 'xʸ', 
-    secondaryDisplay: 'ʸ√x' 
-  },
-  { 
-    primary: '10^x', 
-    secondary: '2^x', 
-    primaryDisplay: '10ˣ', 
-    secondaryDisplay: '2ˣ' 
-  },
-  { 
-    primary: 'log', 
-    secondary: 'log2', 
-    primaryDisplay: 'log', 
-    secondaryDisplay: 'log₂' 
-  },
-  { 
-    primary: 'ln', 
-    secondary: 'e^x', 
-    primaryDisplay: 'ln', 
-    secondaryDisplay: 'eˣ' 
-  }
-]);
-
-// Function and clear row
-const functionRow = markRaw([
+// Make first row reactive for comma/factorial toggle
+const reactiveButtonRow = computed(() => [
   { value: '(', variant: 'function' },
   { value: ')', variant: 'function' },
-  { value: 'n!', variant: 'function' },
+  {
+    value: secondFunctionActive.value ? ',' : 'n!',
+    display: secondFunctionActive.value ? ',' : 'n!',
+    variant: 'function'
+  },
   { value: 'C', variant: 'function' }
-]);
-
-// Constants and operations row
-const constantsRow = markRaw([
-  { value: 'π', variant: 'function' },
-  { value: 'e', variant: 'function' },
-  { value: 'exp', variant: 'function' },
-  { value: 'backspace', variant: 'function', icon: LucideDelete }
-]);
-
-// Additional functions row
-const additionalFunctionsRow = markRaw([
-  { value: '1/x', variant: 'function' },
-  { value: '|x|', variant: 'function' },
-  { value: 'mod', variant: 'function' },
-  { value: '÷', variant: 'operator' }
-]);
-
-// Primary trigonometric functions
-const primaryTrigFunctions = markRaw([
-  { value: 'sin', display: 'sin' },
-  { value: 'cos', display: 'cos' },
-  { value: 'tan', display: 'tan' },
-  { value: 'asin', display: 'sin⁻¹' },
-  { value: 'acos', display: 'cos⁻¹' },
-  { value: 'atan', display: 'tan⁻¹' }
-]);
-
-// Secondary trigonometric functions (with 2nd button)
-const secondaryTrigFunctions = markRaw([
-  { value: 'csc', display: 'csc' },
-  { value: 'sec', display: 'sec' },
-  { value: 'cot', display: 'cot' },
-  { value: 'acsc', display: 'csc⁻¹' },
-  { value: 'asec', display: 'sec⁻¹' },
-  { value: 'acot', display: 'cot⁻¹' }
-]);
-
-// Primary hyperbolic functions
-const primaryHyperbolicFunctions = markRaw([
-  { value: 'sinh', display: 'sinh' },
-  { value: 'cosh', display: 'cosh' },
-  { value: 'tanh', display: 'tanh' },
-  { value: 'asinh', display: 'sinh⁻¹' },
-  { value: 'acosh', display: 'cosh⁻¹' },
-  { value: 'atanh', display: 'tanh⁻¹' }
-]);
-
-// Secondary hyperbolic functions (with 2nd button)
-const secondaryHyperbolicFunctions = markRaw([
-  { value: 'csch', display: 'csch' },
-  { value: 'sech', display: 'sech' },
-  { value: 'coth', display: 'coth' },
-  { value: 'acsch', display: 'csch⁻¹' },
-  { value: 'asech', display: 'sech⁻¹' },
-  { value: 'acoth', display: 'coth⁻¹' }
 ]);
 
 // Compute current trig functions based on both 2nd and hyperbolic mode
@@ -340,25 +252,12 @@ const currentTrigFunctions = computed(() => {
   }
 });
 
-// Function list
-const functionsList = markRaw([
-  { value: 'abs', display: '|x|' },
-  { value: 'ceil', display: '⌈x⌉' },
-  { value: 'floor', display: '⌊x⌋' },
-  { value: 'round', display: 'round' },
-  { value: 'rand', display: 'rand' },
-  { value: 'dms', display: '→DMS' },
-  { value: 'deg', display: '→DEG' },
-  { value: 'gcd', display: 'gcd' },
-  { value: 'lcm', display: 'lcm' }
-]);
-
 const handleClick = (value) => {
   if (value === 'C') {
     emit('clear');
-  } else {
-    emit('button-click', value);
+    return;
   }
+  emit('button-click', value);
 };
 
 const handleTrigFunction = (value) => {
@@ -375,24 +274,36 @@ const cycleAngleMode = () => {
     angleMode.value = 'DEG';
   }
   
-  emit('mode-toggle', { mode: 'ANGLE', value: angleMode.value });
+  emit('mode-toggle', { type: 'angle', value: angleMode.value });
 };
 
-const handleModeToggle = (mode) => {
-  if (mode === 'F-E') {
-    notationMode.value = notationMode.value === 'F-E' ? 'SCI' : 'F-E';
-    emit('mode-toggle', { mode, value: notationMode.value });
-  } else if (mode === 'HYP') {
-    hyperbolicMode.value = !hyperbolicMode.value;
-    emit('mode-toggle', { mode, value: hyperbolicMode.value });
-  }
+// Toggle notation mode F-E <-> SCI
+const toggleNotationMode = () => {
+  notationMode.value = notationMode.value === 'F-E' ? 'SCI' : 'F-E';
+  emit('mode-toggle', { type: 'notation', value: notationMode.value });
+};
+
+// Toggle hyperbolic mode
+const toggleHyperbolicMode = () => {
+  hyperbolicMode.value = !hyperbolicMode.value;
+  emit('mode-toggle', { type: 'hyperbolic', value: hyperbolicMode.value });
 };
 
 const toggleSecondFunction = () => {
   secondFunctionActive.value = !secondFunctionActive.value;
+  
+  // Auto-reset after a short delay to prevent confusion
+  if (secondFunctionActive.value) {
+    setTimeout(() => {
+      secondFunctionActive.value = false;
+    }, 50000); // Reset after 50 seconds
+  }
 };
 
 const toggleTrigSecondFunction = () => {
   trigSecondFunctionActive.value = !trigSecondFunctionActive.value;
 };
 </script>
+
+<style scoped>
+</style>

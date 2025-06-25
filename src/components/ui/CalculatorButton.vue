@@ -12,7 +12,9 @@
       v-if="icon" 
       class="w-6 h-6 mx-auto"
     />
-    <span v-else>{{ value }}</span>
+    <slot v-else>
+      {{ value }}
+    </slot>
   </button>
 </template>
 

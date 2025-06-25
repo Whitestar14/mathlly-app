@@ -1,51 +1,95 @@
 @tailwind components;
+
 @layer components {
+  /* Base Fluent Design button */
   .calc-btn {
-    @apply font-mono text-xl font-semibold rounded-lg transition-transform duration-100 ease-in-out px-3 py-2
-           active:scale-[0.985] active:opacity-80 
-           disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:bg-inherit;
+    @apply relative text-sm font-medium rounded-lg
+           transition-all duration-200 ease-out px-3 py-1
+           sm:text-sm sm:px-3 sm:py-2 sm:min-h-10
+           border border-gray-200/30 shadow-sm backdrop-blur-sm
+           hover:scale-[1.02] hover:shadow-md hover:border-gray-300/40
+           active:scale-[0.98] active:shadow-sm
+           focus:outline-none focus:ring-2 focus:ring-indigo-500/30
+           disabled:opacity-50 disabled:cursor-not-allowed 
+           disabled:hover:scale-100
+           dark:border-gray-700/30 dark:hover:border-gray-600/40
+           min-h-[2.5rem] h-8;
   }
 
+  /* Button grid container */
   .calc-btn-grid {
-    @apply h-full min-h-8;
+    @apply h-full min-h-12 gap-2 sm:min-h-10 sm:gap-1.5;
   }
 
-  .calc-letter-btn,
+  /* Number buttons */
   .calc-number-btn {
-  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 
-         dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500
-         disabled:hover:bg-gray-100 disabled:dark:hover:bg-gray-600;
+    @apply bg-white/80 text-gray-900 
+           hover:bg-white/90
+           dark:bg-gray-800/80 dark:text-gray-100 
+           dark:hover:bg-gray-800/90;
   }
 
+  /* Function buttons */
   .calc-function-btn {
-    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 
-         dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600
-         disabled:hover:bg-gray-200 disabled:dark:hover:bg-gray-700;
+    @apply bg-gray-50/70 text-gray-700 
+           hover:bg-gray-100/70
+           dark:bg-gray-700/70 dark:text-gray-200 
+           dark:hover:bg-gray-600/70;
   }
 
+  /* Operator buttons */
   .calc-operator-btn {
-    @apply bg-indigo-500/85 text-white hover:bg-indigo-500 
-         dark:bg-gray-500 dark:text-white dark:hover:bg-gray-500/85
-         disabled:hover:bg-indigo-400 disabled:dark:hover:bg-gray-500;
+    @apply bg-indigo-500/90 text-white 
+           hover:bg-indigo-600/90
+           dark:bg-indigo-600/90 dark:hover:bg-indigo-500/90;
   }
 
+  /* Memory buttons */
   .calc-memory-btn {
-    @apply text-sm tracking-wider text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 disabled:dark:hover:bg-transparent;
+    @apply text-xs md:text-sm font-medium tracking-wide text-gray-700 
+           bg-transparent hover:bg-gray-100/60 
+           p-2 min-h-[2rem]
+           dark:text-gray-300 dark:hover:bg-gray-700/60
+           border-0 shadow-none hover:shadow-none
+           disabled:dark:hover:bg-transparent;
   }
 
-  /* Responsive adjustments */
-  @media (max-width: 640px) {
-    .calc-btn {
-      @apply text-lg px-2 py-1;
-    }
-    
-    .calc-btn-grid {
-      @apply min-h-6;
-    }
-    
-    .calc-memory-btn,
-    .calc-base-btn {
-      @apply text-xs;
-    }
+  /* Active state */
+  .calc-active-btn,
+  .active {
+    @apply bg-indigo-500/90 text-white shadow-md
+           hover:bg-indigo-600/90
+           dark:bg-indigo-600/90 dark:hover:bg-indigo-500/90;
+  }
+
+  /* Top row buttons - smaller height */
+  .calc-btn-top {
+    @apply h-8 min-h-[2rem] py-1 px-3 text-xs sm:h-7 sm:min-h-[1.75rem] sm:px-2;
+  }
+
+  /* Dropdown items */
+  .calc-dropdown-item {
+    @apply text-sm font-medium rounded-lg
+           w-14 h-10 flex items-center justify-center
+           bg-gray-50/70 text-gray-700 border border-gray-200/30
+           hover:bg-gray-100/70 hover:scale-105
+           dark:bg-gray-700/70 dark:text-gray-200 dark:border-gray-600/30
+           dark:hover:bg-gray-600/70
+           sm:w-12 sm:h-8 sm:text-xs
+           transition-all duration-150 ease-out
+           focus:outline-none focus:ring-2 focus:ring-indigo-500/30;
+  }
+
+  /* Small dropdown items for memory */
+  .calc-dropdown-item-small {
+    @apply text-xs font-medium rounded-md
+           w-10 h-8 flex items-center justify-center
+           bg-gray-50/70 text-gray-700 border border-gray-200/30
+           hover:bg-gray-100/70 hover:scale-110
+           dark:bg-gray-700/70 dark:text-gray-200 dark:border-gray-600/30
+           dark:hover:bg-gray-600/70
+           sm:w-8 sm:h-6 sm:text-xs
+           transition-all duration-150 ease-out
+           focus:outline-none focus:ring-2 focus:ring-indigo-500/30;
   }
 }

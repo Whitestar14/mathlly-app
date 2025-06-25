@@ -1,6 +1,6 @@
 import { format, fraction } from "mathjs";
 import { ExpressionEvaluator } from "@/utils/core/ExpressionEvaluator.ts";
-import { CalculatorUtils } from "@/utils/constants/CalculatorConstants.ts";
+import { CalculatorUtils } from '../constants/CalculatorUtils';
 
 /**
  * Handles calculations for the standard calculator mode

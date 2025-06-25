@@ -2,7 +2,7 @@ import { computed, nextTick, watch, shallowRef, type Ref, type ComputedRef } fro
 import { useKeyboard } from '@/composables/useKeyboard'
 import { useEventListener, useMemoize, useThrottleFn } from '@vueuse/core'
 import { DisplayFormatter } from '@/services/display/DisplayFormatter'
-import { CalculatorUtils } from '@/utils/constants/CalculatorConstants'
+import { CalculatorUtils } from '@/utils/constants/CalculatorUtils'
 import type { Calculator } from '@/services/factory/CalculatorFactory'
 import { isProgrammerCalculator } from '@/services/factory/CalculatorFactory'
 // Import types from useCalculatorState to align interfaces

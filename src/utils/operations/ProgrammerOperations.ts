@@ -1,8 +1,9 @@
 import { ParenthesesTracker } from "@/utils/core/ParenthesesTracker.ts";
-import { CalculatorConstants, CalculatorUtils } from "@/utils/constants/CalculatorConstants.ts";
+import { CalculatorConstants } from "@/utils/constants/CalculatorConstants.ts";
+import { CalculatorUtils } from '../constants/CalculatorUtils';
 
-/**
- * Handles operations for the programmer calculator mode
+/** 
+ * Handles operations for the programmer calculator mode 
  */
 export class ProgrammerOperations {
   calculator: any;
@@ -13,13 +14,13 @@ export class ProgrammerOperations {
     this.parenthesesTracker = new ParenthesesTracker();
   }
 
-  // --- Helper methods must be defined before use in TS ---
+  // --- Helper methods ---
   isLastCharOperator(): boolean {
     const input = this.calculator.states[this.calculator.activeBase].input.trim();
-    return CalculatorUtils.endsWithOperator(input) || 
+    return CalculatorUtils.endsWithOperator(input) ||
            (/-$/.test(input) && !/-\d+$/.test(input)) ||
-           input.endsWith(" << ") || 
-           input.endsWith(" >> ") || 
+           input.endsWith(" << ") ||
+           input.endsWith(" >> ") ||
            input.endsWith(" % ");
   }
 
@@ -54,6 +55,7 @@ export class ProgrammerOperations {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input;
+      
       if (currentInput === "0" || currentInput === "Error") {
         state.input = num;
       } else if (this.isLastCharClosingParenthesis()) {
@@ -61,81 +63,125 @@ export class ProgrammerOperations {
       } else {
         state.input += num;
       }
+      
       return this.createResponse(state.input);
     } catch (err: any) {
       return this.createErrorResponse(err);
     }
+  }
+
+  /**
+   * Parse the current operator state of the input
+   * @param {string} input - Current input to parse
+   * @returns {Object} Parsed state information
+   */
+  private parseOperatorState(input: string): {
+    baseExpression: string;
+    lastOperator: string | null;
+    hasNegative: boolean;
+    canAddNegative: boolean;
+    hasShiftOperator: boolean;
+  } {
+    // Match patterns like "8 + ", "8 × - ", "8 << ", "8 >> ", etc.
+    const operatorPattern = /^(.*?)\s*([+\-×÷%]|<<|>>|&|\||\^|~)\s*(-\s*)?$/;
+    const match = input.match(operatorPattern);
+    
+    if (!match) {
+      // No operators at the end
+      return {
+        baseExpression: input,
+        lastOperator: null,
+        hasNegative: false,
+        canAddNegative: false,
+        hasShiftOperator: false
+      };
+    }
+    
+    const [, baseExpression, lastOperator, negativeSign] = match;
+    const hasNegative = !!negativeSign;
+    const isShiftOperator = ['<<', '>>', '&', '|', '^', '~'].includes(lastOperator);
+    const canAddNegative = !hasNegative && !isShiftOperator && ['×', '÷', '+', '%'].includes(lastOperator);
+    
+    return {
+      baseExpression,
+      lastOperator,
+      hasNegative,
+      canAddNegative,
+      hasShiftOperator: isShiftOperator
+    };
   }
 
   handleOperator(op: string): Record<string, any> {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input.trim();
-      if ((currentInput === "" || this.isLastCharOperator()) && op === "-") {
-        state.input = currentInput ? `${currentInput} ${op}` : op;
-        return this.createResponse(state.input);
-      }
+      
+      // Don't allow operators on empty input
       if (currentInput === "" && op !== "-") {
         return this.createResponse(state.input);
       }
-      // Accept any string for op, but only handle shift ops if they are in the allowed set
+      
+      // Parse the current state
+      const operatorState = this.parseOperatorState(currentInput);
+      
+      // Handle programmer-specific operators
       if (Array.from(CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS).includes(op)) {
-        return this.handleShiftOperator(op);
+        return this.handleShiftOperator(op, operatorState);
       }
-      return this.handleBasicOperator(op);
+      
+      return this.handleBasicOperator(op, operatorState);
     } catch (err: any) {
       return this.createErrorResponse(err);
     }
   }
 
-  handleShiftOperator(op: string): Record<string, any> {
+  handleShiftOperator(op: string, state?: any): Record<string, any> {
     try {
-      const state = this.calculator.states[this.calculator.activeBase];
-      const currentInput = state.input.trim();
+      const calculatorState = this.calculator.states[this.calculator.activeBase];
+      const currentInput = calculatorState.input.trim();
+      
       if (!currentInput || currentInput === "Error") {
         return this.createErrorResponse(new Error(CalculatorConstants.ERROR_MESSAGES.INVALID_EXPRESSION));
       }
+      
       if (currentInput.endsWith("(")) {
-        return this.createResponse(state.input);
+        return this.createResponse(calculatorState.input);
       }
-      const lastPart = CalculatorUtils.getLastExpressionPart(currentInput);
-      if (!lastPart || CalculatorConstants.REGEX.OPERATOR.test(lastPart)) {
-        return this.createResponse(state.input);
+      
+      // Use the parsed state if provided, otherwise parse it
+      const operatorState = state || this.parseOperatorState(currentInput);
+      
+      // Don't allow shift operators after negative signs or other shift operators
+      if (operatorState.hasNegative || operatorState.hasShiftOperator) {
+        return this.createResponse(calculatorState.input);
       }
-      let newInput;
-      if (this.isLastCharClosingParenthesis()) {
-        newInput = `${currentInput.trim()} ${op} `;
-      } else if (/>>\s*$|<<\s*$/.test(currentInput)) {
-        newInput = currentInput.replace(/\s*(?:<<|>>)\s*$/, ` ${op} `);
-      } else if (this.isLastCharNumber()) {
-        newInput = `${currentInput.trim()} ${op} `;
-      } else {
-        return this.createErrorResponse(new Error(CalculatorConstants.ERROR_MESSAGES.INVALID_EXPRESSION));
-      }
-      state.input = newInput;
-      return this.createResponse(state.input);
+      
+      // Replace any existing operator with the shift operator
+      calculatorState.input = `${operatorState.baseExpression} ${op} `;
+      
+      return this.createResponse(calculatorState.input);
     } catch (err: any) {
       return this.createErrorResponse(err);
     }
   }
 
-  handleBasicOperator(op: string): Record<string, any> {
+  handleBasicOperator(op: string, state?: any): Record<string, any> {
     try {
-      const state = this.calculator.states[this.calculator.activeBase];
-      const currentInput = state.input.trim();
-      if (this.isLastCharClosingParenthesis()) {
-        state.input = `${currentInput} ${op} `;
-        return this.createResponse(state.input);
+      const calculatorState = this.calculator.states[this.calculator.activeBase];
+      const currentInput = calculatorState.input.trim();
+      
+      // Use the parsed state if provided, otherwise parse it
+      const operatorState = state || this.parseOperatorState(currentInput);
+      
+      // Special case: allow minus after certain operators for negative numbers
+      if (op === "-" && operatorState.canAddNegative) {
+        calculatorState.input = `${operatorState.baseExpression} ${operatorState.lastOperator} ${op} `;
+      } else {
+        // Replace any existing operator sequence with the new operator
+        calculatorState.input = `${operatorState.baseExpression} ${op} `;
       }
-      if (this.isLastCharOperator()) {
-        state.input = CalculatorUtils.removeLastOperator(currentInput) + ` ${op} `;
-        return this.createResponse(state.input);
-      }
-      if (currentInput.endsWith("(")) {
-        return this.createResponse(state.input);
-      }
-      state.input = `${currentInput} ${op} `;
-      return this.createResponse(state.input);
+      
+      return this.createResponse(calculatorState.input);
     } catch (err: any) {
       return this.createErrorResponse(err);
     }
@@ -146,11 +192,13 @@ export class ProgrammerOperations {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input.trim();
       const position = currentInput.length;
+      
       if (parenthesis === "(") {
         this.handleOpenParenthesis(currentInput, position);
       } else if (parenthesis === ")" && this.canCloseParenthesis(currentInput)) {
         this.handleCloseParenthesis(currentInput, position);
       }
+      
       return this.createResponse(state.input);
     } catch (err: any) {
       return this.createErrorResponse(err);
@@ -160,18 +208,23 @@ export class ProgrammerOperations {
   canCloseParenthesis(expr: string): boolean {
     if (this.parenthesesTracker.getOpenCount() <= 0) return false;
     if (!expr.trim()) return false;
+    
     const lastOpenIndex = expr.lastIndexOf("(");
     if (lastOpenIndex === -1) return false;
+    
     const contentAfterOpen = expr.slice(lastOpenIndex + 1).trim();
     if (!contentAfterOpen) return false;
+    
     const lastContent = contentAfterOpen.trim();
     if (lastContent.endsWith('<<') || lastContent.endsWith('>>')) return false;
+    
     const lastChar = expr.trim().slice(-1);
     return /[0-9A-Fa-f)]/.test(lastChar);
   }
 
   handleOpenParenthesis(currentInput: string, position: number): void {
     const state = this.calculator.states[this.calculator.activeBase];
+    
     if (currentInput === "0" || currentInput === "Error") {
       state.input = "(";
       this.parenthesesTracker.open(position);
@@ -193,17 +246,23 @@ export class ProgrammerOperations {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input;
+      
       if (currentInput === "0" || currentInput === "Error") {
         return this.createResponse(state.input);
       }
+      
       const beforeBackspace = currentInput;
+      
       if (this.handleSpecialBackspace(currentInput)) {
         return this.createResponse(state.input);
       }
+      
       this.handleDefaultBackspace(currentInput);
+      
       if (state.input === beforeBackspace) {
         console.debug('[ProgrammerOperations] Backspace had no effect');
       }
+      
       return this.createResponse(state.input);
     } catch (err: any) {
       return this.createErrorResponse(err);
@@ -212,19 +271,25 @@ export class ProgrammerOperations {
 
   handleSpecialBackspace(currentInput: string): boolean {
     const state = this.calculator.states[this.calculator.activeBase];
+    
+    // Handle shift operators
     if (currentInput.match(/\s*[<>]{2}\s*$/)) {
       state.input = currentInput.replace(/\s*[<>]{2}\s*$/, '');
       return true;
     }
+    
+    // Handle regular operators
     if (CalculatorUtils.endsWithOperator(currentInput)) {
       state.input = CalculatorUtils.removeLastOperator(currentInput);
       return true;
     }
+    
     return false;
   }
 
   handleDefaultBackspace(currentInput: string): void {
     const state = this.calculator.states[this.calculator.activeBase];
+    
     if (currentInput.length === 1) {
       state.input = "0";
     } else {
@@ -236,9 +301,11 @@ export class ProgrammerOperations {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input;
+      
       if (currentInput !== "0" && currentInput !== "Error") {
         const parts = CalculatorUtils.splitExpression(currentInput);
         const lastPart = parts[parts.length - 1].trim();
+        
         if (lastPart) {
           if (lastPart.startsWith("-")) {
             parts[parts.length - 1] = lastPart.slice(1);
@@ -248,6 +315,7 @@ export class ProgrammerOperations {
           state.input = parts.join(" ").trim();
         }
       }
+      
       return this.createResponse(state.input);
     } catch (err: any) {
       return this.createErrorResponse(err);
@@ -258,20 +326,25 @@ export class ProgrammerOperations {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input.trim();
+      
       if (!currentInput || currentInput === "0" || currentInput === "Error") {
         return this.createResponse(state.input);
       }
+      
       if (currentInput.endsWith("(")) {
         return this.createResponse(state.input);
       }
+      
+      // Parse the current state to handle operator replacement properly
+      const operatorState = this.parseOperatorState(currentInput);
+      
       if (this.isLastCharClosingParenthesis() || this.isLastCharNumber()) {
-        state.input = `${currentInput} % `;
-        return this.createResponse(state.input);
+        state.input = `${operatorState.baseExpression} % `;
+      } else {
+        // Replace any existing operator with modulo
+        state.input = `${operatorState.baseExpression} % `;
       }
-      if (this.isLastCharOperator()) {
-        state.input = CalculatorUtils.removeLastOperator(currentInput) + " % ";
-        return this.createResponse(state.input);
-      }
+      
       return this.createResponse(state.input);
     } catch (err: any) {
       return this.createErrorResponse(err);
