@@ -17,9 +17,12 @@
         </div>
       </template>
     </Suspense>
+    
+    <!-- Production Components -->
     <UpdateNotification />
-    <!-- PWA Test Panel (development only) -->
-    <PWATestPanel v-show="isDev" />
+    
+    <!-- Development Components -->
+    <DevDock />
   </div>
 </template>
 
@@ -31,10 +34,9 @@ import AppProvider from '@/components/panel/AppProvider.vue';
 import AppSetup from '@/components/layout/AppSetup.vue';
 import Loader from '@/components/base/BaseLoader.vue';
 import UpdateNotification from '@/components/ui/UpdateNotification.vue';
-import PWATestPanel from '@/components/dev/PWATestPanel.vue';
+import DevDock from '@/components/dev/DevDock.vue';
 
-const error: Ref<Error | null> = shallowRef(null);
-const isDev: Ref<boolean> = shallowRef(import.meta.env.DEV);
+const error = shallowRef(null);
 
 onErrorCaptured((err: Error, instance: ComponentPublicInstance | null, info: string): boolean => {
   console.error("[Global Error Boundary Caught]:", err, instance, info);
