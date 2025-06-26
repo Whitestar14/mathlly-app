@@ -2,22 +2,25 @@
   "name": "mathlly",
   "version": "0.11.13-beta",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "dev": "vite --open && node scripts/generate-version-info.cjs",
+    "build": "vue-tsc && vite build",
+    "prebuild": "node scripts/generate-version-info.cjs",
+    "preview": "vite preview",
     "serve:prod": "pnpm dlx serve -s dist",
-    "dev": "vue-cli-service serve --mode development --open",
-    "prebuild": "node scripts/generate-version-info.js",
-    "build": "vue-cli-service build",
-    "build:analyze": "vue-cli-service build --mode production --report",
-    "lint": "vue-cli-service lint",
-    "version:bump": "node scripts/bump-version.js"
+    "build:analyze": "vite build --mode production && open dist/stats.html",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "type-check": "vue-tsc --noEmit",
+    "version:bump": "node scripts/bump-version.js",
+    "pwa:dev": "vite --mode development",
+    "pwa:build": "vite build --mode production"
   },
   "dependencies": {
     "@vueuse/core": "^11.3.0",
     "@vueuse/motion": "^3.0.3",
     "animejs": "^3.2.2",
     "chart.js": "^4.4.9",
-    "core-js": "^3.39.0",
     "dexie": "^4.0.10",
     "html-to-image": "^1.11.13",
     "lucide-vue-next": "^0.469.0",
@@ -28,60 +31,27 @@
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.2",
     "vue-router": "^4.5.0",
-    "vue-tippy": "^6.6.0"
+    "vue-tippy": "^6.6.0",
+    "workbox-window": "^7.3.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/eslint-parser": "^7.25.9",
-    "@babel/preset-env": "^7.26.0",
-    "@vue/cli-plugin-babel": "~5.0.8",
-    "@vue/cli-plugin-eslint": "~5.0.8",
-    "@vue/cli-plugin-pwa": "^5.0.8",
-    "@vue/cli-service": "~5.0.8",
-    "@vue/eslint-config-standard": "^8.0.1",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.33.1",
+    "@typescript-eslint/parser": "^8.33.1",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/eslint-config-typescript": "^14.5.0",
     "autoprefixer": "^10.4.20",
-    "babel-loader": "^10.0.0",
     "eslint": "^8.57.1",
     "eslint-plugin-vue": "^9.32.0",
     "postcss": "^8.4.49",
+    "rollup-plugin-visualizer": "^5.12.0",
     "tailwindcss": "^3.4.17",
-    "vue-loader": "^17.4.2",
-    "vue-template-compiler": "^2.7.16",
-    "webpack-bundle-analyzer": "^4.10.2",
-    "webpack-dev-server": "^5.2.0"
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "vite-plugin-eslint": "^1.8.1",
+    "vite-plugin-pwa": "^0.20.0",
+    "vue-eslint-parser": "^10.1.4",
+    "vue-tsc": "^2.0.0"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/recommended",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
-    "rules": {
-      "vue/no-unused-refs": "warn",
-      "vue/no-unused-vars": "warn",
-      "vue/component-options-name-casing": "warn",
-      "vue/component-tags-order": "warn",
-      "vue/define-macros-order": "warn",
-      "vue/no-dupe-keys": "warn",
-      "vue/no-multiple-template-root": "warn",
-      "vue/no-required-prop-with-default": "warn",
-      "vue/no-undef-components": "warn",
-      "vue/no-unused-components": "warn",
-      "vue/no-unused-properties": "warn",
-      "vue/no-v-model-argument": "off"
-    }
-  },
-  "browserslist": [
-    "> 0.5%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ],
   "packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
 }

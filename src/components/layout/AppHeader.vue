@@ -20,20 +20,11 @@
 
       <div class="flex-grow flex justify-center sm:justify-end items-center">
         <div class="w-full sm:w-auto flex justify-end items-center space-x-4">
-          <Suspense v-if="isCalculatorRoute">
-            <div class="relative w-full min-w-36">
-              <SelectBar
-                :model-value="props.currentCalculatorMode"
-                :options="availableModes"
-                position="popper"
-                placeholder="Select mode"
-                @update:model-value="onModeChange"
-              />
-            </div>
-            <template #fallback>
-              <div class="relative w-full min-w-36 h-10 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
-            </template>
-          </Suspense>
+          <!-- Teleport target for calculator mode switcher -->
+          <div
+            id="calculator-mode-switcher-slot"
+            class="w-full"
+          />
 
           <div class="flex items-center justify-between gap-2">
             <Button
@@ -65,50 +56,28 @@
   </header>
 </template>
 
-<script setup>
-import { computed } from "vue";
+<script setup lang="ts">
 import {
   Command,
   CircleEqual,
   CircleMinus, 
 } from "lucide-vue-next";
-import { useRoute } from "vue-router";
 import Button from "@/components/base/BaseButton.vue";
 import OfflineIndicator from '@/components/ui/OfflineIndicator.vue';
-import SelectBar from '@/components/ui/SelectBar.vue';
 
-const props = defineProps({
-  currentCalculatorMode: {
-    type: String,
-    required: true,
-  },
-  isSidebarOpen: {
-    type: Boolean,
-    default: false,
-  },
-  isMenubarOpen: {
-    type: Boolean,
-    default: false,
-  },
-});
+// Define props interface - much cleaner now!
+interface Props {
+  isSidebarOpen: boolean;
+  isMenubarOpen: boolean;
+}
 
-const emit = defineEmits([
-  "update:mode", 
-  "toggle-sidebar", 
-  "toggle-menubar",
-  "open-shortcut-modal"
-]);
+// Define emits interface - no more mode-specific events
+interface Emits {
+  (e: 'toggle-sidebar'): void;
+  (e: 'toggle-menubar'): void;
+  (e: 'open-shortcut-modal'): void;
+}
 
-const availableModes = [
-  { value: 'Standard', label: 'Standard' },
-  { value: 'Scientific', label: 'Scientific' },
-  { value: 'Programmer', label: 'Programmer' }
-];
-
-const route = useRoute();
-const isCalculatorRoute = computed(() => route.path === '/calculator' || route.path.startsWith('/calculator/'));
-
-const onModeChange = (newMode) => {
-  emit("update:mode", newMode);
-};
+defineProps<Props>();
+defineEmits<Emits>();
 </script>

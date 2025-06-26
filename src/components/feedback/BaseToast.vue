@@ -68,56 +68,60 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { BadgeXIcon, BadgeAlertIcon, CheckCircle2Icon, BadgeInfoIcon, XIcon } from 'lucide-vue-next';
-import { useToast } from '@/composables/useToast';
+import { useToast, type ToastType } from '@/composables/useToast';
 import Button from "@/components/base/BaseButton.vue";
+import type { Component } from 'vue';
 
-defineProps({
-  isMobile: {
-    type: Boolean,
-    required: true
-  }
-});
+interface Props {
+  isMobile: boolean;
+}
+
+defineProps<Props>();
 
 const { toasts, removeToast } = useToast();
 
-const toastTypeClasses = {
+type ToastTypeClasses = Record<ToastType, string>;
+type ToastIcons = Record<ToastType, Component>;
+type DefaultTitles = Record<ToastType, string>;
+
+const toastTypeClasses: ToastTypeClasses = {
   info: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600/70',
   success: 'bg-emerald-50 dark:bg-emerald-950/95 border-emerald-200 dark:border-emerald-800',
   warning: 'bg-amber-50 dark:bg-amber-950/95 border-amber-200 dark:border-amber-800',
   error: 'bg-rose-50 dark:bg-rose-950/95 border-rose-200 dark:border-rose-800'
 };
 
-const titleClasses = {
+const titleClasses: ToastTypeClasses = {
   info: 'text-gray-900 dark:text-gray-100',
   success: 'text-green-700 dark:text-green-400',
   warning: 'text-yellow-700 dark:text-yellow-400',
   error: 'text-red-700 dark:text-red-400'
 };
 
-const messageClasses = {
+const messageClasses: ToastTypeClasses = {
   info: 'text-gray-600 dark:text-gray-300',
   success: 'text-green-600 dark:text-green-300',
   warning: 'text-yellow-600 dark:text-yellow-300',
   error: 'text-red-600 dark:text-red-300'
 };
 
-const iconClasses = {
+const iconClasses: ToastTypeClasses = {
   info: 'text-gray-700 dark:text-gray-300',
   success: 'text-green-700 dark:text-green-400',
   warning: 'text-yellow-700 dark:text-yellow-400', 
   error: 'text-red-700 dark:text-red-400'
 };
 
-const toastIcons = {
+const toastIcons: ToastIcons = {
   info: BadgeInfoIcon,
   success: CheckCircle2Icon,
   warning: BadgeAlertIcon,
   error: BadgeXIcon
 };
 
-const defaultTitles = {
+const defaultTitles: DefaultTitles = {
   info: 'Information',
   success: 'Success',
   warning: 'Warning',

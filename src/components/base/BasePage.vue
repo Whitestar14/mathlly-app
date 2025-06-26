@@ -18,9 +18,11 @@
         >
           <ArrowLeftIcon class="h-5 w-5" />
         </Button>
-        <h1 class="text-xl font-medium">
-          {{ title }}
-        </h1>
+        <div class="flex items-center gap-3">
+          <h1 class="text-xl font-medium">
+            {{ title }}
+          </h1>
+        </div>
       </div>
     </header>
 
@@ -39,44 +41,38 @@
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+<script setup lang="ts">
+import { computed, type ComputedRef } from 'vue'
+import { useRouter, type Router } from 'vue-router'
 import { ArrowLeftIcon } from 'lucide-vue-next'
 import { useTitle } from '@/composables/useTitle'
 import Button from '@/components/base/BaseButton.vue'
-const props = defineProps({
-  title: {
-    type: String,
-    default: ''
-  },
-  showHeader: {
-    type: Boolean,
-    default: true
-  },
-  showFooter: {
-    type: Boolean,
-    default: false
-  },
-  showBackButton: {
-    type: Boolean,
-    default: true
-  },
-  mainClass: {
-    type: String,
-    default: 'container mx-auto px-4 py-8 md:py-12'
-  },
-  isToolLayout: {
-    type: Boolean,
-    default: false
-  }
+
+interface Props {
+  title?: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  showBackButton?: boolean;
+  mainClass?: string;
+  isToolLayout?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  title: '',
+  showHeader: true,
+  showFooter: false,
+  showBackButton: true,
+  mainClass: 'container mx-auto px-4 py-8 md:py-12',
+  isToolLayout: false,
+  badge: false
 })
 
-const router = useRouter()
+const router: Router = useRouter()
 
-useTitle(computed(() => props.title))
+const titleComputed: ComputedRef<string> = computed(() => props.title)
+useTitle(titleComputed)
 
-const goBack = () => {
+const goBack = (): void => {
   router.go(-1)
 }
 </script>

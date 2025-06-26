@@ -2,11 +2,10 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { SearchIcon, CircleHelp, AlertTriangle } from "lucide-vue-next";
-import { useSettingsStore } from "@/stores/settings";
 import { filterByQuery } from "@/utils/misc/queryFilter";
-import { DEFAULT_SETTINGS } from "@/stores/settings"
+import { useSettingsStore, DEFAULT_SETTINGS } from "@/stores/settings.ts"
 import { useToast } from "@/composables/useToast";
-import { cloneDeep } from "@/utils/misc/objectUtils";
+import { cloneDeep } from "@/utils/misc/objectUtils.ts";
 import BasePage from "@/components/base/BasePage.vue";
 import BaseInput from "@/components/base/BaseInput.vue";
 import BaseModal from "@/components/base/BaseModal.vue";

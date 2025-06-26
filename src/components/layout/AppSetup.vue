@@ -4,10 +4,8 @@
     :class="mainContentClasses"
   >
     <app-header
-      :is-sidebar-open="sidebarPanel.isOpen"
-      :is-menubar-open="menuPanel.isOpen"
-      :current-calculator-mode="currentMode" 
-      @update:mode="updateMode"
+      :is-sidebar-open="unref(sidebarPanel.isOpen)"
+      :is-menubar-open="unref(menuPanel.isOpen)"
       @toggle-sidebar="sidebarPanel.toggle()"
       @toggle-menubar="menuPanel.toggle()"
       @open-shortcut-modal="openShortcutModal"
@@ -30,7 +28,6 @@
 
     <Suspense>
       <app-view
-        :mode="currentMode"
         :settings="settings"
         :is-mobile="device.isMobile"
       />
@@ -60,19 +57,19 @@
     <Suspense>
       <ShortcutGuide
         v-if="panelStates.isLoaded"
-        v-model="isShortcutModalOpen"
+        v-model:show="isShortcutModalOpen"
       />
     </Suspense>
   </div>
 </template>
 
-<script setup>
-import { onUnmounted, computed, shallowRef, reactive, defineAsyncComponent } from "vue";
+<script setup lang="ts">
+import { onUnmounted, computed, unref, shallowRef, reactive, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
 import { useFullscreen, useLocalStorage } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
-import { useSettingsStore } from "@/stores/settings";
-import { useKeyboard } from "@/composables/useKeyboard";
+import { useSettingsStore } from "@/stores/settings.ts";
+import { useKeyboard } from "@/composables/useKeyboard.ts";
 import { usePanel } from "@/composables/usePanel";
 import { useTheme } from "@/composables/useTheme";
 import AppHeader from "@/components/layout/AppHeader.vue";
@@ -106,17 +103,12 @@ const panelStates = reactive({
 });
 
 const isShortcutModalOpen = shallowRef(false);
-const currentMode = shallowRef(settings.calculator.mode); 
 
 const sidebarPanel = usePanel('sidebar');
 const menuPanel = usePanel('menu');
 
 function openShortcutModal() {
   isShortcutModalOpen.value = true;
-}
-
-function updateMode(newMode) {
-  currentMode.value = newMode;
 }
 
 useKeyboard("global", {
@@ -137,9 +129,9 @@ const mainContentClasses = computed(() => {
     if (panelStates.menu.isOpen) classes.push('md:pr-64');
   }
 
-  if (sidebarPanel.isOpen) classes.push('md:pl-64');
-  if (menuPanel.isOpen) classes.push('md:pr-64');
-  
+  if (unref(sidebarPanel.isOpen)) classes.push('md:pl-64');
+  if (unref(menuPanel.isOpen)) classes.push('md:pr-64');
+
   return classes;
 });
 

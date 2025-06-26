@@ -1,7 +1,7 @@
 <template>
   <BaseModal
-    :open="modelValue"
-    @update:open="$emit('update:modelValue', $event)"
+    :open="show"
+    @update:open="handleModalUpdate"
   >
     <template #title>
       <div class="flex items-center">
@@ -30,7 +30,7 @@
               ? 'text-indigo-600 dark:text-indigo-400'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
           ]"
-          @click="handleTabChange(category, $event.target)"
+          @click="handleTabChange(category, $event.target as HTMLElement)"
         >
           {{ category }}
         </button>
@@ -93,21 +93,34 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { shallowRef } from "vue";
+<script setup lang="ts">
+import { shallowRef, type ShallowRef } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { usePills } from "@/composables/usePills";
 import Indicator from "@/components/ui/PillIndicator.vue";
 
-defineProps({
-  modelValue: Boolean,
-});
+interface Shortcut {
+  description: string;
+}
 
-defineEmits(['update:modelValue']);
+type ShortcutGroup = Record<string, Shortcut>;
 
-const tabElements = shallowRef([]);
+interface ShortcutGroups {
+  [category: string]: ShortcutGroup;
+}
 
-const shortcutGroups = {
+defineProps<{
+  show: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:show', value: boolean): void;
+  (e: 'close'): void;
+}>();
+
+const tabElements: ShallowRef<HTMLElement[]> = shallowRef([]);
+
+const shortcutGroups: ShortcutGroups = {
   Global: {
     "ctrl+alt+f": { description: "Toggle Fullscreen" },
     "ctrl+l": { description: "Toggle Sidebar" },
@@ -135,10 +148,17 @@ const shortcutGroups = {
   },
 };
 
-const { 
-  currentPill, 
-  indicatorStyle, 
-  handleNavigation 
+function handleModalUpdate(isOpen: boolean): void {
+  emit('update:show', isOpen);
+  if (!isOpen) {
+    emit('close');
+  }
+}
+
+const {
+  currentPill,
+  indicatorStyle,
+  handleNavigation
 } = usePills({
   position: "bottom",
   updateRoute: false,
@@ -146,7 +166,7 @@ const {
   containerRef: tabElements
 });
 
-const handleTabChange = (category, tabElement) => {
-  handleNavigation(category, tabElement); 
-};
+function handleTabChange(category: string, tabElement: HTMLElement): void {
+  handleNavigation(category, tabElement);
+}
 </script>
