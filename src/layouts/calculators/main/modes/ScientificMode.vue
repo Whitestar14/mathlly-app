@@ -68,7 +68,7 @@
               :class="{ 'calc-active-btn': trigSecondFunctionActive }"
               @click="toggleTrigSecondFunction"
             >
-              2ⁿᵈ
+              <span>2<sup>nd</sup></span>
             </CalcButton>
           </div>
         </template>
@@ -81,7 +81,8 @@
             item-class="calc-dropdown-item"
             @select="handleTrigFunction"
           >
-            <span v-html="func.display || func.value"></span>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <span v-html="func.display || func.value" />
           </BaseDropdownItem>
         </div>
       </BaseDropdown>
@@ -103,7 +104,8 @@
             item-class="calc-dropdown-item"
             @select="handleClick"
           >
-            <span v-html="func.display || func.value"></span>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <span v-html="func.display || func.value" />
           </BaseDropdownItem>
         </div>
       </BaseDropdown>
@@ -118,7 +120,7 @@
           :class="{ 'calc-active-btn': secondFunctionActive }"
           @click="toggleSecondFunction"
         >
-          <span>2ⁿᵈ</span>
+          <span>2<sup>nd</sup></span>
         </CalcButton>
         
         <CalcButton
@@ -128,7 +130,8 @@
           variant="function"
           @click="handleClick"
         >
-          <span v-html="secondFunctionActive ? func.secondaryDisplay : func.primaryDisplay"></span>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <span v-html="secondFunctionActive ? func.secondaryDisplay : func.primaryDisplay" />
         </CalcButton>
       </div>
 
@@ -165,11 +168,14 @@
         />
 
         <!-- Number pad and operations -->
-        <template v-for="(row, rowIndex) in numberRows" :key="`row-${rowIndex}`">
+        <template
+          v-for="(row, rowIndex) in numberRows"
+          :key="`row-${rowIndex}`"
+        >
           <CalcButton 
             v-for="(btn, btnIndex) in row" 
             :key="`row-${rowIndex}-btn-${btnIndex}`"
-                        :value="btn.value"
+            :value="btn.value"
             :disabled="isMaxLengthReached && btn.variant === 'number'"
             :variant="btn.variant"
             @click="handleClick"
@@ -191,7 +197,6 @@ import {
 } from 'lucide-vue-next';
 import { 
   numberRows,
-  scientificFirstRow,
   scientificSecondRow,
   scientificThirdRow,
   memoryOperations,
@@ -292,11 +297,10 @@ const toggleHyperbolicMode = () => {
 const toggleSecondFunction = () => {
   secondFunctionActive.value = !secondFunctionActive.value;
   
-  // Auto-reset after a short delay to prevent confusion
   if (secondFunctionActive.value) {
     setTimeout(() => {
       secondFunctionActive.value = false;
-    }, 50000); // Reset after 50 seconds
+    }, 30000);
   }
 };
 

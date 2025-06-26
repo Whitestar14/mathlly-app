@@ -509,7 +509,7 @@ export class ScientificOperations extends StandardOperations {
         this.calculator.input = "0!"
       } else {
         // Find the last number or expression in the input
-        const lastNumberMatch = currentInput.match(/(\d+|\))(?!.*[\d\)])$/)
+        const lastNumberMatch = currentInput.match(/(\d+|\))(?!.*[\d)])$/)
         
         if (lastNumberMatch) {
           const lastNumber = lastNumberMatch[0]

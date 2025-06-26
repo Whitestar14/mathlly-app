@@ -25,7 +25,7 @@
       <div class="h-full flex-auto grid grid-cols-4 gap-1">
         <div 
           v-for="n in 24" 
-                    :key="n" 
+          :key="n" 
           class="animate-pulse calc-btn-grid bg-gray-200 dark:bg-gray-700 rounded-lg"
         />
       </div>

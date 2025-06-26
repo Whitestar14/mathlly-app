@@ -124,7 +124,6 @@
         </Button>
       </div>
     </section>
-
   </BasePage>
 </template>
 

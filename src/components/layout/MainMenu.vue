@@ -78,7 +78,6 @@ import {
   ToggleGroupRoot,
   ToggleGroupItem
 } from "radix-vue";
-import { onMounted, onUnmounted} from 'vue';
 
 // Types
 interface ThemeItem {
@@ -93,8 +92,8 @@ interface ExternalLink {
   icon: LucideIcon;
 }
 
-// Theme management
-const { selectedTheme, isDark } = useTheme();
+// Theme management - now properly destructured
+const { selectedTheme } = useTheme();
 
 // Theme items configuration
 const themeItems: ThemeItem[] = [
@@ -106,41 +105,14 @@ const themeItems: ThemeItem[] = [
 // External links configuration
 const externalLinks: ExternalLink[] = [
   {
-    url: "https://github.com/Whitestar14/mathlly-app",
+    url: "https://github.com/Whitestar14/mathlly",
     text: "Star on GitHub",
     icon: GithubIcon
   },
   {
-    url: "https://x.com/@SOlusunmbola",
+    url: "https://x.com/@xijibomi",
     text: "Follow my Twitter",
     icon: AtSign
   }
 ];
-
-// Media query handling for system theme
-let mediaQueryCleanup: (() => void) | null = null;
-
-onMounted(() => {
-  const mediaQuery: MediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
-  
-  const handleChange = (e: MediaQueryListEvent): void => {
-    if (selectedTheme.value === 'system') {
-      isDark.value = e.matches;
-    }
-  };
-  
-  mediaQuery.addEventListener('change', handleChange);
-  
-  // Store cleanup function
-  mediaQueryCleanup = (): void => {
-    mediaQuery.removeEventListener('change', handleChange);
-  };
-});
-
-onUnmounted(() => {
-  if (mediaQueryCleanup) {
-    mediaQueryCleanup();
-    mediaQueryCleanup = null;
-  }
-});
 </script>

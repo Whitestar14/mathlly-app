@@ -47,8 +47,11 @@ export const DEFAULT_SETTINGS: Settings = {
 // Define the flattened state type
 type FlattenedSettings = Record<string, any>
 
-// Define the store state interface
-interface SettingsState extends FlattenedSettings {}
+// Define the store state interface with proper typing
+interface SettingsState extends FlattenedSettings {
+  // Add index signature to allow dynamic property access
+  [key: string]: any
+}
 
 export const useSettingsStore = defineStore('settings', {
   state: (): SettingsState => ({ ...flattenObject(DEFAULT_SETTINGS) }),
@@ -132,7 +135,7 @@ export const useSettingsStore = defineStore('settings', {
  * Creates a proxy for accessing nested settings with dot notation
  */
 function createSettingsProxy(state: SettingsState, section: string): any {
-  const handler: ProxyHandler<{}> = {
+  const handler: ProxyHandler<Record<string, any>> = {
     get(_, prop: string | symbol) {
       if (prop === 'toJSON') {
         return () => {
@@ -160,7 +163,7 @@ function createSettingsProxy(state: SettingsState, section: string): any {
 
       if (hasSubsection) {
         return new Proxy(
-          {},
+          {} as Record<string, any>,
           {
             get(_, subProp: string | symbol) {
               const subKey = `${section}_${propStr}_${String(subProp)}`
@@ -180,5 +183,5 @@ function createSettingsProxy(state: SettingsState, section: string): any {
     },
   }
 
-  return new Proxy({}, handler)
+  return new Proxy({} as Record<string, any>, handler)
 }

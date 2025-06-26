@@ -199,8 +199,8 @@ export function CalculatorController(options: ControllerOptions): ControllerRetu
           const result = calculator.value.evaluateExpression(input)
           return calculator.value.formatResult(result)
         }
-      } catch (err) {
-        return ''
+      } catch {
+        return '0'
       }
     }
   )

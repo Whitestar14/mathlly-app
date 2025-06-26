@@ -36,11 +36,15 @@
         :variant="btn.variant"
         @click="handleClick"
       >
-        <span v-html="btn.display || btn.value"></span>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <span v-html="btn.display || btn.value" />
       </CalcButton>
 
       <!-- Number pad and operations -->
-      <template v-for="(row, rowIndex) in numberRows" :key="`row-${rowIndex}`">
+      <template
+        v-for="(row, rowIndex) in numberRows"
+        :key="`row-${rowIndex}`"
+      >
         <CalcButton 
           v-for="(btn, btnIndex) in row" 
           :key="`row-${rowIndex}-btn-${btnIndex}`"

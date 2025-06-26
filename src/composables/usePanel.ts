@@ -204,7 +204,11 @@ export function createPanel(options: PanelOptions = {}): PanelAPI {
       }
       updatePreferences();
     } else {
-      isOpen.value ? close(isMobile) : open(isMobile);
+      if (isOpen.value) {
+        close(isMobile);
+      } else {
+        open(isMobile);
+      }
     }
   };
 

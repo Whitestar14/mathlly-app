@@ -21,7 +21,10 @@
       <div class="flex-grow flex justify-center sm:justify-end items-center">
         <div class="w-full sm:w-auto flex justify-end items-center space-x-4">
           <!-- Teleport target for calculator mode switcher -->
-          <div id="calculator-mode-switcher-slot" class="w-full" />
+          <div
+            id="calculator-mode-switcher-slot"
+            class="w-full"
+          />
 
           <div class="flex items-center justify-between gap-2">
             <Button

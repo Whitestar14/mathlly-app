@@ -193,19 +193,19 @@ const openReleaseNotes = (): void => {
       <!-- Main Card with Proper Border Isolation -->
       <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
         <!-- Solid background layer to prevent background bleed -->
-        <div class="absolute inset-0 bg-white/95 dark:bg-gray-900/95 rounded-2xl"></div>
+        <div class="absolute inset-0 bg-white/95 dark:bg-gray-900/95 rounded-2xl" />
         
         <!-- Content overlay -->
         <div class="relative">
           <!-- Gradient overlay -->
-          <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent dark:from-gray-800/10 pointer-events-none"></div>
+          <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent dark:from-gray-800/10 pointer-events-none" />
           
           <!-- Header Section -->
           <div class="relative p-3 sm:p-5">
             <div class="flex items-start gap-2.5 sm:gap-3">
               <!-- Icon -->
               <div class="relative flex-shrink-0 mt-0.5">
-                <div class="absolute inset-0 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl blur-sm opacity-60"></div>
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl blur-sm opacity-60" />
                 <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-2 sm:p-2.5 rounded-xl shadow-lg">
                   <RefreshCwIcon class="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
@@ -225,8 +225,8 @@ const openReleaseNotes = (): void => {
                       v-if="updateFeatures.length > 0"
                       variant="ghost"
                       size="icon"
-                      @click="toggleDetails"
                       class="h-7 w-7"
+                      @click="toggleDetails"
                     >
                       <ChevronDownIcon 
                         class="h-4 w-4 transition-transform duration-300 ease-out"
@@ -238,8 +238,8 @@ const openReleaseNotes = (): void => {
                     <BaseButton
                       variant="ghost"
                       size="icon"
-                      @click="dismissUpdate"
                       class="h-7 w-7"
+                      @click="dismissUpdate"
                     >
                       <XIcon class="h-4 w-4" />
                     </BaseButton>
@@ -262,7 +262,7 @@ const openReleaseNotes = (): void => {
                     v-if="displayLatestVersion" 
                     class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-md bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-700/50 shadow-sm flex-shrink-0"
                   >
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse" />
                     {{ formatVersion(displayLatestVersion) }}
                   </span>
                 </div>
@@ -273,9 +273,15 @@ const openReleaseNotes = (): void => {
                 </p>
                 
                 <!-- Quick Feature Preview -->
-                <div v-if="updateFeatures.length > 0" class="space-y-2">
+                <div
+                  v-if="updateFeatures.length > 0"
+                  class="space-y-2"
+                >
                   <!-- Collapsed Preview -->
-                  <div v-if="!showDetails" class="flex flex-wrap gap-1">
+                  <div
+                    v-if="!showDetails"
+                    class="flex flex-wrap gap-1"
+                  >
                     <span
                       v-for="(feature, index) in getPreviewFeatures()"
                       :key="index"
@@ -306,17 +312,20 @@ const openReleaseNotes = (): void => {
               leave-from-class="max-h-64 opacity-100"
               leave-to-class="max-h-0 opacity-0"
             >
-              <div v-if="showDetails && updateFeatures.length > 0" class="relative">
+              <div
+                v-if="showDetails && updateFeatures.length > 0"
+                class="relative"
+              >
                 <!-- Divider -->
                 <div class="px-3 sm:px-5">
-                  <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
+                  <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
                 </div>
                 
                 <!-- Details Content -->
                 <div class="px-3 sm:px-5 py-3 sm:py-4">
                   <div class="max-h-40 overflow-y-auto scrollbar-thin">
                     <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3 flex items-center">
-                      <div class="w-1 h-1 bg-indigo-500 rounded-full mr-2"></div>
+                      <div class="w-1 h-1 bg-indigo-500 rounded-full mr-2" />
                       {{ isServiceWorkerUpdate ? 'Service Worker Updates' : `What's new in ${formatVersion(displayLatestVersion)}` }}
                     </h4>
                     
@@ -328,7 +337,7 @@ const openReleaseNotes = (): void => {
                         class="flex items-start group"
                       >
                         <div class="relative mt-1.5 mr-2.5 sm:mr-3 flex-shrink-0">
-                          <div class="absolute inset-0 bg-green-400 rounded-full blur-sm opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                          <div class="absolute inset-0 bg-green-400 rounded-full blur-sm opacity-40 group-hover:opacity-60 transition-opacity" />
                           <CheckIcon class="relative h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-600 dark:text-green-400" />
                         </div>
                         <span class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{{ feature }}</span>
@@ -336,12 +345,15 @@ const openReleaseNotes = (): void => {
                     </div>
                     
                     <!-- Release Notes Link -->
-                    <div v-if="hasReleaseNotes" class="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div
+                      v-if="hasReleaseNotes"
+                      class="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700"
+                    >
                       <BaseButton
                         variant="link"
                         size="sm"
-                        @click="openReleaseNotes"
                         class="text-xs p-0 h-auto"
+                        @click="openReleaseNotes"
                       >
                         <BookOpenIcon class="h-3 w-3 mr-1.5" />
                         <span class="hidden sm:inline">View full release notes</span>
@@ -362,8 +374,8 @@ const openReleaseNotes = (): void => {
               <BaseButton
                 variant="outline"
                 size="sm"
-                @click="dismissUpdate"
                 class="text-xs"
+                @click="dismissUpdate"
               >
                 Later
               </BaseButton>
@@ -373,8 +385,8 @@ const openReleaseNotes = (): void => {
                 size="sm"
                 :disabled="isUpdating"
                 :loading="isUpdating"
-                @click="handleUpdate"
                 class="text-xs min-w-[90px]"
+                @click="handleUpdate"
               >
                 <DownloadIcon 
                   v-if="!isUpdating"
@@ -386,7 +398,7 @@ const openReleaseNotes = (): void => {
           </div>
           
           <!-- Bottom accent -->
-          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-60"></div>
+          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-60" />
         </div>
       </div>
     </div>

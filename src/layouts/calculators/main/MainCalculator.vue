@@ -1,6 +1,6 @@
 <template>
   <BasePage 
-    :title="mode + ' Mode'" 
+    :title="currentMode + ' Mode'" 
     :show-header="false" 
     :show-footer="false" 
     main-class="flex"
@@ -15,8 +15,8 @@
         :class="state.mode === 'Programmer' 
           ? 'grid-rows-[1fr_2fr]' 
           : (state.mode === 'Standard' 
-          ? 'grid-rows-[1fr_3fr]' 
-          : 'grid-rows-[1fr_4fr]')"
+            ? 'grid-rows-[1fr_3fr]' 
+            : 'grid-rows-[1fr_4fr]')"
       >
         <calculator-display
           :input="input"
@@ -67,12 +67,14 @@ import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import BasePage from '@/components/base/BasePage.vue'
 
+// Define props
+const props = defineProps<Props>()
+
 // Import the calculator mode switcher component
 const CalculatorModeSwitcher = defineAsyncComponent(() => import('@/components/calculator/CalculatorModeSwitcher.vue'))
 
 // Types
 interface Props {
-  mode: CalculatorMode
   settings: Record<string, any>
   isMobile: boolean
 }
@@ -80,9 +82,6 @@ interface Props {
 interface HistoryService {
   addToHistory: (expression: string, result: string) => void
 }
-
-// Define props
-const props = defineProps<Props>()
 
 // Async component import with proper typing
 const ActivityPanel = defineAsyncComponent(() => import('@/layouts/calculators/main/ActivityPanel.vue'))
@@ -96,7 +95,7 @@ const activityPanelResult = usePanel('activity')
 const activityPanel = activityPanelResult as LightweightPanelAPI
 
 // Get calculator mode switcher context
-const { currentMode, updateMode } = useCalculatorModeSwitcher()
+const { currentMode } = useCalculatorModeSwitcher()
 
 const {
   state,
@@ -105,13 +104,13 @@ const {
   setAnimation,
   updateDisplayValues,
   setActiveBase
-} = useCalculatorState(props.mode)
+} = useCalculatorState(currentMode.value)
 
 // Session storage with proper typing
-const storedInput = useSessionStorage<string>(`calculator-session-input-${props.mode}`, '')
+const storedInput = useSessionStorage<string>(`calculator-session-input-${currentMode.value}`, '')
 
 // Calculator instance with proper typing - use ref instead of shallowRef to match interface
-const calculator: Ref<Calculator> = ref(CalculatorFactory.create(props.mode, props.settings))
+const calculator: Ref<Calculator> = ref(CalculatorFactory.create(currentMode.value, props.settings))
  
 // Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value))
@@ -141,7 +140,7 @@ const {
 
 // Memoized computed properties with proper typing
 const maxInputLength: ComputedRef<number> = computed(() => calculator.value.MAX_INPUT_LENGTH)
-const hasMemoryValue: ComputedRef<boolean> = computed(() => memoryService.hasMemory(props.mode).value)
+const hasMemoryValue: ComputedRef<boolean> = computed(() => memoryService.hasMemory(currentMode.value).value)
 
 // Activity panel methods
 const openActivity = (): void => activityPanel.open()
@@ -160,7 +159,7 @@ const handleModeToggle = (data: { type: string; value: any }) => {
       calculator.value.setNotationMode(data.value);
       break;
     case 'hyperbolic':
-      calculator.value.toggleHyperbolic(data.value);
+      calculator.value.toggleHyperbolic();
       break;
   }
 };
@@ -201,23 +200,8 @@ const handleModeChange = (newMode: CalculatorMode, oldMode?: CalculatorMode) => 
   }
 }
 
-// Watch for mode changes from the switcher and sync with props
-watch(() => currentMode.value, (newMode: CalculatorMode) => {
-  if (newMode !== props.mode) {
-    // The mode change came from the switcher, handle it
-    handleModeChange(newMode)
-  }
-})
-
-// Watch for mode changes from props and sync with switcher
-watch(() => props.mode, (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
-  if (!newMode) return
-
-  // Sync the switcher with the prop change
-  if (currentMode.value !== newMode) {
-    updateMode(newMode)
-  }
-
+// Watch for mode changes from the switcher
+watch(() => currentMode.value, (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
   handleModeChange(newMode, oldMode)
 }, { immediate: true })
 

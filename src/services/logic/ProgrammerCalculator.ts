@@ -18,8 +18,8 @@ import {
  */
 export class ProgrammerCalculator extends ICalculator {
   MAX_INPUT_LENGTH: number;
-  states: Record<string, { input: string; display: string }>;
-  calculators: Record<string, any>;
+  states: Record<BaseType, { input: string; display: string }>;
+  calculators: Record<BaseType, any>;
   calculations: ProgrammerCalculations;
   operations: ProgrammerOperations;
 
@@ -43,7 +43,7 @@ export class ProgrammerCalculator extends ICalculator {
   }
 
   get activeCalculator(): any {
-    return this.calculators[this.activeBase];
+    return this.calculators[this.activeBase as BaseType];
   }
 
   evaluateExpression(expr: string, base: BaseType = this.activeBase as BaseType): any {
@@ -69,13 +69,13 @@ export class ProgrammerCalculator extends ICalculator {
     if (this.isInputTooLong(btn)) {
       return this.createErrorResponse(
         new Error("Maximum input length reached"),
-        this.states[this.activeBase].input
+        this.states[this.activeBase as BaseType].input
       );
     }
     try {
       return this.normalizeResponse(this.processButton(btn));
     } catch (err: any) {
-      return this.createErrorResponse(err, this.states[this.activeBase].input);
+      return this.createErrorResponse(err, this.states[this.activeBase as BaseType].input);
     }
   }
 
@@ -118,7 +118,7 @@ export class ProgrammerCalculator extends ICalculator {
         this.updateDisplayValues();
       }
       return {
-        input: this.states[this.activeBase].input,
+        input: this.states[this.activeBase as BaseType].input,
         error: this.error,
         expression: this.currentExpression
       };
@@ -129,7 +129,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   handleEquals(): Record<string, any> {
     try {
-      const expression = this.states[this.activeBase].input;
+      const expression = this.states[this.activeBase as BaseType].input;
       const openCount = this.operations.getParenthesesCount();
       const finalExpr = openCount > 0 ? expression + " )".repeat(openCount) : expression;
       this.currentExpression = finalExpr;
@@ -139,7 +139,7 @@ export class ProgrammerCalculator extends ICalculator {
       this.updateAllStates(formattedResult);
       this.operations.resetParentheses();
       return {
-        input: this.states[this.activeBase].input,
+        input: this.states[this.activeBase as BaseType].input,
         expression: this.currentExpression,
         result: formattedResult,
         displayValues: { ...this.states }
@@ -149,40 +149,46 @@ export class ProgrammerCalculator extends ICalculator {
     }
   }
 
-  updateDisplayValues(): Record<string, { input: string; display: string }> {
+  updateDisplayValues(): Record<BaseType, { input: string; display: string }> {
     try {
       const currentValue = this.evaluateExpression(
-        this.states[this.activeBase].input,
+        this.states[this.activeBase as BaseType].input,
         this.activeBase as BaseType
       );
       if (currentValue || currentValue === 0) {
-        Object.keys(this.states).forEach(base => {
+        // Use type assertion with proper validation
+        (Object.keys(this.states) as BaseType[]).forEach(base => {
           this.states[base].display = this.formatResult(currentValue, base);
         });
       }
       return this.states;
     } catch (err) {
-      return this.states;
+      return console.error('Error updating display values:', err), this.states;
     }
   }
 
   handleBaseChange(newBase: string): Record<string, any> {
     try {
-      const currentInput = this.states[this.activeBase].input.trim();
+      // Validate that newBase is a valid BaseType
+      if (!this.isValidBaseType(newBase)) {
+        throw new Error(`Invalid base type: ${newBase}`);
+      }
+
+      const currentInput = this.states[this.activeBase as BaseType].input.trim();
       const cleanedInput = CalculatorUtils.sanitizeExpression(currentInput);
       if (cleanedInput !== currentInput) {
-        this.states[this.activeBase].input = cleanedInput;
+        this.states[this.activeBase as BaseType].input = cleanedInput;
       }
       const currentValue = this.evaluateExpression(
         cleanedInput,
-        this.activeBase
+        this.activeBase as BaseType
       );
       if (currentValue || currentValue === 0) {
         this.updateAllStates(this.formatResult(currentValue));
       }
       this.activeBase = newBase;
       return {
-        input: this.states[newBase].input,
+        input: this.states[newBase as BaseType].input,
         error: this.error,
         displayValues: this.states
       };
@@ -191,10 +197,17 @@ export class ProgrammerCalculator extends ICalculator {
     }
   }
 
+  /**
+   * Type guard to check if a string is a valid BaseType
+   */
+  private isValidBaseType(base: string): base is BaseType {
+    return ['DEC', 'BIN', 'HEX', 'OCT'].includes(base);
+  }
+
   updateAllStates(value: string | number): void {
     try {
-      Object.keys(this.states).forEach(base => {
-        const converted = this.convertToBase(value, this.activeBase as BaseType, base as BaseType);
+      (Object.keys(this.states) as BaseType[]).forEach(base => {
+        const converted = this.convertToBase(value, this.activeBase as BaseType, base);
         this.states[base] = {
           input: converted,
           display: converted
@@ -208,7 +221,7 @@ export class ProgrammerCalculator extends ICalculator {
 
   handleClear(): Record<string, any> {
     super.handleClear();
-    Object.keys(this.states).forEach(base => {
+    (Object.keys(this.states) as BaseType[]).forEach(base => {
       this.states[base] = { input: "0", display: "0" };
     });
     this.operations.resetParentheses();
@@ -220,16 +233,16 @@ export class ProgrammerCalculator extends ICalculator {
   }
 
   handleClearEntry(): Record<string, any> {
-    const input = this.states[this.activeBase].input;
+    const input = this.states[this.activeBase as BaseType].input;
     if (input !== "0" && input !== "Error") {
       const parts = input.split(" ");
-      this.states[this.activeBase].input = parts.length > 1 ? 
+      this.states[this.activeBase as BaseType].input = parts.length > 1 ? 
         parts.slice(0, -1).join(" ") : "0";
     } else {
       this.handleClear();
     }
     return {
-      input: this.states[this.activeBase].input,
+      input: this.states[this.activeBase as BaseType].input,
       error: "",
       displayValues: this.states
     };
@@ -242,7 +255,7 @@ export class ProgrammerCalculator extends ICalculator {
       ...CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS,
       "CE", "±", "%"
     ];
-    return this.states[this.activeBase].input.length >= this.MAX_INPUT_LENGTH &&
+    return this.states[this.activeBase as BaseType].input.length >= this.MAX_INPUT_LENGTH &&
       !excludedButtons.includes(btn);
   }
 }

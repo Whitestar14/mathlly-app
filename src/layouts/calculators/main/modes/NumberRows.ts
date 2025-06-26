@@ -56,14 +56,6 @@ export const standardSecondRow = markRaw<ButtonConfig[]>([
   { value: '÷', variant: 'operator' }
 ]);
 
-// Scientific mode specific rows
-export const scientificFirstRow = markRaw<ButtonConfig[]>([
-  { value: '(', variant: 'function' },
-  { value: ')', variant: 'function' },
-  { value: 'n!', variant: 'function' },
-  { value: 'C', variant: 'function' }
-]);
-
 export const scientificSecondRow = markRaw<ButtonConfig[]>([
   { value: 'π', variant: 'function' },
   { value: 'e', variant: 'function' },

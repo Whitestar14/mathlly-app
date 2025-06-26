@@ -17,7 +17,7 @@ async function initializePWA() {
       const pwaModule = await import('virtual:pwa-register/vue')
       useRegisterSW = pwaModule.useRegisterSW
     }
-  } catch (error) {
+  } catch {
     console.warn('[PWA] Virtual module not available, using fallback registration')
     useRegisterSW = createFallbackRegisterSW()
   }

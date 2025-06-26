@@ -31,9 +31,12 @@
               v-for="(token, index) in formattedTokens"
               :key="index"
               :class="[
-                tokenClassMap[token.type] || '',
+                getTokenClass(token),
+                getParenthesesLevelClass(token),
                 errorClass,
               ]"
+              :data-token-type="token.type"
+              :data-parent-level="token.parentLevel"
             >
               {{ token.content }}
             </span>
@@ -72,6 +75,7 @@ import { useElementSize, useScroll, useThrottleFn, useMemoize } from '@vueuse/co
 import { useAnimation, type SlideAnimationControls } from '@/composables/useAnimation'
 import { useSettingsStore } from '@/stores/settings'
 import { SyntaxHighlighter } from '@/services/display/SyntaxHighlighter'
+import { CalculatorConstants } from '@/utils/constants/CalculatorConstants'
 
 // Define interfaces for props and emits
 interface Props {
@@ -92,6 +96,7 @@ interface ScrollUpdatePayload {
 interface Token {
   type: string
   content: string
+  parentLevel?: number
 }
 
 interface Calculator {
@@ -144,18 +149,94 @@ const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
 // Check if syntax highlighting is enabled - non-reactive if setting doesn't change often
 const syntaxHighlightingEnabled: ComputedRef<boolean> = computed(() => settingsStore.display.syntaxHighlighting)
 
-// Pre-compute token class map for better performance
+// Comprehensive token class map supporting all syntax variants from CalculatorConstants
 const tokenClassMap: Record<string, string> = {
+  // Parentheses and structural elements
   'open': 'paren-open syntax-parenthesis',
   'close': 'paren-close syntax-parenthesis',
   'ghost': 'paren-ghost syntax-ghost',
+  'parenthesis': 'syntax-parenthesis',
+  
+  // Numbers and decimals
   'number': 'syntax-number',
-  'operator': 'syntax-operator',
-  'programmer-operator': 'syntax-programmer-operator',
-  'function': 'syntax-function',
   'decimal': 'syntax-decimal',
+  
+  // Standard operators (from BUTTON_TYPES.OPERATORS)
+  'operator': 'syntax-operator',
+  
+  // Programmer operators (from BUTTON_TYPES.PROGRAMMER_OPERATORS)
+  'programmer-operator': 'syntax-programmer-operator',
+  
+  // Scientific functions (from BUTTON_TYPES.SCIENTIFIC_FUNCTIONS)
+  'scientific-function': 'syntax-scientific-function',
+  'trig-function': 'syntax-trig-function',
+  'hyperbolic-function': 'syntax-hyperbolic-function',
+  'log-function': 'syntax-log-function',
+  'power-operator': 'syntax-power-operator',
+  'root-function': 'syntax-root-function',
+  'factorial': 'syntax-factorial',
+  'modulo-operator': 'syntax-modulo-operator',
+  
+  // Constants and special symbols
+  'constant': 'syntax-constant',
+  
+  // Generic and utility
+  'function': 'syntax-function',
   'text': 'syntax-text',
   'space': ''
+}
+
+// Parentheses level styling for nested expressions
+const parenthesesLevelColors: Record<number, string> = {
+  0: 'text-blue-600 dark:text-blue-400',
+  1: 'text-green-600 dark:text-green-400', 
+  2: 'text-purple-600 dark:text-purple-400',
+  3: 'text-orange-600 dark:text-orange-400',
+  4: 'text-pink-600 dark:text-pink-400'
+}
+
+// Enhanced token classification function
+function getTokenClass(token: Token): string {
+  const baseClass = tokenClassMap[token.type] || 'syntax-text'
+  
+  // Add mode-specific enhancements
+  if (props.mode === 'Scientific') {
+    // Enhanced scientific function styling
+    if (CalculatorConstants.BUTTON_TYPES.SCIENTIFIC_FUNCTIONS.includes(token.content as any)) {
+      return `${baseClass} font-semibold`
+    }
+    // Constants get special treatment
+    if (token.content === 'π' || token.content === 'e') {
+      return `${baseClass} font-bold text-indigo-600 dark:text-indigo-400`
+    }
+  }
+  
+  if (props.mode === 'Programmer') {
+    // Programmer operators get enhanced styling
+    if (CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token.content as any)) {
+      return `${baseClass} font-bold`
+    }
+    // Base-specific number styling
+    if (token.type === 'number') {
+      switch (props.activeBase) {
+        case 'BIN': return `${baseClass} text-green-700 dark:text-green-300`
+        case 'OCT': return `${baseClass} text-yellow-700 dark:text-yellow-300`
+        case 'HEX': return `${baseClass} text-purple-700 dark:text-purple-300`
+        default: return baseClass
+      }
+    }
+  }
+  
+  return baseClass
+}
+
+// Parentheses level styling
+function getParenthesesLevelClass(token: Token): string {
+  if (token.type === 'open' || token.type === 'close' || token.type === 'ghost') {
+    const level = token.parentLevel || 0
+    return parenthesesLevelColors[level % 5] || parenthesesLevelColors[0]
+  }
+  return ''
 }
 
 // Memoize font size calculation for better performance
@@ -168,8 +249,13 @@ const getFontSizeClass = useMemoize((value: string, mode: string, activeBase: st
     if (length > 70) return 'text-xl'
     if (length > 50) return 'text-2xl'
     return 'text-3xl'
+  } else if (mode === 'Scientific') {
+    // Scientific mode: account for function names
+    if (length > 60) return 'text-lg'
+    if (length > 40) return 'text-xl'
+    return 'text-2xl'
   } else {
-    // Programmer mode: use smaller font sizes
+    // Programmer mode: use smaller font sizes for binary
     if (length > 70) return 'text-base'
     if (length > 50) return 'text-lg'
     return activeBase === 'BIN' ? 'text-lg' : 'text-2xl'
@@ -242,7 +328,11 @@ function resetPositions(): void {
 }
 
 watch(() => props.isAnimating, (newValue: boolean) => {
-  newValue ? animateSlide() : resetPositions()
+  if (newValue) {
+    animateSlide()
+  } else {
+    resetPositions()
+  }
 }, { flush: 'post' })
 
 function clearCache(): void {

@@ -10,7 +10,7 @@
       @enter="historyAnimation.onEnter" 
       @leave="historyAnimation.onLeave"
     >
-      <history-item 
+      <history-item-component 
         v-for="(item, index) in historyItems" 
         :key="item.id" 
         :item="item" 
@@ -19,8 +19,8 @@
         :data-index="index" 
         @select="handleSelectItem" 
         @delete="handleDelete"
-        @copy="copyItem" 
-        @copy-json="copyAsJson" 
+        @copy="copyItem"
+        @copy-json="copyAsJson"
       />
     </TransitionGroup>
 
@@ -60,8 +60,8 @@ import { useClipboard } from "@vueuse/core";
 
 // Types
 interface Props {
-  mode: string;
-  isMobile: boolean;
+  mode?: string;
+  isMobile?: boolean;
 }
 
 interface Emits {
@@ -95,7 +95,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 // Async component
-const HistoryItem = defineAsyncComponent(() => import("@/components/ui/HistoryItem.vue"));
+const HistoryItemComponent = defineAsyncComponent(() => import("@/components/ui/HistoryItem.vue"));
 
 // Composables
 const { historyItems, deleteItem } = useHistory();

@@ -15,16 +15,6 @@ const THEME_OPTIONS = {
 export type ThemeOption = typeof THEME_OPTIONS[keyof typeof THEME_OPTIONS];
 
 /**
- * Settings store interface for theme management
- */
-interface SettingsStore {
-  appearance: {
-    theme: ThemeOption;
-  };
-  updateSetting: (key: string, value: ThemeOption) => Promise<void>;
-}
-
-/**
  * Theme composable return type
  */
 export interface UseThemeReturn {
@@ -43,7 +33,7 @@ export interface UseThemeReturn {
  */
 export function useTheme(): UseThemeReturn {
   // Get settings store for persistence
-  const settings = useSettingsStore() as SettingsStore;
+  const settings = useSettingsStore();
   
   // Use VueUse's dark mode composable
   const isDark = useDark();
@@ -55,7 +45,9 @@ export function useTheme(): UseThemeReturn {
    * Current theme with getter/setter for two-way binding
    */
   const selectedTheme: ComputedRef<ThemeOption> = computed({
-    get: (): ThemeOption => settings.appearance.theme,
+    get: (): ThemeOption => {
+      return settings.appearance?.theme || THEME_OPTIONS.SYSTEM;
+    },
     set: async (newTheme: ThemeOption): Promise<void> => {
       await settings.updateSetting('appearance.theme', newTheme);
     },
@@ -120,6 +112,7 @@ export function useTheme(): UseThemeReturn {
     }
   });
 
+  // Make sure to return ALL the properties
   return {
     isDark,
     selectedTheme,

@@ -98,6 +98,8 @@ export class ICalculator {
    * Format a result for display
    */
   formatResult(result: any, base?: string): string {
+    void result;
+    void base;
     throw new Error('formatResult must be implemented in derived class')
   }
 
@@ -207,6 +209,7 @@ export class ICalculator {
    * Handle operator input
    */
   handleOperator(operator: string): Record<string, any> {
+    void operator;
     throw new Error('handleOperator must be implemented in derived class')
   }
 
@@ -214,6 +217,7 @@ export class ICalculator {
    * Handle number input
    */
   handleNumber(num: string): Record<string, any> {
+    void num;
     throw new Error('handleNumber must be implemented in derived class')
   }
 

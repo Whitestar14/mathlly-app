@@ -111,7 +111,15 @@ export class ProgrammerOperations {
     };
   }
 
-  handleOperator(op: string): Record<string, any> {
+  /**
+   * Type guard to check if a string is a programmer operator
+   */
+    private isProgrammerOperator(op: string): op is typeof CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS[number] {
+    return (CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS as readonly string[]).includes(op);
+  }
+
+
+handleOperator(op: string): Record<string, any> {
     try {
       const state = this.calculator.states[this.calculator.activeBase];
       const currentInput = state.input.trim();
@@ -125,7 +133,7 @@ export class ProgrammerOperations {
       const operatorState = this.parseOperatorState(currentInput);
       
       // Handle programmer-specific operators
-      if (Array.from(CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS).includes(op)) {
+      if (this.isProgrammerOperator(op)) {
         return this.handleShiftOperator(op, operatorState);
       }
       

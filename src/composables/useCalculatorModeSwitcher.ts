@@ -1,10 +1,7 @@
-import { ref, computed, provide, inject, type Ref, type ComputedRef } from 'vue'
+import { ref, readonly, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useLocalStorage } from '@vueuse/core'
 import type { CalculatorMode } from '@/composables/useCalculatorState'
-import { validateCalculatorMode } from '@/utils/validation/typeGuard'
-
-// Symbol for provide/inject
-const CalculatorModeSwitcherSymbol = Symbol('CalculatorModeSwitcher')
 
 interface ModeOption {
   value: CalculatorMode
@@ -12,26 +9,49 @@ interface ModeOption {
   shortLabel?: string
 }
 
-interface CalculatorModeSwitcherContext {
-  currentMode: Ref<CalculatorMode>
-  availableModes: ModeOption[]
-  isCalculatorRoute: ComputedRef<boolean>
-  updateMode: (newMode: string | CalculatorMode) => void
-  shouldShowSwitcher: ComputedRef<boolean>
+// Global reactive state - no provide/inject needed
+const currentMode = ref<CalculatorMode>('Standard')
+const isInitialized = ref(false)
+
+const availableModes: ModeOption[] = [
+  { value: 'Standard', label: 'Standard', shortLabel: 'Std' },
+  { value: 'Scientific', label: 'Scientific', shortLabel: 'Sci' },
+  { value: 'Programmer', label: 'Programmer', shortLabel: 'Prog' }
+]
+
+// Persist mode to localStorage
+const persistedMode = useLocalStorage<CalculatorMode>('calculator-mode', 'Standard')
+
+/**
+ * Initialize the calculator mode switcher
+ */
+export function initializeCalculatorModeSwitcher(initialMode?: CalculatorMode) {
+  if (isInitialized.value) return
+
+  // Use provided initial mode or fallback to persisted/default
+  const modeToUse = initialMode || persistedMode.value || 'Standard'
+  currentMode.value = modeToUse
+  persistedMode.value = modeToUse
+  isInitialized.value = true
+
+  // Sync changes to localStorage
+  const stopWatcher = currentMode.value !== persistedMode.value ? 
+    (() => { persistedMode.value = currentMode.value }) : 
+    undefined
+  
+  if (stopWatcher) stopWatcher()
 }
 
 /**
- * Provider for calculator mode switcher context
+ * Main composable for calculator mode switching
  */
-export function provideCalculatorModeSwitcher(initialMode: CalculatorMode = 'Standard') {
-  const currentMode = ref<CalculatorMode>(initialMode)
+export function useCalculatorModeSwitcher() {
   const route = useRoute()
 
-  const availableModes: ModeOption[] = [
-    { value: 'Standard', label: 'Standard', shortLabel: 'Std' },
-    { value: 'Scientific', label: 'Scientific', shortLabel: 'Sci' },
-    { value: 'Programmer', label: 'Programmer', shortLabel: 'Prog' }
-  ]
+  // Auto-initialize if not already done
+  if (!isInitialized.value) {
+    initializeCalculatorModeSwitcher()
+  }
 
   const isCalculatorRoute = computed(() => 
     route.path === '/calculator' || route.path.startsWith('/calculator/')
@@ -39,33 +59,21 @@ export function provideCalculatorModeSwitcher(initialMode: CalculatorMode = 'Sta
 
   const shouldShowSwitcher = computed(() => isCalculatorRoute.value)
 
-  const updateMode = (newMode: string | CalculatorMode) => {
-    const validatedMode = validateCalculatorMode(newMode)
-    currentMode.value = validatedMode
+  const updateMode = (newMode: CalculatorMode) => {
+    if (availableModes.some(mode => mode.value === newMode)) {
+      currentMode.value = newMode
+      persistedMode.value = newMode
+    }
   }
 
-  const context: CalculatorModeSwitcherContext = {
-    currentMode,
+  return {
+    currentMode: readonly(currentMode),
     availableModes,
     isCalculatorRoute,
-    updateMode,
-    shouldShowSwitcher
+    shouldShowSwitcher,
+    updateMode
   }
-
-  provide(CalculatorModeSwitcherSymbol, context)
-  
-  return context
 }
 
-/**
- * Consumer for calculator mode switcher context
- */
-export function useCalculatorModeSwitcher(): CalculatorModeSwitcherContext {
-  const context = inject<CalculatorModeSwitcherContext>(CalculatorModeSwitcherSymbol)
-  
-  if (!context) {
-    throw new Error('useCalculatorModeSwitcher must be used within a provider')
-  }
-  
-  return context
-}
+// Export for direct access if needed
+export { currentMode as calculatorMode }

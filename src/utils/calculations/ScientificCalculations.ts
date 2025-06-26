@@ -372,7 +372,7 @@ export class ScientificCalculations {
                 `${ERROR_MESSAGES.DOMAIN_ERROR}: acoth(${argValue}) - argument must satisfy |x| > 1`
               );
             }
-          } catch (err) {
+          } catch {
             // If we can't evaluate the argument, let the main evaluation handle it
             continue;
           }
@@ -394,7 +394,7 @@ export class ScientificCalculations {
                 `${ERROR_MESSAGES.DOMAIN_ERROR}: acosh(${argValue}) - argument must be ≥ 1`
               );
             }
-          } catch (err) {
+          } catch {
             continue;
           }
         }
@@ -415,7 +415,7 @@ export class ScientificCalculations {
                 `${ERROR_MESSAGES.DOMAIN_ERROR}: atanh(${argValue}) - argument must satisfy |x| < 1`
               );
             }
-          } catch (err) {
+          } catch {
             continue;
           }
         }
@@ -436,7 +436,7 @@ export class ScientificCalculations {
                 `${ERROR_MESSAGES.DOMAIN_ERROR}: asin(${argValue}) - argument must satisfy |x| ≤ 1`
               );
             }
-          } catch (err) {
+          } catch {
             continue;
           }
         }
@@ -456,7 +456,7 @@ export class ScientificCalculations {
                 `${ERROR_MESSAGES.DOMAIN_ERROR}: acos(${argValue}) - argument must satisfy |x| ≤ 1`
               );
             }
-          } catch (err) {
+          } catch {
             continue;
           }
         }
@@ -477,7 +477,7 @@ export class ScientificCalculations {
                 `${ERROR_MESSAGES.DOMAIN_ERROR}: √(${argValue}) - argument must be ≥ 0`
               );
             }
-          } catch (err) {
+          } catch {
             continue;
           }
         }
@@ -499,7 +499,7 @@ export class ScientificCalculations {
                 `${ERROR_MESSAGES.DOMAIN_ERROR}: ${funcName}(${argValue}) - argument must be > 0`
               );
             }
-          } catch (err) {
+          } catch {
             continue;
           }
         }

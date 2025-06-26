@@ -4,8 +4,8 @@
     :class="mainContentClasses"
   >
     <app-header
-      :is-sidebar-open="sidebarPanel.isOpen"
-      :is-menubar-open="menuPanel.isOpen"
+      :is-sidebar-open="unref(sidebarPanel.isOpen)"
+      :is-menubar-open="unref(menuPanel.isOpen)"
       @toggle-sidebar="sidebarPanel.toggle()"
       @toggle-menubar="menuPanel.toggle()"
       @open-shortcut-modal="openShortcutModal"
@@ -28,7 +28,6 @@
 
     <Suspense>
       <app-view
-        :mode="modeSwitcher.currentMode.value"
         :settings="settings"
         :is-mobile="device.isMobile"
       />
@@ -65,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, computed, shallowRef, reactive, defineAsyncComponent } from "vue";
+import { onUnmounted, computed, unref, shallowRef, reactive, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
 import { useFullscreen, useLocalStorage } from "@vueuse/core";
 import { useDeviceStore } from "@/stores/device";
@@ -73,8 +72,6 @@ import { useSettingsStore } from "@/stores/settings.ts";
 import { useKeyboard } from "@/composables/useKeyboard.ts";
 import { usePanel } from "@/composables/usePanel";
 import { useTheme } from "@/composables/useTheme";
-import { provideCalculatorModeSwitcher } from "@/composables/useCalculatorModeSwitcher";
-import type { CalculatorMode } from "@/composables/useCalculatorState";
 import AppHeader from "@/components/layout/AppHeader.vue";
 
 const SidebarMenu = defineAsyncComponent(() => import("@/components/layout/SidebarMenu.vue"));
@@ -98,11 +95,6 @@ await Promise.all([
 device.initializeDeviceInfo();
 
 const { toggleTheme } = useTheme();
-
-// Provide calculator mode switcher context
-const modeSwitcher = provideCalculatorModeSwitcher(
-  (settings.calculator.mode as CalculatorMode) || 'Standard'
-);
 
 const panelStates = reactive({
   sidebar: { isOpen: false, isLoaded: false },
@@ -137,9 +129,9 @@ const mainContentClasses = computed(() => {
     if (panelStates.menu.isOpen) classes.push('md:pr-64');
   }
 
-  if (sidebarPanel.isOpen) classes.push('md:pl-64');
-  if (menuPanel.isOpen) classes.push('md:pr-64');
-  
+  if (unref(sidebarPanel.isOpen)) classes.push('md:pl-64');
+  if (unref(menuPanel.isOpen)) classes.push('md:pr-64');
+
   return classes;
 });
 

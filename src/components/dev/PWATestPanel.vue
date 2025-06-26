@@ -1,10 +1,15 @@
 <template>
-  <div v-if="isPanelVisible" class="fixed top-4 left-4 z-50 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border max-w-xs">
+  <div
+    v-if="isPanelVisible"
+    class="fixed top-4 left-4 z-50 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border max-w-xs"
+  >
     <div class="flex justify-between items-center mb-3">
-      <h3 class="text-sm font-semibold">PWA Test Panel</h3>
+      <h3 class="text-sm font-semibold">
+        PWA Test Panel
+      </h3>
       <button 
-        @click="togglePanelVisibility" 
-        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" 
+        @click="togglePanelVisibility"
       >
         ✕
       </button>

@@ -149,9 +149,9 @@ import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewpor
 
 // Types
 interface Props {
-  mode: string;
-  isMobile: boolean;
-  isOpen: boolean;
+  mode?: string;
+  isMobile?: boolean;
+  isOpen?: boolean;
 }
 
 interface Tab {

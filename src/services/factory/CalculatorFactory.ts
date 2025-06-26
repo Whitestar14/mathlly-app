@@ -55,8 +55,6 @@ interface ScientificCalculatorInterface extends BaseCalculator {
   setAngleMode: (mode: 'RAD' | 'DEG') => void;
   setNotationMode: (mode: 'F-E' | 'SCI') => void;
   toggleHyperbolic: () => void;
-  handleScientificFunction: (func: string) => CalculatorResult;
-  handleConstant: (constant: string) => CalculatorResult;
   convertToBase: (value: string, fromBase: string, toBase: string) => string;
 }
 
@@ -225,22 +223,6 @@ class ScientificCalculatorWrapper implements ScientificCalculatorInterface {
     }
   }
 
-  handleScientificFunction(func: string): CalculatorResult {
-    const result = this.calculator.handleScientificFunction(func)
-    return {
-      input: this.input,
-      ...result
-    }
-  }
-
-  handleConstant(constant: string): CalculatorResult {
-    const result = this.calculator.handleConstant(constant)
-    return {
-      input: this.input,
-      ...result
-    }
-  }
-
   evaluateExpression(expression: string): any {
     return this.calculator.evaluateExpression(expression)
   }
@@ -251,8 +233,6 @@ class ScientificCalculatorWrapper implements ScientificCalculatorInterface {
 
   // Add convertToBase method for memory operations compatibility
   convertToBase(value: string, fromBase: string, toBase: string): string {
-    // For scientific calculator, we'll implement basic base conversion
-    // This is mainly used for memory operations
     try {
       let decimalValue: number
 
@@ -318,22 +298,24 @@ export class CalculatorFactory {
 
     try {
       switch (mode) {
-        case 'Standard':
-          // Wrap StandardCalculator to add missing methods
+        case 'Standard': {
           const standardCalc = new StandardCalculator(settings)
           return new StandardCalculatorWrapper(standardCalc)
+        }
         
-        case 'Programmer':
+        case 'Programmer': {
           return new ProgrammerCalculator(settings) as unknown as ProgrammerCalculatorInterface
+        }
         
-        case 'Scientific':
-          // ADD: Wrap ScientificCalculator to add missing methods
+        case 'Scientific': {
           const scientificCalc = new ScientificCalculator(settings)
           return new ScientificCalculatorWrapper(scientificCalc)
+        }
         
-        default:
+        default: {
           // TypeScript will ensure this is never reached with proper typing
           throw new Error(`Unsupported calculator mode: ${mode}`)
+        }
       }
     } catch (error) {
       // Re-throw with more context
@@ -346,7 +328,7 @@ export class CalculatorFactory {
    * @returns Array of available calculator modes
    */
   static getAvailableModes(): CalculatorMode[] {
-    return ['Standard', 'Programmer', 'Scientific'] // ADD: Now includes Scientific
+    return ['Standard', 'Programmer', 'Scientific']
   }
 
   /**
@@ -370,35 +352,38 @@ export class CalculatorFactory {
     }
 
     switch (mode) {
-      case 'Standard':
+      case 'Standard': {
         return {
           ...baseSettings,
           // Add standard calculator specific defaults
         }
+      }
       
-      case 'Programmer':
+      case 'Programmer': {
         return {
           ...baseSettings,
           defaultBase: 'DEC',
           // Add programmer calculator specific defaults
         }
+      }
       
-      case 'Scientific':
+      case 'Scientific': {
         // ADD: Scientific calculator specific defaults
         return {
           ...baseSettings,
           angleUnit: 'degrees' as const,
-          precision: 10, // Higher precision for scientific calculations
+          precision: 10,
           notationMode: 'F-E',
           display: {
             precision: 10,
             useFractions: false
           }
-          // Add scientific calculator specific defaults
         }
+      }
       
-      default:
+      default: {
         return baseSettings
+      }
     }
   }
 
@@ -420,5 +405,5 @@ export type {
   CalculatorResult,
   StandardCalculatorInterface,
   ProgrammerCalculatorInterface,
-  ScientificCalculatorInterface // ADD: Export new interface
+  ScientificCalculatorInterface
 }

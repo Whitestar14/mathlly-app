@@ -65,7 +65,10 @@
           </div>
 
           <!-- Footer Slot -->
-          <div v-if="$slots.footer" class="modal-footer mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div
+            v-if="$slots.footer"
+            class="modal-footer mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
+          >
             <slot name="footer" />
           </div>
         </div>
@@ -107,10 +110,6 @@ interface Props {
   closeOnEscape?: boolean;
   /** Custom close button label for accessibility */
   closeButtonLabel?: string;
-  /** Whether to show the close button */
-  showCloseButton?: boolean;
-  /** Custom z-index for the modal */
-  zIndex?: number;
 }
 
 /**
@@ -200,9 +199,9 @@ const handleEscapeKey = (event: KeyboardEvent): void => {
   }
 };
 
-// Listen for escape key when modal is open
-useEventListener('keydown', handleEscapeKey, {
-  target: () => props.open ? document : null,
+// Listen for escape key when modal is open - Fixed parameter order
+useEventListener(document, 'keydown', handleEscapeKey, {
+  passive: false,
 });
 </script>
 

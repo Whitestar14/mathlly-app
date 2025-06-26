@@ -98,7 +98,7 @@
                       ? 'bg-gray-100 text-indigo-600 dark:bg-gray-800 dark:text-indigo-400'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                   ]"
-                  @click="handleFooterItemClick($event, `/${item}`)"
+                  @click="handleFooterItemClick(`/${item}`)"
                 >
                   <component
                     :is="item === 'settings' ? CogIcon : MessagesSquareIcon"
@@ -254,7 +254,7 @@ const handleItemClick = (event: Event, item: any) => {
   handleNavigation(item.path, event.currentTarget as HTMLElement);
 };
 
-const handleFooterItemClick = (event: Event, path: string) => {
+const handleFooterItemClick = (path: string) => {
   handleNavigation(path, null);
 };
 </script>

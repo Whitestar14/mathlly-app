@@ -14,7 +14,7 @@ export function cloneDeep<T>(obj: T): T {
   
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      ;(clone as any)[key] = cloneDeep((obj as any)[key])
+      (clone as any)[key] = cloneDeep((obj as any)[key])
     }
   }
   

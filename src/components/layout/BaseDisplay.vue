@@ -40,6 +40,10 @@ interface Props {
   activeBase: Base
 }
 
+interface Emits {
+  (event: 'base-change', base: Base): void
+}
+
 interface DisplayValue {
   display?: string
   input?: string
@@ -51,6 +55,8 @@ interface FormattedValues {
 
 // Define props with proper typing
 const props = defineProps<Props>()
+
+defineEmits<Emits>()
 
 // Define available bases as a readonly array with proper typing
 const bases = markRaw(['HEX', 'DEC', 'OCT', 'BIN'] as const)

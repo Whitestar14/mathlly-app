@@ -134,6 +134,7 @@ export const CalculatorConstants = {
    */
   MAX_INPUT_LENGTH: {
     STANDARD: 100,
+    SCIENTIFIC: 120,
     PROGRAMMER: 69
   } as const,
   

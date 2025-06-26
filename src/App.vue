@@ -1,6 +1,6 @@
 <template>
   <div>
-    <error-fallback
+    <ErrorFallback
       v-if="hasError"
       :error="error"
       :is-global-error="true"
@@ -8,12 +8,12 @@
     <Suspense v-else>
       <template #default>
         <AppProvider>
-          <app-setup />
+          <AppSetup />
         </AppProvider>
       </template>
       <template #fallback>
         <div class="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark">
-          <loader variant="regular" />
+          <Loader variant="regular" />
         </div>
       </template>
     </Suspense>
@@ -23,7 +23,7 @@
   </div>
 </template>
 
-<script setup lang="ts"> 
+<script setup lang="ts">
 import { shallowRef, onErrorCaptured, type Ref, type ComponentPublicInstance } from 'vue';
 import { hasError } from "@/router/errorHandler";
 import ErrorFallback from '@/layouts/navigation/ErrorFallback.vue';

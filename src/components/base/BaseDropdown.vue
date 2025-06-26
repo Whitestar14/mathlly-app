@@ -10,7 +10,10 @@
           v-if="icon" 
           class="h-4 w-4 flex-shrink-0"
         />
-        <span v-if="label" class="truncate font-medium">{{ label }}</span>
+        <span
+          v-if="label"
+          class="truncate font-medium"
+        >{{ label }}</span>
         <slot name="trigger" />
         <ChevronDownIcon 
           class="h-4 w-4 flex-shrink-0 transition-transform duration-200 ease-out"
@@ -38,7 +41,10 @@
       >
         <div class="p-2">
           <!-- Header section -->
-          <div v-if="$slots.header" class="px-2 py-2 border-b border-gray-200/50 dark:border-gray-700/50 mb-2">
+          <div
+            v-if="$slots.header"
+            class="px-2 py-2 border-b border-gray-200/50 dark:border-gray-700/50 mb-2"
+          >
             <slot name="header" />
           </div>
 
@@ -49,7 +55,10 @@
           />
 
           <!-- Footer section -->
-          <div v-if="$slots.footer" class="px-2 py-2">
+          <div
+            v-if="$slots.footer"
+            class="px-2 py-2"
+          >
             <slot name="footer" />
           </div>
         </div>
@@ -169,10 +178,6 @@ const handleCloseAutoFocus = (event) => {
   emit('close', event);
 };
 
-const handleItemSelect = (item) => {
-  emit('item-select', item);
-  closeDropdown();
-};
 
 // Expose methods for parent components
 defineExpose({
