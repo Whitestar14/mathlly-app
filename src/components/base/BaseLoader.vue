@@ -62,7 +62,7 @@
 <script setup>
 import { shallowRef, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useElementVisibility } from '@vueuse/core';
-import { useAnimation } from '@/composables/useAnimation';
+import { useAnimation } from '@/composables/useAnimation.ts';
 
 const props = defineProps({
   variant: {

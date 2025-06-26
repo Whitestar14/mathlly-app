@@ -31,9 +31,12 @@
               v-for="(token, index) in formattedTokens"
               :key="index"
               :class="[
-                tokenClassMap[token.type] || '',
+                getTokenClass(token),
+                getParenthesesLevelClass(token),
                 errorClass,
               ]"
+              :data-token-type="token.type"
+              :data-parent-level="token.parentLevel"
             >
               {{ token.content }}
             </span>
@@ -66,154 +69,284 @@
   </div>
 </template>
 
-<script setup>
-import { inject, computed, onMounted, watch, onUnmounted, shallowRef } from "vue"
+<script setup lang="ts">
+import { inject, computed, onMounted, watch, onUnmounted, shallowRef, type Ref, type ComputedRef } from "vue"
 import { useElementSize, useScroll, useThrottleFn, useMemoize } from '@vueuse/core'
-import { useAnimation } from '@/composables/useAnimation'
+import { useAnimation, type SlideAnimationControls } from '@/composables/useAnimation'
 import { useSettingsStore } from '@/stores/settings'
 import { SyntaxHighlighter } from '@/services/display/SyntaxHighlighter'
+import { CalculatorConstants } from '@/utils/constants/CalculatorConstants'
 
-const props = defineProps({
-  input: { type: String, default: "" },
-  preview: { type: String, default: "" },
-  error: { type: String, default: "" },
-  isAnimating: { type: Boolean, default: false },
-  animatedResult: { type: String, default: "" },
-  activeBase: { type: String, default: "DEC" },
-  mode: { type: String, default: "Standard" }
-});
+// Define interfaces for props and emits
+interface Props {
+input?: string
+  preview?: string
+  error?: string
+  isAnimating?: boolean
+  animatedResult?: string
+  activeBase?: string
+  mode?: string
+}
 
-const emit = defineEmits(['scroll-update']);
-const settingsStore = useSettingsStore();
+interface ScrollUpdatePayload {
+  canScrollLeft: boolean
+  canScrollRight: boolean
+}
+
+interface Token {
+  type: string
+  content: string
+  parentLevel?: number
+}
+
+interface Calculator {
+  operations: {
+    parenthesesTracker: any
+  }
+}
+
+// Define props with defaults
+const props = withDefaults(defineProps<Props>(), {
+  input: "",
+  preview: "",
+  error: "",
+  isAnimating: false,
+  animatedResult: "",
+  activeBase: "DEC",
+  mode: "Standard"
+})
+
+// Define emits
+const emit = defineEmits<{
+  'scroll-update': [payload: ScrollUpdatePayload]
+}>()
+
+const settingsStore = useSettingsStore()
+
 // DOM refs - use shallowRef for better performance with DOM elements
-const displayContainer = shallowRef(null);
-const resultContainer = shallowRef(null);
-const inputContainer = shallowRef(null);
-const previewContainer = shallowRef(null);
+const displayContainer: Ref<HTMLElement | null> = shallowRef(null)
+const resultContainer: Ref<HTMLElement | null> = shallowRef(null)
+const inputContainer: Ref<HTMLElement | null> = shallowRef(null)
+const previewContainer: Ref<HTMLElement | null> = shallowRef(null)
 
 // Animation service - created once and reused
-const animationService = (() => {
-  const { createSlideAnimation } = useAnimation();
-  return createSlideAnimation();
-})();
+const animationService: SlideAnimationControls = (() => {
+  const { createSlideAnimation } = useAnimation()
+  return createSlideAnimation()
+})()
 
-// Inject calculator
-const calculator = inject('calculator');
-const parenthesesTracker = computed(() => calculator.value.operations.parenthesesTracker);
+// Inject calculator with proper typing
+const calculator = inject<Ref<Calculator>>('calculator')
+const parenthesesTracker = computed(() => calculator?.value?.operations?.parenthesesTracker)
 
 // Use VueUse for better performance
-const { width } = useElementSize(displayContainer);
+const { width } = useElementSize(displayContainer)
 const { x: scrollLeft, arrivedState } = useScroll(displayContainer, {
   throttle: 16,
   onScroll: useThrottleFn(updateScrollState, 100)
-});
+})
 
 // Check if syntax highlighting is enabled - non-reactive if setting doesn't change often
-const syntaxHighlightingEnabled = computed(() => settingsStore.display.syntaxHighlighting);
+const syntaxHighlightingEnabled: ComputedRef<boolean> = computed(() => settingsStore.display.syntaxHighlighting)
 
-// Pre-compute token class map for better performance
-const tokenClassMap = {
+// Comprehensive token class map supporting all syntax variants from CalculatorConstants
+const tokenClassMap: Record<string, string> = {
+  // Parentheses and structural elements
   'open': 'paren-open syntax-parenthesis',
   'close': 'paren-close syntax-parenthesis',
   'ghost': 'paren-ghost syntax-ghost',
+  'parenthesis': 'syntax-parenthesis',
+  
+  // Numbers and decimals
   'number': 'syntax-number',
-  'operator': 'syntax-operator',
-  'programmer-operator': 'syntax-programmer-operator',
-  'function': 'syntax-function',
   'decimal': 'syntax-decimal',
+  
+  // Standard operators (from BUTTON_TYPES.OPERATORS)
+  'operator': 'syntax-operator',
+  
+  // Programmer operators (from BUTTON_TYPES.PROGRAMMER_OPERATORS)
+  'programmer-operator': 'syntax-programmer-operator',
+  
+  // Scientific functions (from BUTTON_TYPES.SCIENTIFIC_FUNCTIONS)
+  'scientific-function': 'syntax-scientific-function',
+  'trig-function': 'syntax-trig-function',
+  'hyperbolic-function': 'syntax-hyperbolic-function',
+  'log-function': 'syntax-log-function',
+  'power-operator': 'syntax-power-operator',
+  'root-function': 'syntax-root-function',
+  'factorial': 'syntax-factorial',
+  'modulo-operator': 'syntax-modulo-operator',
+  
+  // Constants and special symbols
+  'constant': 'syntax-constant',
+  
+  // Generic and utility
+  'function': 'syntax-function',
   'text': 'syntax-text',
   'space': ''
-};
+}
+
+// Parentheses level styling for nested expressions
+const parenthesesLevelColors: Record<number, string> = {
+  0: 'text-blue-600 dark:text-blue-400',
+  1: 'text-green-600 dark:text-green-400', 
+  2: 'text-purple-600 dark:text-purple-400',
+  3: 'text-orange-600 dark:text-orange-400',
+  4: 'text-pink-600 dark:text-pink-400'
+}
+
+// Enhanced token classification function
+function getTokenClass(token: Token): string {
+  const baseClass = tokenClassMap[token.type] || 'syntax-text'
+  
+  // Add mode-specific enhancements
+  if (props.mode === 'Scientific') {
+    // Enhanced scientific function styling
+    if (CalculatorConstants.BUTTON_TYPES.SCIENTIFIC_FUNCTIONS.includes(token.content as any)) {
+      return `${baseClass} font-semibold`
+    }
+    // Constants get special treatment
+    if (token.content === 'π' || token.content === 'e') {
+      return `${baseClass} font-bold text-indigo-600 dark:text-indigo-400`
+    }
+  }
+  
+  if (props.mode === 'Programmer') {
+    // Programmer operators get enhanced styling
+    if (CalculatorConstants.BUTTON_TYPES.PROGRAMMER_OPERATORS.includes(token.content as any)) {
+      return `${baseClass} font-bold`
+    }
+    // Base-specific number styling
+    if (token.type === 'number') {
+      switch (props.activeBase) {
+        case 'BIN': return `${baseClass} text-green-700 dark:text-green-300`
+        case 'OCT': return `${baseClass} text-yellow-700 dark:text-yellow-300`
+        case 'HEX': return `${baseClass} text-purple-700 dark:text-purple-300`
+        default: return baseClass
+      }
+    }
+  }
+  
+  return baseClass
+}
+
+// Parentheses level styling
+function getParenthesesLevelClass(token: Token): string {
+  if (token.type === 'open' || token.type === 'close' || token.type === 'ghost') {
+    const level = token.parentLevel || 0
+    return parenthesesLevelColors[level % 5] || parenthesesLevelColors[0]
+  }
+  return ''
+}
 
 // Memoize font size calculation for better performance
-const getFontSizeClass = useMemoize((value, mode, activeBase) => {
-  if (!value) return 'text-3xl';
+const getFontSizeClass = useMemoize((value: string, mode: string, activeBase: string): string => {
+  if (!value) return mode === 'Standard' ? 'text-3xl' : 'text-2xl'
 
-  const length = value.toString().length;
+  const length = value.toString().length
 
   if (mode === 'Standard') {
-    if (length > 70) return 'text-xl';
-    if (length > 50) return 'text-2xl';
-    return 'text-3xl';
+    if (length > 70) return 'text-xl'
+    if (length > 50) return 'text-2xl'
+    return 'text-3xl'
+  } else if (mode === 'Scientific') {
+    // Scientific mode: account for function names
+    if (length > 60) return 'text-lg'
+    if (length > 40) return 'text-xl'
+    return 'text-2xl'
+  } else {
+    // Programmer mode: use smaller font sizes for binary
+    if (length > 70) return 'text-base'
+    if (length > 50) return 'text-lg'
+    return activeBase === 'BIN' ? 'text-lg' : 'text-2xl'
   }
-  return activeBase === 'BIN' ? 'text-2xl' : 'text-3xl';
-}, { max: 20 });
+})
 
-const formattedTokens = computed(() => {
-  if (!syntaxHighlightingEnabled.value) return [];
+const formattedTokens: ComputedRef<Token[]> = computed(() => {
+  if (!syntaxHighlightingEnabled.value) return []
   
   return SyntaxHighlighter.format(
     props.input, 
-    parenthesesTracker.value, 
+    parenthesesTracker?.value, 
     true,
     {
       base: props.activeBase,
       mode: props.mode
     }
-  );
-});
+  )
+})
 
-const displayClass = computed(() => [
+const displayClass: ComputedRef<string[]> = computed(() => [
   'mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide',
   getFontSizeClass(props.input, props.mode, props.activeBase),
   errorClass.value
-]);
+])
 
-const errorClass = computed(() => props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors');
+const errorClass: ComputedRef<string> = computed(() => 
+  props.error ? 'text-red-500 dark:text-red-400' : 'transition-colors'
+)
 
-function updateScrollState() {
-  if (!displayContainer.value) return;
+function updateScrollState(): void {
+  if (!displayContainer.value) return
 
-  const canScrollLeft = scrollLeft.value > 0;
+  const canScrollLeft = scrollLeft.value > 0
   const canScrollRight = !arrivedState.right &&
-    (displayContainer.value.scrollWidth - displayContainer.value.clientWidth - scrollLeft.value) > 2;
+    (displayContainer.value.scrollWidth - displayContainer.value.clientWidth - scrollLeft.value) > 2
 
-  emit('scroll-update', { canScrollLeft, canScrollRight });
+  emit('scroll-update', { canScrollLeft, canScrollRight })
 }
 
-function scrollToEnd() {
+function scrollToEnd(): void {
   if (displayContainer.value) {
-    displayContainer.value.scrollLeft = displayContainer.value.scrollWidth;
+    displayContainer.value.scrollLeft = displayContainer.value.scrollWidth
   }
 }
 
-function scrollToPrevious() {
+function scrollToPrevious(): void {
   if (displayContainer.value) {
-    const newScrollLeft = Math.max(0, scrollLeft.value - width.value / 2);
-    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+    const newScrollLeft = Math.max(0, scrollLeft.value - width.value / 2)
+    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
   }
 }
 
-function scrollToNext() {
+function scrollToNext(): void {
   if (displayContainer.value) {
     const newScrollLeft = Math.min(
       displayContainer.value.scrollWidth - width.value,
       scrollLeft.value + width.value / 2
-    );
-    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+    )
+    displayContainer.value.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
   }
 }
 
-function animateSlide() {
-  animationService.animateSlide(resultContainer.value, inputContainer.value);
+function animateSlide(): void {
+  animationService.animateSlide(resultContainer.value, inputContainer.value)
 }
 
-function resetPositions() {
-  animationService.resetPositions(resultContainer.value, inputContainer.value);
+function resetPositions(): void {
+  animationService.resetPositions(resultContainer.value, inputContainer.value)
 }
 
-watch(() => props.isAnimating, (newValue) => {
-  newValue ? animateSlide() : resetPositions();
-}, { flush: 'post' });
+watch(() => props.isAnimating, (newValue: boolean) => {
+  if (newValue) {
+    animateSlide()
+  } else {
+    resetPositions()
+  }
+}, { flush: 'post' })
 
-function clearCache() {
-  if (syntaxHighlightingEnabled.value) SyntaxHighlighter.clearCache();
+function clearCache(): void {
+  if (syntaxHighlightingEnabled.value) SyntaxHighlighter.clearCache()
 }
 
-watch([() => props.mode, () => props.activeBase], clearCache, { deep: false });
+watch([() => props.mode, () => props.activeBase], clearCache, { deep: false })
 
-onMounted(updateScrollState);
-onUnmounted(clearCache);
+onMounted(updateScrollState)
+onUnmounted(clearCache)
 
-defineExpose({scrollToEnd, scrollToPrevious, scrollToNext});
+defineExpose({
+  scrollToEnd, 
+  scrollToPrevious, 
+  scrollToNext
+})
 </script>

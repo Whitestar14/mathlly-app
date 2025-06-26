@@ -7,39 +7,49 @@
   </div>
 </template>
   
-<script setup>
-import { watch, onMounted, computed } from 'vue';
+<script setup lang="ts">
+import { watch, onMounted, computed, type ComputedRef } from 'vue';
 import { createPanelContext } from '@/composables/usePanel';
 import { useDeviceStore } from '@/stores/device';
 import { useSettingsStore } from '@/stores/settings';
-  
-// Get the device store instance
+
+// Types
+type TextSize = 'small' | 'normal' | 'medium' | 'large';
+
+interface PanelActions {
+  setMobile: (isMobile: boolean) => void;
+}
+
+// Store instances
 const device = useDeviceStore();
 const settings = useSettingsStore();
-const { actions } = createPanelContext();
-  
+const { actions }: { actions: PanelActions } = createPanelContext();
+
 onMounted(() => {
-  const isMobile = device.isMobile;
+  const isMobile: boolean = device.isMobile;
   actions.setMobile(isMobile);
   updateTextSizeClasses(textSize.value);
 });
-  
-watch(() => device.isMobile, (newIsMobile) => {
+
+watch(() => device.isMobile, (newIsMobile: boolean) => {
   actions.setMobile(newIsMobile);
 });
 
-// Moved from AppSetup.vue
-const globalClasses = computed(() => {
-  const classes = [];
+// Computed properties
+const globalClasses: ComputedRef<string[]> = computed(() => {
+  const classes: string[] = [];
   if (settings.appearance.animationDisabled) {
     classes.push('animation-disabled');
   }
   return classes;
 });
 
-const textSize = computed(() => settings.display.textSize || "medium");
+const textSize: ComputedRef<TextSize> = computed(() => 
+  (settings.display.textSize as TextSize) || "medium"
+);
 
-const updateTextSizeClasses = newSize => {
+// Methods
+const updateTextSizeClasses = (newSize: TextSize): void => {
   const root = document.documentElement;
   root.classList.remove("ts-small", "ts-normal", "ts-medium", "ts-large");
   if (newSize) {

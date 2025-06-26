@@ -1,12 +1,11 @@
 /* ==========================================================================
    Tailwind Directives
    ========================================================================== */
+/* CSS Stylesheet Imports */
+@import './buttons.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* CSS Stylesheet Imports */
-@import url(./buttons.css);
 
 /* ==========================================================================
    Base Styles
@@ -89,6 +88,41 @@
     background-color: rgba(107, 114, 128, 0.7);
   }
 
+  /* Custom scrollbar for details section */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(156 163 175 / 0.5) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(156 163 175 / 0.5);
+    border-radius: 2px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(156 163 175 / 0.7);
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: rgb(75 85 99 / 0.5) transparent;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(75 85 99 / 0.5);
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(75 85 99 / 0.7);
+  }
+
   /* Logo SVG styling */
   svg {
     #logo-background {
@@ -134,6 +168,10 @@
     @apply inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium duration-200 transition-colors disabled:opacity-50 disabled:pointer-events-none focus-colors;
   }
 
+  .btn-default {
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700;
+  }
+
   .btn-primary {
     @apply bg-primary dark:bg-primary-dark text-primary-foreground hover:bg-primary-dark dark:hover:bg-primary-light;
   }
@@ -163,6 +201,10 @@
     @apply h-9 py-1 px-3 rounded-md;
   }
 
+  .btn-xs {
+    @apply h-6 px-2 text-xs rounded;
+  }
+
   .btn-sm {
     @apply h-9 px-3 rounded-md;
   }
@@ -175,12 +217,17 @@
     @apply size-8 rounded-md;
   }
 
+  .btn:disabled {
+    @apply opacity-50 cursor-not-allowed pointer-events-none;
+  }
+
   /* Loader styles */
   .loader-expanded {
     @apply fixed inset-0 z-50 bg-gray-50/95 dark:bg-gray-900/95;
   }
 
   /* Syntax highlighting classes */
+    /* Syntax highlighting classes */
   .syntax-number {
     @apply text-blue-700 dark:text-blue-300;
   }
@@ -208,6 +255,90 @@
 
   .syntax-ghost {
     @apply text-gray-400 opacity-40 dark:opacity-60;
+  }
+
+  /* Scientific mode specific syntax highlighting */
+  .syntax-scientific-function {
+    @apply text-pink-700 dark:text-pink-300 font-medium;
+  }
+
+  .syntax-trig-function {
+    @apply text-emerald-600 dark:text-emerald-400 font-medium;
+  }
+
+    .syntax-hyperbolic-function {
+    @apply text-teal-600 dark:text-teal-400 font-medium;
+  }
+
+  .syntax-log-function {
+    @apply text-orange-600 dark:text-orange-400 font-medium;
+  }
+
+  .syntax-root-function {
+    @apply text-cyan-600 dark:text-cyan-400 font-bold;
+  }
+
+  .syntax-constant {
+    @apply text-amber-600 dark:text-amber-400 font-semibold;
+  }
+
+  .syntax-power-operator {
+    @apply text-red-600 dark:text-red-400 font-bold;
+  }
+
+  .syntax-factorial {
+    @apply text-violet-600 dark:text-violet-400 font-bold;
+  }
+
+  .syntax-modulo-operator {
+    @apply text-indigo-700 dark:text-indigo-300 font-medium;
+  }
+
+  /* Parentheses nesting levels for scientific mode */
+  .paren-level-0 {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+
+  .paren-level-1 {
+    @apply text-green-600 dark:text-green-400;
+  }
+
+  .paren-level-2 {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+
+  .paren-level-3 {
+    @apply text-orange-600 dark:text-orange-400;
+  }
+
+  .paren-level-4 {
+    @apply text-pink-600 dark:text-pink-400;
+  }
+
+  .paren-level-5 {
+    @apply text-cyan-600 dark:text-cyan-400;
+  }
+
+  /* Fallback for deeper nesting */
+  .paren-level-deep {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  /* Scientific mode expression highlighting */
+  .scientific-expression {
+    @apply font-mono text-sm leading-relaxed;
+  }
+
+  .scientific-expression .syntax-constant {
+    @apply bg-amber-50 dark:bg-amber-900/20 px-1 rounded;
+  }
+
+  .scientific-expression .syntax-root-function {
+    @apply bg-cyan-50 dark:bg-cyan-900/20 px-1 rounded;
+  }
+
+  .scientific-expression .syntax-power-operator {
+    @apply bg-red-50 dark:bg-red-900/20 px-0.5 rounded;
   }
 
   .paren-ghost {

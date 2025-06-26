@@ -15,6 +15,8 @@
           :has-memory="hasMemory"
           @button-click="handleButtonClick"
           @clear="handleClear"
+          @base-change="handleBaseChange"
+          @mode-toggle="handleModeToggle"
         />
       </Transition>
     </template>
@@ -33,11 +35,12 @@
 
 <script setup>
 import { computed, defineAsyncComponent } from 'vue';
+
 const props = defineProps({
   mode: {
     type: String,
     required: true,
-    validator: (value) => ['Standard', 'Programmer'].includes(value)
+    validator: (value) => ['Standard', 'Scientific', 'Programmer'].includes(value)
   },
   activeBase: {
     type: String,
@@ -57,15 +60,18 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['button-click', 'clear', 'base-change']);
+const emit = defineEmits(['button-click', 'clear', 'base-change', 'mode-toggle']);
 
 const StandardMode = defineAsyncComponent(() => import('./modes/StandardMode.vue'));
+const ScientificMode = defineAsyncComponent(() => import('./modes/ScientificMode.vue'));
 const ProgrammerMode = defineAsyncComponent(() => import('./modes/ProgrammerMode.vue'));
 
 const modeComponent = computed(() => {
   switch (props.mode) {
     case 'Standard':
       return StandardMode;
+    case 'Scientific':
+      return ScientificMode;
     case 'Programmer':
       return ProgrammerMode;
     default:
@@ -75,4 +81,6 @@ const modeComponent = computed(() => {
 
 const handleButtonClick = (value) => emit('button-click', value);
 const handleClear = () => emit('clear');
+const handleBaseChange = (base) => emit('base-change', base);
+const handleModeToggle = (data) => emit('mode-toggle', data);
 </script>

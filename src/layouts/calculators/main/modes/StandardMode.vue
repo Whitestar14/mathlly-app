@@ -2,49 +2,56 @@
   <div class="flex flex-col gap-1">
     <!-- Memory buttons row -->
     <div class="grid grid-cols-5 gap-1">
-      <button
+      <CalcButton
         v-for="op in memoryOperations"
         :key="op"
-        class="calc-btn calc-memory-btn calc-btn-grid"
+        :value="op"
+        variant="memory"
         :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
-        @click="handleClick(op)"
+        @click="handleClick"
       >
         {{ op }}
-      </button>
+      </CalcButton>
     </div>
     
     <!-- Calculator buttons grid -->
     <div class="grid grid-cols-4 gap-1 flex-grow">
       <!-- First row -->
       <CalcButton 
-        v-for="(btn, index) in firstRow" 
+        v-for="(btn, index) in standardFirstRow" 
         :key="index"
         :value="btn.value"
         :icon="btn.icon"
         :disabled="btn.checkMaxLength ? isMaxLengthReached : false"
         :variant="btn.variant"
-        @click="handleClick(btn.value)"
+        @click="handleClick"
       />
 
       <!-- Second row -->
       <CalcButton 
-        v-for="(btn, index) in secondRow" 
+        v-for="(btn, index) in standardSecondRow" 
         :key="index"
         :value="btn.value"
         :disabled="isMaxLengthReached"
         :variant="btn.variant"
-        @click="handleClick(btn.value)"
-      />
+        @click="handleClick"
+      >
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <span v-html="btn.display || btn.value" />
+      </CalcButton>
 
       <!-- Number pad and operations -->
-      <template v-for="(row, rowIndex) in numberRows">
+      <template
+        v-for="(row, rowIndex) in numberRows"
+        :key="`row-${rowIndex}`"
+      >
         <CalcButton 
           v-for="(btn, btnIndex) in row" 
           :key="`row-${rowIndex}-btn-${btnIndex}`"
           :value="btn.value"
-          :disabled="isMaxLengthReached"
+          :disabled="isMaxLengthReached && btn.variant === 'number'"
           :variant="btn.variant"
-          @click="handleClick(btn.value)"
+          @click="handleClick"
         />
       </template>
     </div>
@@ -52,10 +59,14 @@
 </template>
 
 <script setup>
-import { computed, markRaw } from "vue";
-import { Delete } from 'lucide-vue-next';
-import { numberRows } from './NumberRows'
+import { computed } from "vue";
 import CalcButton from '@/components/ui/CalculatorButton.vue';
+import { 
+  numberRows, 
+  standardFirstRow, 
+  standardSecondRow, 
+  memoryOperations 
+} from './NumberRows';
 
 const props = defineProps({
   inputLength: {
@@ -77,22 +88,6 @@ const emit = defineEmits(['button-click', 'clear']);
 const isMaxLengthReached = computed(() => 
   props.inputLength >= props.maxLength
 );
-
-const memoryOperations = markRaw(['MC', 'MR', 'M+', 'M-', 'MS']);
-
-const firstRow = markRaw([
-  { value: '%', variant: 'function', checkMaxLength: true },
-  { value: 'CE', variant: 'function' },
-  { value: 'C', variant: 'function' },
-  { value: 'backspace', variant: 'function', icon: Delete }
-]);
-
-const secondRow = markRaw([
-  { value: '1/x', variant: 'function' },
-  { value: 'x²', variant: 'function' },
-  { value: '√', variant: 'function' },
-  { value: '÷', variant: 'operator' }
-]);
 
 const handleClick = (value) => {
   if (value === 'C') {
