@@ -6,7 +6,7 @@
     <!-- Panel Header -->
     <div class="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50">
       <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
         {{ title }}
       </h3>
       <button

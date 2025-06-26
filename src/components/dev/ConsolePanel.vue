@@ -10,8 +10,8 @@
         <BaseButton
           variant="ghost"
           size="sm"
-          @click="clearLogs"
           :disabled="logs.length === 0"
+          @click="clearLogs"
         >
           <TrashIcon class="h-3 w-3" />
         </BaseButton>
@@ -26,7 +26,10 @@
               v-if="isCapturing"
               class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"
             />
-            <PlayIcon v-else class="h-3 w-3" />
+            <PlayIcon
+              v-else
+              class="h-3 w-3"
+            />
             {{ isCapturing ? 'Stop' : 'Start' }}
           </div>
         </BaseButton>
@@ -71,9 +74,14 @@
         </div>
         
         <!-- Empty state -->
-        <div v-if="logs.length === 0" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
+        <div
+          v-if="logs.length === 0"
+          class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400"
+        >
           <TerminalIcon class="h-8 w-8 mb-3 opacity-40" />
-          <p class="text-sm">{{ isCapturing ? 'Console is ready' : 'Start capturing to see logs' }}</p>
+          <p class="text-sm">
+            {{ isCapturing ? 'Console is ready' : 'Start capturing to see logs' }}
+          </p>
         </div>
       </div>
     </div>
@@ -89,8 +97,8 @@
             size="sm"
             class="text-xs"
             :class="getLevelButtonStyle(level)"
-            @click="testLog(level)"
             :disabled="!isCapturing"
+            @click="testLog(level)"
           >
             {{ level }}
           </BaseButton>

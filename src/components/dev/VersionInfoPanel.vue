@@ -126,7 +126,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { InfoIcon, CopyIcon, RefreshCwIcon } from 'lucide-vue-next'
+import { CopyIcon, RefreshCwIcon } from 'lucide-vue-next'
 import { version as vueVersion } from 'vue'
 import { useVersionStore } from '@/stores/version'
 import BaseBadge from '@/components/base/BaseBadge.vue'

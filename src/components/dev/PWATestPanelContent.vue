@@ -39,7 +39,7 @@
         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Needs Refresh</span>
         <div class="flex items-center gap-2">
           <BaseBadge
-            :variant="needRefresh ? 'success' : 'secondary'"
+            :variant="needRefresh ? 'success' : 'info'"
             :text="needRefresh ? 'Yes' : 'No'"
             size="xs"
           />
@@ -55,7 +55,7 @@
         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Should Show</span>
         <div class="flex items-center gap-2">
           <BaseBadge
-            :variant="shouldShowUpdate ? 'success' : 'secondary'"
+            :variant="shouldShowUpdate ? 'success' : 'info'"
             :text="shouldShowUpdate ? 'Yes' : 'No'"
             size="xs"
           />
@@ -74,7 +74,10 @@
         <span class="text-xs text-gray-500 dark:text-gray-400">{{ updateFeatures.length }} items</span>
       </div>
       
-      <div v-if="updateFeatures.length > 0" class="space-y-1 max-h-24 overflow-y-auto">
+      <div
+        v-if="updateFeatures.length > 0"
+        class="space-y-1 max-h-24 overflow-y-auto"
+      >
         <div
           v-for="(feature, index) in updateFeatures"
           :key="index"
@@ -85,7 +88,10 @@
         </div>
       </div>
       
-      <div v-else class="text-xs text-gray-500 dark:text-gray-400 italic">
+      <div
+        v-else
+        class="text-xs text-gray-500 dark:text-gray-400 italic"
+      >
         No features available
       </div>
     </div>
@@ -97,7 +103,7 @@
         <div>
           <span class="text-gray-500 dark:text-gray-400 block">Offline Ready</span>
           <BaseBadge
-            :variant="offlineReady ? 'success' : 'secondary'"
+            :variant="offlineReady ? 'success' : 'info'"
             :text="offlineReady ? 'Ready' : 'Not Ready'"
             size="xs"
           />
@@ -119,8 +125,8 @@
         variant="outline"
         size="sm"
         class="w-full text-xs"
-        @click="simulateUpdate"
         :disabled="isLoading"
+        @click="simulateUpdate"
       >
         <RefreshCwIcon class="h-3 w-3 mr-1.5" />
         Simulate Update Available
@@ -130,8 +136,8 @@
         variant="outline"
         size="sm"
         class="w-full text-xs"
-        @click="populateUpdateInfo"
         :disabled="isLoading"
+        @click="populateUpdateInfo"
       >
         <DownloadIcon class="h-3 w-3 mr-1.5" />
         Populate Update Info
@@ -141,8 +147,8 @@
         variant="outline"
         size="sm"
         class="w-full text-xs"
-        @click="checkForUpdates"
         :disabled="isLoading"
+        @click="checkForUpdates"
       >
         <SearchIcon class="h-3 w-3 mr-1.5" />
         Check for Updates
@@ -152,8 +158,8 @@
         variant="destructive"
         size="sm"
         class="w-full text-xs"
-        @click="clearUpdate"
         :disabled="isLoading"
+        @click="clearUpdate"
       >
         <XIcon class="h-3 w-3 mr-1.5" />
         Clear Update State

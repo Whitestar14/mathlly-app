@@ -117,7 +117,10 @@
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">FPS History</span>
         <div class="flex items-center gap-1">
-          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse" v-if="isMonitoring" />
+          <div
+            v-if="isMonitoring"
+            class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+          />
           <span class="text-xs text-gray-500 dark:text-gray-400">{{ fpsHistory.length }}/{{ maxHistoryPoints }}</span>
         </div>
       </div>
@@ -132,7 +135,10 @@
         />
         
         <!-- Empty state -->
-        <div v-if="fpsHistory.length === 0" class="flex flex-col items-center justify-center w-full h-full text-gray-400 dark:text-gray-500">
+        <div
+          v-if="fpsHistory.length === 0"
+          class="flex flex-col items-center justify-center w-full h-full text-gray-400 dark:text-gray-500"
+        >
           <ActivityIcon class="h-6 w-6 mb-1 opacity-50" />
           <span class="text-xs">No data yet</span>
         </div>
@@ -169,8 +175,8 @@
           variant="outline"
           size="sm"
           class="flex-1 text-xs"
-          @click="measurePerformance"
           :disabled="isLoading"
+          @click="measurePerformance"
         >
           <ActivityIcon class="h-3 w-3 mr-1.5" />
           {{ isLoading ? 'Measuring...' : 'Measure' }}
@@ -187,7 +193,10 @@
               v-if="isMonitoring"
               class="w-2 h-2 bg-red-500 rounded-full mr-1.5 animate-pulse"
             />
-            <PlayIcon v-else class="h-3 w-3 mr-1.5" />
+            <PlayIcon
+              v-else
+              class="h-3 w-3 mr-1.5"
+            />
             {{ isMonitoring ? 'Stop' : 'Monitor' }}
           </div>
         </BaseButton>
@@ -237,6 +246,7 @@ import { useRafFn } from '@vueuse/core'
 import { CopyIcon, ActivityIcon, PlayIcon, TrashIcon, TerminalIcon } from 'lucide-vue-next'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseBadge from '@/components/base/BaseBadge.vue'
+import type { BadgeVariant } from '@/composables/useBadge';
 
 const memoryUsage = ref(0)
 const fps = ref(0)
@@ -351,10 +361,11 @@ const getFPSBarColor = (fps: number): string => {
   return 'bg-gradient-to-r from-red-500 to-red-600'
 }
 
-const getLoadTimeVariant = (time: number): string => {
+// Fix return type to BadgeVariant
+const getLoadTimeVariant = (time: number): BadgeVariant => {
   if (time <= 1000) return 'success'
   if (time <= 3000) return 'warning'
-  return 'destructive'
+  return 'info'
 }
 
 const getLoadTimeLabel = (time: number): string => {
@@ -363,10 +374,11 @@ const getLoadTimeLabel = (time: number): string => {
   return 'Slow'
 }
 
-const getDOMNodesVariant = (nodes: number): string => {
+// Fix return type to BadgeVariant
+const getDOMNodesVariant = (nodes: number): BadgeVariant => {
   if (nodes <= 1000) return 'success'
   if (nodes <= 5000) return 'warning'
-  return 'destructive'
+  return 'info'
 }
 
 const getDOMNodesLabel = (nodes: number): string => {

@@ -14,8 +14,8 @@
             variant="ghost"
             size="icon"
             class="h-5 w-5"
-            @click="testShortcut"
             :disabled="isTestingShortcut"
+            @click="testShortcut"
           >
             <ZapIcon 
               class="h-3 w-3"
@@ -42,11 +42,11 @@
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Filter by Category</span>
         <BaseButton
+          v-if="selectedCategory !== 'all'"
           variant="ghost"
           size="sm"
           class="text-xs"
           @click="clearFilter"
-          v-if="selectedCategory !== 'all'"
         >
           <XIcon class="h-3 w-3 mr-1" />
           Clear
@@ -88,9 +88,11 @@
                 :is="getCategoryIcon(categoryName)" 
                 class="h-4 w-4 text-indigo-500 dark:text-indigo-400" 
               />
-              <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ categoryName }}</h4>
+              <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ categoryName }}
+              </h4>
               <BaseBadge
-                variant="secondary"
+                variant="info"
                 :text="`${Object.keys(shortcuts).length} shortcuts`"
                 size="xs"
               />
@@ -130,7 +132,10 @@
           leave-from-class="max-h-96 opacity-100"
           leave-to-class="max-h-0 opacity-0"
         >
-          <div v-if="expandedCategories[categoryName]" class="overflow-hidden">
+          <div
+            v-if="expandedCategories[categoryName]"
+            class="overflow-hidden"
+          >
             <div class="p-3 space-y-2">
               <div
                 v-for="(shortcut, keys) in shortcuts"
@@ -140,7 +145,10 @@
               >
                 <div class="flex-1 min-w-0">
                   <span class="text-sm text-gray-700 dark:text-gray-300">{{ shortcut.description }}</span>
-                  <div v-if="shortcut.note" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <div
+                    v-if="shortcut.note"
+                    class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                  >
                     {{ shortcut.note }}
                   </div>
                 </div>
@@ -152,8 +160,8 @@
                     variant="ghost"
                     size="icon"
                     class="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    @click.stop="testSpecificShortcut(keys)"
                     :disabled="isTestingShortcut"
+                    @click.stop="testSpecificShortcut(keys)"
                   >
                     <PlayIcon class="h-3 w-3" />
                   </BaseButton>
@@ -176,7 +184,7 @@
                       class="px-2 py-1 text-xs font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-700 shadow-sm font-mono"
                       :class="{ 
                         'animate-pulse bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700': 
-                        highlightedShortcut === keys 
+                          highlightedShortcut === keys 
                       }"
                     >
                       {{ key }}
@@ -199,7 +207,7 @@
           type="text"
           placeholder="Search shortcuts..."
           class="flex-1 text-sm bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-        />
+        >
         <BaseButton
           v-if="searchQuery"
           variant="ghost"
@@ -212,7 +220,10 @@
       </div>
       
       <!-- Search Results -->
-      <div v-if="searchQuery && searchResults.length > 0" class="space-y-1 max-h-32 overflow-y-auto">
+      <div
+        v-if="searchQuery && searchResults.length > 0"
+        class="space-y-1 max-h-32 overflow-y-auto"
+      >
         <div
           v-for="result in searchResults"
           :key="`${result.category}-${result.keys}`"
@@ -228,7 +239,10 @@
         </div>
       </div>
       
-      <div v-else-if="searchQuery && searchResults.length === 0" class="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+      <div
+        v-else-if="searchQuery && searchResults.length === 0"
+        class="text-xs text-gray-500 dark:text-gray-400 text-center py-2"
+      >
         No shortcuts found for "{{ searchQuery }}"
       </div>
     </div>
@@ -298,7 +312,9 @@
       <div class="flex items-start gap-2">
         <InfoIcon class="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
         <div class="text-xs text-amber-700 dark:text-amber-300">
-          <p class="font-medium mb-1">Development Mode Only</p>
+          <p class="font-medium mb-1">
+            Development Mode Only
+          </p>
           <p>These shortcuts are only available in development mode and on desktop devices. Some shortcuts may require specific contexts to work properly.</p>
         </div>
       </div>

@@ -45,7 +45,12 @@ import ConsolePanel from './ConsolePanel.vue';
 import StatePanel from './StatePanel.vue';
 import KeyboardShortcuts from './KeyboardShortcuts.vue';
 
-interface ActivePanels {
+// Define panel keys as a const array to ensure string literal types
+const PANEL_KEYS = ['pwa', 'version', 'performance', 'console', 'state', 'shortcuts'] as const;
+type PanelKey = typeof PANEL_KEYS[number];
+
+// Update the ActivePanels interface to be more explicit
+interface ActivePanels extends Record<string, boolean> {
   pwa: boolean;
   version: boolean;
   performance: boolean;
@@ -55,7 +60,7 @@ interface ActivePanels {
 }
 
 interface Tool {
-  key: keyof ActivePanels;
+  key: string;
   icon: string;
   label: string;
   component: any;
@@ -81,13 +86,13 @@ const activePanels = useLocalStorage<ActivePanels>('dev-dock-panels', {
   shortcuts: false
 });
 
-// Desktop panel management
-const currentDesktopPanel = useLocalStorage<keyof ActivePanels | null>('dev-dock-current-panel', null);
+// Desktop panel management - use string instead of keyof
+const currentDesktopPanel = useLocalStorage<string | null>('dev-dock-current-panel', null);
 
 // Mobile-specific state
 const activeMobilePanelIndex = ref(0);
 
-// Tool definitions
+// Tool definitions - ensure keys are strings
 const tools: Tool[] = [
   {
     key: 'pwa',
@@ -133,15 +138,15 @@ const tools: Tool[] = [
   }
 ];
 
-// Computed properties
-const activePanelKeys = computed(() => {
+// Computed properties - ensure string array
+const activePanelKeys = computed((): string[] => {
   return Object.keys(activePanels.value).filter(key => 
     activePanels.value[key as keyof ActivePanels]
-  ) as (keyof ActivePanels)[];
+  );
 });
 
 // Watch for changes in active panels to manage current desktop panel
-watch(activePanelKeys, async (newKeys) => {
+watch(activePanelKeys, async (newKeys: string[]) => {
   if (!isMobile.value) {
     // If current panel was closed, switch to first available
     if (currentDesktopPanel.value && !newKeys.includes(currentDesktopPanel.value)) {
@@ -165,12 +170,23 @@ watch(activePanelKeys, async (newKeys) => {
   }
 }, { immediate: true });
 
-// Methods
+// Helper function to validate panel keys
+const isValidPanelKey = (key: string): key is PanelKey => {
+  return PANEL_KEYS.includes(key as PanelKey);
+};
+
+// Methods - Update parameter types to accept string
 const toggleDock = (): void => {
   isDockOpen.value = !isDockOpen.value;
 };
 
-const togglePanel = async (panel: keyof ActivePanels): Promise<void> => {
+const togglePanel = async (panel: string): Promise<void> => {
+  // Validate that the panel key exists
+  if (!isValidPanelKey(panel)) {
+    console.warn(`Invalid panel key: ${panel}`);
+    return;
+  }
+  
   const wasActive = activePanels.value[panel];
   activePanels.value[panel] = !wasActive;
   
@@ -200,16 +216,21 @@ const togglePanel = async (panel: keyof ActivePanels): Promise<void> => {
   }
 };
 
-const setCurrentDesktopPanel = (panel: keyof ActivePanels): void => {
+const setCurrentDesktopPanel = (panel: string): void => {
   if (!isMobile.value) {
+    if (!isValidPanelKey(panel)) {
+      console.warn(`Invalid panel key: ${panel}`);
+      return;
+    }
+    
     currentDesktopPanel.value = panel;
     isExpanded.value = true; // Ensure expansion when switching panels
   }
 };
 
 const navigatePanel = (direction: number): void => {
-  if (!isMobile.value && activePanelKeys.value.length > 1) {
-    const currentIndex = activePanelKeys.value.indexOf(currentDesktopPanel.value!);
+  if (!isMobile.value && activePanelKeys.value.length > 1 && currentDesktopPanel.value) {
+    const currentIndex = activePanelKeys.value.indexOf(currentDesktopPanel.value);
     const newIndex = currentIndex + direction;
     
     if (newIndex >= 0 && newIndex < activePanelKeys.value.length) {
@@ -233,8 +254,8 @@ const setActiveMobilePanelIndex = (index: number): void => {
 };
 
 const closeAll = (): void => {
-  Object.keys(activePanels.value).forEach(key => {
-    activePanels.value[key as keyof ActivePanels] = false;
+  PANEL_KEYS.forEach(key => {
+    activePanels.value[key] = false;
   });
   isExpanded.value = false;
   activeMobilePanelIndex.value = 0;

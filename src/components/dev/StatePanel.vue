@@ -6,7 +6,7 @@
         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Store Overview</span>
         <div class="flex items-center gap-2">
           <BaseBadge
-            :variant="Object.keys(stores).length > 0 ? 'success' : 'secondary'"
+            :variant="Object.keys(stores).length > 0 ? 'success' : 'info'"
             :text="`${Object.keys(stores).length} stores`"
             size="xs"
           />
@@ -14,8 +14,8 @@
             variant="ghost"
             size="icon"
             class="h-5 w-5"
-            @click="refreshStores"
             :disabled="isLoading"
+            @click="refreshStores"
           >
             <RefreshCwIcon 
               class="h-3 w-3"
@@ -49,9 +49,11 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">{{ name }}</h4>
+              <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">
+                {{ name }}
+              </h4>
               <BaseBadge
-                variant="secondary"
+                variant="info"
                 :text="`${getStorePropertyCount(store)} props`"
                 size="xs"
               />
@@ -73,8 +75,8 @@
                 variant="ghost"
                 size="icon"
                 class="h-6 w-6"
-                @click="toggleWatch(name)"
                 :class="{ 'text-blue-600 dark:text-blue-400': watchedStores.has(name) }"
+                @click="toggleWatch(name)"
               >
                 <EyeIcon class="h-3 w-3" />
               </BaseButton>
@@ -104,20 +106,26 @@
           leave-from-class="max-h-96 opacity-100"
           leave-to-class="max-h-0 opacity-0"
         >
-          <div v-if="expandedStores[name]" class="overflow-hidden">
+          <div
+            v-if="expandedStores[name]"
+            class="overflow-hidden"
+          >
             <div class="p-3 bg-gray-50 dark:bg-gray-800/50">
               <!-- Store properties -->
-              <div v-if="!store.error" class="space-y-2">
+              <div
+                v-if="!store.error"
+                class="space-y-2"
+              >
                 <div
                   v-for="(value, key) in store"
-                  :key="key"
+                  :key="String(key)"
                   class="flex items-start justify-between p-2 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
                 >
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
-                      <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400 font-mono">{{ key }}</span>
+                      <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400 font-mono">{{ String(key) }}</span>
                       <BaseBadge
-                        variant="secondary"
+                        variant="info"
                         :text="getValueType(value)"
                         size="xs"
                       />
@@ -131,7 +139,7 @@
                     variant="ghost"
                     size="icon"
                     class="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    @click="copyProperty(key, value)"
+                    @click="copyProperty(String(key), value)"
                   >
                     <CopyIcon class="h-2.5 w-2.5" />
                   </BaseButton>
@@ -139,7 +147,10 @@
               </div>
               
               <!-- Error state -->
-              <div v-else class="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
+              <div
+                v-else
+                class="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800"
+              >
                 <AlertCircleIcon class="h-4 w-4 text-red-500 dark:text-red-400" />
                 <span class="text-xs text-red-600 dark:text-red-400">{{ store.error }}</span>
               </div>
@@ -149,17 +160,27 @@
       </div>
       
       <!-- Empty state -->
-      <div v-if="Object.keys(stores).length === 0" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-8">
+      <div
+        v-if="Object.keys(stores).length === 0"
+        class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-8"
+      >
         <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
           <DatabaseIcon class="h-8 w-8 mb-3 opacity-40" />
-          <p class="text-sm font-medium mb-1">No Pinia stores detected</p>
-          <p class="text-xs text-center">Stores will appear here when they're initialized</p>
+          <p class="text-sm font-medium mb-1">
+            No Pinia stores detected
+          </p>
+          <p class="text-xs text-center">
+            Stores will appear here when they're initialized
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Watch Panel -->
-    <div v-if="watchedStores.size > 0" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+    <div
+      v-if="watchedStores.size > 0"
+      class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3"
+    >
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Watched Changes</span>
         <div class="flex items-center gap-2">
@@ -190,7 +211,10 @@
           </div>
         </div>
         
-        <div v-if="watchHistory.length === 0" class="text-xs text-gray-500 dark:text-gray-400 italic text-center py-2">
+        <div
+          v-if="watchHistory.length === 0"
+          class="text-xs text-gray-500 dark:text-gray-400 italic text-center py-2"
+        >
           No changes detected yet
         </div>
       </div>
@@ -203,8 +227,8 @@
           variant="outline"
           size="sm"
           class="flex-1 text-xs"
-          @click="refreshStores"
           :disabled="isLoading"
+          @click="refreshStores"
         >
           <RefreshCwIcon class="h-3 w-3 mr-1.5" />
           {{ isLoading ? 'Refreshing...' : 'Refresh' }}
@@ -261,7 +285,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted, onUnmounted } from 'vue'
-import { getActivePinia } from 'pinia'
+import { getActivePinia, type Pinia } from 'pinia'
 import {
   RefreshCwIcon,
   ChevronDownIcon,
@@ -291,12 +315,20 @@ interface WatchChange {
   timestamp: string
 }
 
+// Define proper function type for watchers
+type WatcherFunction = () => void
+
+// Type assertion for accessing internal Pinia properties
+interface PiniaInternal extends Pinia {
+  _s: Map<string, any>
+}
+
 const stores = ref<Record<string, StoreData>>({})
 const expandedStores = reactive<Record<string, boolean>>({})
 const watchedStores = ref(new Set<string>())
 const watchHistory = ref<WatchChange[]>([])
 const isLoading = ref(false)
-const watchers = new Map<string, Function>()
+const watchers = new Map<string, WatcherFunction>()
 
 const refreshStores = async (): Promise<void> => {
   isLoading.value = true
@@ -310,13 +342,14 @@ const refreshStores = async (): Promise<void> => {
     
     const storeData: Record<string, StoreData> = {}
     
-    // Get all registered stores
-    pinia._s.forEach((store, id) => {
+    // Get all registered stores with proper typing
+    const piniaInternal = pinia as PiniaInternal
+    piniaInternal._s.forEach((store: any, id: string) => {
       try {
         // Extract reactive state
         const state = store.$state
         storeData[id] = { ...state }
-      } catch (error) {
+      } catch {
         storeData[id] = { error: 'Failed to serialize store state' }
       }
     })
@@ -353,25 +386,26 @@ const toggleWatch = (storeName: string): void => {
 
 const setupStoreWatcher = (storeName: string): void => {
   const pinia = getActivePinia()
-  if (!pinia) return
+    if (!pinia) return
   
-  const store = pinia._s.get(storeName)
+  const piniaInternal = pinia as PiniaInternal
+  const store = piniaInternal._s.get(storeName)
   if (!store) return
   
   // Watch for changes in store state
   const unwatch = watch(
     () => store.$state,
-    (newState, oldState) => {
+    (newState: any, oldState: any) => {
       if (!oldState) return
       
       // Compare states and log changes
-      Object.keys(newState).forEach(key => {
+      Object.keys(newState).forEach((key: string) => {
         const newValue = newState[key]
         const oldValue = oldState[key]
         
         if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
           watchHistory.value.unshift({
-                        store: storeName,
+            store: storeName,
             property: key,
             oldValue: formatValue(oldValue),
             newValue: formatValue(newValue),
@@ -541,3 +575,4 @@ onMounted(() => {
   })
 })
 </script>
+
