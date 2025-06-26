@@ -2,10 +2,10 @@
   <div class="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-colors">
     <!-- Version Badge -->
     <div class="absolute -top-3 right-4">
-      <Badge
-        :show-notch="true"
-        type="custom"
+      <BaseBadge
+        variant="custom"
         :text="`v${version}`"
+        :show-notch="true"
       />
     </div>
     
@@ -30,21 +30,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { TagIcon, CheckCircle2 } from 'lucide-vue-next';
-import Badge from '@/components/base/BaseBadge.vue'
-defineProps({
-  version: {
-    type: String,
-    required: true
-  },
-  date: {
-    type: String,
-    required: true
-  },
-  features: {
-    type: Array,
-    required: true
-  }
-});
+import BaseBadge from '@/components/base/BaseBadge.vue'
+
+interface Props {
+  version: string;
+  date: string;
+  features: string[];
+}
+
+defineProps<Props>();
 </script>

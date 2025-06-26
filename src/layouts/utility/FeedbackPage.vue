@@ -82,7 +82,7 @@
   </BasePage>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { CheckCircleIcon } from 'lucide-vue-next';
 import BasePage from "@/components/base/BasePage.vue";
 import Button from "@/components/base/BaseButton.vue";

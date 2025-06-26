@@ -4,14 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --open",
+    "dev": "vite --open && node scripts/generate-version-info.cjs",
     "build": "vue-tsc && vite build",
+    "prebuild": "node scripts/generate-version-info.cjs",
     "preview": "vite preview",
     "serve:prod": "pnpm dlx serve -s dist",
     "build:analyze": "vite build --mode production && open dist/stats.html",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "type-check": "vue-tsc --noEmit",
-    "version:bump": "node scripts/bump-version.js"
+    "version:bump": "node scripts/bump-version.js",
+    "pwa:dev": "vite --mode development",
+    "pwa:build": "vite build --mode production"
   },
   "dependencies": {
     "@vueuse/core": "^11.3.0",
@@ -28,7 +31,8 @@
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.2",
     "vue-router": "^4.5.0",
-    "vue-tippy": "^6.6.0"
+    "vue-tippy": "^6.6.0",
+    "workbox-window": "^7.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -46,6 +50,7 @@
     "vite": "^5.0.0",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-pwa": "^0.20.0",
+    "vue-eslint-parser": "^10.1.4",
     "vue-tsc": "^2.0.0"
   },
   "packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"

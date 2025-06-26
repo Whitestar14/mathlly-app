@@ -1,405 +1,407 @@
+<script setup lang="ts">
+import { ref, computed, type Ref, type ComputedRef } from 'vue'
+import { 
+  RefreshCwIcon, 
+  XIcon, 
+  CheckIcon, 
+  ChevronDownIcon, 
+  ArrowRightIcon,
+  SparklesIcon,
+  DownloadIcon,
+  BookOpenIcon,
+  ExternalLinkIcon
+} from 'lucide-vue-next'
+import { usePWA } from '@/composables/usePWA'
+import { useWindowSize } from '@vueuse/core'
+import BaseButton from '@/components/base/BaseButton.vue'
+
+// Use the PWA composable
+const {
+  needRefresh,
+  latestVersion,
+  updateFeatures,
+  shouldShowUpdate,
+  updateApp,
+  dismissUpdate,
+  currentVersion
+} = usePWA()
+
+// Responsive utilities
+const { width } = useWindowSize()
+
+// Local state
+const showDetails: Ref<boolean> = ref(false)
+const isUpdating: Ref<boolean> = ref(false)
+
+// Computed properties
+const hasReleaseNotes: ComputedRef<boolean> = computed(() => {
+  return Boolean(
+    latestVersion.value && 
+    latestVersion.value !== 'Service Worker Update' && 
+    updateFeatures.value.length > 0
+  )
+})
+
+const isMobile: ComputedRef<boolean> = computed(() => width.value < 640)
+
+/**
+ * Check if this is a service worker update
+ */
+const isServiceWorkerUpdate: ComputedRef<boolean> = computed(() => {
+  return latestVersion.value === 'Service Worker Update' || 
+         (needRefresh.value && !latestVersion.value) ||
+         (needRefresh.value && latestVersion.value === currentVersion.value)
+})
+
+/**
+ * Get the display version for the update
+ */
+const displayLatestVersion: ComputedRef<string> = computed(() => {
+  if (isServiceWorkerUpdate.value) {
+    return 'SW Update'
+  }
+  return latestVersion.value
+})
+
+/**
+ * Get preview feature count based on screen size
+ */
+const getPreviewCount = (): number => {
+  if (isMobile.value) return 1
+  return 2
+}
+
+/**
+ * Get preview features for collapsed state
+ */
+const getPreviewFeatures = (): string[] => {
+  const count = getPreviewCount()
+  return updateFeatures.value.slice(0, count).map(feature => {
+    // Truncate long features for preview
+    if (isMobile.value && feature.length > 25) {
+      return `${feature.substring(0, 25)}...`
+    }
+    if (!isMobile.value && feature.length > 30) {
+      return `${feature.substring(0, 30)}...`
+    }
+    return feature
+  })
+}
+
+/**
+ * Format version string for display
+ */
+const formatVersion = (version: string): string => {
+  if (!version) return ''
+  
+  // Handle service worker updates
+  if (version === 'Service Worker Update' || version === 'SW Update') {
+    return 'SW Update'
+  }
+  
+  const cleanVersion = version.replace(/^v/, '')
+  
+  if (cleanVersion.includes('beta')) {
+    const [versionNum] = cleanVersion.split('-')
+    return `${versionNum} β`
+  }
+  
+  if (cleanVersion.includes('alpha')) {
+    const [versionNum] = cleanVersion.split('-')
+    return `${versionNum} α`
+  }
+  
+  return cleanVersion
+}
+
+/**
+ * Get contextual update description
+ */
+const getUpdateDescription = (): string => {
+  // Service worker update
+  if (isServiceWorkerUpdate.value) {
+    return isMobile.value 
+      ? 'App update ready - improved performance' 
+      : 'App update ready - improved offline functionality and performance'
+  }
+  
+  // Version update
+  if (latestVersion.value && currentVersion.value && 
+      latestVersion.value !== currentVersion.value) {
+    
+    // Check for beta to stable transition
+    if (currentVersion.value.includes('beta') && !latestVersion.value.includes('beta')) {
+      return 'Stable release ready - enhanced stability and performance'
+    }
+    
+    if (updateFeatures.value.length > 0) {
+      const featureText = isMobile.value ? 'updates' : 'features and improvements'
+      return `${updateFeatures.value.length} new ${featureText} available`
+    }
+    
+    return 'New version available with improvements'
+  }
+  
+  return 'Enhanced experience awaits with the latest version'
+}
+
+/**
+ * Toggle update details visibility
+ */
+const toggleDetails = (): void => {
+  showDetails.value = !showDetails.value
+}
+
+/**
+ * Handle update button click with loading state
+ */
+const handleUpdate = async (): Promise<void> => {
+  if (isUpdating.value) return
+  
+  isUpdating.value = true
+  
+  try {
+    await updateApp()
+  } catch (error) {
+    console.error('Failed to update:', error)
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+/**
+ * Open release notes
+ */
+const openReleaseNotes = (): void => {
+  const url = `https://github.com/Whitestar14/mathlly-app/releases/tag/v${latestVersion.value}`
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+</script>
 <template>
   <Transition
-    enter-active-class="transform transition duration-300 ease-out"
-    enter-from-class="translate-y-10 opacity-0"
-    enter-to-class="translate-y-0 opacity-100"
-    leave-active-class="transform transition duration-200 ease-in"
-    leave-from-class="translate-y-0 opacity-100"
-    leave-to-class="translate-y-10 opacity-0"
+    enter-active-class="transform transition duration-500 ease-out"
+    enter-from-class="translate-y-full opacity-0 scale-95"
+    enter-to-class="translate-y-0 opacity-100 scale-100"
+    leave-active-class="transform transition duration-300 ease-in"
+    leave-from-class="translate-y-0 opacity-100 scale-100"
+    leave-to-class="translate-y-full opacity-0 scale-95"
   >
     <div 
-      v-if="showNotification"
-      class="fixed bottom-4 right-4 z-50 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
-      style="width:clamp(300px,90vw,32rem);"
+      v-if="shouldShowUpdate"
+      class="fixed bottom-3 left-3 right-3 z-50 sm:bottom-6 sm:right-6 sm:left-auto sm:w-full sm:max-w-sm"
     >
-      <!-- Header with version badge -->
-      <div class="p-4 pb-3 flex items-start justify-between">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-full">
-            <RefreshCwIcon class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
-              Update Available
-              <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
-                {{ latestVersion }}
-              </span>
-            </h3>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              A new version is ready to install
-            </p>
-          </div>
-        </div>
-        <button
-          class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:ring-offset-2 rounded-md"
-          @click="dismissUpdate"
-        >
-          <span class="sr-only">Close</span>
-          <XIcon class="h-5 w-5" />
-        </button>
-      </div>
-      
-      <!-- Update details (collapsible) -->
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="max-h-0 opacity-0"
-        enter-to-class="max-h-[200px] opacity-100"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="max-h-[200px] opacity-100"
-        leave-to-class="max-h-0 opacity-0"
-      >
-        <div
-          v-if="showDetails"
-          class="px-4 pb-2 overflow-hidden"
-        >
-          <div
-            class="border-t border-gray-200 dark:border-gray-700 pt-2 mb-2 overflow-y-auto"
-            style="max-height: calc(100vh - 12rem);"
-          >
-            <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              What's new:
-            </h4>
-            <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
-              <li
-                v-for="(feature, index) in updateFeatures"
-                :key="index"
-                class="flex items-start"
-              >
-                <CheckIcon class="h-3.5 w-3.5 text-green-500 dark:text-green-400 mr-1.5 mt-0.5 flex-shrink-0" />
-                <span>{{ feature }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </Transition>
-      
-      <!-- Action buttons -->
-      <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-right sm:px-6 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex space-x-2 justify-end">
-          <BaseButton 
-            variant="outline" 
-            size="sm" 
-            @click="toggleDetails"
-          >
-            <span class="flex items-center">
-              <component
-                :is="showDetails ? ChevronUpIcon : ChevronDownIcon"
-                class="h-4 w-4 mr-1"
-              />
-              {{ showDetails ? 'Hide' : 'Details' }}
-            </span>
-          </BaseButton>
+      <!-- Main Card with Proper Border Isolation -->
+      <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
+        <!-- Solid background layer to prevent background bleed -->
+        <div class="absolute inset-0 bg-white/95 dark:bg-gray-900/95 rounded-2xl" />
+        
+        <!-- Content overlay -->
+        <div class="relative">
+          <!-- Gradient overlay -->
+          <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent dark:from-gray-800/10 pointer-events-none" />
           
-          <BaseButton 
-            variant="primary" 
-            size="sm" 
-            @click="refreshApp"
-          >
-            <span class="flex items-center">
-              <RefreshCwIcon class="h-4 w-4 mr-1 animate-spin-slow" />
-              Update Now
-            </span>
-          </BaseButton>
+          <!-- Header Section -->
+          <div class="relative p-3 sm:p-5">
+            <div class="flex items-start gap-2.5 sm:gap-3">
+              <!-- Icon -->
+              <div class="relative flex-shrink-0 mt-0.5">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl blur-sm opacity-60" />
+                <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-2 sm:p-2.5 rounded-xl shadow-lg">
+                  <RefreshCwIcon class="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </div>
+              </div>
+              
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <!-- Title Row -->
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {{ isServiceWorkerUpdate ? 'App Update Available' : 'Update Available' }}
+                  </h3>
+                  
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <!-- Details Toggle Icon -->
+                    <BaseButton
+                      v-if="updateFeatures.length > 0"
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7"
+                      @click="toggleDetails"
+                    >
+                      <ChevronDownIcon 
+                        class="h-4 w-4 transition-transform duration-300 ease-out"
+                        :class="{ 'rotate-180': showDetails }"
+                      />
+                    </BaseButton>
+                    
+                    <!-- Close Button -->
+                    <BaseButton
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7"
+                      @click="dismissUpdate"
+                    >
+                      <XIcon class="h-4 w-4" />
+                    </BaseButton>
+                  </div>
+                </div>
+                
+                <!-- Version Progression -->
+                <div class="flex items-center gap-1.5 mb-2 sm:mb-3 overflow-hidden">
+                  <span 
+                    v-if="currentVersion && !isServiceWorkerUpdate" 
+                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border border-gray-200/50 dark:border-gray-600/50 flex-shrink-0"
+                  >
+                    {{ formatVersion(currentVersion) }}
+                  </span>
+                  <ArrowRightIcon 
+                    v-if="currentVersion && displayLatestVersion && !isServiceWorkerUpdate" 
+                    class="h-3 w-3 text-gray-400 flex-shrink-0" 
+                  />
+                  <span 
+                    v-if="displayLatestVersion" 
+                    class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-md bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-700/50 shadow-sm flex-shrink-0"
+                  >
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse" />
+                    {{ formatVersion(displayLatestVersion) }}
+                  </span>
+                </div>
+                
+                <!-- Description -->
+                <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-2 sm:mb-3">
+                  {{ getUpdateDescription() }}
+                </p>
+                
+                <!-- Quick Feature Preview -->
+                <div
+                  v-if="updateFeatures.length > 0"
+                  class="space-y-2"
+                >
+                  <!-- Collapsed Preview -->
+                  <div
+                    v-if="!showDetails"
+                    class="flex flex-wrap gap-1"
+                  >
+                    <span
+                      v-for="(feature, index) in getPreviewFeatures()"
+                      :key="index"
+                      class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50"
+                    >
+                      <SparklesIcon class="h-2.5 w-2.5 mr-1 flex-shrink-0" />
+                      <span class="truncate">{{ feature }}</span>
+                    </span>
+                    <span
+                      v-if="updateFeatures.length > getPreviewCount()"
+                      class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                    >
+                      +{{ updateFeatures.length - getPreviewCount() }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Expandable Details -->
+          <div class="overflow-hidden">
+            <Transition
+              enter-active-class="transition-all duration-400 ease-out"
+              enter-from-class="max-h-0 opacity-0"
+              enter-to-class="max-h-64 opacity-100"
+              leave-active-class="transition-all duration-300 ease-in"
+              leave-from-class="max-h-64 opacity-100"
+              leave-to-class="max-h-0 opacity-0"
+            >
+              <div
+                v-if="showDetails && updateFeatures.length > 0"
+                class="relative"
+              >
+                <!-- Divider -->
+                <div class="px-3 sm:px-5">
+                  <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
+                </div>
+                
+                <!-- Details Content -->
+                <div class="px-3 sm:px-5 py-3 sm:py-4">
+                  <div class="max-h-40 overflow-y-auto scrollbar-thin">
+                    <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3 flex items-center">
+                      <div class="w-1 h-1 bg-indigo-500 rounded-full mr-2" />
+                      {{ isServiceWorkerUpdate ? 'Service Worker Updates' : `What's new in ${formatVersion(displayLatestVersion)}` }}
+                    </h4>
+                    
+                    <!-- Feature List -->
+                    <div class="space-y-2 sm:space-y-2.5">
+                      <div
+                        v-for="(feature, index) in updateFeatures"
+                        :key="index"
+                        class="flex items-start group"
+                      >
+                        <div class="relative mt-1.5 mr-2.5 sm:mr-3 flex-shrink-0">
+                          <div class="absolute inset-0 bg-green-400 rounded-full blur-sm opacity-40 group-hover:opacity-60 transition-opacity" />
+                          <CheckIcon class="relative h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-600 dark:text-green-400" />
+                        </div>
+                        <span class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{{ feature }}</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Release Notes Link -->
+                    <div
+                      v-if="hasReleaseNotes"
+                      class="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700"
+                    >
+                      <BaseButton
+                        variant="link"
+                        size="sm"
+                        class="text-xs p-0 h-auto"
+                        @click="openReleaseNotes"
+                      >
+                        <BookOpenIcon class="h-3 w-3 mr-1.5" />
+                        <span class="hidden sm:inline">View full release notes</span>
+                        <span class="sm:hidden">Release notes</span>
+                        <ExternalLinkIcon class="h-3 w-3 ml-1" />
+                      </BaseButton>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </div>
+          
+          <!-- Action Bar -->
+          <div class="relative px-3 sm:px-5 py-2.5 sm:py-4 bg-gradient-to-r from-gray-50/50 to-gray-100/30 dark:from-gray-800/30 dark:to-gray-900/50 border-t border-gray-200/30 dark:border-gray-700/30">
+            <!-- Action Buttons -->
+            <div class="flex gap-2 justify-end">
+              <BaseButton
+                variant="outline"
+                size="sm"
+                class="text-xs"
+                @click="dismissUpdate"
+              >
+                Later
+              </BaseButton>
+              
+              <BaseButton
+                variant="primary"
+                size="sm"
+                :disabled="isUpdating"
+                :loading="isUpdating"
+                class="text-xs min-w-[90px]"
+                @click="handleUpdate"
+              >
+                <DownloadIcon 
+                  v-if="!isUpdating"
+                  class="h-3.5 w-3.5" 
+                />
+                {{ isUpdating ? 'Updating...' : (isServiceWorkerUpdate ? 'Update App' : 'Update Now') }}
+              </BaseButton>
+            </div>
+          </div>
+          
+          <!-- Bottom accent -->
+          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-60" />
         </div>
       </div>
     </div>
   </Transition>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useIntervalFn, useEventListener, useLocalStorage } from '@vueuse/core';
-import {
-  RefreshCwIcon,
-  XIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CheckIcon
-} from 'lucide-vue-next';
-import { useVersionStore } from '@/stores/version';
-import { useSettingsStore } from '@/stores/settings';
-import { updates } from '@/data/changelog';
-import BaseButton from '@/components/base/BaseButton.vue';
-
-const versionStore = useVersionStore();
-const settingsStore = useSettingsStore();
-const showNotification = ref(false);
-const showDetails = ref(false);
-const latestVersion = ref('');
-const updateFeatures = ref([]);
-const serviceWorkerRegistration = ref(null);
-
-const dismissedVersion = useLocalStorage('dismissed-version', '');
-
-const currentVersion = computed(() => versionStore.versionInfo.full);
-const updatesEnabled = computed(() => settingsStore.appearance.checkForUpdates !== false);
-
-console.log('[UpdateNotification] Component initialized');
-console.log('[UpdateNotification] Current version from store:', currentVersion.value);
-console.log('[UpdateNotification] Updates enabled:', updatesEnabled.value);
-console.log('[UpdateNotification] Previously dismissed version:', dismissedVersion.value);
-console.log('[UpdateNotification] First version in changelog:', updates[0]?.version);
-
-// Helper function to normalize version strings for comparison
-const normalizeVersion = (version) => {
-  // Remove 'v' prefix if present
-  const normalized = version?.replace(/^v/, '') || '';
-  console.log(`[UpdateNotification] Normalizing version: ${version} → ${normalized}`);
-  return normalized;
-};
-
-// Helper function to compare versions (simple semver comparison)
-const isNewerVersion = (latest, current) => {
-  console.log(`[UpdateNotification] Comparing versions - Latest: ${latest}, Current: ${current}`);
-  
-  if (!latest || !current) {
-    console.log('[UpdateNotification] Missing version information, cannot compare');
-    return false;
-  }
-  
-  const latestNorm = normalizeVersion(latest);
-  const currentNorm = normalizeVersion(current);
-  
-  if (latestNorm === currentNorm) {
-    console.log('[UpdateNotification] Versions are identical');
-    return false;
-  }
-  
-  // Split versions into components
-  const latestParts = latestNorm.split('.').map(Number);
-  const currentParts = currentNorm.split('.').map(Number);
-  
-  console.log(`[UpdateNotification] Latest parts:`, latestParts);
-  console.log(`[UpdateNotification] Current parts:`, currentParts);
-  
-  // Compare major, minor, patch
-  for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
-    const latestPart = latestParts[i] || 0;
-    const currentPart = currentParts[i] || 0;
-    
-    console.log(`[UpdateNotification] Comparing part ${i}: ${latestPart} vs ${currentPart}`);
-    
-    if (latestPart > currentPart) {
-      console.log('[UpdateNotification] Latest version is newer');
-      return true;
-    }
-    if (latestPart < currentPart) {
-      console.log('[UpdateNotification] Latest version is older');
-      return false;
-    }
-  }
-  
-  console.log('[UpdateNotification] Versions are equivalent');
-  return false;
-};
-
-const fetchLatestVersion = async () => {
-  console.log('[UpdateNotification] Fetching latest version information');
-  
-  try {
-    // First, try to get the latest version from the updates array
-    if (updates.length > 0) {
-      console.log('[UpdateNotification] Using updates array for version info');
-      
-      // Get the first (most recent) update from the changelog
-      const latestUpdate = updates[0];
-      latestVersion.value = latestUpdate?.version || '';
-      
-      console.log(`[UpdateNotification] Latest version from changelog: ${latestVersion.value}`);
-      console.log(`[UpdateNotification] Features:`, latestUpdate?.features);
-      
-      // Check if this is a newer version
-      const isNewer = isNewerVersion(latestVersion.value, currentVersion.value);
-      console.log(`[UpdateNotification] Is newer version? ${isNewer}`);
-      
-      // Only set update features if this is actually a newer version
-      if (isNewer) {
-        updateFeatures.value = latestUpdate?.features || [];
-        console.log('[UpdateNotification] Set update features for newer version');
-      } else {
-        console.log('[UpdateNotification] Not setting features as version is not newer');
-      }
-      return;
-    }
-    
-    // Fallback if updates array is empty
-    console.log('[UpdateNotification] Updates array is empty, fetching from version-info.json');
-    const timestamp = Date.now();
-    const response = await fetch(`/version-info.json?t=${timestamp}`);
-    
-    if (!response.ok) {
-      console.error('[UpdateNotification] Failed to fetch version-info.json:', response.status);
-      throw new Error('Failed to fetch version-info.json');
-    }
-    
-    const versionData = await response.json();
-    console.log('[UpdateNotification] Fetched version data:', versionData);
-    
-    latestVersion.value = versionData.full || '';
-    console.log(`[UpdateNotification] Latest version from version-info.json: ${latestVersion.value}`);
-    
-    // Find the update entry that matches the latest version
-    const updateEntry = updates.find(u => normalizeVersion(u.version) === normalizeVersion(latestVersion.value));
-    console.log('[UpdateNotification] Found matching update entry:', updateEntry);
-    
-    if (updateEntry && isNewerVersion(latestVersion.value, currentVersion.value)) {
-      updateFeatures.value = updateEntry?.features || [];
-      console.log('[UpdateNotification] Set update features from matching entry');
-    } else {
-      console.log('[UpdateNotification] No matching entry found or version is not newer');
-    }
-  } catch (error) {
-    console.error('[UpdateNotification] Failed to fetch version info:', error);
-  }
-};
-
-const toggleDetails = () => {
-  showDetails.value = !showDetails.value;
-  console.log(`[UpdateNotification] Toggled details: ${showDetails.value}`);
-};
-
-const handleWorkerUpdate = (event) => {
-  console.log('[UpdateNotification] Service worker update event received:', event);
-  
-  if (event.detail) {
-    console.log('[UpdateNotification] Service worker registration details:', event.detail);
-    serviceWorkerRegistration.value = event.detail;
-    showNotification.value = true;
-    console.log('[UpdateNotification] Showing notification due to service worker update');
-    fetchLatestVersion();
-  } else {
-    console.log('[UpdateNotification] No service worker registration details in event');
-  }
-};
-
-// Check for updates periodically
-const checkForUpdates = async () => {
-  console.log('[UpdateNotification] Checking for updates...');
-  
-  if ('serviceWorker' in navigator) {
-    try {
-      console.log('[UpdateNotification] Updating service worker');
-      const registration = await navigator.serviceWorker.ready;
-      registration.update();
-    } catch (error) {
-      console.error('[UpdateNotification] Error updating service worker:', error);
-    }
-  } else {
-    console.log('[UpdateNotification] Service worker not supported in this browser');
-  }
-
-  await fetchLatestVersion();
-  
-  console.log(`[UpdateNotification] After fetch - Current: ${currentVersion.value}, Latest: ${latestVersion.value}`);
-  console.log(`[UpdateNotification] Previously dismissed: ${dismissedVersion.value}`);
-  
-  // Compare versions to determine if an update is available
-  if (isNewerVersion(latestVersion.value, currentVersion.value)) {
-    console.log('[UpdateNotification] Newer version is available');
-    
-    // Only show notification if this version hasn't been dismissed
-    if (dismissedVersion.value !== latestVersion.value && !showNotification.value) {
-      console.log(`[UpdateNotification] Showing notification for new version: ${latestVersion.value}`);
-      showNotification.value = true;
-    } else {
-      console.log(`[UpdateNotification] Not showing notification - Already dismissed or already showing`);
-    }
-  } else {
-    console.log('[UpdateNotification] No newer version available');
-  }
-};
-
-// Use VueUse's useIntervalFn for periodic checks
-const { pause, resume } = useIntervalFn(checkForUpdates, 60 * 60 * 1000, { 
-  immediate: false, 
-  immediateCallback: false
-});
-
-// Use VueUse's useEventListener for cleaner event handling
-useEventListener(window, 'sw-update-available', handleWorkerUpdate);
-console.log('[UpdateNotification] Registered event listener for sw-update-available');
-
-// Refresh the app with the new version
-const refreshApp = () => {
-  console.log('[UpdateNotification] Refreshing app to update to new version');
-  showNotification.value = false;
-  const registration = serviceWorkerRegistration.value;
-
-  if (registration?.waiting) {
-    console.log('[UpdateNotification] Found waiting service worker');
-    const worker = registration.waiting;
-    
-    useEventListener(worker, 'statechange', (event) => {
-      console.log(`[UpdateNotification] Service worker state changed: ${event.target.state}`);
-      if (event.target.state === 'activated') {
-        console.log('[UpdateNotification] Service worker activated, reloading page');
-        window.location.reload();
-      }
-    }, { once: true });
-
-    if (worker.state === 'installed') {
-      console.log('[UpdateNotification] Sending SKIP_WAITING message to worker');
-      worker.postMessage({ type: 'SKIP_WAITING' });
-    } else {
-      console.log(`[UpdateNotification] Worker in ${worker.state} state, reloading page directly`);
-      window.location.reload();
-    }
-
-    setTimeout(() => {
-      if (!window.location.reloading) {
-        console.log('[UpdateNotification] Fallback reload triggered after timeout');
-        window.location.reloading = true;
-        window.location.reload();
-      }
-    }, 3000);
-  } else {
-    console.log('[UpdateNotification] No waiting service worker, reloading page directly');
-    window.location.reload();
-  }
-};
-
-// Dismiss the update notification
-const dismissUpdate = () => {
-  console.log('[UpdateNotification] Dismissing update notification');
-  showNotification.value = false;
-  if (latestVersion.value) {
-    console.log(`[UpdateNotification] Saving dismissed version: ${latestVersion.value}`);
-    dismissedVersion.value = latestVersion.value;
-  }
-};
-
-// Lifecycle hooks
-onMounted(() => {
-  console.log('[UpdateNotification] Component mounted');
-  console.log('[UpdateNotification] Updates enabled:', updatesEnabled.value);
-  
-  if (updatesEnabled.value) {
-    console.log('[UpdateNotification] Running initial update check');
-    checkForUpdates();
-    console.log('[UpdateNotification] Starting periodic update checks');
-    resume();
-  } else {
-    console.log('[UpdateNotification] Update checks disabled in settings');
-  }
-});
-
-onUnmounted(() => {
-  console.log('[UpdateNotification] Component unmounted, pausing update checks');
-  pause();
-});
-</script>
-
-<style scoped>
-.animate-spin-slow {
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>

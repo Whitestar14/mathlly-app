@@ -5,7 +5,7 @@ import { useEventListener } from "@vueuse/core";
 export const useDeviceStore = defineStore("device", () => {
   const isMobile = ref(false);
   const isResizing = ref(false);
-  let resizeTimeout = null;
+  let resizeTimeout: number | null = null;
 
   const updateDeviceInfo = () => {
     if (resizeTimeout !== null) {
@@ -17,7 +17,7 @@ export const useDeviceStore = defineStore("device", () => {
       isResizing.value = true;
     }
 
-    resizeTimeout = setTimeout(() => {
+    resizeTimeout = window.setTimeout(() => {
       isMobile.value = window.innerWidth < 768;
       isResizing.value = false;
     }, 100);
@@ -31,6 +31,7 @@ export const useDeviceStore = defineStore("device", () => {
   const destroyDeviceInfo = () => {
     if (resizeTimeout !== null) {
       clearTimeout(resizeTimeout);
+      resizeTimeout = null;
     }
   };
 

@@ -60,15 +60,16 @@
   </BasePanel>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   Sun,
   Moon,
   AppWindowMac,
   AtSign,
   GithubIcon,
+  type LucideIcon,
 } from "lucide-vue-next";
-import { useTheme } from "@/composables/useTheme";
+import { useTheme, type ThemeOption } from "@/composables/useTheme";
 import BasePanel from "@/components/base/BasePanel.vue";
 import {
   ScrollAreaRoot,
@@ -77,42 +78,41 @@ import {
   ToggleGroupRoot,
   ToggleGroupItem
 } from "radix-vue";
-import { onMounted } from 'vue';
 
-const { selectedTheme, isDark } = useTheme();
+// Types
+interface ThemeItem {
+  id: ThemeOption;
+  title: string;
+  icon: LucideIcon;
+}
 
-const themeItems = [
+interface ExternalLink {
+  url: string;
+  text: string;
+  icon: LucideIcon;
+}
+
+// Theme management - now properly destructured
+const { selectedTheme } = useTheme();
+
+// Theme items configuration
+const themeItems: ThemeItem[] = [
   { id: "light", title: "Light", icon: Sun },
   { id: "dark", title: "Dark", icon: Moon },
   { id: "system", title: "System", icon: AppWindowMac }
 ];
 
-const externalLinks = [
+// External links configuration
+const externalLinks: ExternalLink[] = [
   {
-    url: "https://github.com/Whitestar14/mathlly-app",
+    url: "https://github.com/Whitestar14/mathlly",
     text: "Star on GitHub",
     icon: GithubIcon
   },
   {
-    url: "https://x.com/@SOlusunmbola",
+    url: "https://x.com/@xijibomi",
     text: "Follow my Twitter",
     icon: AtSign
   }
 ];
-
-onMounted(() => {
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  
-  const handleChange = (e) => {
-    if (selectedTheme.value === 'system') {
-      isDark.value = e.matches;
-    }
-  };
-  
-  mediaQuery.addEventListener('change', handleChange);
-  
-  return () => {
-    mediaQuery.removeEventListener('change', handleChange);
-  };
-});
 </script>

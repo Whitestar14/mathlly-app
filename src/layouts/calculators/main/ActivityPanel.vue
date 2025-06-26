@@ -25,7 +25,7 @@
                 ? 'text-indigo-600 dark:text-indigo-400'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300',
             ]"
-            @click="handleTabChange(tab.value, $event.target)"
+            @click="handleTabChange(tab.value, $event.target as HTMLElement)"
           >
             {{ tab.label }}
           </div>
@@ -133,40 +133,58 @@
   </BaseModal>
 </template>
 
-<script setup>
-import { ref, computed, watch } from "vue"
+<script setup lang="ts">
+import { ref, computed, watch, type Ref, type ComputedRef } from "vue"
 import { TrashIcon, AlertTriangleIcon } from "lucide-vue-next"
 import Button from "@/components/base/BaseButton.vue"
 import BaseModal from "@/components/base/BaseModal.vue"
 import BasePanel from "@/components/base/BasePanel.vue"
 import HistoryList from "@/components/ui/HistoryList.vue"
 import Indicator from "@/components/ui/PillIndicator.vue"
-import { useHistory } from "@/composables/useHistory"
+import { useHistory, type HistoryItem } from "@/composables/useHistory"
 import { useAnimation } from "@/composables/useAnimation"
 import { useToast } from "@/composables/useToast"
 import { usePills } from "@/composables/usePills"
 import { ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport } from "radix-vue"
 
-// Props and emits
-const props = defineProps({
-  mode: { type: String, default: "Standard" },
-  isMobile: { type: Boolean, default: false},
-  isOpen: { type: Boolean, default: false },
-})
+// Types
+interface Props {
+  mode?: string;
+  isMobile?: boolean;
+  isOpen?: boolean;
+}
 
-const emit = defineEmits(["select-item", "history-close"])
+interface Tab {
+  label: string;
+  value: string;
+}
+
+interface Emits {
+  (e: 'select-item', item: HistoryItem): void;
+  (e: 'history-close'): void;
+}
+
+// Props and emits
+const props = withDefaults(defineProps<Props>(), {
+  mode: "Standard",
+  isMobile: false,
+  isOpen: false,
+});
+
+const emit = defineEmits<Emits>();
 
 // Tabs configuration
-const tabs = ref([
+const tabs: Ref<Tab[]> = ref([
   { label: "History", value: "history" },
   { label: "Memory", value: "memory" },
 ]);
-const tabElements = ref([]);
+
+const tabElements: Ref<HTMLElement[]> = ref([]);
 
 // Composables
-const { historyItems, clearAll, loadHistory } = useHistory()
-const { toast } = useToast()
-const { setInitialAnimation } = useAnimation()
+const { historyItems, clearAll, loadHistory } = useHistory();
+const { toast } = useToast();
+const { setInitialAnimation } = useAnimation();
 
 // Tab navigation using usePills
 const {
@@ -181,63 +199,66 @@ const {
 });
 
 // Local state 
-const showClearConfirmation = ref(false)
+const showClearConfirmation: Ref<boolean> = ref(false);
 
 // Computed properties
-const currentTab = computed(() => currentPill.value);
-const isProgrammerMode = computed(() => props.mode === "Programmer")
-const showClearButton = computed(() => historyItems.value.length > 0 && !isProgrammerMode.value)
+const currentTab: ComputedRef<string> = computed(() => currentPill.value);
+const isProgrammerMode: ComputedRef<boolean> = computed(() => props.mode === "Programmer");
+const showClearButton: ComputedRef<boolean> = computed(() => 
+  historyItems.value.length > 0 && !isProgrammerMode.value
+);
 
 // Handle tab change
-const handleTabChange = (value, tabElement) => {
+const handleTabChange = (value: string, tabElement: HTMLElement): void => {
   handleNavigation(value, tabElement);
 };
 
 // Watch for panel open/close
 watch(
   () => props.isOpen,
-  async (isOpen) => {
+  async (isOpen: boolean) => {
     if (isOpen && !isProgrammerMode.value && currentTab.value === 'history') {
       // Reset animation state when panel opens
-      setInitialAnimation(true)
-      await loadHistory()
-      setTimeout(() => setInitialAnimation(false), 500)
+      setInitialAnimation(true);
+      await loadHistory();
+      setTimeout(() => setInitialAnimation(false), 500);
     }
   },
   { immediate: true },
-)
+);
 
 // Watch for mode changes
 watch(
   () => props.mode,
   () => {
     if (!isProgrammerMode.value && props.isOpen && currentTab.value === 'history') {
-      loadHistory()
+      loadHistory();
     }
   },
-)
+);
 
 // Watch for tab changes
 watch(
   currentTab,
-  (newTab) => {
+  (newTab: string) => {
     if (newTab === 'history' && !isProgrammerMode.value && props.isOpen) {
-      loadHistory()
+      loadHistory();
     }
   }
-)
+);
 
 // Handle history item selection
-const handleSelectItem = (item) => {
+const handleSelectItem = (item: HistoryItem): void => {
   emit("select-item", item);
 };
 
-const handleClear = async () => {
-  await clearAll()
-  showClearConfirmation.value = false
+// Handle clear confirmation
+const handleClear = async (): Promise<void> => {
+  await clearAll();
+  showClearConfirmation.value = false;
   toast({
     title: "History cleared",
     description: "All history items have been removed",
-  })
-}
+  });
+};
 </script>

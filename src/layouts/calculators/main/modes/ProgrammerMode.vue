@@ -2,55 +2,54 @@
   <div class="flex flex-col gap-1">
     <!-- Memory buttons row -->
     <div class="grid grid-cols-5 gap-1">
-      <button
+      <CalcButton
         v-for="op in memoryOperations"
         :key="op"
-        class="calc-btn calc-memory-btn calc-btn-grid"
+        :value="op"
+        variant="memory"
         :disabled="(op === 'MC' || op === 'MR') && !hasMemory"
-        @click="handleClick(op)"
+        @click="handleClick"
       >
         {{ op }}
-      </button>
+      </CalcButton>
     </div>
 
     <div class="grid grid-cols-5 gap-1 flex-grow">
       <!-- Hex letters column -->
       <div class="flex flex-col gap-1">
-        <button
+        <CalcButton
           v-for="letter in hexLetters"
           :key="letter"
+          :value="letter"
+          variant="function"
           :disabled="!isButtonEnabled(letter) || isMaxLengthReached"
-          :class="[
-            'calc-btn calc-letter-btn calc-btn-grid',
-            (!isButtonEnabled(letter) || isMaxLengthReached) ? 'calc-btn-disabled' : '',
-          ]"
-          @click="handleClick(letter)"
+          @click="handleClick"
         >
           {{ letter }}
-        </button>
+        </CalcButton>
       </div>
 
       <!-- Main calculator grid -->
       <div class="col-span-4 grid grid-cols-4 gap-1">
-        <!-- Bit shift and clear row -->
+        <!-- First row -->
         <CalcButton 
-          v-for="(btn, index) in bitShiftRow" 
+          v-for="(btn, index) in programmerFirstRow" 
           :key="index"
           :value="btn.value"
           :icon="btn.icon"
           :disabled="btn.checkMaxLength ? isMaxLengthReached : false"
           :variant="btn.variant"
-          @click="handleClick(btn.value)"
+          @click="handleClick"
         />
 
-        <!-- Parentheses and operators row -->
+        <!-- Second row -->
         <CalcButton 
-          v-for="(btn, index) in parenthesesRow" 
+          v-for="(btn, index) in programmerSecondRow" 
           :key="index"
           :value="btn.value"
           :disabled="isMaxLengthReached"
           :variant="btn.variant"
-          @click="handleClick(btn.value)"
+          @click="handleClick"
         />
 
         <!-- Number pad and operations -->
@@ -59,9 +58,9 @@
             v-for="(btn, btnIndex) in row" 
             :key="`row-${rowIndex}-btn-${btnIndex}`"
             :value="btn.value"
-            :disabled="!isButtonEnabled(btn.value) || isMaxLengthReached"
+            :disabled="!isButtonEnabled(btn.value) || (isMaxLengthReached && btn.variant === 'number')"
             :variant="btn.variant"
-            @click="handleClick(btn.value)"
+            @click="handleClick"
           />
         </template>
       </div>
@@ -70,10 +69,16 @@
 </template>
 
 <script setup>
-import { Delete, ChevronsRightIcon, ChevronsLeftIcon } from "lucide-vue-next";
-import { computed, markRaw } from "vue";
+import { computed } from "vue";
 import CalcButton from '@/components/ui/CalculatorButton.vue';
-import { numberRows } from './NumberRows'
+import { 
+  numberRows, 
+  programmerFirstRow, 
+  programmerSecondRow, 
+  memoryOperations, 
+  hexLetters 
+} from './NumberRows';
+
 const props = defineProps({
   activeBase: {
     type: String,
@@ -96,26 +101,6 @@ const props = defineProps({
 const emit = defineEmits(["button-click", "clear"]);
 
 const isMaxLengthReached = computed(() => props.inputLength >= props.maxLength);
-
-// Button configurations using markRaw for better performance
-const memoryOperations = markRaw(['MC', 'MR', 'M+', 'M-', 'MS']);
-const hexLetters = markRaw(['A', 'B', 'C', 'D', 'E', 'F']);
-
-// Bit shift and clear row
-const bitShiftRow = markRaw([
-  { value: '<<', variant: 'function', icon: ChevronsLeftIcon, checkMaxLength: true },
-  { value: '>>', variant: 'function', icon: ChevronsRightIcon, checkMaxLength: true },
-  { value: 'CE', variant: 'function' },
-  { value: 'backspace', variant: 'function', icon: Delete }
-]);
-
-// Parentheses and operators row
-const parenthesesRow = markRaw([
-  { value: '(', variant: 'function' },
-  { value: ')', variant: 'function' },
-  { value: '%', variant: 'function' },
-  { value: '÷', variant: 'operator' }
-]);
 
 const handleClick = (value) => {
   emit("button-click", value);

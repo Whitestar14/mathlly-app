@@ -56,13 +56,13 @@
                       "
                     />
                     <span>{{ item.name }}</span>
-                    <Badge
+                    <BaseBadge
                       v-if="item.comingSoon"
-                      type="soon"
+                      variant="soon"
                     />
-                    <Badge
+                    <BaseBadge
                       v-if="item.isNew"
-                      type="new"
+                      variant="new"
                     />
                   </button>
                 </NavigationMenuLink>
@@ -98,7 +98,7 @@
                       ? 'bg-gray-100 text-indigo-600 dark:bg-gray-800 dark:text-indigo-400'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                   ]"
-                  @click="handleFooterItemClick($event, `/${item}`)"
+                  @click="handleFooterItemClick(`/${item}`)"
                 >
                   <component
                     :is="item === 'settings' ? CogIcon : MessagesSquareIcon"
@@ -118,7 +118,7 @@
   </BasePanel>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   CompassIcon,
   Code2Icon,
@@ -140,19 +140,22 @@ import {
 } from "radix-vue";
 import { ref, markRaw } from "vue";
 import { usePills } from "@/composables/usePills";
-import Badge from "@/components/base/BaseBadge.vue";
+import BaseBadge from "@/components/base/BaseBadge.vue";
 import TextLogo from '@/components/base/TextLogo.vue';
 import BasePanel from "@/components/base/BasePanel.vue";
 import Indicator from "@/components/ui/PillIndicator.vue";
 
-const props = defineProps({
-  isMobile: {
-    type: Boolean,
-    default: false,
-  },
+interface Props {
+  isMobile?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  isMobile: false
 });
 
-const emit = defineEmits(["sidebar-close"]);
+const emit = defineEmits<{
+  'sidebar-close': []
+}>();
 
 defineOptions({
   name: "SidebarMenu",
@@ -164,13 +167,13 @@ const categories = markRaw([
   {
     title: "Navigation",
     items: [
-      { name: "Home", path: "/", icon: CompassIcon, isNew: false },
+      { name: "Home", path: "/", icon: CompassIcon, comingSoon: false, isNew: false },
     ]
   },
   {
     title: "Calculators",
     items: [
-      { name: "Calculator", path: "/calculator", icon: Code2Icon, isNew: false },
+      { name: "Calculator", path: "/calculator", icon: Code2Icon, comingSoon: false, isNew: false },
       {
         name: "Functions",
         path: "/functions",
@@ -200,6 +203,7 @@ const categories = markRaw([
         path: "/tools/base64",
         icon: BinaryIcon,
         isNew: true,
+        comingSoon: false,
         description: "Encode and decode Base64 strings",
       },
     ],
@@ -207,8 +211,8 @@ const categories = markRaw([
   {
     title: "Information",
     items: [
-      { name: "Updates", path: "/info/update", icon: SparklesIcon },
-      { name: "About", path: "/info/about", icon: InfoIcon },
+      { name: "Updates", path: "/info/update", comingSoon: false, icon: SparklesIcon },
+      { name: "About", path: "/info/about", comingSoon: false, icon: InfoIcon },
     ],
   },
 ]);
@@ -229,7 +233,7 @@ const {
   },
 });
 
-const getMenuItemClasses = (item) => {
+const getMenuItemClasses = (item: any) => {
   const baseClasses = "w-full flex items-center gap-2.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200";
   
   if (currentPill.value === item.path) {
@@ -245,12 +249,12 @@ const getMenuItemClasses = (item) => {
   return classes;
 };
 
-const handleItemClick = (event, item) => {
+const handleItemClick = (event: Event, item: any) => {
   if (item.comingSoon) return;
-  handleNavigation(item.path, event.currentTarget);
+  handleNavigation(item.path, event.currentTarget as HTMLElement);
 };
 
-const handleFooterItemClick = (event, path) => {
+const handleFooterItemClick = (path: string) => {
   handleNavigation(path, null);
 };
 </script>
