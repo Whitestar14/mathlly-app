@@ -1,66 +1,68 @@
 <template>
   <div
-    class="relative md:flex h-full flex-col overflow-hidden hidden transition-[width] duration-300 ease-in-out bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+    v-show="true"
+    class="relative md:flex h-full flex-col flex-auto overflow-hidden hidden transition-[width] duration-300 ease-in-out bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
     :class="[
       isOpen ? 'w-64' : 'w-10',
       position === 'left' ? 'border-l' : 'border-r',
     ]"
   >
-    <!-- Panel Content (only when open) -->
-    <div
-      v-if="isOpen"
-      class="flex flex-col w-full h-full transition-opacity duration-300"
-      :class="mainClass"
-    >
-      <PanelContent
-        :title="title"
-        :show-header="showHeader"
-        :show-footer="showFooter"
-        :content-class="contentClass"
-        @close="$emit('close')"
+    <!-- Panel Content with Transition -->
+    <Transition name="slide-out">
+      <div
+        v-if="isOpen"
+        class="flex flex-col w-full absolute inset-y-0 right-0 transition-opacity duration-300 max-h-[100vh]"
+        :class="[
+          'opacity-100',
+          mainClass,
+        ]"
       >
-        <template #default>
-          <slot />
-        </template>
-        <template #header-actions>
-          <slot name="header-actions" />
-        </template>
-        <template
-          v-if="$slots.footer"
-          #footer
+        <PanelContent
+          :title="title"
+          :show-header="showHeader"
+          :show-footer="showFooter"
+          :content-class="contentClass"
+          @close="$emit('close')"
         >
-          <slot name="footer" />
-        </template>
-      </PanelContent>
-    </div>
+          <template #default>
+            <slot />
+          </template>
+          <template #header-actions>
+            <slot name="header-actions" />
+          </template>
+          <template
+            v-if="$slots.footer"
+            #footer
+          >
+            <slot name="footer" />
+          </template>
+        </PanelContent>
+      </div>
+    </Transition>
 
-    <!-- Toggle button area (always visible) -->
-    <div
-      class="absolute inset-y-0 flex items-center justify-center"
+    <!-- Toggle button (always visible, positioned based on panel state) -->
+    <Button
+      v-tippy="{
+        content: isOpen ? 'Hide Panel' : 'Show Panel',
+        placement: position === 'left' ? 'right' : 'left',
+      }"
+      variant="outline"
+      size="icon"
+      class="shadow-sm absolute bottom-0 -translate-y-1/3 pointer-events-auto z-10"
       :class="[
-        isOpen 
-          ? (position === 'left' ? 'right-0 -mr-3' : 'left-0 -ml-3')
-          : 'left-0 right-0'
+        position === 'left' 
+          ? (isOpen ? 'right-30 translate-x-1/4' : 'left-1/2 -translate-x-1/2')
+          : (isOpen ? 'left-30 -translate-x-1/4' : 'left-1/2 -translate-x-1/2')
       ]"
+      @click="$emit('toggle')"
     >
-      <Button
-        v-tippy="{
-          content: isOpen ? 'Hide Panel' : 'Show Panel',
-          placement: position === 'left' ? 'right' : 'left',
+      <ArrowRightToLine
+        class="h-4 w-4 text-gray-700 dark:text-gray-300 transition-transform duration-300"
+        :class="{ 
+          'rotate-180': position === 'left' ? isOpen : !isOpen 
         }"
-        variant="outline"
-        size="icon"
-        class="shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 z-10"
-        @click="$emit('toggle')"
-      >
-        <ArrowRightToLine
-          class="h-4 w-4 text-gray-700 dark:text-gray-300 transition-transform duration-300"
-          :class="{ 
-            'rotate-180': (position === 'left' && isOpen) || (position === 'right' && !isOpen)
-          }"
-        />
-      </Button>
-    </div>
+      />
+    </Button>
   </div>
 </template>
 
@@ -81,3 +83,22 @@ defineProps({
 
 defineEmits(['close', 'toggle']);
 </script>
+
+<style scoped>
+.slide-out-enter-active,
+.slide-out-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+
+.slide-out-enter-from,
+.slide-out-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.slide-out-enter-to,
+.slide-out-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+</style>
