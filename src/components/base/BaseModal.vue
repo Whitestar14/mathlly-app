@@ -3,76 +3,88 @@
     :open="open"
     @update:open="handleOpenChange"
   >
-    <Transition name="fade">
+    <!-- Backdrop -->
+    <Transition name="backdrop">
       <DialogOverlay
         v-if="open"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-        aria-hidden="true"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
         @click="closeModal"
       />
     </Transition>
 
+    <!-- Modal Container -->
     <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 scale-95 translate-y-4"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-95 translate-y-4"
     >
-      <DialogContent
+      <div
         v-if="open"
-        class="fixed inset-0 flex items-center justify-center p-4 z-30"
-        :aria-labelledby="titleId"
-        role="dialog"
-        aria-modal="true"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
         @click.self="closeModal"
       >
-        <div
+        <DialogContent
           :class="[
-            'relative w-full max-h-[85vh] overflow-y-auto transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl',
+            'relative flex flex-col bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-h-[90vh]',
             sizeClasses
           ]"
+          :aria-labelledby="titleId"
+          role="dialog"
+          aria-modal="true"
           @click.stop
         >
-          <!-- Close Button -->
-          <BaseButton
-            variant="ghost"
-            size="icon"
-            class="absolute right-4 top-4 dark:text-gray-100 p-1"
-            :aria-label="closeButtonLabel"
-            @click="closeModal"
-          >
-            <XIcon class="h-4 w-4" />
-            <span class="sr-only">{{ closeButtonLabel }}</span>
-          </BaseButton>
+          <!-- Sticky Header -->
+          <div class="sticky top-0 z-10 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+            <div class="flex items-center justify-between p-3 pb-2">
+              <!-- Title Section -->
+              <div
+                :id="titleId"
+                class="flex-1 min-w-0 pr-4"
+              >
+                <DialogTitle
+                  as="h2"
+                  class="text-lg font-medium text-gray-900 dark:text-white leading-tight"
+                >
+                  <slot name="title">
+                    {{ title }}
+                  </slot>
+                </DialogTitle>
+              </div>
 
-          <!-- Title Slot -->
-          <div :id="titleId">
-            <DialogTitle
-              as="h3"
-              class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
-            >
-              <slot name="title">
-                {{ title }}
-              </slot>
-            </DialogTitle>
+              <!-- Close Button -->
+              <button
+                type="button"
+                class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                :aria-label="closeButtonLabel"
+                @click="closeModal"
+              >
+                <XIcon class="h-5 w-5" />
+                <span class="sr-only">{{ closeButtonLabel }}</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Content Slot -->
-          <div class="modal-content">
-            <slot />
+          <!-- Scrollable Content -->
+          <div class="flex-1 overflow-y-auto min-h-0">
+            <div class="p-6 pt-4">
+              <slot />
+            </div>
           </div>
 
-          <!-- Footer Slot -->
+          <!-- Sticky Footer -->
           <div
             v-if="$slots.footer"
-            class="modal-footer mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
+            class="sticky bottom-0 z-10 flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-b-xl"
           >
-            <slot name="footer" />
+            <div class="p-6 pt-4">
+              <slot name="footer" />
+            </div>
           </div>
-        </div>
-      </DialogContent>
+        </DialogContent>
+      </div>
     </Transition>
   </DialogRoot>
 </template>
@@ -86,7 +98,6 @@ import {
   DialogTitle,
 } from "radix-vue";
 import { useEventListener } from "@vueuse/core";
-import BaseButton from "@/components/base/BaseButton.vue";
 import { XIcon } from "lucide-vue-next";
 
 /**
@@ -131,8 +142,6 @@ const props = withDefaults(defineProps<Props>(), {
   closeOnClickOutside: true,
   closeOnEscape: true,
   closeButtonLabel: 'Close dialog',
-  showCloseButton: true,
-  zIndex: 30,
 });
 
 const emit = defineEmits<Emits>();
@@ -156,7 +165,7 @@ const sizeClassMap: Record<ModalSize, string> = {
   '4xl': 'max-w-4xl',
   '5xl': 'max-w-5xl',
   '6xl': 'max-w-6xl',
-  full: 'max-w-full mx-4',
+  full: 'max-w-[95vw]',
 };
 
 /**
@@ -199,65 +208,72 @@ const handleEscapeKey = (event: KeyboardEvent): void => {
   }
 };
 
-// Listen for escape key when modal is open - Fixed parameter order
+// Listen for escape key when modal is open
 useEventListener(document, 'keydown', handleEscapeKey, {
   passive: false,
 });
 </script>
 
 <style scoped>
-/* Fade transition for overlay */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+/* Backdrop transitions */
+.backdrop-enter-active,
+.backdrop-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.backdrop-enter-from,
+.backdrop-leave-to {
   opacity: 0;
 }
 
-/* Ensure modal content is scrollable */
-.modal-content {
-  max-height: calc(85vh - 8rem); /* Account for header and footer */
-  overflow-y: auto;
-}
-
-/* Custom scrollbar for modal content */
-.modal-content::-webkit-scrollbar {
+/* Custom scrollbar for content area */
+.overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
 
-.modal-content::-webkit-scrollbar-track {
+.overflow-y-auto::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.modal-content::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.4);
   border-radius: 3px;
 }
 
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(156, 163, 175, 0.7);
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.6);
 }
 
-.dark .modal-content::-webkit-scrollbar-thumb {
-  background-color: rgba(75, 85, 99, 0.5);
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.4);
 }
 
-.dark .modal-content::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(75, 85, 99, 0.7);
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(75, 85, 99, 0.6);
 }
 
-/* Focus trap styling */
-.modal-content:focus {
+/* Ensure proper focus management */
+[role="dialog"]:focus {
   outline: none;
 }
 
-/* Responsive adjustments */
+/* Mobile responsive adjustments */
 @media (max-width: 640px) {
-  .modal-content {
-    max-height: calc(90vh - 6rem);
+  .p-6 {
+    @apply p-4;
   }
+  
+  .pb-4 {
+    @apply pb-3;
+  }
+  
+  .pt-4 {
+    @apply pt-3;
+  }
+}
+
+/* Prevent content from jumping when scrollbar appears */
+.overflow-y-auto {
+  scrollbar-gutter: stable;
 }
 </style>

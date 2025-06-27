@@ -55,7 +55,6 @@
 
 <script setup lang="ts">
 import { computed, watch, ref, provide, defineAsyncComponent, type Ref, type ComputedRef } from 'vue'
-import { useSessionStorage } from '@vueuse/core'
 import { useHistory, type HistoryItem } from '@/composables/useHistory'
 import { useMemory, type UseMemoryReturn } from '@/composables/useMemory'
 import { usePanel, type LightweightPanelAPI } from '@/composables/usePanel'
@@ -63,6 +62,7 @@ import { useCalculatorState, type CalculatorMode, type Base } from '@/composable
 import { useCalculatorModeSwitcher } from '@/composables/useCalculatorModeSwitcher'
 import { CalculatorController, type ControllerReturn } from './MainCalculator'
 import { CalculatorFactory, type Calculator, isScientificCalculator } from '@/services/factory/CalculatorFactory'
+import { useCalculatorSession } from '@/composables/useCalculatorSession'
 import CalculatorDisplay from '@/layouts/calculators/main/CalculatorDisplay.vue'
 import CalculatorButtons from '@/layouts/calculators/main/CalculatorButtons.vue'
 import BasePage from '@/components/base/BasePage.vue'
@@ -106,12 +106,10 @@ const {
   setActiveBase
 } = useCalculatorState(currentMode.value)
 
-// Session storage with proper typing
-const storedInput = useSessionStorage<string>(`calculator-session-input-${currentMode.value}`, '')
+const { saveInput, getInput } = useCalculatorSession();
 
-// Calculator instance with proper typing - use ref instead of shallowRef to match interface
 const calculator: Ref<Calculator> = ref(CalculatorFactory.create(currentMode.value, props.settings))
- 
+
 // Provide calculator instance to child components
 provide('calculator', computed(() => calculator.value))
 provide('calculatorState', state)
@@ -166,37 +164,33 @@ const handleModeToggle = (data: { type: string; value: any }) => {
 
 // Watch for input changes with proper typing
 watch(() => state.input, (newRawInput: string) => {
-  if (storedInput.value !== newRawInput) {
-    storedInput.value = newRawInput
-  }
+  saveInput(currentMode.value, newRawInput)
 })
 
 // Centralized mode change handler
 const handleModeChange = (newMode: CalculatorMode, oldMode?: CalculatorMode) => {
-  const validatedMode: CalculatorMode = newMode as CalculatorMode
+  if (oldMode) {
+    saveInput(oldMode, state.input)
+  }
 
-  resetState(validatedMode)
-  calculator.value = CalculatorFactory.create(validatedMode, props.settings)
+  resetState(newMode)
+  calculator.value = CalculatorFactory.create(newMode, props.settings)
   
-  if (validatedMode === 'Programmer') {
+  if (newMode === 'Programmer') {
     setActiveBase('DEC' as Base)
   }
   
-  if (oldMode === undefined) {
-    if (storedInput.value && state.input !== storedInput.value) {
-      updateState({ input: storedInput.value })
-      calculator.value.input = storedInput.value
+    const savedInput = getInput(newMode)
+    if (savedInput) {
+      updateState({ input: savedInput })
+      calculator.value.input = savedInput
       
-      // Safe access to programmer calculator states
-      if (validatedMode === "Programmer") {
+      if (newMode === "Programmer") {
         const calc = calculator.value as any
         if (calc.states?.DEC) {
-          calc.states.DEC.input = storedInput.value
-        }
+          calc.states.DEC.input = savedInput
       }
     }
-  } else { 
-    storedInput.value = ""
   }
 }
 

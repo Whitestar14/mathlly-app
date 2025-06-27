@@ -21,20 +21,19 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { networkStatus } from '@/router/errorHandler';
+<script setup lang="ts">
+import { ref, watchEffect } from 'vue';
+import { useOnline } from '@vueuse/core'
 import { Wifi, WifiOff } from 'lucide-vue-next';
 import { useTimeoutFn } from '@vueuse/core';
 
 const isAnimating = ref(false);
+const networkStatus = useOnline();
 
 const { start: startAnimation } = useTimeoutFn(() => {
   isAnimating.value = false;
 }, 2000);
-
-import { watchEffect } from 'vue';
-
+  
 watchEffect(() => {
   if (networkStatus.value !== undefined) {
     isAnimating.value = true;
