@@ -1,6 +1,6 @@
 <template>
   <!-- Developer Dock - Only visible in development -->
-  <div v-if="isDev">
+  <div>
     <!-- Beta Opt-in Modal -->
     <DevDockBetaModal
       :open="showBetaModal"
@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, type Ref } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useLocalStorage, useWindowSize, useEventListener } from '@vueuse/core';
 import { CodeIcon } from 'lucide-vue-next';
 import DesktopDevDock from './DesktopDevDock.vue';
@@ -95,17 +95,14 @@ interface Tool {
   title: string;
 }
 
-// Development environment check
-const isDev: Ref<boolean> = ref(import.meta.env.DEV);
-
 // Beta opt-in state
 const hasOptedIn = useLocalStorage('dev-dock-beta-opted-in', false);
 const betaDecisionMade = useLocalStorage('dev-dock-beta-decision-made', false);
 const showBetaModal = ref(false);
 
 // Show modal on first visit if no decision has been made
-watch([isDev, betaDecisionMade], ([devMode, decisionMade]) => {
-  if (devMode && !decisionMade && !hasOptedIn.value) {
+watch([betaDecisionMade], ([decisionMade]) => {
+  if (!decisionMade && !hasOptedIn.value) {
     // Small delay to ensure app is fully loaded
     setTimeout(() => {
       showBetaModal.value = true;
@@ -329,7 +326,7 @@ const closeAll = (): void => {
 // Keyboard shortcuts (desktop only, and only if opted in)
 useEventListener('keydown', (e: KeyboardEvent) => {
   // Only in development, desktop, opted in, and when Ctrl+Shift is pressed
-  if (!isDev.value || !hasOptedIn.value || isMobile.value || !e.ctrlKey || !e.shiftKey) return;
+  if (!hasOptedIn.value || isMobile.value || !e.ctrlKey || !e.shiftKey) return;
   
   switch (e.key.toLowerCase()) {
     case 'd':

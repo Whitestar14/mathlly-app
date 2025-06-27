@@ -17,7 +17,7 @@
     </template>
 
     <div class="mt-4">
-      <div class="flex border-b border-gray-200 dark:border-gray-700 relative">
+      <div class="flex border-b border-gray-200 dark:border-gray-800 relative">
         <Indicator :position="indicatorStyle" />
         <button
           v-for="category in Object.keys(shortcutGroups)"
