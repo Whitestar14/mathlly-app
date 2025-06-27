@@ -1,6 +1,15 @@
 {
   "updates": [
     {
+      "version": "0.12.2",
+      "date": "June 27, 2025",
+      "features": [
+        "@milestone: migrated to new domain: mathlly.vercel.app",
+        "Optimized calculator buttons for low-end devices",
+        "Rectified dev dock beta testpoint inconsistent appearance on mobile devices"
+      ]
+    },
+    {
       "version": "0.12.1",
       "date": "June 27, 2025",
       "features": [
