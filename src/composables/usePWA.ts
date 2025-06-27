@@ -8,17 +8,18 @@ let useRegisterSW: any
 // Dynamically import the PWA register module
 async function initializePWA() {
   try {
+    // Try virtual module first (this should work in most cases)
+    const pwaModule = await import('virtual:pwa-register/vue')
+    useRegisterSW = pwaModule.useRegisterSW
+    console.log('[PWA] Using virtual PWA module')
+  } catch (error) {
+    console.warn('[PWA] Virtual module not available, using fallback:', error)
+    
+    // Only use fallback if we're sure we need it
     if (import.meta.env.DEV) {
-      // In development, check if the virtual module is available
-      const pwaModule = await import('virtual:pwa-register/vue')
-      useRegisterSW = pwaModule.useRegisterSW
-    } else {
-      // In production, it should definitely be available
-      const pwaModule = await import('virtual:pwa-register/vue')
-      useRegisterSW = pwaModule.useRegisterSW
+      console.log('[PWA] Development mode: creating fallback registration')
     }
-  } catch {
-    console.warn('[PWA] Virtual module not available, using fallback registration')
+    
     useRegisterSW = createFallbackRegisterSW()
   }
 }
@@ -50,15 +51,10 @@ function createFallbackRegisterSW() {
 
     // Only register in production or when sw.js is actually available
     if ('serviceWorker' in navigator && (import.meta.env.PROD || import.meta.env.DEV)) {
-      // Check if sw.js exists before registering
-      fetch('/sw.js', { method: 'HEAD' })
-        .then(response => {
-          if (response.ok && response.headers.get('content-type')?.includes('javascript')) {
-            return navigator.serviceWorker.register('/sw.js')
-          } else {
-            throw new Error('Service worker not available or wrong MIME type')
-          }
-        })
+      // FIXED: More robust service worker detection
+      const swPath = import.meta.env.PROD ? '/sw.js' : '/dev-sw.js?dev-sw'
+      
+      navigator.serviceWorker.register(swPath)
         .then((registration: ServiceWorkerRegistration) => {
           console.log('[PWA] Service worker registered:', registration)
           callbacks.onRegistered?.(registration)
@@ -81,8 +77,7 @@ function createFallbackRegisterSW() {
           }
         })
         .catch((error: Error) => {
-          console.warn('[PWA] Service worker registration skipped:', error.message)
-          // Don't call onRegisterError for development when SW isn't available
+          console.warn('[PWA] Service worker registration failed:', error.message)
           if (import.meta.env.PROD) {
             callbacks.onRegisterError?.(error)
           }

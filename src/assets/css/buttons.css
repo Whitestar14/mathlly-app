@@ -41,12 +41,12 @@
   .calc-operator-btn {
     @apply bg-indigo-500/90 text-white 
            hover:bg-indigo-600/90
-           dark:bg-indigo-600/90 dark:hover:bg-indigo-500/90;
+           dark:bg-gray-500/90 dark:hover:bg-gray-400/90;
   }
 
   /* Memory buttons */
   .calc-memory-btn {
-    @apply text-xs md:text-sm font-medium tracking-wide text-gray-700 
+    @apply text-xs md:text-sm font-medium font-mono tracking-wide text-gray-700 
            bg-transparent hover:bg-gray-100/60 
            p-2 min-h-[2rem]
            dark:text-gray-300 dark:hover:bg-gray-700/60
