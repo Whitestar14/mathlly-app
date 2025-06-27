@@ -28,7 +28,7 @@
       >
         <DialogContent
           :class="[
-            'relative flex flex-col bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-h-[90vh]',
+            'relative flex flex-col bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-h-[90vh]',
             sizeClasses
           ]"
           :aria-labelledby="titleId"
@@ -37,7 +37,7 @@
           @click.stop
         >
           <!-- Sticky Header -->
-          <div class="sticky top-0 z-10 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
+          <div class="sticky top-0 z-10 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 rounded-t-xl">
             <div class="flex items-center justify-between p-3 pb-2">
               <!-- Title Section -->
               <div
@@ -55,15 +55,15 @@
               </div>
 
               <!-- Close Button -->
-              <button
-                type="button"
-                class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+              <BaseButton
+                variant="ghost"
+                size="icon"
                 :aria-label="closeButtonLabel"
                 @click="closeModal"
               >
-                <XIcon class="h-5 w-5" />
+                <XIcon class="h-4 w-4" />
                 <span class="sr-only">{{ closeButtonLabel }}</span>
-              </button>
+              </BaseButton>
             </div>
           </div>
 
@@ -98,6 +98,7 @@ import {
   DialogTitle,
 } from "radix-vue";
 import { useEventListener } from "@vueuse/core";
+import BaseButton from '@/components/base/BaseButton.vue'
 import { XIcon } from "lucide-vue-next";
 
 /**
