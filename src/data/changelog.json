@@ -1,6 +1,22 @@
 {
   "updates": [
     {
+      "version": "0.12.1",
+      "date": "June 27, 2025",
+      "features": [
+        "Refactored calculator session management to use a dedicated composable for saving and loading inputs per calculator mode",
+        "Added Scientific mode support to calculator settings with proper configuration options",
+        "Updated OfflineIndicator component to leverage @vueuse/core for more reliable network status detection",
+        "Updated pnpm version requirements and added engines specification to package.json for better dependency management",
+        "Fixed PWA registration system to use virtual module imports with robust fallback for service worker detection",
+        "Enhanced calculator operator button styles with improved dark mode contrast and visual consistency",
+        "Removed deprecated BaseDropdownSeparator and BaseAccordion components to reduce bundle size and improve maintainability",
+        "Enhanced DevDock with beta opt-in modal functionality for improved developer experience and feature testing",
+        "Optimized component architecture by removing unused UI components and consolidating functionality",
+        "Improved developer tools with streamlined beta feature access and testing capabilities"
+      ]
+    },
+    {
       "version": "0.12.0",
       "date": "June 27, 2025",
       "features": [
